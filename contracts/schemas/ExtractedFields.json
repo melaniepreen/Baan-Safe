@@ -1,0 +1,89 @@
+{
+  "$defs": {
+    "Need": {
+      "enum": [
+        "rescue",
+        "medical",
+        "water",
+        "food",
+        "shelter",
+        "evacuation",
+        "power",
+        "information",
+        "aid_payment"
+      ],
+      "title": "Need",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "location": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Location"
+    },
+    "location_confidence": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Location Confidence"
+    },
+    "people_count": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "People Count"
+    },
+    "vulnerable": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Vulnerable",
+      "type": "array"
+    },
+    "medical": {
+      "default": false,
+      "title": "Medical",
+      "type": "boolean"
+    },
+    "danger": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Danger",
+      "type": "array"
+    },
+    "needs": {
+      "items": {
+        "$ref": "#/$defs/Need"
+      },
+      "title": "Needs",
+      "type": "array"
+    }
+  },
+  "title": "ExtractedFields",
+  "type": "object"
+}

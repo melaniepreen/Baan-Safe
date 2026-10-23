@@ -1,0 +1,228 @@
+{
+  "$defs": {
+    "ExtractedFields": {
+      "additionalProperties": false,
+      "properties": {
+        "location": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Location"
+        },
+        "location_confidence": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Location Confidence"
+        },
+        "people_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "People Count"
+        },
+        "vulnerable": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Vulnerable",
+          "type": "array"
+        },
+        "medical": {
+          "default": false,
+          "title": "Medical",
+          "type": "boolean"
+        },
+        "danger": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Danger",
+          "type": "array"
+        },
+        "needs": {
+          "items": {
+            "$ref": "#/$defs/Need"
+          },
+          "title": "Needs",
+          "type": "array"
+        }
+      },
+      "title": "ExtractedFields",
+      "type": "object"
+    },
+    "MemoryItem": {
+      "additionalProperties": false,
+      "properties": {
+        "memory_id": {
+          "minLength": 1,
+          "title": "Memory Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "similar_case",
+            "prior_failure",
+            "policy",
+            "correction"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "summary": {
+          "minLength": 1,
+          "title": "Summary",
+          "type": "string"
+        },
+        "relevance": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Relevance",
+          "type": "number"
+        },
+        "source_case_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Case Id"
+        }
+      },
+      "required": [
+        "memory_id",
+        "kind",
+        "summary",
+        "relevance"
+      ],
+      "title": "MemoryItem",
+      "type": "object"
+    },
+    "Need": {
+      "enum": [
+        "rescue",
+        "medical",
+        "water",
+        "food",
+        "shelter",
+        "evacuation",
+        "power",
+        "information",
+        "aid_payment"
+      ],
+      "title": "Need",
+      "type": "string"
+    },
+    "TranscriptTurn": {
+      "additionalProperties": false,
+      "properties": {
+        "t_ms": {
+          "minimum": 0,
+          "title": "T Ms",
+          "type": "integer"
+        },
+        "speaker": {
+          "enum": [
+            "caller",
+            "operator"
+          ],
+          "title": "Speaker",
+          "type": "string"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "t_ms",
+        "speaker",
+        "text"
+      ],
+      "title": "TranscriptTurn",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "case_id": {
+      "minLength": 1,
+      "title": "Case Id",
+      "type": "string"
+    },
+    "caller_id_hash": {
+      "minLength": 1,
+      "title": "Caller Id Hash",
+      "type": "string"
+    },
+    "transcript": {
+      "items": {
+        "$ref": "#/$defs/TranscriptTurn"
+      },
+      "title": "Transcript",
+      "type": "array"
+    },
+    "fields": {
+      "$ref": "#/$defs/ExtractedFields"
+    },
+    "memory_context": {
+      "items": {
+        "$ref": "#/$defs/MemoryItem"
+      },
+      "title": "Memory Context",
+      "type": "array"
+    },
+    "policy_flags": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Policy Flags",
+      "type": "array"
+    },
+    "resources": {
+      "additionalProperties": true,
+      "title": "Resources",
+      "type": "object"
+    },
+    "received_at": {
+      "format": "date-time",
+      "title": "Received At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "case_id",
+    "caller_id_hash",
+    "transcript",
+    "fields",
+    "received_at"
+  ],
+  "title": "CaseState",
+  "type": "object"
+}

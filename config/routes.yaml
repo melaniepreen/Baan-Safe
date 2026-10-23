@@ -1,0 +1,29 @@
+# JUDGEMENT CALLS — human sign-off required. Listed in MORNING_REPORT.md.
+# Starting map of route → needs. Not executed as a router.
+routes:
+  rescue_coordination:
+    description: Coordinate a rescue for people who may be trapped or in danger.
+    needs: [rescue, evacuation]
+  medical_response:
+    description: Coordinate clinical support.
+    needs: [medical]
+  welfare_distribution:
+    description: Same-day drinking water, food, or similar welfare.
+    needs: [water, food]
+  shelter_placement:
+    description: Help the caller find or reach a shelter.
+    needs: [shelter]
+  aid_caseworker:
+    description: A caseworker reviews an aid-payment eligibility question or exception.
+    needs: [aid_payment]
+  information_only:
+    description: >
+      Answer a question without a dispatch. Also the starting home for a power-status
+      question, because the route list has no power route yet.
+    needs: [information, power]
+  duplicate_merge:
+    description: This call matches an open case from the same synthetic household.
+    needs: []
+  supervisor_escalation:
+    description: Hand the case to a human supervisor. Used for safeguarding and unresolved conflict.
+    needs: []

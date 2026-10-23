@@ -1,0 +1,57 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "correction_id": {
+      "minLength": 1,
+      "title": "Correction Id",
+      "type": "string"
+    },
+    "case_id": {
+      "minLength": 1,
+      "title": "Case Id",
+      "type": "string"
+    },
+    "corrected_by": {
+      "enum": [
+        "operator",
+        "supervisor",
+        "caseworker"
+      ],
+      "title": "Corrected By",
+      "type": "string"
+    },
+    "field": {
+      "minLength": 1,
+      "title": "Field",
+      "type": "string"
+    },
+    "old_value": {
+      "default": null,
+      "title": "Old Value"
+    },
+    "new_value": {
+      "default": null,
+      "title": "New Value"
+    },
+    "reason": {
+      "minLength": 1,
+      "title": "Reason",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "correction_id",
+    "case_id",
+    "corrected_by",
+    "field",
+    "reason",
+    "created_at"
+  ],
+  "title": "Correction",
+  "type": "object"
+}

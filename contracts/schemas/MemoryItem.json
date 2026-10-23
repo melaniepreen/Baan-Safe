@@ -1,0 +1,51 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "memory_id": {
+      "minLength": 1,
+      "title": "Memory Id",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "similar_case",
+        "prior_failure",
+        "policy",
+        "correction"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "summary": {
+      "minLength": 1,
+      "title": "Summary",
+      "type": "string"
+    },
+    "relevance": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Relevance",
+      "type": "number"
+    },
+    "source_case_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Case Id"
+    }
+  },
+  "required": [
+    "memory_id",
+    "kind",
+    "summary",
+    "relevance"
+  ],
+  "title": "MemoryItem",
+  "type": "object"
+}

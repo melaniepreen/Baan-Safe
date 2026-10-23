@@ -1,0 +1,9 @@
+{
+  "title": "System",
+  "description": "",
+  "type": "string",
+  "enum": [
+    "system_1",
+    "system_2"
+  ]
+}

@@ -1,0 +1,15 @@
+# JUDGEMENT CALLS — human sign-off required. Listed in MORNING_REPORT.md.
+# Starting definitions only. They are not executed as decision logic.
+priorities:
+  P1:
+    definition: Immediate life-safety risk. A person may be trapped, medically dependent, or in rising water.
+    example: An oxygen-dependent elderly person with water rising outside the home.
+  P2:
+    definition: Urgent, measured in hours. Evacuation, a safeguarding handoff, or a worsening situation that is not confirmed as immediate life-safety.
+    example: A household asked to evacuate today, with a complete location and no medical dependency.
+  P3:
+    definition: Welfare the same day. Drinking water, food, shelter information, or a power cut without danger signs.
+    example: A family requesting drinking water, on dry ground, with the district known.
+  P4:
+    definition: Information or a non-urgent request.
+    example: A caller asks what time the district publishes its flood update.

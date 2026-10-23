@@ -1,0 +1,156 @@
+{
+  "$defs": {
+    "Need": {
+      "enum": [
+        "rescue",
+        "medical",
+        "water",
+        "food",
+        "shelter",
+        "evacuation",
+        "power",
+        "information",
+        "aid_payment"
+      ],
+      "title": "Need",
+      "type": "string"
+    },
+    "Priority": {
+      "enum": [
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "title": "Priority",
+      "type": "string"
+    },
+    "Route": {
+      "enum": [
+        "rescue_coordination",
+        "medical_response",
+        "welfare_distribution",
+        "shelter_placement",
+        "aid_caseworker",
+        "information_only",
+        "duplicate_merge",
+        "supervisor_escalation"
+      ],
+      "title": "Route",
+      "type": "string"
+    },
+    "System": {
+      "enum": [
+        "system_1",
+        "system_2"
+      ],
+      "title": "System",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One shape for both systems. reasoning is set by System 2 only.",
+  "properties": {
+    "system": {
+      "$ref": "#/$defs/System"
+    },
+    "outcome": {
+      "enum": [
+        "fast_route",
+        "reasoned_recommendation",
+        "escalate"
+      ],
+      "title": "Outcome",
+      "type": "string"
+    },
+    "priority": {
+      "$ref": "#/$defs/Priority"
+    },
+    "needs": {
+      "items": {
+        "$ref": "#/$defs/Need"
+      },
+      "title": "Needs",
+      "type": "array"
+    },
+    "route": {
+      "$ref": "#/$defs/Route"
+    },
+    "confidence": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "reason": {
+      "minLength": 1,
+      "title": "Reason",
+      "type": "string"
+    },
+    "reasoning": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reasoning"
+    },
+    "missing_evidence": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Missing Evidence",
+      "type": "array"
+    },
+    "next_question": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Next Question"
+    },
+    "requires_human": {
+      "title": "Requires Human",
+      "type": "boolean"
+    },
+    "escalate": {
+      "title": "Escalate",
+      "type": "boolean"
+    },
+    "latency_ms": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Latency Ms"
+    }
+  },
+  "required": [
+    "system",
+    "outcome",
+    "priority",
+    "needs",
+    "route",
+    "confidence",
+    "reason",
+    "requires_human",
+    "escalate"
+  ],
+  "title": "Outcome",
+  "type": "object"
+}

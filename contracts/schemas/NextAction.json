@@ -1,0 +1,12 @@
+{
+  "title": "NextAction",
+  "description": "",
+  "type": "string",
+  "enum": [
+    "ask_next_question",
+    "create_provisional_dispatch",
+    "escalate_to_supervisor",
+    "finalize_case",
+    "request_more_evidence"
+  ]
+}

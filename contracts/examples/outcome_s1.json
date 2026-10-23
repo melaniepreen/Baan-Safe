@@ -1,0 +1,15 @@
+{
+  "system": "system_1",
+  "outcome": "fast_route",
+  "priority": "P3",
+  "needs": ["water"],
+  "route": "welfare_distribution",
+  "confidence": 0.94,
+  "reason": "Clear same-day water request with a complete district and no danger signs.",
+  "reasoning": null,
+  "missing_evidence": [],
+  "next_question": null,
+  "requires_human": false,
+  "escalate": false,
+  "latency_ms": 20
+}

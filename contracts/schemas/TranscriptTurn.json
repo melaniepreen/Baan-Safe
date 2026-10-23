@@ -1,0 +1,30 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "t_ms": {
+      "minimum": 0,
+      "title": "T Ms",
+      "type": "integer"
+    },
+    "speaker": {
+      "enum": [
+        "caller",
+        "operator"
+      ],
+      "title": "Speaker",
+      "type": "string"
+    },
+    "text": {
+      "minLength": 1,
+      "title": "Text",
+      "type": "string"
+    }
+  },
+  "required": [
+    "t_ms",
+    "speaker",
+    "text"
+  ],
+  "title": "TranscriptTurn",
+  "type": "object"
+}

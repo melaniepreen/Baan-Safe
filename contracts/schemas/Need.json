@@ -1,0 +1,16 @@
+{
+  "title": "Need",
+  "description": "",
+  "type": "string",
+  "enum": [
+    "rescue",
+    "medical",
+    "water",
+    "food",
+    "shelter",
+    "evacuation",
+    "power",
+    "information",
+    "aid_payment"
+  ]
+}

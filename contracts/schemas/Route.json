@@ -1,0 +1,15 @@
+{
+  "title": "Route",
+  "description": "",
+  "type": "string",
+  "enum": [
+    "rescue_coordination",
+    "medical_response",
+    "welfare_distribution",
+    "shelter_placement",
+    "aid_caseworker",
+    "information_only",
+    "duplicate_merge",
+    "supervisor_escalation"
+  ]
+}

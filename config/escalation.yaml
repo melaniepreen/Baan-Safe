@@ -1,0 +1,35 @@
+# JUDGEMENT CALLS — human sign-off required. Listed in MORNING_REPORT.md.
+# The stub gateway does not evaluate the rule strings below. System 1 and System 2
+# owners implement them. Enrichment thresholds are read by the gateway only to attach
+# data flags. They do not change priority or route.
+
+escalate_to_system_2_if_any:
+  - "fields.medical == true"
+  - "'oxygen_dependent' in fields.vulnerable or 'immobile' in fields.vulnerable"
+  - "fields.location is null or fields.location_confidence < 0.7"
+  - "'safeguarding' in policy_flags"
+  - "conflicting_evidence == true"
+  - "system_1.confidence < 0.80"
+
+always_requires_human:
+  - "route == supervisor_escalation"
+  - "aid denial or exception"
+  - "safeguarding flag present"
+
+# Starting numbers for data flags. Not a triage policy.
+enrichment_flags:
+  heavy_rain_forecast_mm_24h: 30
+  heavy_rain_observed_mm_24h: 30
+  near_flood_buffer_m: 500
+
+# Plumbing for gateway use_stubs=True only. Copies fields already present on a stub
+# Outcome into a RouterDecision. First match wins. Not a merge policy.
+stub_next_action_order:
+  - when: requires_human
+    action: escalate_to_supervisor
+  - when: missing_evidence_or_next_question
+    action: ask_next_question
+  - when: escalate
+    action: escalate_to_supervisor
+  - when: default
+    action: create_provisional_dispatch

@@ -1,0 +1,15 @@
+{
+  "system": "system_2",
+  "outcome": "reasoned_recommendation",
+  "priority": "P1",
+  "needs": ["rescue", "medical"],
+  "route": "rescue_coordination",
+  "confidence": 0.86,
+  "reason": "Oxygen-dependent elderly person with rising water is an immediate life-safety risk.",
+  "reasoning": "The caller is not asking for welfare supplies. An oxygen-dependent elderly person cannot safely wait if the water keeps rising, so this is a rescue plus medical case and a human must confirm the dispatch.",
+  "missing_evidence": ["water_depth"],
+  "next_question": "Is the water still outside, or has it entered the room?",
+  "requires_human": true,
+  "escalate": false,
+  "latency_ms": 90
+}

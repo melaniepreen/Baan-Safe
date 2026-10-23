@@ -1,0 +1,23 @@
+# Every value starts as TODO_HUMAN. Code reading these must fail loudly if unset.
+# Humans fill these in. Do not resolve them in code.
+system1:
+  extraction_method: TODO_HUMAN      # rules-only | small model | hybrid
+  extraction_model: TODO_HUMAN       # only if a model is used
+system2:
+  orchestrator_model: TODO_HUMAN     # Nemotron variant/size
+  hosting: TODO_HUMAN                # via Mubit gateway / self-hosted / provider
+  use_banyan_sapling: TODO_HUMAN     # true | false, and for which checks
+  max_latency_ms: TODO_HUMAN
+memory:
+  mubit_project: TODO_HUMAN
+  retrieval_top_k: TODO_HUMAN
+  token_budget: TODO_HUMAN
+speech_to_text:
+  provider: TODO_HUMAN               # or "scripted only" for the demo
+ui:
+  framework: TODO_HUMAN
+data:
+  demo_event: TODO_HUMAN             # which flood event / provinces anchor the demo
+  production_db: TODO_HUMAN          # SQLite is used tonight
+correction_loop:
+  graduation_threshold: TODO_HUMAN   # corrections before an S2 pattern becomes an S1 rule

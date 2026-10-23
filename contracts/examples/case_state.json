@@ -1,0 +1,34 @@
+{
+  "case_id": "EXAMPLE-CASE",
+  "caller_id_hash": "synthetic:example-caller",
+  "transcript": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "We need drinking water. The ground is dry."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Which district are you in?"
+    },
+    {
+      "t_ms": 8000,
+      "speaker": "caller",
+      "text": "Mueang Lampang District, near the blue temple."
+    }
+  ],
+  "fields": {
+    "location": "Mueang Lampang District, Lampang",
+    "location_confidence": 0.93,
+    "people_count": 3,
+    "vulnerable": [],
+    "medical": false,
+    "danger": [],
+    "needs": ["water"]
+  },
+  "memory_context": [],
+  "policy_flags": [],
+  "resources": {},
+  "received_at": "2026-10-23T08:00:00Z"
+}
