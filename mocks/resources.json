@@ -1,0 +1,46 @@
+{
+  "boats": [
+    {
+      "id": "boat-fictional-01",
+      "kind": "boat",
+      "name": "Fictional river boat A",
+      "district": "Wang Chin District",
+      "capacity": 6,
+      "available": 2,
+      "status": "available"
+    }
+  ],
+  "ambulances": [
+    {
+      "id": "amb-fictional-01",
+      "kind": "ambulance",
+      "name": "Fictional clinic van 1",
+      "district": "Mueang Phrae District",
+      "capacity": 2,
+      "available": 1,
+      "status": "available"
+    }
+  ],
+  "shelters": [
+    {
+      "id": "shelter-fictional-01",
+      "kind": "shelter",
+      "name": "Fictional North Canal hall",
+      "district": "Den Chai District",
+      "capacity": 80,
+      "available": 30,
+      "status": "open"
+    }
+  ],
+  "welfare_points": [
+    {
+      "id": "welfare-fictional-01",
+      "kind": "welfare_point",
+      "name": "Fictional market-day water desk",
+      "district": "Mae Mo District",
+      "capacity": null,
+      "available": 40,
+      "status": "open"
+    }
+  ]
+}

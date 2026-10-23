@@ -1,0 +1,116 @@
+{
+  "id": "F02",
+  "title": "Rice finished, no danger",
+  "tags": [
+    "system_1",
+    "clear",
+    "welfare"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Our rice is finished. Can someone bring food today?"
+    },
+    {
+      "t_ms": 4050,
+      "speaker": "operator",
+      "text": "Is the house flooding, or is anyone sick?"
+    },
+    {
+      "t_ms": 8350,
+      "speaker": "caller",
+      "text": "Neither. Sorry, I should have said that first."
+    },
+    {
+      "t_ms": 12900,
+      "speaker": "operator",
+      "text": "Where are you?"
+    },
+    {
+      "t_ms": 17700,
+      "speaker": "caller",
+      "text": "Mae Tha District, Lampang, by the invented stone arch. Not a street address."
+    },
+    {
+      "t_ms": 22750,
+      "speaker": "operator",
+      "text": "How many people are eating there?"
+    },
+    {
+      "t_ms": 28050,
+      "speaker": "caller",
+      "text": "Three. Two adults and one child. Everyone can walk."
+    }
+  ],
+  "case_state": {
+    "case_id": "F02",
+    "caller_id_hash": "synthetic:f02",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Our rice is finished. Can someone bring food today?"
+      },
+      {
+        "t_ms": 4050,
+        "speaker": "operator",
+        "text": "Is the house flooding, or is anyone sick?"
+      },
+      {
+        "t_ms": 8350,
+        "speaker": "caller",
+        "text": "Neither. Sorry, I should have said that first."
+      },
+      {
+        "t_ms": 12900,
+        "speaker": "operator",
+        "text": "Where are you?"
+      },
+      {
+        "t_ms": 17700,
+        "speaker": "caller",
+        "text": "Mae Tha District, Lampang, by the invented stone arch. Not a street address."
+      },
+      {
+        "t_ms": 22750,
+        "speaker": "operator",
+        "text": "How many people are eating there?"
+      },
+      {
+        "t_ms": 28050,
+        "speaker": "caller",
+        "text": "Three. Two adults and one child. Everyone can walk."
+      }
+    ],
+    "fields": {
+      "location": "Mae Tha District, Lampang",
+      "location_confidence": 0.91,
+      "people_count": 3,
+      "vulnerable": [
+        "child"
+      ],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "food"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-23T09:15:00Z"
+  },
+  "expected": {
+    "system": "system_1",
+    "priority": "P3",
+    "route": "welfare_distribution",
+    "needs": [
+      "food"
+    ],
+    "requires_human": false,
+    "missing_evidence": [],
+    "acceptable_next_questions": []
+  },
+  "notes": "Food only, child is with adults, no medical need and no water in the house. A human may still want a welfare check because a child was mentioned."
+}

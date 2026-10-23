@@ -1,0 +1,114 @@
+{
+  "id": "F07",
+  "title": "Is the school open tomorrow",
+  "tags": [
+    "system_1",
+    "clear",
+    "information"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Is the school open tomorrow?"
+    },
+    {
+      "t_ms": 4050,
+      "speaker": "operator",
+      "text": "Which district is the school in?"
+    },
+    {
+      "t_ms": 8350,
+      "speaker": "caller",
+      "text": "Wang Chin District, Phrae. The invented riverside school, not a home."
+    },
+    {
+      "t_ms": 12900,
+      "speaker": "operator",
+      "text": "Is your household flooding?"
+    },
+    {
+      "t_ms": 17700,
+      "speaker": "caller",
+      "text": "No. I am only asking about the school."
+    },
+    {
+      "t_ms": 22750,
+      "speaker": "operator",
+      "text": "Anyone sick at home?"
+    },
+    {
+      "t_ms": 28050,
+      "speaker": "caller",
+      "text": "No. Thank you."
+    }
+  ],
+  "case_state": {
+    "case_id": "F07",
+    "caller_id_hash": "synthetic:f07",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Is the school open tomorrow?"
+      },
+      {
+        "t_ms": 4050,
+        "speaker": "operator",
+        "text": "Which district is the school in?"
+      },
+      {
+        "t_ms": 8350,
+        "speaker": "caller",
+        "text": "Wang Chin District, Phrae. The invented riverside school, not a home."
+      },
+      {
+        "t_ms": 12900,
+        "speaker": "operator",
+        "text": "Is your household flooding?"
+      },
+      {
+        "t_ms": 17700,
+        "speaker": "caller",
+        "text": "No. I am only asking about the school."
+      },
+      {
+        "t_ms": 22750,
+        "speaker": "operator",
+        "text": "Anyone sick at home?"
+      },
+      {
+        "t_ms": 28050,
+        "speaker": "caller",
+        "text": "No. Thank you."
+      }
+    ],
+    "fields": {
+      "location": "Wang Chin District, Phrae",
+      "location_confidence": 0.93,
+      "people_count": 1,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "information"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-23T11:15:00Z"
+  },
+  "expected": {
+    "system": "system_1",
+    "priority": "P4",
+    "route": "information_only",
+    "needs": [
+      "information"
+    ],
+    "requires_human": false,
+    "missing_evidence": [],
+    "acceptable_next_questions": []
+  },
+  "notes": "Non-urgent question. P4 information_only."
+}

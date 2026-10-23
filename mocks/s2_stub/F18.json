@@ -1,0 +1,19 @@
+{
+  "system": "system_2",
+  "outcome": "reasoned_recommendation",
+  "priority": "P3",
+  "needs": [
+    "aid_payment"
+  ],
+  "route": "aid_caseworker",
+  "confidence": 0.84,
+  "reason": "P3 aid_caseworker",
+  "reasoning": "Second aid exception. Human caseworker. Not an automated denial.",
+  "missing_evidence": [
+    "household_list_rule"
+  ],
+  "next_question": "Should a caseworker review the extra person on the list?",
+  "requires_human": true,
+  "escalate": false,
+  "latency_ms": 88
+}

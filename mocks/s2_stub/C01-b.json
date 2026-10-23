@@ -1,0 +1,19 @@
+{
+  "system": "system_2",
+  "outcome": "reasoned_recommendation",
+  "priority": "P1",
+  "needs": [
+    "rescue"
+  ],
+  "route": "rescue_coordination",
+  "confidence": 0.84,
+  "reason": "P1 rescue_coordination",
+  "reasoning": "Near-identical to C01-a. Once the C01-a correction is in memory, the retrieved context must name that correction. Expected label matches the corrected one, not the naive P3 water label.",
+  "missing_evidence": [
+    "water_depth"
+  ],
+  "next_question": "Is the water still only at the door?",
+  "requires_human": true,
+  "escalate": false,
+  "latency_ms": 88
+}

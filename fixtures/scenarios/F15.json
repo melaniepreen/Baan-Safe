@@ -1,0 +1,121 @@
+{
+  "id": "F15",
+  "title": "Road question while a child is crying",
+  "tags": [
+    "system_2",
+    "conflicting"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Is the road still open?"
+    },
+    {
+      "t_ms": 4050,
+      "speaker": "operator",
+      "text": "I can hear a child crying. Is the child with you?"
+    },
+    {
+      "t_ms": 8350,
+      "speaker": "caller",
+      "text": "Yes. They are upset. We only need the road."
+    },
+    {
+      "t_ms": 12900,
+      "speaker": "operator",
+      "text": "Is anyone hurt?"
+    },
+    {
+      "t_ms": 17700,
+      "speaker": "caller",
+      "text": "No. Please just tell me if the road is open."
+    },
+    {
+      "t_ms": 22750,
+      "speaker": "operator",
+      "text": "Which district?"
+    },
+    {
+      "t_ms": 28050,
+      "speaker": "caller",
+      "text": "Wiang Sa District, Nan. Near the invented bus shelter."
+    }
+  ],
+  "case_state": {
+    "case_id": "F15",
+    "caller_id_hash": "synthetic:f15",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Is the road still open?"
+      },
+      {
+        "t_ms": 4050,
+        "speaker": "operator",
+        "text": "I can hear a child crying. Is the child with you?"
+      },
+      {
+        "t_ms": 8350,
+        "speaker": "caller",
+        "text": "Yes. They are upset. We only need the road."
+      },
+      {
+        "t_ms": 12900,
+        "speaker": "operator",
+        "text": "Is anyone hurt?"
+      },
+      {
+        "t_ms": 17700,
+        "speaker": "caller",
+        "text": "No. Please just tell me if the road is open."
+      },
+      {
+        "t_ms": 22750,
+        "speaker": "operator",
+        "text": "Which district?"
+      },
+      {
+        "t_ms": 28050,
+        "speaker": "caller",
+        "text": "Wiang Sa District, Nan. Near the invented bus shelter."
+      }
+    ],
+    "fields": {
+      "location": "Wiang Sa District, Nan",
+      "location_confidence": 0.8,
+      "people_count": 2,
+      "vulnerable": [
+        "child"
+      ],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "information"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [
+      "conflicting_evidence"
+    ],
+    "resources": {},
+    "received_at": "2026-10-23T16:15:00Z"
+  },
+  "expected": {
+    "system": "system_2",
+    "priority": "P2",
+    "route": "supervisor_escalation",
+    "needs": [
+      "information"
+    ],
+    "requires_human": true,
+    "missing_evidence": [
+      "who_is_with_the_caller"
+    ],
+    "acceptable_next_questions": [
+      "Is the child safe and dry where you are?"
+    ]
+  },
+  "notes": "Non-graphic. The words say information, the background says distress. Starting label is supervisor_escalation. Flagged: a human may prefer a welfare route plus a question."
+}

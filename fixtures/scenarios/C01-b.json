@@ -1,0 +1,121 @@
+{
+  "id": "C01-b",
+  "title": "Same pattern after the correction",
+  "tags": [
+    "system_2",
+    "correction_pair"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "We need water bottles, if that is what you send."
+    },
+    {
+      "t_ms": 4050,
+      "speaker": "operator",
+      "text": "Where is the water, and who is in the flat?"
+    },
+    {
+      "t_ms": 8350,
+      "speaker": "caller",
+      "text": "Ground floor. Water is at the door. Grandmother is elderly."
+    },
+    {
+      "t_ms": 12900,
+      "speaker": "operator",
+      "text": "Can she walk out?"
+    },
+    {
+      "t_ms": 17700,
+      "speaker": "caller",
+      "text": "Only with help. The flat is the one by the invented mango tree."
+    },
+    {
+      "t_ms": 22750,
+      "speaker": "operator",
+      "text": "District?"
+    },
+    {
+      "t_ms": 28050,
+      "speaker": "caller",
+      "text": "Wang Chin District, Phrae. Please check what you did for the similar call."
+    }
+  ],
+  "case_state": {
+    "case_id": "C01-b",
+    "caller_id_hash": "synthetic:c01b",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "We need water bottles, if that is what you send."
+      },
+      {
+        "t_ms": 4050,
+        "speaker": "operator",
+        "text": "Where is the water, and who is in the flat?"
+      },
+      {
+        "t_ms": 8350,
+        "speaker": "caller",
+        "text": "Ground floor. Water is at the door. Grandmother is elderly."
+      },
+      {
+        "t_ms": 12900,
+        "speaker": "operator",
+        "text": "Can she walk out?"
+      },
+      {
+        "t_ms": 17700,
+        "speaker": "caller",
+        "text": "Only with help. The flat is the one by the invented mango tree."
+      },
+      {
+        "t_ms": 22750,
+        "speaker": "operator",
+        "text": "District?"
+      },
+      {
+        "t_ms": 28050,
+        "speaker": "caller",
+        "text": "Wang Chin District, Phrae. Please check what you did for the similar call."
+      }
+    ],
+    "fields": {
+      "location": "Wang Chin District, Phrae",
+      "location_confidence": 0.9,
+      "people_count": 2,
+      "vulnerable": [
+        "elderly"
+      ],
+      "medical": false,
+      "danger": [
+        "rising_water"
+      ],
+      "needs": [
+        "rescue"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-23T19:15:00Z"
+  },
+  "expected": {
+    "system": "system_2",
+    "priority": "P1",
+    "route": "rescue_coordination",
+    "needs": [
+      "rescue"
+    ],
+    "requires_human": true,
+    "missing_evidence": [
+      "water_depth"
+    ],
+    "acceptable_next_questions": [
+      "Is the water still only at the door?"
+    ]
+  },
+  "notes": "Near-identical to C01-a. Once the C01-a correction is in memory, the retrieved context must name that correction. Expected label matches the corrected one, not the naive P3 water label."
+}

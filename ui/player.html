@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>BaanSafe transcript player</title>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; max-width: 42rem; }
+    .caller { color: #0b3d91; }
+    .operator { color: #444; }
+    li { margin: 0.4rem 0; }
+  </style>
+</head>
+<body>
+  <h1>Transcript player</h1>
+  <p>Plays a fixture stream from the API. Speech-to-text is <code>TODO_HUMAN</code>.</p>
+  <label>Fixture <input id="fid" value="F01" /></label>
+  <button id="play" type="button">Play</button>
+  <ol id="log"></ol>
+  <script>
+    document.getElementById("play").addEventListener("click", () => {
+      const log = document.getElementById("log");
+      log.innerHTML = "";
+      const id = document.getElementById("fid").value.trim();
+      const source = new EventSource(`/fixtures/${encodeURIComponent(id)}/stream?pace=1`);
+      source.addEventListener("turn", (event) => {
+        const turn = JSON.parse(event.data);
+        const item = document.createElement("li");
+        item.className = turn.speaker;
+        item.textContent = `${turn.t_ms} ms  ${turn.speaker}: ${turn.text}`;
+        log.appendChild(item);
+      });
+      source.addEventListener("done", () => source.close());
+      source.onerror = () => source.close();
+    });
+  </script>
+</body>
+</html>

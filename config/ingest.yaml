@@ -1,0 +1,24 @@
+# JUDGEMENT CALLS — human sign-off required. Listed in MORNING_REPORT.md.
+# Operational ingest choices. These are not the TODO_HUMAN product decisions
+# in decisions.yaml.
+
+# api.open-meteo.com and archive-api.open-meteo.com publish robots.txt as
+# "User-agent: * / Disallow: /". Open-Meteo's own API docs invite these calls.
+# The client calls only the documented forecast and archive endpoints, at or
+# below 1 request/second, and does not crawl the website.
+# Set to false to skip Open-Meteo entirely.
+open_meteo_documented_api_despite_robots_disallow: true
+
+overpass:
+  # overpass-api.de robots.txt disallows /api/, so that host is not used.
+  # This host has no robots.txt (HTTP 404), which means no crawl restrictions.
+  interpreter: https://overpass.openstreetmap.fr/api/interpreter
+
+# Weather rows are one per location per day (Open-Meteo daily variables),
+# not raw hourly samples.
+weather_granularity: daily
+
+# A flood polygon is assigned to the nearest admin_level=6 centre inside this
+# distance. This is not a polygon-intersection against a district boundary set.
+# HDX district boundaries are listed as later — human to approve.
+district_match_km: 25

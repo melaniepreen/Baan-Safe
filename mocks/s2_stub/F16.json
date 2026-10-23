@@ -1,0 +1,19 @@
+{
+  "system": "system_2",
+  "outcome": "reasoned_recommendation",
+  "priority": "P2",
+  "needs": [
+    "shelter"
+  ],
+  "route": "supervisor_escalation",
+  "confidence": 0.84,
+  "reason": "P2 supervisor_escalation",
+  "reasoning": "Safeguarding, kept non-graphic. No description of harm. Supervisor required.",
+  "missing_evidence": [
+    "guardian_contact_status"
+  ],
+  "next_question": "Is a named guardian expected, or should a supervisor take this now?",
+  "requires_human": true,
+  "escalate": false,
+  "latency_ms": 88
+}

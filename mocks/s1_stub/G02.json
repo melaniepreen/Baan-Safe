@@ -1,0 +1,17 @@
+{
+  "system": "system_1",
+  "outcome": "fast_route",
+  "priority": "P1",
+  "needs": [
+    "rescue"
+  ],
+  "route": "rescue_coordination",
+  "confidence": 0.93,
+  "reason": "Illustrative S1 label after this pattern graduates.",
+  "reasoning": null,
+  "missing_evidence": [],
+  "next_question": null,
+  "requires_human": true,
+  "escalate": false,
+  "latency_ms": 22
+}

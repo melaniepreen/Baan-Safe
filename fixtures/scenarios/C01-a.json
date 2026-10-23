@@ -1,0 +1,121 @@
+{
+  "id": "C01-a",
+  "title": "Water at the door, ground floor, elderly",
+  "tags": [
+    "system_2",
+    "correction_pair"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Can you send drinking water?"
+    },
+    {
+      "t_ms": 4050,
+      "speaker": "operator",
+      "text": "Tell me about the water and who is there."
+    },
+    {
+      "t_ms": 8350,
+      "speaker": "caller",
+      "text": "It is at the door of our ground-floor flat. My father is elderly."
+    },
+    {
+      "t_ms": 12900,
+      "speaker": "operator",
+      "text": "Can he leave if the water comes in?"
+    },
+    {
+      "t_ms": 17700,
+      "speaker": "caller",
+      "text": "Not quickly. I thought you only sent water, though."
+    },
+    {
+      "t_ms": 22750,
+      "speaker": "operator",
+      "text": "Which district?"
+    },
+    {
+      "t_ms": 28050,
+      "speaker": "caller",
+      "text": "Long District, Phrae, near the invented blue temple."
+    }
+  ],
+  "case_state": {
+    "case_id": "C01-a",
+    "caller_id_hash": "synthetic:c01a",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Can you send drinking water?"
+      },
+      {
+        "t_ms": 4050,
+        "speaker": "operator",
+        "text": "Tell me about the water and who is there."
+      },
+      {
+        "t_ms": 8350,
+        "speaker": "caller",
+        "text": "It is at the door of our ground-floor flat. My father is elderly."
+      },
+      {
+        "t_ms": 12900,
+        "speaker": "operator",
+        "text": "Can he leave if the water comes in?"
+      },
+      {
+        "t_ms": 17700,
+        "speaker": "caller",
+        "text": "Not quickly. I thought you only sent water, though."
+      },
+      {
+        "t_ms": 22750,
+        "speaker": "operator",
+        "text": "Which district?"
+      },
+      {
+        "t_ms": 28050,
+        "speaker": "caller",
+        "text": "Long District, Phrae, near the invented blue temple."
+      }
+    ],
+    "fields": {
+      "location": "Long District, Phrae",
+      "location_confidence": 0.9,
+      "people_count": 2,
+      "vulnerable": [
+        "elderly"
+      ],
+      "medical": false,
+      "danger": [
+        "rising_water"
+      ],
+      "needs": [
+        "rescue"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-23T18:15:00Z"
+  },
+  "expected": {
+    "system": "system_2",
+    "priority": "P1",
+    "route": "rescue_coordination",
+    "needs": [
+      "rescue"
+    ],
+    "requires_human": true,
+    "missing_evidence": [
+      "water_depth"
+    ],
+    "acceptable_next_questions": [
+      "Is the water still only at the door?"
+    ]
+  },
+  "notes": "Naive fast reading would label this P3 welfare_distribution for water, because the caller asks for drinking water and does not say the word rescue. The expected label is P1 rescue. The correction from this case should be retrieved on C01-b."
+}

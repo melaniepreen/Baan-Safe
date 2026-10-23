@@ -1,0 +1,19 @@
+{
+  "system": "system_2",
+  "outcome": "reasoned_recommendation",
+  "priority": "P3",
+  "needs": [
+    "aid_payment"
+  ],
+  "route": "aid_caseworker",
+  "confidence": 0.84,
+  "reason": "P3 aid_caseworker",
+  "reasoning": "Aid eligibility edge case. No rescue. Caseworker and a human.",
+  "missing_evidence": [
+    "eligibility_rule"
+  ],
+  "next_question": "Do you want a caseworker to review the renter exception?",
+  "requires_human": true,
+  "escalate": false,
+  "latency_ms": 88
+}

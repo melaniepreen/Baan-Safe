@@ -1,0 +1,19 @@
+{
+  "system": "system_2",
+  "outcome": "reasoned_recommendation",
+  "priority": "P2",
+  "needs": [
+    "rescue"
+  ],
+  "route": "rescue_coordination",
+  "confidence": 0.84,
+  "reason": "P2 rescue_coordination",
+  "reasoning": "Caller minimises while describing water at the door. Cautious P2 rescue, not the caller's 'we are fine'. Flagged between P1 and P2.",
+  "missing_evidence": [
+    "whether_water_is_entering"
+  ],
+  "next_question": "Has the water crossed the doorway?",
+  "requires_human": true,
+  "escalate": false,
+  "latency_ms": 88
+}

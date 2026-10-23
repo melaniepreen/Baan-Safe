@@ -1,0 +1,17 @@
+{
+  "system": "system_1",
+  "outcome": "fast_route",
+  "priority": "P3",
+  "needs": [
+    "water"
+  ],
+  "route": "duplicate_merge",
+  "confidence": 0.93,
+  "reason": "Pair with F09, same synthetic caller hash.",
+  "reasoning": null,
+  "missing_evidence": [],
+  "next_question": null,
+  "requires_human": false,
+  "escalate": false,
+  "latency_ms": 22
+}

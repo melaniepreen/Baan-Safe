@@ -1,0 +1,9 @@
+[
+  {
+    "memory_id": "mem-f12-failure",
+    "kind": "prior_failure",
+    "summary": "A previous vague-landmark case was closed as information-only and the team could not find the household. Ask for a district before closing.",
+    "relevance": 0.8,
+    "source_case_id": "synthetic-prior-case"
+  }
+]

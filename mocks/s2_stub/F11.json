@@ -1,0 +1,20 @@
+{
+  "system": "system_2",
+  "outcome": "reasoned_recommendation",
+  "priority": "P1",
+  "needs": [
+    "rescue",
+    "medical"
+  ],
+  "route": "rescue_coordination",
+  "confidence": 0.84,
+  "reason": "P1 rescue_coordination",
+  "reasoning": "Immobile elderly person and water at the step. Non-graphic. Human required.",
+  "missing_evidence": [
+    "mobility_aid"
+  ],
+  "next_question": "Is there anyone who can help them move if the water rises?",
+  "requires_human": true,
+  "escalate": false,
+  "latency_ms": 88
+}

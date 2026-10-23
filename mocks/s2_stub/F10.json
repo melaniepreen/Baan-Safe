@@ -1,0 +1,20 @@
+{
+  "system": "system_2",
+  "outcome": "reasoned_recommendation",
+  "priority": "P1",
+  "needs": [
+    "rescue",
+    "medical"
+  ],
+  "route": "rescue_coordination",
+  "confidence": 0.84,
+  "reason": "P1 rescue_coordination",
+  "reasoning": "Medical dependency plus rising water. Life-safety, human confirms the dispatch.",
+  "missing_evidence": [
+    "water_depth"
+  ],
+  "next_question": "Is the water still outside, or has it reached the doorway?",
+  "requires_human": true,
+  "escalate": false,
+  "latency_ms": 88
+}

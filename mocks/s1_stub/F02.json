@@ -1,0 +1,17 @@
+{
+  "system": "system_1",
+  "outcome": "fast_route",
+  "priority": "P3",
+  "needs": [
+    "food"
+  ],
+  "route": "welfare_distribution",
+  "confidence": 0.93,
+  "reason": "Food only, child is with adults, no medical need and no water in the house.",
+  "reasoning": null,
+  "missing_evidence": [],
+  "next_question": null,
+  "requires_human": false,
+  "escalate": false,
+  "latency_ms": 22
+}

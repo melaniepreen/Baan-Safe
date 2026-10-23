@@ -1,0 +1,114 @@
+{
+  "id": "F03",
+  "title": "Which shelter has space",
+  "tags": [
+    "system_1",
+    "clear",
+    "shelter"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Which shelter still has space tonight?"
+    },
+    {
+      "t_ms": 4050,
+      "speaker": "operator",
+      "text": "Are you in the water now?"
+    },
+    {
+      "t_ms": 8350,
+      "speaker": "caller",
+      "text": "No. We are dry. We just want a place if the rain comes back."
+    },
+    {
+      "t_ms": 12900,
+      "speaker": "operator",
+      "text": "Which district?"
+    },
+    {
+      "t_ms": 17700,
+      "speaker": "caller",
+      "text": "Sop Prap District, Lampang. We can see the invented green gate."
+    },
+    {
+      "t_ms": 22750,
+      "speaker": "operator",
+      "text": "How many would come?"
+    },
+    {
+      "t_ms": 28050,
+      "speaker": "caller",
+      "text": "Two adults. We have a motorbike and we can travel."
+    }
+  ],
+  "case_state": {
+    "case_id": "F03",
+    "caller_id_hash": "synthetic:f03",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Which shelter still has space tonight?"
+      },
+      {
+        "t_ms": 4050,
+        "speaker": "operator",
+        "text": "Are you in the water now?"
+      },
+      {
+        "t_ms": 8350,
+        "speaker": "caller",
+        "text": "No. We are dry. We just want a place if the rain comes back."
+      },
+      {
+        "t_ms": 12900,
+        "speaker": "operator",
+        "text": "Which district?"
+      },
+      {
+        "t_ms": 17700,
+        "speaker": "caller",
+        "text": "Sop Prap District, Lampang. We can see the invented green gate."
+      },
+      {
+        "t_ms": 22750,
+        "speaker": "operator",
+        "text": "How many would come?"
+      },
+      {
+        "t_ms": 28050,
+        "speaker": "caller",
+        "text": "Two adults. We have a motorbike and we can travel."
+      }
+    ],
+    "fields": {
+      "location": "Sop Prap District, Lampang",
+      "location_confidence": 0.9,
+      "people_count": 2,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "shelter"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-23T09:15:00Z"
+  },
+  "expected": {
+    "system": "system_1",
+    "priority": "P3",
+    "route": "shelter_placement",
+    "needs": [
+      "shelter"
+    ],
+    "requires_human": false,
+    "missing_evidence": [],
+    "acceptable_next_questions": []
+  },
+  "notes": "Shelter information while the callers are dry and mobile. Not a rescue."
+}

@@ -1,0 +1,121 @@
+{
+  "id": "F14",
+  "title": "Caller says fine, water at the door",
+  "tags": [
+    "system_2",
+    "conflicting"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "We're fine. Really. No need to send anyone."
+    },
+    {
+      "t_ms": 4050,
+      "speaker": "operator",
+      "text": "I thought I heard water. Where is it?"
+    },
+    {
+      "t_ms": 8350,
+      "speaker": "caller",
+      "text": "It is at the door. But we are fine, please."
+    },
+    {
+      "t_ms": 12900,
+      "speaker": "operator",
+      "text": "Who is with you?"
+    },
+    {
+      "t_ms": 17700,
+      "speaker": "caller",
+      "text": "Two of us. We can still stand in the room."
+    },
+    {
+      "t_ms": 22750,
+      "speaker": "operator",
+      "text": "District?"
+    },
+    {
+      "t_ms": 28050,
+      "speaker": "caller",
+      "text": "Nong Muang Khai District, Phrae. Do not make a fuss."
+    }
+  ],
+  "case_state": {
+    "case_id": "F14",
+    "caller_id_hash": "synthetic:f14",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "We're fine. Really. No need to send anyone."
+      },
+      {
+        "t_ms": 4050,
+        "speaker": "operator",
+        "text": "I thought I heard water. Where is it?"
+      },
+      {
+        "t_ms": 8350,
+        "speaker": "caller",
+        "text": "It is at the door. But we are fine, please."
+      },
+      {
+        "t_ms": 12900,
+        "speaker": "operator",
+        "text": "Who is with you?"
+      },
+      {
+        "t_ms": 17700,
+        "speaker": "caller",
+        "text": "Two of us. We can still stand in the room."
+      },
+      {
+        "t_ms": 22750,
+        "speaker": "operator",
+        "text": "District?"
+      },
+      {
+        "t_ms": 28050,
+        "speaker": "caller",
+        "text": "Nong Muang Khai District, Phrae. Do not make a fuss."
+      }
+    ],
+    "fields": {
+      "location": "Nong Muang Khai District, Phrae",
+      "location_confidence": 0.84,
+      "people_count": 2,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [
+        "rising_water"
+      ],
+      "needs": [
+        "rescue"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [
+      "conflicting_evidence"
+    ],
+    "resources": {},
+    "received_at": "2026-10-23T16:15:00Z"
+  },
+  "expected": {
+    "system": "system_2",
+    "priority": "P2",
+    "route": "rescue_coordination",
+    "needs": [
+      "rescue"
+    ],
+    "requires_human": true,
+    "missing_evidence": [
+      "whether_water_is_entering"
+    ],
+    "acceptable_next_questions": [
+      "Has the water crossed the doorway?"
+    ]
+  },
+  "notes": "Caller minimises while describing water at the door. Cautious P2 rescue, not the caller's 'we are fine'. Flagged between P1 and P2."
+}

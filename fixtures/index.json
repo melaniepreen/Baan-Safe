@@ -1,0 +1,239 @@
+{
+  "scenarios": [
+    {
+      "id": "F01",
+      "title": "Drinking water, dry ground",
+      "tags": [
+        "system_1",
+        "clear",
+        "welfare"
+      ],
+      "path": "scenarios/F01.json"
+    },
+    {
+      "id": "F02",
+      "title": "Rice finished, no danger",
+      "tags": [
+        "system_1",
+        "clear",
+        "welfare"
+      ],
+      "path": "scenarios/F02.json"
+    },
+    {
+      "id": "F03",
+      "title": "Which shelter has space",
+      "tags": [
+        "system_1",
+        "clear",
+        "shelter"
+      ],
+      "path": "scenarios/F03.json"
+    },
+    {
+      "id": "F04",
+      "title": "Power cut, people are safe",
+      "tags": [
+        "system_1",
+        "clear",
+        "power"
+      ],
+      "path": "scenarios/F04.json"
+    },
+    {
+      "id": "F05",
+      "title": "When is the flood update published",
+      "tags": [
+        "system_1",
+        "clear",
+        "information"
+      ],
+      "path": "scenarios/F05.json"
+    },
+    {
+      "id": "F06",
+      "title": "Evacuation today, full details",
+      "tags": [
+        "system_1",
+        "clear",
+        "evacuation"
+      ],
+      "path": "scenarios/F06.json"
+    },
+    {
+      "id": "F07",
+      "title": "Is the school open tomorrow",
+      "tags": [
+        "system_1",
+        "clear",
+        "information"
+      ],
+      "path": "scenarios/F07.json"
+    },
+    {
+      "id": "F08",
+      "title": "First call from the canal household",
+      "tags": [
+        "system_1",
+        "duplicate"
+      ],
+      "path": "scenarios/F08.json"
+    },
+    {
+      "id": "F09",
+      "title": "Same household calls again",
+      "tags": [
+        "system_1",
+        "duplicate"
+      ],
+      "path": "scenarios/F09.json"
+    },
+    {
+      "id": "F10",
+      "title": "Oxygen-dependent elderly person, rising water",
+      "tags": [
+        "system_2",
+        "medical"
+      ],
+      "path": "scenarios/F10.json"
+    },
+    {
+      "id": "F11",
+      "title": "Immobile neighbour, water at the step",
+      "tags": [
+        "system_2",
+        "medical"
+      ],
+      "path": "scenarios/F11.json"
+    },
+    {
+      "id": "F12",
+      "title": "Near the blue temple, road unknown",
+      "tags": [
+        "system_2",
+        "vague_location"
+      ],
+      "path": "scenarios/F12.json"
+    },
+    {
+      "id": "F13",
+      "title": "Shelter question, district unknown",
+      "tags": [
+        "system_2",
+        "vague_location"
+      ],
+      "path": "scenarios/F13.json"
+    },
+    {
+      "id": "F14",
+      "title": "Caller says fine, water at the door",
+      "tags": [
+        "system_2",
+        "conflicting"
+      ],
+      "path": "scenarios/F14.json"
+    },
+    {
+      "id": "F15",
+      "title": "Road question while a child is crying",
+      "tags": [
+        "system_2",
+        "conflicting"
+      ],
+      "path": "scenarios/F15.json"
+    },
+    {
+      "id": "F16",
+      "title": "Unaccompanied child at a shelter",
+      "tags": [
+        "system_2",
+        "safeguarding"
+      ],
+      "path": "scenarios/F16.json"
+    },
+    {
+      "id": "F17",
+      "title": "Renter told they are not eligible",
+      "tags": [
+        "system_2",
+        "aid_exception"
+      ],
+      "path": "scenarios/F17.json"
+    },
+    {
+      "id": "F18",
+      "title": "Extra person not on the household list",
+      "tags": [
+        "system_2",
+        "aid_exception"
+      ],
+      "path": "scenarios/F18.json"
+    },
+    {
+      "id": "C01-a",
+      "title": "Water at the door, ground floor, elderly",
+      "tags": [
+        "system_2",
+        "correction_pair"
+      ],
+      "path": "scenarios/C01-a.json"
+    },
+    {
+      "id": "C01-b",
+      "title": "Same pattern after the correction",
+      "tags": [
+        "system_2",
+        "correction_pair"
+      ],
+      "path": "scenarios/C01-b.json"
+    }
+  ],
+  "graduation": [
+    {
+      "id": "G01",
+      "title": "Graduated pattern: door, ground floor, elderly",
+      "tags": [
+        "graduation",
+        "system_1",
+        "rescue"
+      ],
+      "path": "graduation/G01.json"
+    },
+    {
+      "id": "G02",
+      "title": "Graduated pattern: door, ground floor, elderly",
+      "tags": [
+        "graduation",
+        "system_1",
+        "rescue"
+      ],
+      "path": "graduation/G02.json"
+    },
+    {
+      "id": "G03",
+      "title": "Graduated pattern: door, ground floor, elderly",
+      "tags": [
+        "graduation",
+        "system_1",
+        "rescue"
+      ],
+      "path": "graduation/G03.json"
+    },
+    {
+      "id": "G04",
+      "title": "Graduated pattern: door, ground floor, elderly",
+      "tags": [
+        "graduation",
+        "system_1",
+        "rescue"
+      ],
+      "path": "graduation/G04.json"
+    }
+  ],
+  "correction_pairs": [
+    {
+      "a": "C01-a",
+      "b": "C01-b"
+    }
+  ]
+}

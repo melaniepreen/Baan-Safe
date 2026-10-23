@@ -1,0 +1,114 @@
+{
+  "id": "F01",
+  "title": "Drinking water, dry ground",
+  "tags": [
+    "system_1",
+    "clear",
+    "welfare"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Hello, we need drinking water for the house."
+    },
+    {
+      "t_ms": 4050,
+      "speaker": "operator",
+      "text": "Is anyone hurt, or is water inside the rooms?"
+    },
+    {
+      "t_ms": 8350,
+      "speaker": "caller",
+      "text": "No. Um, the ground is dry. We just ran out of bottles."
+    },
+    {
+      "t_ms": 12900,
+      "speaker": "operator",
+      "text": "Which district are you calling from?"
+    },
+    {
+      "t_ms": 17700,
+      "speaker": "caller",
+      "text": "We are in Mae Mo District, Lampang, near the blue temple."
+    },
+    {
+      "t_ms": 22750,
+      "speaker": "operator",
+      "text": "How many people, and can you reach the market?"
+    },
+    {
+      "t_ms": 28050,
+      "speaker": "caller",
+      "text": "Four of us. The market is open. We only need water."
+    }
+  ],
+  "case_state": {
+    "case_id": "F01",
+    "caller_id_hash": "synthetic:f01",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Hello, we need drinking water for the house."
+      },
+      {
+        "t_ms": 4050,
+        "speaker": "operator",
+        "text": "Is anyone hurt, or is water inside the rooms?"
+      },
+      {
+        "t_ms": 8350,
+        "speaker": "caller",
+        "text": "No. Um, the ground is dry. We just ran out of bottles."
+      },
+      {
+        "t_ms": 12900,
+        "speaker": "operator",
+        "text": "Which district are you calling from?"
+      },
+      {
+        "t_ms": 17700,
+        "speaker": "caller",
+        "text": "We are in Mae Mo District, Lampang, near the blue temple."
+      },
+      {
+        "t_ms": 22750,
+        "speaker": "operator",
+        "text": "How many people, and can you reach the market?"
+      },
+      {
+        "t_ms": 28050,
+        "speaker": "caller",
+        "text": "Four of us. The market is open. We only need water."
+      }
+    ],
+    "fields": {
+      "location": "Mae Mo District, Lampang",
+      "location_confidence": 0.94,
+      "people_count": 4,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "water"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-23T08:15:00Z"
+  },
+  "expected": {
+    "system": "system_1",
+    "priority": "P3",
+    "route": "welfare_distribution",
+    "needs": [
+      "water"
+    ],
+    "requires_human": false,
+    "missing_evidence": [],
+    "acceptable_next_questions": []
+  },
+  "notes": "Clear same-day water request. District is complete and there is no danger sign."
+}

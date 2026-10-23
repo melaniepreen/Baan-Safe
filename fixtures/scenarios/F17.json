@@ -1,0 +1,119 @@
+{
+  "id": "F17",
+  "title": "Renter told they are not eligible",
+  "tags": [
+    "system_2",
+    "aid_exception"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "They said we cannot get the payment because we rent."
+    },
+    {
+      "t_ms": 4050,
+      "speaker": "operator",
+      "text": "Is this about a payment decision, not a rescue?"
+    },
+    {
+      "t_ms": 8350,
+      "speaker": "caller",
+      "text": "Yes. The neighbour rents too, and they received it."
+    },
+    {
+      "t_ms": 12900,
+      "speaker": "operator",
+      "text": "Which district is the household in?"
+    },
+    {
+      "t_ms": 17700,
+      "speaker": "caller",
+      "text": "Ban Luang District, Nan. I will not read out an address."
+    },
+    {
+      "t_ms": 22750,
+      "speaker": "operator",
+      "text": "Anyone in danger tonight?"
+    },
+    {
+      "t_ms": 28050,
+      "speaker": "caller",
+      "text": "No. We need a person to look at the exception."
+    }
+  ],
+  "case_state": {
+    "case_id": "F17",
+    "caller_id_hash": "synthetic:f17",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "They said we cannot get the payment because we rent."
+      },
+      {
+        "t_ms": 4050,
+        "speaker": "operator",
+        "text": "Is this about a payment decision, not a rescue?"
+      },
+      {
+        "t_ms": 8350,
+        "speaker": "caller",
+        "text": "Yes. The neighbour rents too, and they received it."
+      },
+      {
+        "t_ms": 12900,
+        "speaker": "operator",
+        "text": "Which district is the household in?"
+      },
+      {
+        "t_ms": 17700,
+        "speaker": "caller",
+        "text": "Ban Luang District, Nan. I will not read out an address."
+      },
+      {
+        "t_ms": 22750,
+        "speaker": "operator",
+        "text": "Anyone in danger tonight?"
+      },
+      {
+        "t_ms": 28050,
+        "speaker": "caller",
+        "text": "No. We need a person to look at the exception."
+      }
+    ],
+    "fields": {
+      "location": "Ban Luang District, Nan",
+      "location_confidence": 0.87,
+      "people_count": 4,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "aid_payment"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [
+      "aid_exception"
+    ],
+    "resources": {},
+    "received_at": "2026-10-23T17:15:00Z"
+  },
+  "expected": {
+    "system": "system_2",
+    "priority": "P3",
+    "route": "aid_caseworker",
+    "needs": [
+      "aid_payment"
+    ],
+    "requires_human": true,
+    "missing_evidence": [
+      "eligibility_rule"
+    ],
+    "acceptable_next_questions": [
+      "Do you want a caseworker to review the renter exception?"
+    ]
+  },
+  "notes": "Aid eligibility edge case. No rescue. Caseworker and a human."
+}

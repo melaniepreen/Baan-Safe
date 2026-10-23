@@ -1,0 +1,19 @@
+{
+  "system": "system_2",
+  "outcome": "reasoned_recommendation",
+  "priority": "P2",
+  "needs": [
+    "information"
+  ],
+  "route": "supervisor_escalation",
+  "confidence": 0.84,
+  "reason": "P2 supervisor_escalation",
+  "reasoning": "Non-graphic. The words say information, the background says distress. Starting label is supervisor_escalation. Flagged: a human may prefer a welfare route plus a question.",
+  "missing_evidence": [
+    "who_is_with_the_caller"
+  ],
+  "next_question": "Is the child safe and dry where you are?",
+  "requires_human": true,
+  "escalate": false,
+  "latency_ms": 88
+}

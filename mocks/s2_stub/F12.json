@@ -1,0 +1,19 @@
+{
+  "system": "system_2",
+  "outcome": "reasoned_recommendation",
+  "priority": "P2",
+  "needs": [
+    "rescue"
+  ],
+  "route": "rescue_coordination",
+  "confidence": 0.84,
+  "reason": "P2 rescue_coordination",
+  "reasoning": "Vague landmark only. Labelled P2 rather than P1 because the caller is upstairs and the water is not at the door. Flagged: a human may call this P1.",
+  "missing_evidence": [
+    "precise_location"
+  ],
+  "next_question": "Which district or road are you near?",
+  "requires_human": true,
+  "escalate": false,
+  "latency_ms": 88
+}

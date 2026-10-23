@@ -1,0 +1,117 @@
+{
+  "id": "F13",
+  "title": "Shelter question, district unknown",
+  "tags": [
+    "system_2",
+    "vague_location"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Where can we sleep if we have to leave?"
+    },
+    {
+      "t_ms": 4050,
+      "speaker": "operator",
+      "text": "Which district are you in?"
+    },
+    {
+      "t_ms": 8350,
+      "speaker": "caller",
+      "text": "I don't know the district. We just arrived."
+    },
+    {
+      "t_ms": 12900,
+      "speaker": "operator",
+      "text": "Any landmark?"
+    },
+    {
+      "t_ms": 17700,
+      "speaker": "caller",
+      "text": "A market, I think. I cannot read the sign."
+    },
+    {
+      "t_ms": 22750,
+      "speaker": "operator",
+      "text": "Is anyone in danger right now?"
+    },
+    {
+      "t_ms": 28050,
+      "speaker": "caller",
+      "text": "No. We are dry. We only need a shelter name."
+    }
+  ],
+  "case_state": {
+    "case_id": "F13",
+    "caller_id_hash": "synthetic:f13",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Where can we sleep if we have to leave?"
+      },
+      {
+        "t_ms": 4050,
+        "speaker": "operator",
+        "text": "Which district are you in?"
+      },
+      {
+        "t_ms": 8350,
+        "speaker": "caller",
+        "text": "I don't know the district. We just arrived."
+      },
+      {
+        "t_ms": 12900,
+        "speaker": "operator",
+        "text": "Any landmark?"
+      },
+      {
+        "t_ms": 17700,
+        "speaker": "caller",
+        "text": "A market, I think. I cannot read the sign."
+      },
+      {
+        "t_ms": 22750,
+        "speaker": "operator",
+        "text": "Is anyone in danger right now?"
+      },
+      {
+        "t_ms": 28050,
+        "speaker": "caller",
+        "text": "No. We are dry. We only need a shelter name."
+      }
+    ],
+    "fields": {
+      "location": null,
+      "location_confidence": null,
+      "people_count": 3,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "shelter"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-23T15:15:00Z"
+  },
+  "expected": {
+    "system": "system_2",
+    "priority": "P3",
+    "route": "shelter_placement",
+    "needs": [
+      "shelter"
+    ],
+    "requires_human": false,
+    "missing_evidence": [
+      "location"
+    ],
+    "acceptable_next_questions": [
+      "Which district are you in?"
+    ]
+  },
+  "notes": "Missing location with no danger sign, so the starting label stays P3 and does not require a human. Flagged: the escalation note says a null location goes to System 2, which this does, but a human may still want requires_human true."
+}

@@ -1,0 +1,19 @@
+{
+  "system": "system_2",
+  "outcome": "reasoned_recommendation",
+  "priority": "P3",
+  "needs": [
+    "shelter"
+  ],
+  "route": "shelter_placement",
+  "confidence": 0.84,
+  "reason": "P3 shelter_placement",
+  "reasoning": "Missing location with no danger sign, so the starting label stays P3 and does not require a human. Flagged: the escalation note says a null location goes to System 2, which this does, but a human may still want requires_human true.",
+  "missing_evidence": [
+    "location"
+  ],
+  "next_question": "Which district are you in?",
+  "requires_human": false,
+  "escalate": false,
+  "latency_ms": 88
+}

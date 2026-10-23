@@ -1,0 +1,114 @@
+{
+  "id": "F04",
+  "title": "Power cut, people are safe",
+  "tags": [
+    "system_1",
+    "clear",
+    "power"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "The power has been out since morning."
+    },
+    {
+      "t_ms": 4050,
+      "speaker": "operator",
+      "text": "Is anyone trapped, or is there water near the house?"
+    },
+    {
+      "t_ms": 8350,
+      "speaker": "caller",
+      "text": "No water. We are fine. We have candles."
+    },
+    {
+      "t_ms": 12900,
+      "speaker": "operator",
+      "text": "Where is the house, at district level?"
+    },
+    {
+      "t_ms": 17700,
+      "speaker": "caller",
+      "text": "Den Chai District, Phrae, near the invented clock tower."
+    },
+    {
+      "t_ms": 22750,
+      "speaker": "operator",
+      "text": "Do you need a medic or a rescue?"
+    },
+    {
+      "t_ms": 28050,
+      "speaker": "caller",
+      "text": "No. I only want to know when the power comes back."
+    }
+  ],
+  "case_state": {
+    "case_id": "F04",
+    "caller_id_hash": "synthetic:f04",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "The power has been out since morning."
+      },
+      {
+        "t_ms": 4050,
+        "speaker": "operator",
+        "text": "Is anyone trapped, or is there water near the house?"
+      },
+      {
+        "t_ms": 8350,
+        "speaker": "caller",
+        "text": "No water. We are fine. We have candles."
+      },
+      {
+        "t_ms": 12900,
+        "speaker": "operator",
+        "text": "Where is the house, at district level?"
+      },
+      {
+        "t_ms": 17700,
+        "speaker": "caller",
+        "text": "Den Chai District, Phrae, near the invented clock tower."
+      },
+      {
+        "t_ms": 22750,
+        "speaker": "operator",
+        "text": "Do you need a medic or a rescue?"
+      },
+      {
+        "t_ms": 28050,
+        "speaker": "caller",
+        "text": "No. I only want to know when the power comes back."
+      }
+    ],
+    "fields": {
+      "location": "Den Chai District, Phrae",
+      "location_confidence": 0.92,
+      "people_count": 2,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "power"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-23T10:15:00Z"
+  },
+  "expected": {
+    "system": "system_1",
+    "priority": "P3",
+    "route": "information_only",
+    "needs": [
+      "power"
+    ],
+    "requires_human": false,
+    "missing_evidence": [],
+    "acceptable_next_questions": []
+  },
+  "notes": "Power has no route of its own in config/routes.yaml, so this starting label uses information_only. Flagged for sign-off."
+}

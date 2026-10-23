@@ -1,0 +1,113 @@
+{
+  "id": "F09",
+  "title": "Same household calls again",
+  "tags": [
+    "system_1",
+    "duplicate"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "I called earlier about water for the market-canal household."
+    },
+    {
+      "t_ms": 4050,
+      "speaker": "operator",
+      "text": "Are you the same household, still in the same district?"
+    },
+    {
+      "t_ms": 8350,
+      "speaker": "caller",
+      "text": "Yes. Still Song District, Phrae. Sorry, the wording is a bit different."
+    },
+    {
+      "t_ms": 12900,
+      "speaker": "operator",
+      "text": "Did the water arrive?"
+    },
+    {
+      "t_ms": 17700,
+      "speaker": "caller",
+      "text": "Not yet. We still need the bottles. Nobody is hurt."
+    },
+    {
+      "t_ms": 22750,
+      "speaker": "operator",
+      "text": "Same three people?"
+    },
+    {
+      "t_ms": 28050,
+      "speaker": "caller",
+      "text": "Yes. Please do not open a second case."
+    }
+  ],
+  "case_state": {
+    "case_id": "F09",
+    "caller_id_hash": "synthetic:household-canal-08",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "I called earlier about water for the market-canal household."
+      },
+      {
+        "t_ms": 4050,
+        "speaker": "operator",
+        "text": "Are you the same household, still in the same district?"
+      },
+      {
+        "t_ms": 8350,
+        "speaker": "caller",
+        "text": "Yes. Still Song District, Phrae. Sorry, the wording is a bit different."
+      },
+      {
+        "t_ms": 12900,
+        "speaker": "operator",
+        "text": "Did the water arrive?"
+      },
+      {
+        "t_ms": 17700,
+        "speaker": "caller",
+        "text": "Not yet. We still need the bottles. Nobody is hurt."
+      },
+      {
+        "t_ms": 22750,
+        "speaker": "operator",
+        "text": "Same three people?"
+      },
+      {
+        "t_ms": 28050,
+        "speaker": "caller",
+        "text": "Yes. Please do not open a second case."
+      }
+    ],
+    "fields": {
+      "location": "Song District, Phrae",
+      "location_confidence": 0.92,
+      "people_count": 3,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "water"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-23T13:15:00Z"
+  },
+  "expected": {
+    "system": "system_1",
+    "priority": "P3",
+    "route": "duplicate_merge",
+    "needs": [
+      "water"
+    ],
+    "requires_human": false,
+    "missing_evidence": [],
+    "acceptable_next_questions": []
+  },
+  "notes": "Second call from the F08 household. Expected route is duplicate_merge. See the sign-off note on F08."
+}

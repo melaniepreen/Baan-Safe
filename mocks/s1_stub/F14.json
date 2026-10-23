@@ -1,0 +1,17 @@
+{
+  "system": "system_1",
+  "outcome": "escalate",
+  "priority": "P3",
+  "needs": [
+    "information"
+  ],
+  "route": "information_only",
+  "confidence": 0.42,
+  "reason": "Fast path defers this case to System 2.",
+  "reasoning": null,
+  "missing_evidence": [],
+  "next_question": null,
+  "requires_human": false,
+  "escalate": true,
+  "latency_ms": 16
+}

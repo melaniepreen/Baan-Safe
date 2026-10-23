@@ -1,0 +1,9 @@
+[
+  {
+    "memory_id": "mem-f02-similar",
+    "kind": "similar_case",
+    "summary": "Similar same-day food request in a known district, with no danger signs, was handled as welfare.",
+    "relevance": 0.55,
+    "source_case_id": "synthetic-prior-food"
+  }
+]

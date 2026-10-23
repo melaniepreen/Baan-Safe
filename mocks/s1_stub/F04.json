@@ -1,0 +1,17 @@
+{
+  "system": "system_1",
+  "outcome": "fast_route",
+  "priority": "P3",
+  "needs": [
+    "power"
+  ],
+  "route": "information_only",
+  "confidence": 0.93,
+  "reason": "Power has no route of its own in config/routes.",
+  "reasoning": null,
+  "missing_evidence": [],
+  "next_question": null,
+  "requires_human": false,
+  "escalate": false,
+  "latency_ms": 22
+}

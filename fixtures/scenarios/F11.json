@@ -1,0 +1,124 @@
+{
+  "id": "F11",
+  "title": "Immobile neighbour, water at the step",
+  "tags": [
+    "system_2",
+    "medical"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "I am next door. The person here cannot get out of bed."
+    },
+    {
+      "t_ms": 4050,
+      "speaker": "operator",
+      "text": "Is there a medical device, or an injury you can see?"
+    },
+    {
+      "t_ms": 8350,
+      "speaker": "caller",
+      "text": "No injury I should describe. They are immobile. Water is at the step."
+    },
+    {
+      "t_ms": 12900,
+      "speaker": "operator",
+      "text": "Are they elderly?"
+    },
+    {
+      "t_ms": 17700,
+      "speaker": "caller",
+      "text": "Yes. Elderly, and they cannot stand."
+    },
+    {
+      "t_ms": 22750,
+      "speaker": "operator",
+      "text": "District?"
+    },
+    {
+      "t_ms": 28050,
+      "speaker": "caller",
+      "text": "Rong Kwang District, Phrae. The house with the invented yellow gate."
+    }
+  ],
+  "case_state": {
+    "case_id": "F11",
+    "caller_id_hash": "synthetic:f11",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "I am next door. The person here cannot get out of bed."
+      },
+      {
+        "t_ms": 4050,
+        "speaker": "operator",
+        "text": "Is there a medical device, or an injury you can see?"
+      },
+      {
+        "t_ms": 8350,
+        "speaker": "caller",
+        "text": "No injury I should describe. They are immobile. Water is at the step."
+      },
+      {
+        "t_ms": 12900,
+        "speaker": "operator",
+        "text": "Are they elderly?"
+      },
+      {
+        "t_ms": 17700,
+        "speaker": "caller",
+        "text": "Yes. Elderly, and they cannot stand."
+      },
+      {
+        "t_ms": 22750,
+        "speaker": "operator",
+        "text": "District?"
+      },
+      {
+        "t_ms": 28050,
+        "speaker": "caller",
+        "text": "Rong Kwang District, Phrae. The house with the invented yellow gate."
+      }
+    ],
+    "fields": {
+      "location": "Rong Kwang District, Phrae",
+      "location_confidence": 0.86,
+      "people_count": 2,
+      "vulnerable": [
+        "elderly",
+        "immobile"
+      ],
+      "medical": true,
+      "danger": [
+        "rising_water"
+      ],
+      "needs": [
+        "rescue",
+        "medical"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-23T14:15:00Z"
+  },
+  "expected": {
+    "system": "system_2",
+    "priority": "P1",
+    "route": "rescue_coordination",
+    "needs": [
+      "rescue",
+      "medical"
+    ],
+    "requires_human": true,
+    "missing_evidence": [
+      "mobility_aid"
+    ],
+    "acceptable_next_questions": [
+      "Is there anyone who can help them move if the water rises?"
+    ]
+  },
+  "notes": "Immobile elderly person and water at the step. Non-graphic. Human required."
+}

@@ -1,0 +1,116 @@
+{
+  "id": "F06",
+  "title": "Evacuation today, full details",
+  "tags": [
+    "system_1",
+    "clear",
+    "evacuation"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "They told our lane to move to a shelter today."
+    },
+    {
+      "t_ms": 4050,
+      "speaker": "operator",
+      "text": "Is anyone unable to walk, or on oxygen?"
+    },
+    {
+      "t_ms": 8350,
+      "speaker": "caller",
+      "text": "No. All five of us can walk. No medicine machines."
+    },
+    {
+      "t_ms": 12900,
+      "speaker": "operator",
+      "text": "Which district, and do you already have a shelter name?"
+    },
+    {
+      "t_ms": 17700,
+      "speaker": "caller",
+      "text": "Mueang Phrae District, Phrae. They said the invented north hall. I do not know the road number."
+    },
+    {
+      "t_ms": 22750,
+      "speaker": "operator",
+      "text": "Is water inside the house?"
+    },
+    {
+      "t_ms": 28050,
+      "speaker": "caller",
+      "text": "Not yet. It is at the end of the lane. We should leave this afternoon."
+    }
+  ],
+  "case_state": {
+    "case_id": "F06",
+    "caller_id_hash": "synthetic:f06",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "They told our lane to move to a shelter today."
+      },
+      {
+        "t_ms": 4050,
+        "speaker": "operator",
+        "text": "Is anyone unable to walk, or on oxygen?"
+      },
+      {
+        "t_ms": 8350,
+        "speaker": "caller",
+        "text": "No. All five of us can walk. No medicine machines."
+      },
+      {
+        "t_ms": 12900,
+        "speaker": "operator",
+        "text": "Which district, and do you already have a shelter name?"
+      },
+      {
+        "t_ms": 17700,
+        "speaker": "caller",
+        "text": "Mueang Phrae District, Phrae. They said the invented north hall. I do not know the road number."
+      },
+      {
+        "t_ms": 22750,
+        "speaker": "operator",
+        "text": "Is water inside the house?"
+      },
+      {
+        "t_ms": 28050,
+        "speaker": "caller",
+        "text": "Not yet. It is at the end of the lane. We should leave this afternoon."
+      }
+    ],
+    "fields": {
+      "location": "Mueang Phrae District, Phrae",
+      "location_confidence": 0.9,
+      "people_count": 5,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [
+        "rising_water"
+      ],
+      "needs": [
+        "evacuation"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-23T11:15:00Z"
+  },
+  "expected": {
+    "system": "system_1",
+    "priority": "P2",
+    "route": "shelter_placement",
+    "needs": [
+      "evacuation"
+    ],
+    "requires_human": false,
+    "missing_evidence": [],
+    "acceptable_next_questions": []
+  },
+  "notes": "Urgent evacuation with a known district and mobile people. requires_human is false in this starting label. Flagged: a human may want every evacuation confirmed."
+}

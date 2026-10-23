@@ -1,0 +1,9 @@
+[
+  {
+    "memory_id": "mem-c01b-correction",
+    "kind": "correction",
+    "summary": "Correction from C01-a: water at the door, plus a ground-floor flat, plus an elderly resident, is P1 rescue, not P3 welfare.",
+    "relevance": 0.97,
+    "source_case_id": "C01-a"
+  }
+]

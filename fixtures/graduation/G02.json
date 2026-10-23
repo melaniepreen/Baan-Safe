@@ -1,0 +1,118 @@
+{
+  "id": "G02",
+  "title": "Graduated pattern: door, ground floor, elderly",
+  "tags": [
+    "graduation",
+    "system_1",
+    "rescue"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "The water reached the door. Ground-floor room. The elderly neighbour cannot hurry."
+    },
+    {
+      "t_ms": 4050,
+      "speaker": "operator",
+      "text": "Is this a ground-floor place, and is the elderly person mobile?"
+    },
+    {
+      "t_ms": 8350,
+      "speaker": "caller",
+      "text": "Ground floor. They are elderly and slow. Not a medical machine."
+    },
+    {
+      "t_ms": 12900,
+      "speaker": "operator",
+      "text": "Which district?"
+    },
+    {
+      "t_ms": 17700,
+      "speaker": "caller",
+      "text": "Mae Tha District, Lampang, near the invented blue temple."
+    },
+    {
+      "t_ms": 22750,
+      "speaker": "operator",
+      "text": "How many people?"
+    },
+    {
+      "t_ms": 28050,
+      "speaker": "caller",
+      "text": "Two. We called because of the water at the door."
+    }
+  ],
+  "case_state": {
+    "case_id": "G02",
+    "caller_id_hash": "synthetic:g02",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "The water reached the door. Ground-floor room. The elderly neighbour cannot hurry."
+      },
+      {
+        "t_ms": 4050,
+        "speaker": "operator",
+        "text": "Is this a ground-floor place, and is the elderly person mobile?"
+      },
+      {
+        "t_ms": 8350,
+        "speaker": "caller",
+        "text": "Ground floor. They are elderly and slow. Not a medical machine."
+      },
+      {
+        "t_ms": 12900,
+        "speaker": "operator",
+        "text": "Which district?"
+      },
+      {
+        "t_ms": 17700,
+        "speaker": "caller",
+        "text": "Mae Tha District, Lampang, near the invented blue temple."
+      },
+      {
+        "t_ms": 22750,
+        "speaker": "operator",
+        "text": "How many people?"
+      },
+      {
+        "t_ms": 28050,
+        "speaker": "caller",
+        "text": "Two. We called because of the water at the door."
+      }
+    ],
+    "fields": {
+      "location": "Mae Tha District, Lampang",
+      "location_confidence": 0.91,
+      "people_count": 2,
+      "vulnerable": [
+        "elderly"
+      ],
+      "medical": false,
+      "danger": [
+        "rising_water"
+      ],
+      "needs": [
+        "rescue"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-23T08:15:00Z"
+  },
+  "expected": {
+    "system": "system_1",
+    "priority": "P1",
+    "route": "rescue_coordination",
+    "needs": [
+      "rescue"
+    ],
+    "requires_human": true,
+    "missing_evidence": [],
+    "acceptable_next_questions": []
+  },
+  "notes": "Illustrative S1 label after this pattern graduates. graduation_threshold in config/decisions.yaml is still TODO_HUMAN, so no rule was implemented. The stub only echoes this label."
+}

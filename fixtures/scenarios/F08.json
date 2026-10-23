@@ -1,0 +1,113 @@
+{
+  "id": "F08",
+  "title": "First call from the canal household",
+  "tags": [
+    "system_1",
+    "duplicate"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "We need drinking water. This is the household by the market canal."
+    },
+    {
+      "t_ms": 4050,
+      "speaker": "operator",
+      "text": "Is water in the house?"
+    },
+    {
+      "t_ms": 8350,
+      "speaker": "caller",
+      "text": "No. Dry floor. Three people."
+    },
+    {
+      "t_ms": 12900,
+      "speaker": "operator",
+      "text": "Which district?"
+    },
+    {
+      "t_ms": 17700,
+      "speaker": "caller",
+      "text": "Song District, Phrae, near the invented blue shutter shop."
+    },
+    {
+      "t_ms": 22750,
+      "speaker": "operator",
+      "text": "Has anyone called us about this already?"
+    },
+    {
+      "t_ms": 28050,
+      "speaker": "caller",
+      "text": "I don't think so. First time."
+    }
+  ],
+  "case_state": {
+    "case_id": "F08",
+    "caller_id_hash": "synthetic:household-canal-08",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "We need drinking water. This is the household by the market canal."
+      },
+      {
+        "t_ms": 4050,
+        "speaker": "operator",
+        "text": "Is water in the house?"
+      },
+      {
+        "t_ms": 8350,
+        "speaker": "caller",
+        "text": "No. Dry floor. Three people."
+      },
+      {
+        "t_ms": 12900,
+        "speaker": "operator",
+        "text": "Which district?"
+      },
+      {
+        "t_ms": 17700,
+        "speaker": "caller",
+        "text": "Song District, Phrae, near the invented blue shutter shop."
+      },
+      {
+        "t_ms": 22750,
+        "speaker": "operator",
+        "text": "Has anyone called us about this already?"
+      },
+      {
+        "t_ms": 28050,
+        "speaker": "caller",
+        "text": "I don't think so. First time."
+      }
+    ],
+    "fields": {
+      "location": "Song District, Phrae",
+      "location_confidence": 0.9,
+      "people_count": 3,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "water"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-23T12:15:00Z"
+  },
+  "expected": {
+    "system": "system_1",
+    "priority": "P3",
+    "route": "duplicate_merge",
+    "needs": [
+      "water"
+    ],
+    "requires_human": false,
+    "missing_evidence": [],
+    "acceptable_next_questions": []
+  },
+  "notes": "Pair with F09, same synthetic caller hash. Both are labelled duplicate_merge so the pair scores as a merge. A human may instead label only F09 as the duplicate and F08 as welfare_distribution. Flagged for sign-off."
+}

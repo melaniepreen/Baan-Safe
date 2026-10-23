@@ -1,0 +1,119 @@
+{
+  "id": "F18",
+  "title": "Extra person not on the household list",
+  "tags": [
+    "system_2",
+    "aid_exception"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "My sister is staying with us. She is not on the payment list."
+    },
+    {
+      "t_ms": 4050,
+      "speaker": "operator",
+      "text": "Are you asking for an exception to the household list?"
+    },
+    {
+      "t_ms": 8350,
+      "speaker": "caller",
+      "text": "Yes. I don't know if that is allowed."
+    },
+    {
+      "t_ms": 12900,
+      "speaker": "operator",
+      "text": "District?"
+    },
+    {
+      "t_ms": 17700,
+      "speaker": "caller",
+      "text": "Chiang Muan District, Phayao. Same place as the rest of the household."
+    },
+    {
+      "t_ms": 22750,
+      "speaker": "operator",
+      "text": "Is anyone unwell or in the water?"
+    },
+    {
+      "t_ms": 28050,
+      "speaker": "caller",
+      "text": "No. This is only the payment question."
+    }
+  ],
+  "case_state": {
+    "case_id": "F18",
+    "caller_id_hash": "synthetic:f18",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "My sister is staying with us. She is not on the payment list."
+      },
+      {
+        "t_ms": 4050,
+        "speaker": "operator",
+        "text": "Are you asking for an exception to the household list?"
+      },
+      {
+        "t_ms": 8350,
+        "speaker": "caller",
+        "text": "Yes. I don't know if that is allowed."
+      },
+      {
+        "t_ms": 12900,
+        "speaker": "operator",
+        "text": "District?"
+      },
+      {
+        "t_ms": 17700,
+        "speaker": "caller",
+        "text": "Chiang Muan District, Phayao. Same place as the rest of the household."
+      },
+      {
+        "t_ms": 22750,
+        "speaker": "operator",
+        "text": "Is anyone unwell or in the water?"
+      },
+      {
+        "t_ms": 28050,
+        "speaker": "caller",
+        "text": "No. This is only the payment question."
+      }
+    ],
+    "fields": {
+      "location": "Chiang Muan District, Phayao",
+      "location_confidence": 0.86,
+      "people_count": 5,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "aid_payment"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [
+      "aid_exception"
+    ],
+    "resources": {},
+    "received_at": "2026-10-23T18:15:00Z"
+  },
+  "expected": {
+    "system": "system_2",
+    "priority": "P3",
+    "route": "aid_caseworker",
+    "needs": [
+      "aid_payment"
+    ],
+    "requires_human": true,
+    "missing_evidence": [
+      "household_list_rule"
+    ],
+    "acceptable_next_questions": [
+      "Should a caseworker review the extra person on the list?"
+    ]
+  },
+  "notes": "Second aid exception. Human caseworker. Not an automated denial."
+}

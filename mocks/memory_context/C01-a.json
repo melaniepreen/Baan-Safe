@@ -1,0 +1,9 @@
+[
+  {
+    "memory_id": "mem-c01a-similar",
+    "kind": "similar_case",
+    "summary": "A similar water request was once treated as welfare. That outcome was later corrected.",
+    "relevance": 0.7,
+    "source_case_id": "synthetic-prior-water"
+  }
+]

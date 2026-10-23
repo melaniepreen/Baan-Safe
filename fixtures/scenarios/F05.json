@@ -1,0 +1,114 @@
+{
+  "id": "F05",
+  "title": "When is the flood update published",
+  "tags": [
+    "system_1",
+    "clear",
+    "information"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "What time does the district post the flood news?"
+    },
+    {
+      "t_ms": 4050,
+      "speaker": "operator",
+      "text": "Are you calling because someone is in danger?"
+    },
+    {
+      "t_ms": 8350,
+      "speaker": "caller",
+      "text": "No, no. Just the time of the update."
+    },
+    {
+      "t_ms": 12900,
+      "speaker": "operator",
+      "text": "Which district are you asking about?"
+    },
+    {
+      "t_ms": 17700,
+      "speaker": "caller",
+      "text": "Long District, Phrae. I am at the invented tea stall."
+    },
+    {
+      "t_ms": 22750,
+      "speaker": "operator",
+      "text": "Anyone with you who needs help today?"
+    },
+    {
+      "t_ms": 28050,
+      "speaker": "caller",
+      "text": "Just me. This is only a question."
+    }
+  ],
+  "case_state": {
+    "case_id": "F05",
+    "caller_id_hash": "synthetic:f05",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "What time does the district post the flood news?"
+      },
+      {
+        "t_ms": 4050,
+        "speaker": "operator",
+        "text": "Are you calling because someone is in danger?"
+      },
+      {
+        "t_ms": 8350,
+        "speaker": "caller",
+        "text": "No, no. Just the time of the update."
+      },
+      {
+        "t_ms": 12900,
+        "speaker": "operator",
+        "text": "Which district are you asking about?"
+      },
+      {
+        "t_ms": 17700,
+        "speaker": "caller",
+        "text": "Long District, Phrae. I am at the invented tea stall."
+      },
+      {
+        "t_ms": 22750,
+        "speaker": "operator",
+        "text": "Anyone with you who needs help today?"
+      },
+      {
+        "t_ms": 28050,
+        "speaker": "caller",
+        "text": "Just me. This is only a question."
+      }
+    ],
+    "fields": {
+      "location": "Long District, Phrae",
+      "location_confidence": 0.95,
+      "people_count": 1,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "information"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-23T10:15:00Z"
+  },
+  "expected": {
+    "system": "system_1",
+    "priority": "P4",
+    "route": "information_only",
+    "needs": [
+      "information"
+    ],
+    "requires_human": false,
+    "missing_evidence": [],
+    "acceptable_next_questions": []
+  },
+  "notes": "Information only. No welfare and no danger."
+}

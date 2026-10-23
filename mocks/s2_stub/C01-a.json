@@ -1,0 +1,19 @@
+{
+  "system": "system_2",
+  "outcome": "reasoned_recommendation",
+  "priority": "P1",
+  "needs": [
+    "rescue"
+  ],
+  "route": "rescue_coordination",
+  "confidence": 0.84,
+  "reason": "P1 rescue_coordination",
+  "reasoning": "Naive fast reading would label this P3 welfare_distribution for water, because the caller asks for drinking water and does not say the word rescue. The expected label is P1 rescue. The correction from this case should be retrieved on C01-b.",
+  "missing_evidence": [
+    "water_depth"
+  ],
+  "next_question": "Is the water still only at the door?",
+  "requires_human": true,
+  "escalate": false,
+  "latency_ms": 88
+}
