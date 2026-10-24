@@ -80,6 +80,66 @@ function describeEvent(event) {
   return `${event.kind} on ${name}`;
 }
 
+function pick(run, keys) {
+  for (const key of keys) {
+    const value = run && run[key];
+    if (value != null && value !== "") return value;
+  }
+  const nested = run && (run.mubit || run.trace_summary || run.s2_trace);
+  if (nested && typeof nested === "object") {
+    for (const key of keys) {
+      const value = nested[key];
+      if (value != null && value !== "") return value;
+    }
+  }
+  return null;
+}
+
+/** Live S2 = via Mubit. Replay/fake never claim a Mubit hop. Browser never calls Mubit. */
+function s2SourceBadge(run) {
+  const mode = String((run && run.s2) || "").toLowerCase();
+  if (mode === "live") return "live · via Mubit";
+  if (mode === "replay") return "replay · S2 cache";
+  if (mode === "fake") return "fake · authored truth";
+  return `${mode || "?"} mode`;
+}
+
+function s2SourceLine(run) {
+  const mode = String((run && run.s2) || "").toLowerCase();
+  const parts = [];
+  if (mode === "live") {
+    parts.push("live S2 answers via Mubit");
+  } else if (mode === "replay") {
+    parts.push("replay from S2 cache (no Mubit call)");
+  } else if (mode === "fake") {
+    parts.push("fake S2 (authored truth, no Mubit)");
+  } else {
+    parts.push(`${mode || "?"} S2 mode`);
+  }
+  const model = pick(run, ["model", "orchestrator_model"]);
+  parts.push(model ? `model ${model}` : "model not recorded");
+  const latency = pick(run, [
+    "avg_mubit_latency_ms",
+    "mubit_avg_latency_ms",
+    "avg_latency_ms",
+    "latency_ms",
+  ]);
+  if (latency != null) parts.push(`${latency} ms`);
+  const hits = pick(run, ["cache_hits", "s2_cache_hits"]);
+  const misses = pick(run, ["cache_misses", "s2_cache_misses"]);
+  if (hits != null || misses != null) {
+    if (hits != null && misses != null) parts.push(`cache ${hits} hit / ${misses} miss`);
+    else if (hits != null) parts.push(`${hits} cache hits`);
+    else parts.push(`${misses} cache misses`);
+  }
+  const note = pick(run, ["cache_note", "mubit_note", "s2_note"]);
+  if (note != null) {
+    const text = String(note);
+    if (!/api[_-]?key|bearer|mbt_/i.test(text)) parts.push(text);
+  }
+  return parts.join(" · ");
+}
+
 function shareBar(rows) {
   const total = rows.length || 1;
   const counts = { s1: 0, cascade: 0, s2: 0 };
@@ -209,16 +269,15 @@ function render(root) {
   const title = el("div");
   title.append(el("p", "kicker", "Learning loop"), el("h2", null, "RL run"));
   const badge = el("span", "sim-badge rl-badge");
-  badge.textContent =
-    `${run.s2 || "?"} mode` +
-    (run.notes && run.notes.length ? "" : "");
+  badge.textContent = s2SourceBadge(run);
   head.append(title, badge);
   panel.append(head);
+  panel.append(el("p", "muted", s2SourceLine(run)));
   panel.append(
     el(
       "p",
       "muted",
-      `model ${run.model || "not recorded"} · epochs ${epochs(run).length} · seed ${run.seed}`,
+      `epochs ${epochs(run).length} · seed ${run.seed}`,
     ),
   );
 
