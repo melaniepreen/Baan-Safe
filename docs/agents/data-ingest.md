@@ -28,7 +28,7 @@ Pull public flood context into the committed JSON/GeoJSON in `data/processed/` a
 - `ingest/gdacs.py`, `ingest/gistda.py`, `ingest/hdx.py`, `ingest/open_meteo.py`, `ingest/overpass.py`, `ingest/thaiwater.py` — active clients.
 - `ingest/reliefweb.py` — `RETIRED`. `ingest()` records status and does not send a request.
 - `data/SOURCES.md` — row counts. Raw bodies are gitignored under `data/raw/`.
-- `enrich/context.py` — flags for the gateway. Not a priority.
+- `enrich/context.py` — flags for the gateway. Not a priority. Matches `districts` first, then `admin_districts` for points and flags.
 - `ingest/demo_sources.py` — live checks for the fixture provinces, with committed snapshots. See `docs/agents/data-sources.md`. `make sources-status` sends no request.
 
 ## Interfaces/contracts
@@ -36,6 +36,7 @@ Pull public flood context into the committed JSON/GeoJSON in `data/processed/` a
 - `make ingest` uses the cache. `make ingest-refresh` ignores it.
 - ReliefWeb status text is the `RETIRED` string: robots.txt on `api.reliefweb.int` disallows `/v2/`, and the API wants a pre-approved appname.
 - `GET /map/flood`, `GET /map/facilities`, and `GET /context` read the committed files (`api/routes/endpoints.py`, `ingest/store.py`).
+- Runtime never opens SQLite. Gateway, enrich, extract, and the API use `ingest.store` (`store.available()` / JSON). `BAANSAFE_DB_PATH` only redirects the ingest build cache; Modal does not set it.
 
 ## Invariants
 

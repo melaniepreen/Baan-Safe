@@ -30,22 +30,34 @@ def _modal() -> bool:
     return bool(os.environ.get("MODAL_TASK_ID") or os.environ.get("MODAL_ENVIRONMENT"))
 
 
+def _blockers() -> list[str]:
+    """Conditions that keep this target skip-safe (no paid GPU implied)."""
+    missing: list[str] = []
+    if not _gpu() and not _modal():
+        missing.append("no CUDA GPU and no Modal task (MODAL_TASK_ID / MODAL_ENVIRONMENT)")
+    if shutil.which("laya-train") is None:
+        missing.append("laya-train is not on PATH (install laya>=0.4.14)")
+    train = DATA / "train.jsonl"
+    held = DATA / "held.jsonl"
+    if not train.is_file() or not held.is_file():
+        missing.append("training/out/laya is missing; run make export-laya")
+    return missing
+
+
 def main() -> int:
     if os.environ.get("LAYA_TRAIN", "").strip() != "1":
         print("skipped: set LAYA_TRAIN=1 to fine-tune")
         return 0
-    if not _gpu() and not _modal():
-        print("skipped: no GPU and no Modal task")
+    blockers = _blockers()
+    if blockers:
+        print("skipped: Laya train not ready:")
+        for item in blockers:
+            print(f"  - {item}")
         return 0
     binary = shutil.which("laya-train")
-    if binary is None:
-        print("skipped: laya-train is not on PATH")
-        return 0
+    assert binary is not None
     train = DATA / "train.jsonl"
     held = DATA / "held.jsonl"
-    if not train.is_file() or not held.is_file():
-        print("skipped: training/out/laya is missing; run make export-laya")
-        return 0
     out = Path(os.environ.get("LAYA_OUT", str(ROOT / "training" / "out" / "laya-ckpt")))
     command = [
         binary,

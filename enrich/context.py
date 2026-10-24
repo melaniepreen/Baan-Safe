@@ -99,21 +99,33 @@ def location_context(
 
 
 def _match_district(text: str | None):
-    rows = store.rows("districts")
+    """Match a name against ``districts``, then ``admin_districts``.
+
+    ``districts`` is preferred: weather rows key to its ``location_id``.
+    ``admin_districts`` covers the rest of the 8-province gazetteer.
+    """
     if not text:
         return None
+    for table in ("districts", "admin_districts"):
+        matched = _match_in_rows(store.rows(table), text)
+        if matched is not None:
+            return matched
+    return None
+
+
+def _match_in_rows(rows: list[dict], text: str) -> dict | None:
     low = text.lower()
     matches = []
     for row in rows:
-        name = (row["name_en"] or "").lower()
-        thai = (row["name_th"] or "").lower()
+        name = (row.get("name_en") or "").lower()
+        thai = (row.get("name_th") or "").lower()
         if name and (name in low or low in name):
             matches.append(row)
         elif thai and (thai in low or low in thai):
             matches.append(row)
     if not matches:
         return None
-    return max(matches, key=lambda row: len(row["name_en"] or ""))
+    return max(matches, key=lambda row: len(row.get("name_en") or ""))
 
 
 def within_flood_buffer(lat: float, lon: float, geometries, buffer_m: float) -> tuple[bool, float | None]:

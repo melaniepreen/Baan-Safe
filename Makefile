@@ -79,7 +79,8 @@ export-training:
 export-laya:
 	$(PYTHON) -m training.laya_export --out "$(TRAINING_OUT)/laya"
 
-# Fine-tune only when LAYA_TRAIN=1 and a GPU or Modal task is present. Otherwise skips.
+# Laya fine-tune only when LAYA_TRAIN=1 + GPU/Modal task + laya-train on PATH. Otherwise skips.
+# Not the same as modal-finetune (SetFit/LoRA from the event log).
 laya-train:
 	$(PYTHON) scripts/laya_train.py
 
@@ -111,6 +112,7 @@ modal-deploy-stt:
 deploy-modal:
 	modal deploy infra/modal/gateway_app.py
 
+# Event-log SetFit (s1_triage) / LoRA — not Laya. Laya uses make laya-train.
 modal-finetune:
 	$(PYTHON) -m modal run -m infra.modal.finetune_app --dataset "$(DATASET)"
 

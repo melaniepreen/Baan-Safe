@@ -337,3 +337,93 @@ def test_bare_names_that_read_as_english_do_not_match():
 
 def test_bare_name_in_two_provinces_stays_low_confidence():
     assert _location("We are in Chom Thong.")[1] == 0.6
+
+
+def test_thai_water_need_and_negated_medical():
+    fields, flags = extract(
+        _turns(("caller", "น้ำดื่มหมดแล้ว พื้นแห้ง ไม่มีใครบาดเจ็บ")),
+        districts=DISTRICTS,
+    )
+    assert Need.water in fields.needs
+    assert Need.medical not in fields.needs
+    assert fields.medical is False
+    assert flags == []
+
+
+def test_thai_rescue_danger_and_roof():
+    fields, _ = extract(
+        _turns(("caller", "เราติดอยู่บนหลังคา ออกไปไม่ได้ น้ำท่วมเข้ามาในบ้าน")),
+        districts=DISTRICTS,
+    )
+    assert Need.rescue in fields.needs
+    assert "rising_water" in fields.danger
+
+
+def test_thai_negated_trapped_is_not_rescue():
+    fields, _ = extract(
+        _turns(("caller", "ต้องการอาหาร ไม่มีใครติดอยู่ พื้นแห้ง")),
+        districts=DISTRICTS,
+    )
+    assert Need.food in fields.needs
+    assert Need.rescue not in fields.needs
+
+
+def test_thai_elderly_water_and_people_count():
+    fields, _ = extract(
+        _turns(
+            ("caller", "ยายอายุมาก ขอรับน้ำดื่ม พื้นแห้ง"),
+            ("caller", "มีสี่คนค่ะ"),
+        ),
+        districts=DISTRICTS,
+    )
+    assert Need.water in fields.needs
+    assert "elderly" in fields.vulnerable
+    assert fields.people_count == 4
+
+
+def test_thai_child_alone_flags_safeguarding():
+    fields, flags = extract(
+        _turns(("caller", "เด็กอยู่คนเดียวในบ้าน ไม่มีผู้ใหญ่")),
+        districts=DISTRICTS,
+    )
+    assert "child" in fields.vulnerable
+    assert "safeguarding" in flags
+
+
+def test_thai_immobile_and_oxygen():
+    fields, _ = extract(
+        _turns(("caller", "ยายเดินไม่ได้ ใช้ออกซิเจน")),
+        districts=DISTRICTS,
+    )
+    assert "immobile" in fields.vulnerable
+    assert "oxygen_dependent" in fields.vulnerable
+    assert "elderly" in fields.vulnerable
+    assert fields.medical is True
+
+
+def test_thai_chest_deep_infers_rescue():
+    fields, _ = extract(
+        _turns(("caller", "น้ำถึงอกแล้ว ขึ้นชั้นบนไม่ได้")),
+        districts=DISTRICTS,
+    )
+    assert "rising_water" in fields.danger
+    assert "immobile" in fields.vulnerable
+    assert Need.rescue in fields.needs
+
+
+def test_thai_knee_deep_at_door_infers_rescue():
+    fields, _ = extract(
+        _turns(("caller", "น้ำลึกระดับเข่าถึงประตู ไม่มีใครติดอยู่")),
+        districts=DISTRICTS,
+    )
+    assert "rising_water" in fields.danger
+    assert Need.rescue in fields.needs
+
+
+def test_thai_not_using_wheelchair_is_not_immobile():
+    fields, _ = extract(
+        _turns(("caller", "เขาพิการ ไม่ได้ใช้รถเข็น ขอรับน้ำดื่ม")),
+        districts=DISTRICTS,
+    )
+    assert "immobile" not in fields.vulnerable
+    assert Need.water in fields.needs

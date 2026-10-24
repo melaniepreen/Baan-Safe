@@ -72,7 +72,7 @@ Owners stay as in `OWNERSHIP.md`. Contracts are `v0.3-contracts`.
     - `admin_districts`: 108 rows for the 8 configured provinces.
     - `data/snapshots/gazetteer.json`: 224 KB.
 
-    `system1/extract.py` reads all three plus `DISTRICT_ALIASES`. `enrich/context.py` reads only `districts`.
+    `system1/extract.py` reads all three plus `DISTRICT_ALIASES`. `enrich/context.py` matches `districts` first (weather `location_id`), then falls back to `admin_districts`.
 21. **Four resource lists.**
     - `mocks/resources.json`: 4 fictional units.
     - `ui/sim/data/town.json` `resources`: the same 4 ids under new names.
@@ -103,7 +103,7 @@ Owners stay as in `OWNERSHIP.md`. Contracts are `v0.3-contracts`.
     - All 22 resolvable fixtures have no flood flag and at most 0.5 mm of rain, so enrichment does nothing in the demo.
     - The Hat Yai flood of November 2025 (EOS-RS polygon) is in the database with no calls. Songkhla fixtures, or `data.demo_event` = Hat Yai, would light it up.
 31. **The flood flag tests one point per district.** Thepha has 120 live polygons whose centres are within 5 km of its own. It still reads as dry: its centre is 2.4 km from water, and the buffer is 500 m. Test the district area or a wider radius.
-32. **Enrichment knows 50 districts.** `enrich/context._match_district` reads `districts` only. Hat Yai, Mueang Songkhla, and most of the 8 provinces get no point, no flags, and no facilities. Fall back to `admin_districts`.
+32. **Enrichment gazetteer fallback (done).** `_match_district` prefers `districts`, then `admin_districts`, so Hat Yai / Mueang Songkhla resolve a point and facilities. Weather gauge rows still only cover the 50 `districts` `location_id`s; admin-only names use snapshot rain / null rain.
 33. **Flood history is unused.** `disaster_report` names Nan in 9 events, Lampang in 7, Phrae in 6, and Songkhla in 3. That is a "past floods here" line, or System 2 evidence.
 34. **Rain trend is unused.** `weather_observation` has 1,900 rows: 50 districts, 30-day archive plus 7-day forecast.
 35. **There is no real map.** The town is a local-metre drawing of Sukhumvit. A small WGS84 panel could show call pins (`admin_districts` centres), flood polygons, and nearby facilities, filtered by province to stay light. If the picture stays in Bangkok, Vadhana already resolves: 20 mm of rain in the last 24 hours and named hospitals and shelters.
@@ -125,13 +125,32 @@ The full routing walk-through, the loops, and the Modal status are in `BaanSafe_
 
 ## Laya Model Training Pipeline (Verified 24 Oct 2026)
 
-The Laya fine-tuning path is now fully functional end-to-end.
+Export + skip-safe train wrapper are ready. A live GPU train is optional and not required for green CI. System 1 stays rules-only: no checkpoint is loaded at inference.
 
 ### Export (`make export-laya`)
 - **Train**: 168 calls (56 en, 56 th, 56 mixed)
 - **Held-out**: 72 calls (24 en, 24 th, 24 mixed)
 - **Questions**: 12 total — 1 `choice` (priority: red/yellow/green/white/black) + 11 `noul` (boolean System 1 labels)
 - **Split**: 70/30 by `group_id` (80 groups, seeded) — same split as SetFit export
+- **Out**: `training/out/laya/train.jsonl`, `held.jsonl`
+
+### Train readiness (no paid GPU required to verify)
+`LAYA_TRAIN=1 make laya-train` runs only when all of these are true; otherwise it prints `skipped` and exits 0:
+1. `LAYA_TRAIN=1`
+2. CUDA GPU **or** Modal task env (`MODAL_TASK_ID` / `MODAL_ENVIRONMENT`)
+3. `laya-train` on `PATH` (from the `laya` package, ≥0.4.14)
+4. Export present (`make export-laya` already done)
+
+Exact train command (what the Makefile invokes when ready):
+```bash
+laya-train --data training/out/laya/train.jsonl \
+  --eval training/out/laya/held.jsonl \
+  --base convaiinnovations/laya-multilingual \
+  --out training/out/laya-ckpt
+```
+
+### Not Laya
+`make modal-finetune` is **SetFit/LoRA from the event log** (`infra/modal/finetune_job.py`). It does **not** train Laya and does not read `training/out/laya/`.
 
 ### Tests & Validation
 ```
@@ -166,15 +185,59 @@ SYNTHETIC=1 make export-training
 ### Next Steps (When Ready)
 | Action | Command |
 |--------|---------|
-| Fine-tune locally (GPU) | `LAYA_TRAIN=1 make laya-train` |
-| Fine-tune on Modal | `make modal-finetune` |
-| Deploy S1 with Laya to Modal | `export S1_MODEL_ID=convaiinnovations/laya-multilingual && make modal-deploy-s1` |
-| Deploy fine-tuned checkpoint | `export S1_MODEL_ID=/path/to/laya-ckpt && make modal-deploy-s1` |
+| Export Laya JSONL | `make export-laya` |
+| Fine-tune Laya (local GPU or Modal task) | `LAYA_TRAIN=1 make laya-train` |
+| Event-log SetFit/LoRA (not Laya) | `make modal-finetune` — needs `modal.finetune_base_model` / `FINETUNE_BASE_MODEL` |
+| Deploy Modal S1 classifier (optional side path) | `export S1_MODEL_ID=convaiinnovations/laya-multilingual S1_GPU=cpu && make modal-deploy-s1` |
+| Deploy fine-tuned Laya ckpt on Modal S1 | `export S1_MODEL_ID=/path/to/laya-ckpt S1_GPU=... && make modal-deploy-s1` |
+
+### Still blocks loading a checkpoint into System 1
+- `system1.extraction_method` is **rules-only**; `system1/decide.py` never reads a model.
+- Gateway triage does not call Modal `s1_app` `/classify`.
+- `modal.s1_model_id` / `modal.s1_gpu` stay `TODO_HUMAN` in git (set via env only at deploy).
+- A trained `training/out/laya-ckpt` does not exist until a GPU/`laya-train` run succeeds.
+- Wiring a classifier second opinion into the cascade is an open product decision, not an export bug.
 
 ### Open Decisions (from `config/decisions.yaml`)
-- `modal.s1_model_id: TODO_HUMAN` — set at deploy via env
-- `modal.s1_gpu: TODO_HUMAN` — cpu \| T4 \| L4
-- `modal.finetune_base_model: TODO_HUMAN` — LoRA base checkpoint
+- `modal.s1_model_id: TODO_HUMAN` — set at deploy via `S1_MODEL_ID`
+- `modal.s1_gpu: TODO_HUMAN` — cpu \| T4 \| L4 via `S1_GPU`
+- `modal.finetune_base_model: TODO_HUMAN` — SetFit/LoRA base only (not Laya)
+
+---
+
+## latte-bench (Third-Party Reference Benchmark)
+
+**Status**: Submodule checked out at `third_party/latte-bench` (pinned to `3828bd8`), but `bun` not installed → `make latte-bench` skips.
+
+### What it is
+- [MubitLabs/latte-bench](https://github.com/MubitLabs/latte-bench) — third-party benchmark, **no license published**
+- BaanSafe does **not** vendor source; uses git submodule at pinned commit
+- `latte_bench.license_confirmation: TODO_HUMAN` in `config/decisions.yaml` — must confirm terms with Mubit before any use beyond reference
+
+### Commands
+```bash
+git submodule update --init third_party/latte-bench   # fetch pinned commit
+make latte-bench                                     # calibrated reference (no API call)
+make latte-bench LATTE_SERVE=1                       # free UI at http://127.0.0.1:3000
+make latte-bench LATTE_LIVE=1                        # live run through Mubit gateway (needs keys)
+```
+
+### Modes
+| Mode | Command | API Call | Purpose |
+|------|---------|----------|---------|
+| **Calibrated reference** | `make latte-bench` | ❌ No | Replays "heart witness" on "default milk", writes `eval/out/latte-reference.json` (gitignored) |
+| **Free UI** | `make latte-bench LATTE_SERVE=1` | ❌ No | Bun dev server, strips `MUBIT_API_KEY` |
+| **Live** | `make latte-bench LATTE_LIVE=1` | ✅ Yes | Runs through Mubit gateway (`api.mubit.ai` or compat prefix), needs `MUBIT_BASE_URL`, `MUBIT_API_KEY`, `MUBIT_MODEL`, `FRONTIER_MODEL` |
+
+### Integration
+- `make eval-learning` appends **External sanity check: does the model learn from feedback** section
+- Reads local reference result (`eval/out/latte-reference.json`) when it exists
+- Reads `docs/model-study/summary.json` from pinned checkout (notes vs no notes)
+- **Benchmark's own write-up says figures do not establish learning** — they do not change BaanSafe promotion rule
+
+### Prerequisites (Not Currently Met)
+- `bun` (JavaScript runtime) — not installed
+- Submodule checked out — ✅ done (pinned to `3828bd8c201c272c8eb021608631f2217316ec33`)
 
 ---
 

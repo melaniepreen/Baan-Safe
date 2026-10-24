@@ -29,3 +29,13 @@ def test_coordinate_query():
     ctx = location_context(None, 18.39, 99.84)
     assert KEYS <= ctx.keys()
     assert ctx["point"]["lat"] == 18.39
+
+
+def test_admin_districts_fallback_for_name_match():
+    """Names only in admin_districts still resolve a point (HANDOVER #32)."""
+    ctx = location_context("Hat Yai District", None, None)
+    assert ctx["matched_district"] == "Hat Yai District"
+    assert ctx["matched_province"] == "Songkhla Province"
+    assert ctx["point"] is not None
+    assert ctx["point"]["lat"] is not None
+    assert ctx["point"]["lon"] is not None
