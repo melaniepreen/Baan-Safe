@@ -1,0 +1,116 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BaanSafe · Live triage console (prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0d10;--panel:#12151a;--line:#1f242c;--txt:#e6e8eb;--dim:#8a929e;--mute:#59616c;--mubit:#8b7cf6;--s1:#3ecf8e;--s2:#f5a524;--p1:#ef5a5a;--p2:#f5a524;--p3:#5aa9ef;--mono:'JetBrains Mono',ui-monospace,Menlo,monospace}
+*{box-sizing:border-box;margin:0}body{background:var(--bg);color:var(--txt);font:400 13px/1.45 Inter,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;padding:20px 24px;min-width:1280px}
+.mono{font-family:var(--mono)}.dim{color:var(--dim)}.mute{color:var(--mute)}
+header{display:flex;align-items:baseline;gap:16px;margin-bottom:16px}
+h1{font-weight:700;font-size:20px;letter-spacing:-.02em}h1 span{font-weight:300;color:var(--dim)}
+.tag{font:500 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;border:1px solid var(--line);border-radius:4px;color:var(--dim)}
+.live{color:var(--s1);border-color:#1e4a37}.live:before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--s1);margin-right:6px;animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.25}}
+.grid{display:grid;grid-template-columns:300px 1fr 330px;gap:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+h2{font:600 11px Inter;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:10px;display:flex;justify-content:space-between}
+.call{padding:9px 0;border-bottom:1px solid var(--line);animation:in .5s}@keyframes in{from{opacity:0;transform:translateY(-6px)}}
+.call .t{font-weight:500}.row{display:flex;gap:6px;align-items:center;margin-top:4px;font-size:11px}
+.b{font:600 10px var(--mono);padding:1px 6px;border-radius:3px}
+.P1{background:#3a1717;color:var(--p1)}.P2{background:#3a2a10;color:var(--p2)}.P3{background:#10263a;color:var(--p3)}
+.S1{background:#0f2e22;color:var(--s1)}.S2{background:#33250c;color:var(--s2)}
+svg text{font-family:Inter,sans-serif}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.kpi .v{font:600 22px Inter;letter-spacing:-.02em}.kpi .l{font-size:11px;color:var(--dim)}
+#log{font:11px/1.6 var(--mono);height:190px;overflow:hidden;color:var(--dim)}#log div{white-space:nowrap;animation:in .3s}
+.ev-g{color:var(--mubit)}.ev-1{color:var(--s1)}.ev-2{color:var(--s2)}.ev-r{color:var(--txt)}
+.ctx td{padding:3px 0;font-size:12px}.ctx td:last-child{text-align:right;font-family:var(--mono)}
+.bar{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin-top:4px}.bar i{display:block;height:100%;background:var(--mubit);transition:width .8s}
+footer{margin-top:14px;font-size:11px;color:var(--mute)}
+</style></head><body>
+<header><h1>BaanSafe <span>flood call triage · Songkhla / Hat Yai</span></h1><span class="tag live">live · simulated</span><span class="tag">contracts v0.2</span><span class="tag">synthetic callers only</span><span style="margin-left:auto" class="mono dim" id="clock"></span></header>
+<div class="grid">
+<section class="panel"><h2>Incoming calls <span class="mono" id="ccount">0</span></h2><div id="feed"></div></section>
+<section>
+ <div class="panel"><h2>Pipeline <span class="mono mute" id="trace">trace —</span></h2>
+ <svg viewBox="0 0 760 415" width="100%" id="pipe">
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#3a414c"/></marker></defs>
+  <g stroke="#2a3039" stroke-width="1.5" fill="none" marker-end="url(#a)">
+   <path d="M95 110H215"/><path d="M385 85C440 85 450 50 505 50"/><path d="M385 135C440 135 450 170 505 170"/>
+   <path d="M625 50C670 50 680 95 690 100"/><path d="M625 170C670 170 680 125 690 120"/>
+   <path d="M300 160V230" stroke-dasharray="3 3"/>
+  </g>
+  <g id="nodes">
+   <rect x="15" y="85" width="80" height="50" rx="8" fill="#161a20" stroke="#2a3039"/><text x="55" y="107" fill="#e6e8eb" font-size="12" font-weight="600" text-anchor="middle">Call</text><text x="55" y="123" fill="#8a929e" font-size="9" text-anchor="middle">STT · intake</text>
+   <rect id="nG" x="215" y="55" width="170" height="105" rx="12" fill="#17142a" stroke="#8b7cf6" stroke-width="1.5"/>
+   <text x="300" y="78" fill="#8b7cf6" font-size="14" font-weight="700" text-anchor="middle">Mubit gateway</text>
+   <text x="300" y="96" fill="#b9b0fb" font-size="9.5" text-anchor="middle">auth · memory · policy</text><text x="300" y="110" fill="#b9b0fb" font-size="9.5" text-anchor="middle">route · trace / audit</text>
+   <text x="300" y="132" fill="#59616c" font-size="9" text-anchor="middle" font-style="italic">no reasoning</text>
+   <text x="300" y="148" fill="#8a929e" font-size="9" font-family="JetBrains Mono" text-anchor="middle" id="gLat">p50 4 ms</text>
+   <rect id="n1" x="505" y="22" width="120" height="56" rx="8" fill="#10201a" stroke="#3ecf8e"/><text x="565" y="44" fill="#3ecf8e" font-size="12" font-weight="600" text-anchor="middle">System 1</text><text x="565" y="58" fill="#8a929e" font-size="9" text-anchor="middle">fast · deterministic</text><text x="565" y="71" fill="#8a929e" font-size="9" font-family="JetBrains Mono" text-anchor="middle">~20 ms</text>
+   <rect id="n2" x="505" y="142" width="120" height="56" rx="8" fill="#241b0b" stroke="#f5a524"/><text x="565" y="164" fill="#f5a524" font-size="12" font-weight="600" text-anchor="middle">System 2</text><text x="565" y="178" fill="#8a929e" font-size="9" text-anchor="middle">Nemotron orchestrator</text><text x="565" y="191" fill="#8a929e" font-size="9" font-family="JetBrains Mono" text-anchor="middle">~1.8 s</text>
+   <rect id="nR" x="690" y="80" width="64" height="60" rx="8" fill="#161a20" stroke="#e6e8eb"/><text x="722" y="105" fill="#e6e8eb" font-size="10.5" font-weight="600" text-anchor="middle">Decision</text><text x="722" y="118" fill="#e6e8eb" font-size="10.5" font-weight="600" text-anchor="middle">Router</text><text x="722" y="132" fill="#8a929e" font-size="8" text-anchor="middle">1 next action</text>
+  </g>
+  <!-- correction loop -->
+  <g transform="translate(300,315)">
+   <circle r="78" fill="none" stroke="#2a2550" stroke-width="1.5" stroke-dasharray="2 4"/>
+   <circle r="78" fill="none" stroke="#8b7cf6" stroke-width="2" stroke-dasharray="60 430" id="spin"><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="8s" repeatCount="indefinite"/></circle>
+   <text y="-6" text-anchor="middle" fill="#e6e8eb" font-size="11" font-weight="600">Correction loop</text>
+   <text y="12" text-anchor="middle" fill="#8b7cf6" font-size="16" font-weight="700" font-family="JetBrains Mono" id="ver">stub-1</text>
+   <text y="27" text-anchor="middle" fill="#59616c" font-size="9">model version</text>
+  </g>
+  <g font-size="9.5" fill="#8a929e" id="steps">
+   <text x="300" y="229" text-anchor="middle">① operator correction</text>
+   <text x="395" y="270">② Mubit memory</text><text x="395" y="355">③ SFT/LoRA JSONL</text>
+   <text x="300" y="408" text-anchor="middle">④ fine-tune job</text>
+   <text x="205" y="355" text-anchor="end">⑤ register version</text><text x="205" y="270" text-anchor="end">⑥ replay before/after</text>
+  </g>
+  <g transform="translate(500,250)"><rect width="250" height="130" rx="8" fill="#0f1216" stroke="#1f242c"/>
+   <text x="14" y="22" fill="#8a929e" font-size="9.5" font-weight="600" letter-spacing="1">REPLAY · BEFORE → AFTER</text>
+   <text x="14" y="50" fill="#8a929e" font-size="11">route accuracy</text><text x="236" y="50" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#3ecf8e" id="mAcc"></text>
+   <text x="14" y="74" fill="#8a929e" font-size="11">latency p50</text><text x="236" y="74" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#e6e8eb" id="mLat"></text>
+   <text x="14" y="98" fill="#8a929e" font-size="11">cost / call</text><text x="236" y="98" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#e6e8eb" id="mCost"></text>
+   <text x="14" y="120" fill="#59616c" font-size="9" id="mGrad">graduation threshold: TODO_HUMAN (shown 0.90)</text></g>
+  <circle r="5" fill="#8b7cf6" id="dot" opacity="0"/>
+ </svg>
+ <div class="kpis"><div class="kpi"><div class="v mono" id="k1">0</div><div class="l">calls triaged</div></div><div class="kpi"><div class="v mono" id="k2" style="color:var(--s1)">0%</div><div class="l">routed to System 1</div></div><div class="kpi"><div class="v mono" id="k3" style="color:var(--mubit)">0</div><div class="l">memory items (Mubit)</div></div><div class="kpi"><div class="v mono" id="k4">0</div><div class="l">corrections → training rows</div></div></div>
+ </div>
+ <div class="panel" style="margin-top:14px"><h2>Trace stream <span class="mute">every event audited by Mubit</span></h2><div id="log"></div></div>
+</section>
+<aside>
+ <div class="panel"><h2>Flood context <span class="mute">repo ingest</span></h2><table class="ctx" width="100%">
+  <tr><td>GISTDA live extent polygons</td><td>228</td></tr><tr><td>GISTDA repeat-flood areas</td><td>400</td></tr><tr><td>ThaiWater stations</td><td>805</td></tr><tr><td>ThaiWater rain gauges</td><td>4,774</td></tr><tr><td>Open-Meteo district rows</td><td>1,850</td></tr><tr><td>OSM facilities</td><td>4,218</td></tr><tr><td>GDACS · GLIDE · IDMC</td><td>3 · 109 · 14</td></tr></table>
+  <div style="margin-top:12px" class="dim">U-Tapao canal level <span class="mono" id="lvl" style="color:var(--txt)"></span> m</div><div class="bar"><i id="lvlb"></i></div>
+ </div>
+ <div class="panel" style="margin-top:14px"><h2>Next action <span class="mute">router output</span></h2><div id="act" class="dim">waiting…</div></div>
+ <div class="panel" style="margin-top:14px"><h2>Version history</h2><div id="hist" class="mono" style="font-size:11px"></div></div>
+</aside></div>
+<footer>Prototype · all calls, people and metrics are simulated. Fixture IDs from fixtures/index.json. Mubit governs memory, policy and traceability; System 1 acts fast; System 2 reasons with Nemotron; the Decision Router returns one safe next action.</footer>
+<script>
+const F=[["F01","Drinking water, dry ground",1,"P3","Send water via aid casework"],["F02","Rice finished, no danger",1,"P3","Add to food distribution list"],["F03","Which shelter has space",1,"P3","Reply: nearest open shelter"],["F04","Power cut, people are safe",1,"P3","Log with PEA outage feed"],["F05","When is the flood update published",1,"P3","Reply with bulletin time"],["F06","Evacuation today, full details",1,"P2","Book evacuation slot"],["F08","First call from the canal household",1,"P2","Open household case"],["F09","Same household calls again",1,"P2","Merge into existing case"],["F10","Oxygen-dependent elderly person, rising water",2,"P1","Dispatch boat + medic; human confirm"],["F11","Immobile neighbour, water at the step",2,"P1","Dispatch rescue team"],["F12","Near the blue temple, road unknown",2,"P2","Call back to resolve location"],["F14","Caller says fine, water at the door",2,"P2","Human review: conflicting signals"],["F16","Unaccompanied child at a shelter",2,"P1","Safeguarding officer, now"],["F17","Renter told they are not eligible",2,"P3","Aid exception casework"],["C01-b","Same pattern after the correction",2,"P1","Dispatch rescue team"]];
+const D=["Hat Yai","Mueang Songkhla","Sadao","Rattaphum","Khlong Hoi Khong","Na Mom"];
+const $=id=>document.getElementById(id),hex=n=>[...Array(n)].map(()=>"0123456789abcdef"[Math.random()*16|0]).join("");
+let n=0,s1=0,mem=1240,corr=0,ver=1,acc=.62,lat=28,cost=.0041,hist=[];
+function log(c,t){const d=document.createElement("div");d.className=c;d.textContent=new Date().toTimeString().slice(0,8)+"  "+t;$("log").prepend(d);while($("log").children.length>14)$("log").lastChild.remove()}
+function fly(path){const dot=$("dot");let i=0;dot.setAttribute("opacity",1);const st=setInterval(()=>{const [x,y]=path[i];dot.setAttribute("cx",x);dot.setAttribute("cy",y);if(++i>=path.length){clearInterval(st);dot.setAttribute("opacity",0)}},140)}
+function glow(id,c){const e=$(id);e.style.filter=`drop-shadow(0 0 8px ${c})`;setTimeout(()=>e.style.filter="",700)}
+function call(){const f=F[Math.random()*F.length|0],tr="tr_"+hex(8),d=D[Math.random()*D.length|0];n++;$("ccount").textContent=n;$("trace").textContent="trace "+tr;
+ const el=document.createElement("div");el.className="call";el.innerHTML=`<div class="t">${f[1]}</div><div class="row"><span class="b ${f[3]}">${f[3]}</span><span class="b S${f[2]}">S${f[2]}</span><span class="mono mute">${f[0]} · ${d}</span></div>`;$("feed").prepend(el);while($("feed").children.length>11)$("feed").lastChild.remove();
+ const S=f[2]==1;if(S)s1++;mem+=1+(Math.random()*2|0);
+ fly([[55,110],[150,110],[300,108],[440,S?80:140],[565,S?50:170],[650,S?70:150],[722,110]]);
+ setTimeout(()=>{glow("nG","#8b7cf6");log("ev-g",`${tr} gateway  auth=ok memory.hits=${2+(Math.random()*4|0)} policy=pass route=${S?"system_1":"system_2"} ${3+(Math.random()*3|0)}ms`)},300);
+ setTimeout(()=>{glow(S?"n1":"n2",S?"#3ecf8e":"#f5a524");log(S?"ev-1":"ev-2",S?`${tr} system_1 rule=${f[0].toLowerCase()} priority=${f[3]} ${16+(Math.random()*8|0)}ms`:`${tr} system_2 nemotron plan→tools(geo,water,memory)→outcome priority=${f[3]} ${1500+(Math.random()*700|0)}ms`)},650);
+ setTimeout(()=>{glow("nR","#fff");log("ev-r",`${tr} router   next_action="${f[4]}" model=${$("ver").textContent}`);$("act").innerHTML=`<div style="font-size:15px;font-weight:600;color:var(--txt)">${f[4]}</div><div class="row"><span class="b ${f[3]}">${f[3]}</span><span class="b S${f[2]}">S${f[2]}</span><span class="mono mute">${tr}</span></div><div class="mute" style="margin-top:6px">${d} · synthetic caller</div>`},1000);
+ $("k1").textContent=n;$("k2").textContent=Math.round(s1/n*100)+"%";$("k3").textContent=mem.toLocaleString()}
+function metrics(pa,pl,pc){$("mAcc").textContent=`${pa.toFixed(2)} → ${acc.toFixed(2)}`;$("mLat").textContent=`${pl} → ${lat} ms`;$("mCost").textContent=`$${pc.toFixed(4)} → $${cost.toFixed(4)}`}
+function correction(){const st=$("steps").children,tr="tr_"+hex(8);corr++;$("k4").textContent=corr;
+ const msgs=["operator: F14 P2 → P1 (water at door, elderly)","memory.put kind=correction id=mem_"+hex(6),"training row appended → corrections.jsonl ("+corr+" rows)","finetune job ft_"+hex(6)+" queued (LoRA, stub)","registered stub-"+(ver+1),"replay 20 fixtures before/after"];
+ [...st].forEach((t,i)=>setTimeout(()=>{[...st].forEach(x=>x.setAttribute("fill","#8a929e"));t.setAttribute("fill","#8b7cf6");log("ev-g",`${tr} loop[${i+1}] ${msgs[i]}`);
+  if(i==4){ver++;$("ver").textContent="stub-"+ver}
+  if(i==5){const pa=acc,pl=lat,pc=cost;acc=Math.min(.99,acc+(1-acc)*.28);lat=Math.max(19,lat-(Math.random()*3|0));cost=Math.max(.0019,cost*.93);metrics(pa,pl,pc);
+   const g=acc>=.9;$("mGrad").textContent=g?"✓ graduated: ≥ 0.90 → promoted to production":"graduation threshold: TODO_HUMAN (shown 0.90)";$("mGrad").setAttribute("fill",g?"#3ecf8e":"#59616c");
+   hist.unshift(`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--line)"><span style="color:var(--mubit)">stub-${ver}</span><span>acc ${acc.toFixed(2)}</span><span class="dim">${lat} ms</span><span style="color:${g?'var(--s1)':'var(--mute)'}">${g?'prod':'shadow'}</span></div>`);$("hist").innerHTML=hist.slice(0,6).join("")}},i*900))}
+let lv=2.1;function water(){lv=Math.max(1.6,Math.min(3.4,lv+(Math.random()-.42)*.08));$("lvl").textContent=lv.toFixed(2);$("lvlb").style.width=(lv/3.6*100)+"%"}
+setInterval(()=>$("clock").textContent=new Date().toLocaleTimeString("en-GB")+" UK",1000);
+metrics(acc,lat,cost);hist=[`<div class="dim">stub-1 · baseline · acc 0.62</div>`];$("hist").innerHTML=hist[0];
+for(let i=0;i<5;i++)setTimeout(call,i*250);setInterval(call,2600);setInterval(correction,9000);setTimeout(correction,1500);setInterval(water,1500);water();
+</script></body></html>

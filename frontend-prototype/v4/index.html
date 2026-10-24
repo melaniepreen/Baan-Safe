@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>BaanSafe · instrument terminal (simulated)</title>
+<style>
+* {box-sizing:border-box;margin:0}
+html,body {height:100%}
+body {
+  width:1440px;height:900px;overflow:hidden;
+  font-family:Inter,"Liberation Sans",sans-serif;
+  color:var(--ink);background:var(--bg);
+}
+.mono {font-family:"JetBrains Mono",ui-monospace,monospace}
+.dim {opacity:.68}
+.tiny {font-size:10px;margin-top:4px}
+b {font-weight:600}
+h2 {font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:650;margin-bottom:6px}
+.panel {min-height:0;overflow:hidden}
+.call {padding:5px 0;border-bottom:1px solid var(--line)}
+.ct {font-size:13px;font-weight:600;letter-spacing:-.01em;line-height:1.25}
+.cr {display:flex;gap:6px;align-items:center;margin-top:2px;font-size:11px;flex-wrap:wrap}
+.b {font-family:"JetBrains Mono",monospace;font-size:10px;padding:1px 5px;border:1px solid var(--line);border-radius:var(--radius)}
+.span {display:grid;grid-template-columns:148px 90px 1fr;gap:6px;align-items:center;margin:2px 0;font-size:11px}
+.span.d1 {padding-left:12px}
+.sn,.sm,.tid {font-family:"JetBrains Mono",monospace;font-size:10px}
+.tid {margin-bottom:4px}
+.sb {height:7px;background:var(--track);border-radius:var(--radius);overflow:hidden}
+.sb i {display:block;height:100%;background:var(--accent)}
+.act {font-size:18px;letter-spacing:-.03em;font-weight:560;line-height:1.1}
+.meta {font-size:12px;margin-top:3px;line-height:1.3}
+.pool {margin-bottom:5px}
+.pl {display:flex;justify-content:space-between;font-size:12px}
+.bar {height:5px;background:var(--track);border-radius:var(--radius);overflow:hidden;margin-top:2px}
+.bar i {display:block;height:100%;background:var(--accent)}
+.dcard {padding:4px 0;border-bottom:1px solid var(--line)}
+.dh {display:flex;justify-content:space-between;gap:8px;font-size:12px}
+.needs {display:flex;flex-wrap:wrap;gap:6px;font-size:10px;font-family:"JetBrains Mono",monospace;margin-top:2px}
+.needs em {font-style:normal;opacity:.6}
+.bind {font-size:10px;margin-top:2px}
+#loop-steps div {font-size:12px;padding:1px 0}
+#loop-steps div.on {font-weight:700}
+.metrics {display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;font-size:12px;margin:6px 0}
+.metrics b {font-family:"JetBrains Mono",monospace;font-weight:500}
+#versions div {font-family:"JetBrains Mono",monospace;font-size:11px;padding:1px 0}
+#constraints div {font-size:11px;padding:1px 0;line-height:1.3}
+.note {font-size:11px;line-height:1.35;margin-bottom:6px}
+.choice {font-size:12px;line-height:1.35;margin-bottom:6px}
+table {width:100%;border-collapse:collapse}
+th,td {text-align:left;padding:2px 4px;font-size:11px;border-bottom:1px solid var(--line);vertical-align:top}
+th {font-size:9px;letter-spacing:.06em;text-transform:uppercase;font-weight:650}
+.num {text-align:right;font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+
+:root{--bg:#e5efe7;--ink:#102418;--accent:#0b7a32;--line:#b7c9b8;--track:#d5e3d6;--radius:2px}
+body{display:grid;grid-template-rows:32px minmax(0,1fr) 318px 22px;font-size:12px;background:#e7f0e8}
+.tape{display:flex;gap:14px;align-items:center;padding:0 8px;background:#102418;color:#d7f5df;font-family:"JetBrains Mono",monospace;font-size:11px}
+.tape b{color:#9be7b2;font-weight:500}
+.matrix{padding:6px 8px 0;min-height:0;overflow:hidden}
+.matrix h2{color:#0b7a32}
+.lower{display:grid;grid-template-columns:1.05fr .85fr 1fr;gap:8px;padding:6px 8px;min-height:0}
+#pools{display:grid;grid-template-columns:1fr 1fr;gap:0 8px}
+.lower .panel{background:#f4faf5;border:1px solid #b7c9b8;padding:6px 8px;overflow:hidden}
+.side{display:flex;flex-direction:column;gap:6px;min-height:0}
+.kstrip{display:flex;gap:10px;font-family:"JetBrains Mono",monospace;font-size:11px}
+.kstrip b{color:#0b7a32;font-weight:500}
+footer{font-size:10px;padding:2px 8px;color:#245036}
+th,td{font-size:10px;padding:2px 3px}
+.P1,.S2{background:#0b7a32;color:#fff;border-color:#0b7a32}
+.choice{font-family:"JetBrains Mono",monospace;font-size:11px}
+#loop-steps div.on{color:#0b7a32}
+
+</style></head>
+<body data-layout="matrix">
+
+<header class="tape">
+  <span>BAANSAFE // INSTRUMENT</span>
+  <span>SIMULATED</span>
+  <span>SYNTHETIC CALLERS</span>
+  <span id="clock"></span>
+  <span class="kstrip">calls <b id="k-calls">0</b> S1 <b id="k-s1">0%</b> mem <b id="k-mem">1,240</b> rows <b id="k-corr">0</b> ver <b id="ver">stub-1</b></span>
+</header>
+<section class="matrix panel">
+  <h2>Allocation matrix · eight districts · five needs · simulated baht</h2>
+  <p class="choice" id="solver-choice"></p>
+  <div id="alloc"></div>
+</section>
+<section class="lower">
+  <section class="panel">
+    <h2>Span tree</h2>
+    <div id="waterfall"></div>
+    <h2 style="margin-top:6px">Router</h2>
+    <div id="router-out"></div>
+  </section>
+  <section class="panel">
+    <h2>Gateway</h2>
+    <div id="gateway-detail"></div>
+    <h2 style="margin-top:8px">Fixture tape</h2>
+    <div id="feed"></div>
+  </section>
+  <div class="side">
+    <section class="panel">
+      <h2>Pools</h2>
+      <p class="note">Central, DDPM, four provinces, NGO / public / corporate. ฿9,000 cash rule is simulated.</p>
+      <div id="pools"></div>
+    </section>
+    <section class="panel" style="flex:1">
+      <h2>Relearning</h2>
+      <div id="loop-steps"></div>
+      <div class="metrics">
+        <div>Acc <b id="acc"></b></div>
+        <div>Lat <b id="lat"></b></div>
+        <div>Cost <b id="cost"></b></div>
+        <div>Drift <b id="drift"></b></div>
+        <div>Rows <b id="rows"></b></div>
+      </div>
+      <p class="note" id="grad"></p>
+      <div id="versions"></div>
+      <h2 class="gap">Binding</h2>
+      <div id="constraints"></div>
+    </section>
+  </div>
+</section>
+<footer>Operate on Refero, read as a light data terminal · GISTDA 228 · repeat 400 · risk 63 · GDACS 3 · GLIDE 109 · IDMC 14 · Hat Yai 1 polygon / 9,172 · UNOSAT 3 · ThaiWater 805 / 4,774 · Open-Meteo 1,850 · facilities 4,218 · fixtures 24. Costs are simulated. Token price is TODO_HUMAN.</footer>
+
+<script>
+
+const FIXTURES = [
+  {id:"F01", title:"Drinking water, dry ground", system:1, priority:"P3", route:"welfare_distribution", action:"create_provisional_dispatch", district:"Mae Mo"},
+  {id:"F02", title:"Rice finished, no danger", system:1, priority:"P3", route:"welfare_distribution", action:"create_provisional_dispatch", district:"Mae Tha"},
+  {id:"F03", title:"Which shelter has space", system:1, priority:"P3", route:"shelter_placement", action:"create_provisional_dispatch", district:"Sop Prap"},
+  {id:"F04", title:"Power cut, people are safe", system:1, priority:"P3", route:"information_only", action:"finalize_case", district:"Den Chai"},
+  {id:"F05", title:"When is the flood update published", system:1, priority:"P4", route:"information_only", action:"finalize_case", district:"Long"},
+  {id:"F06", title:"Evacuation today, full details", system:1, priority:"P2", route:"shelter_placement", action:"create_provisional_dispatch", district:"Mueang Phrae"},
+  {id:"F07", title:"Is the school open tomorrow", system:1, priority:"P4", route:"information_only", action:"finalize_case", district:"Wang Chin"},
+  {id:"F08", title:"First call from the canal household", system:1, priority:"P3", route:"duplicate_merge", action:"finalize_case", district:"Song"},
+  {id:"F09", title:"Same household calls again", system:1, priority:"P3", route:"duplicate_merge", action:"finalize_case", district:"Song"},
+  {id:"F10", title:"Oxygen-dependent elderly person, rising water", system:2, priority:"P1", route:"rescue_coordination", action:"escalate_to_supervisor", district:"Sung Men"},
+  {id:"F11", title:"Immobile neighbour, water at the step", system:2, priority:"P1", route:"rescue_coordination", action:"escalate_to_supervisor", district:"Rong Kwang"},
+  {id:"F12", title:"Near the blue temple, road unknown", system:2, priority:"P2", route:"rescue_coordination", action:"ask_next_question", district:"Mae Mo"},
+  {id:"F13", title:"Shelter question, district unknown", system:2, priority:"P3", route:"shelter_placement", action:"ask_next_question", district:"unknown"},
+  {id:"F14", title:"Caller says fine, water at the door", system:2, priority:"P2", route:"rescue_coordination", action:"escalate_to_supervisor", district:"Nong Muang Khai"},
+  {id:"F15", title:"Road question while a child is crying", system:2, priority:"P2", route:"supervisor_escalation", action:"escalate_to_supervisor", district:"Wiang Sa"},
+  {id:"F16", title:"Unaccompanied child at a shelter", system:2, priority:"P2", route:"supervisor_escalation", action:"escalate_to_supervisor", district:"Mueang Phrae"},
+  {id:"F17", title:"Renter told they are not eligible", system:2, priority:"P3", route:"aid_caseworker", action:"request_more_evidence", district:"Ban Luang"},
+  {id:"F18", title:"Extra person not on the household list", system:2, priority:"P3", route:"aid_caseworker", action:"request_more_evidence", district:"Chiang Muan"},
+  {id:"C01-a", title:"Water at the door, ground floor, elderly", system:2, priority:"P1", route:"rescue_coordination", action:"escalate_to_supervisor", district:"Long"},
+  {id:"C01-b", title:"Same pattern after the correction", system:2, priority:"P1", route:"rescue_coordination", action:"escalate_to_supervisor", district:"Wang Chin"},
+  {id:"G01", title:"Graduated pattern: door, ground floor, elderly", system:1, priority:"P1", route:"rescue_coordination", action:"escalate_to_supervisor", district:"Mae Mo"}
+];
+const DISTRICTS = [
+  {name:"Mae Mo", prov:"Lampang", water:1.85, boats:2, crew:5, ttr:36, hh:420},
+  {name:"Sop Prap", prov:"Lampang", water:2.15, boats:1, crew:2, ttr:52, hh:180},
+  {name:"Den Chai", prov:"Phrae", water:2.45, boats:2, crew:4, ttr:28, hh:310},
+  {name:"Mueang Phrae", prov:"Phrae", water:1.70, boats:3, crew:8, ttr:16, hh:640},
+  {name:"Sung Men", prov:"Phrae", water:2.85, boats:0, crew:1, ttr:74, hh:210},
+  {name:"Song", prov:"Phrae", water:1.55, boats:1, crew:2, ttr:44, hh:190},
+  {name:"Wiang Sa", prov:"Nan", water:2.05, boats:1, crew:2, ttr:82, hh:150},
+  {name:"Chiang Muan", prov:"Phayao", water:2.35, boats:1, crew:3, ttr:61, hh:200}
+];
+const NEEDS = ["shelter","boats","medical","food","cash"];
+const POOL_META = [
+  ["central","Thai central fund"],
+  ["ddpm","DDPM reserve"],
+  ["lampang","Lampang province"],
+  ["phrae","Phrae province"],
+  ["nan","Nan province"],
+  ["phayao","Phayao province"],
+  ["ngo","NGO donations"],
+  ["public","Public donations"],
+  ["corporate","Corporate donations"]
+];
+const $ = id => document.getElementById(id);
+const hex = n => Array.from({length:n}, () => "0123456789abcdef"[Math.random()*16|0]).join("");
+const baht = n => {
+  const a = Math.abs(Math.round(n));
+  if (a >= 1e6) return "฿" + (a/1e6).toFixed(2) + "m";
+  if (a >= 1e3) return "฿" + (a/1e3).toFixed(0) + "k";
+  return "฿" + a;
+};
+let calls = 0, s1n = 0, mem = 1240, corr = 0, ver = 1;
+let acc = 0.62, lat = 28, cost = 0.0041, rows = 1;
+let prev = {acc:0.62, lat:28, cost:0.0041};
+let lastDelta = 0, drift = 0, lastChoice = "Solver waiting.", bindings = [];
+const alloc = {};
+DISTRICTS.forEach(d => {
+  alloc[d.name] = {};
+  NEEDS.forEach((k,i) => { alloc[d.name][k] = Math.round(d.hh * (60 + i * 35) * d.water / 8); });
+});
+const pools = {
+  central:{cap:420000000, left:318000000},
+  ddpm:{cap:85000000, left:64000000},
+  lampang:{cap:18000000, left:11200000},
+  phrae:{cap:22000000, left:9800000},
+  nan:{cap:9000000, left:6100000},
+  phayao:{cap:6500000, left:4200000},
+  ngo:{cap:4200000, left:2700000},
+  public:{cap:1800000, left:960000},
+  corporate:{cap:7600000, left:5100000}
+};
+function roadOpen(d){ return d.water < 2.7; }
+function policyFor(f){
+  if (f.id === "F16" || f.id === "F15") return {code:"safeguarding_hold", note:"human keeps the decision"};
+  if (f.id === "F17" || f.id === "F18") return {code:"eligibility_unset", note:"needs_human · no payment"};
+  if (f.system === 2) return {code:"pass_to_s2", note:"exclusive · high-risk stub"};
+  return {code:"pass", note:"exclusive · clear stub"};
+}
+function spanRow(name, ms, meta, depth){
+  const w = Math.max(6, Math.min(100, ms / 18));
+  return `<div class="span d${depth}"><span class="sn">${name}</span><span class="sb"><i style="width:${w}%"></i></span><span class="sm">${ms} ms · ${meta}</span></div>`;
+}
+function makeTrace(f){
+  const id = "tr_" + hex(8);
+  const pol = policyFor(f);
+  const hits = 2 + (Math.random()*4|0);
+  const kinds = ["similar_case","policy","correction","prior_failure"].slice(0, Math.min(4, hits));
+  const s1 = f.system === 1;
+  const sMs = s1 ? 16 + (Math.random()*10|0) : 1400 + (Math.random()*500|0);
+  const plan = s1 ? 0 : Math.round(sMs*0.45);
+  const tools = s1 ? 0 : Math.round(sMs*0.3);
+  const out = s1 ? 0 : sMs - plan - tools;
+  const tokIn = s1 ? 0 : 520 + (Math.random()*280|0);
+  const tokOut = s1 ? 0 : 90 + (Math.random()*80|0);
+  const callCost = s1 ? 0 : Math.max(0.0012, cost * (0.7 + Math.random()*0.5));
+  const model = s1 ? "rules · no model" : "stub-" + ver + " · nemotron unspecified";
+  let html = "";
+  html += spanRow("gateway.auth", 1, "scheme TODO_HUMAN · recorded, not rejected", 0);
+  html += spanRow("gateway.memory", 4 + (Math.random()*5|0), "hits " + hits + " · " + kinds.join(", "), 0);
+  html += spanRow("gateway.policy", 2, pol.code + " · " + pol.note, 0);
+  html += spanRow("gateway.route", 1, "exclusive system_" + f.system, 0);
+  if (s1) html += spanRow("system_1.decide", sMs, "deterministic · tokens 0/0 · cost 0 · " + model, 0);
+  else {
+    html += spanRow("system_2.nemotron", sMs, model + " · tok " + tokIn + "/" + tokOut + " · sim $" + callCost.toFixed(4), 0);
+    html += spanRow("plan", plan, "orchestrator stub · Outcome not parsed", 1);
+    html += spanRow("tools", tools, "geo · water · memory · simulated", 1);
+    html += spanRow("outcome", out, "reasoned_recommendation · " + f.priority + " " + f.route, 1);
+  }
+  html += spanRow("router", 3, f.action + " · one outcome · merge() not called", 0);
+  $("waterfall").innerHTML = `<div class="tid">${id} · ${f.id} · ${model}</div>` + html;
+  $("gateway-detail").innerHTML =
+    `<div><b>Auth</b> TODO_HUMAN · not rejected</div>` +
+    `<div><b>Memory</b> ${hits} hits · ${kinds.join(", ")}</div>` +
+    `<div><b>Policy</b> ${pol.code} · rules not evaluated in the product</div>` +
+    `<div><b>Route</b> system_${f.system} only · ${s1 ? "System 1 deterministic" : "System 2 Nemotron"}</div>` +
+    `<div><b>Audit</b> ${id} · tokens ${tokIn}/${tokOut} · sim $${callCost.toFixed(4)}</div>`;
+  $("router-out").innerHTML =
+    `<div class="act">${f.action.replaceAll("_"," ")}</div>` +
+    `<div class="meta"><span class="b ${f.priority}">${f.priority}</span> <span class="b S${f.system}">S${f.system}</span> ${f.route} · ${f.id}</div>` +
+    `<div class="meta dim">${s1 ? "System 2 was not called." : "System 1 was not called."} Synthetic caller · ${f.district}. Router copied one outcome.</div>`;
+  return id;
+}
+function renderFeedItem(f, id){
+  const el = document.createElement("div");
+  el.className = "call";
+  el.innerHTML = `<div class="ct">${f.title}</div><div class="cr"><span class="b ${f.priority}">${f.priority}</span><span class="b S${f.system}">S${f.system}</span><span class="mono">${f.id}</span><span class="dim">${f.district} · ${id}</span></div>`;
+  $("feed").prepend(el);
+  while ($("feed").children.length > 6) $("feed").lastChild.remove();
+}
+function callOnce(){
+  const f = FIXTURES[Math.random()*FIXTURES.length|0];
+  calls++; if (f.system === 1) s1n++; mem += 1 + (Math.random()*2|0);
+  const id = makeTrace(f);
+  renderFeedItem(f, id);
+  $("k-calls").textContent = calls;
+  $("k-s1").textContent = Math.round(s1n/calls*100) + "%";
+  $("k-mem").textContent = mem.toLocaleString("en-GB");
+}
+function tickDistricts(){
+  DISTRICTS.forEach(d => {
+    d.water = Math.max(1.15, Math.min(3.35, d.water + (Math.random()-0.48)*0.14));
+    if (!roadOpen(d)) d.ttr = Math.min(140, d.ttr + 4);
+    else d.ttr = Math.max(12, d.ttr - 1);
+  });
+  pools.ngo.left += 16000 + Math.round(Math.random()*20000);
+  pools.public.left += 4000 + Math.round(Math.random()*8000);
+  pools.corporate.left += 8000 + Math.round(Math.random()*12000);
+  ["ngo","public","corporate"].forEach(k => { if (pools[k].left > pools[k].cap) pools[k].cap = pools[k].left; });
+}
+function solve(){
+  tickDistricts();
+  bindings = [];
+  const moves = [];
+  [...DISTRICTS].sort((a,b) => b.water - a.water).forEach(d => {
+    const want = d.water > 2.4 ? ["boats","medical","shelter"] : d.water > 1.9 ? ["shelter","food"] : ["food","cash"];
+    want.forEach(need => {
+      let ask = Math.round(70000 + d.water * 28000);
+      if (need === "boats") {
+        if (!roadOpen(d)) { bindings.push(d.name + " boats · road closed · water " + d.water.toFixed(2) + " m"); return; }
+        if (d.boats < 1) { bindings.push(d.name + " boats · boat cap 0"); return; }
+        if (d.crew < 2) { bindings.push(d.name + " boats · crew " + d.crew + " < 2"); return; }
+        if (d.ttr > 90) { bindings.push(d.name + " boats · time-to-reach " + d.ttr + " min"); return; }
+      }
+      if (need === "medical" && d.ttr > 85) {
+        bindings.push(d.name + " medical · time-to-reach binds at " + d.ttr + " min");
+        ask = Math.round(ask * 0.35);
+      }
+      if (need === "cash") {
+        const cap = 9000 * Math.max(1, Math.round(d.hh * 0.02));
+        if (ask > cap) { bindings.push(d.name + " cash · simulated ฿9,000 household cap"); ask = cap; }
+        if (d.name === "Chiang Muan") { bindings.push("Chiang Muan cash refused · eligibility unset (F18 pattern)"); return; }
+      }
+      let left = ask;
+      [d.prov.toLowerCase(), "central", "ddpm", "ngo", "public", "corporate"].forEach(k => {
+        if (left <= 0) return;
+        if (pools[k].left <= 0) { bindings.push(k + " budget cap"); return; }
+        const take = Math.min(pools[k].left, left);
+        pools[k].left -= take;
+        alloc[d.name][need] += take;
+        left -= take;
+        moves.push(baht(take) + " " + k + " → " + d.name + " " + need);
+      });
+    });
+  });
+  lastChoice = moves.length ? "Solver moved " + moves.slice(0, 3).join(" · ") : "Solver held. Every ask was infeasible.";
+  renderMoney();
+}
+function renderMoney(){
+  $("pools").innerHTML = POOL_META.map(([k, label]) => {
+    const p = pools[k];
+    const pct = Math.min(100, Math.max(0, (p.cap - p.left) / p.cap * 100));
+    return `<div class="pool"><div class="pl"><span>${label}</span><span class="mono">${baht(p.left)}</span></div><div class="bar"><i style="width:${pct.toFixed(0)}%"></i></div></div>`;
+  }).join("");
+  const hot = [...DISTRICTS].sort((a,b) => b.water - a.water);
+  if (document.body.dataset.layout === "matrix") {
+    const body = hot.map(d => {
+      const cells = NEEDS.map(k => `<td class="num">${baht(alloc[d.name][k])}</td>`).join("");
+      const bind = bindings.find(b => b.startsWith(d.name)) || (roadOpen(d) ? "—" : "road");
+      return `<tr><td>${d.name}</td><td class="dim">${d.prov}</td><td class="num">${d.water.toFixed(2)}</td><td>${roadOpen(d)?"open":"shut"}</td><td class="num">${d.boats}/${d.crew}</td><td class="num">${d.ttr}</td>${cells}<td>${bind}</td></tr>`;
+    }).join("");
+    $("alloc").innerHTML = `<table><thead><tr><th>District</th><th>Prov</th><th>m</th><th>Road</th><th>Boat/crew</th><th>Min</th><th>Shelter</th><th>Boats</th><th>Medic</th><th>Food</th><th>Cash</th><th>Binding</th></tr></thead><tbody>${body}</tbody></table>`;
+  } else {
+    $("alloc").innerHTML = hot.slice(0, 3).map(d => {
+      const bits = NEEDS.map(k => `<span><em>${k}</em> ${baht(alloc[d.name][k])}</span>`).join("");
+      const bind = bindings.find(b => b.startsWith(d.name));
+      return `<div class="dcard"><div class="dh"><b>${d.name}</b><span class="dim">${d.prov} · ${d.water.toFixed(2)} m · ${roadOpen(d)?"road open":"road shut"} · crew ${d.crew} · ${d.ttr} min</span></div><div class="needs">${bits}</div>${bind ? `<div class="bind">${bind}</div>` : ""}</div>`;
+    }).join("") + `<p class="dim tiny">Three highest-water districts of eight in the solver. Simulated baht.</p>`;
+  }
+  $("constraints").innerHTML = (bindings.slice(0, 3).map(b => `<div>${b}</div>`).join("")) || "<div>No constraint binding this tick.</div>";
+  $("solver-choice").textContent = lastChoice;
+}
+function renderLoop(){
+  $("ver").textContent = "stub-" + ver;
+  $("acc").textContent = prev.acc.toFixed(2) + " → " + acc.toFixed(2);
+  $("lat").textContent = prev.lat + " → " + lat + " ms";
+  $("cost").textContent = "$" + prev.cost.toFixed(4) + " → $" + cost.toFixed(4);
+  $("drift").textContent = (lastDelta >= 0 ? "+" : "") + lastDelta.toFixed(3) + (drift ? " drift" : " steady");
+  $("grad").textContent = acc >= 0.90
+    ? "Simulated cross of 0.90. Not written to decisions.yaml — graduation_threshold is still TODO_HUMAN."
+    : "Threshold drawn at 0.90 for the demo. The product value is TODO_HUMAN. Nothing is promoted into System 1.";
+  $("rows").textContent = String(rows);
+  $("k-corr").textContent = String(corr);
+}
+function correction(){
+  const steps = [
+    "Operator correction on C01-a",
+    "Mubit memory stores it",
+    "SFT/LoRA JSONL row appended",
+    "LoRA job stub · no weights",
+    "Version registered",
+    "Replay before / after"
+  ];
+  corr++; rows++;
+  prev = {acc, lat, cost};
+  ver++;
+  if (ver % 4 === 0) {
+    lastDelta = -(0.03 + Math.random()*0.02);
+    acc = Math.max(0.55, acc + lastDelta);
+    lat += 3; cost = Math.min(0.02, cost * 1.08); drift = 1;
+  } else {
+    lastDelta = (1 - acc) * 0.2;
+    acc = Math.min(0.97, acc + lastDelta);
+    lat = Math.max(18, lat - 1);
+    cost = Math.max(0.0015, cost * 0.94);
+    drift = 0;
+  }
+  $("loop-steps").innerHTML = steps.map((t,i) => `<div class="${i===5?"on":""}">${i+1} ${t}</div>`).join("");
+  const li = document.createElement("div");
+  li.textContent = "stub-" + ver + "  acc " + acc.toFixed(2) + "  " + lat + " ms  " + (drift ? "drift" : "steady");
+  $("versions").prepend(li);
+  while ($("versions").children.length > 4) $("versions").lastChild.remove();
+  renderLoop();
+}
+function boot(){
+  $("loop-steps").innerHTML = "<div>Waiting for the first correction.</div>";
+  renderLoop();
+  solve();
+  for (let i = 0; i < 4; i++) callOnce();
+  $("versions").innerHTML = "<div>stub-1 baseline acc 0.62 simulated</div>";
+  const tick = () => { $("clock").textContent = new Date().toLocaleTimeString("en-GB", {hour12:false}) + " UK"; };
+  tick(); setInterval(tick, 1000);
+  setInterval(callOnce, 2400);
+  setInterval(solve, 2800);
+  setInterval(correction, 7200);
+  setTimeout(correction, 700);
+}
+boot();
+
+</script>
+</body></html>
