@@ -103,6 +103,14 @@ def maybe_commit() -> bool:
     return True
 
 
+def run_sync() -> int:
+    step("make sync (behind origin)")
+    py = ROOT / ".venv" / "bin" / "python"
+    if not py.is_file():
+        py = Path(sys.executable)
+    return run([str(py), str(ROOT / "scripts" / "sync_workspace.py")], check=False).returncode
+
+
 def push_git() -> int:
     step("git push")
     run(["git", "fetch", "origin", "--prune"])
@@ -114,8 +122,17 @@ def push_git() -> int:
     print(status)
     ahead, behind = ahead_behind(status)
     if behind:
-        print(f"behind origin/main by {behind}; run make sync first, then make push")
-        return 1
+        print(f"behind origin/main by {behind}; running sync to pull/merge first")
+        if run_sync() != 0:
+            print("sync failed (conflicts?). Set SYNC_KEEP=local|remote|manual and retry")
+            return 1
+        run(["git", "fetch", "origin", "--prune"])
+        status = run(["git", "status", "-sb"], capture=True).stdout.strip()
+        print(status)
+        ahead, behind = ahead_behind(status)
+        if behind:
+            print("still behind after sync; resolve manually")
+            return 1
     if ahead == 0:
         print("nothing new to push to origin/main")
         return 0

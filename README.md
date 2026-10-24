@@ -93,8 +93,9 @@ One-time setup, done by a person:
 ```bash
 modal token new          # once per machine; browser login
 # Put HF_TOKEN and MUBIT_API_KEY in gitignored .env (make sync creates .env from .env.example)
-make sync                # download: git pull, deps, Modal check, secret sync
-make push                # send: Modal secrets + git push main
+make sync                # download: git pull/merge, deps, Modal check, secret sync
+make sync SYNC_KEEP=remote   # on conflicts, prefer origin (default is local)
+make push                # send: Modal secrets + git push main (syncs first if behind)
 make push MSG='summary'  # commit local work (not .env), then push
 ```
 

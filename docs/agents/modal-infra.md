@@ -29,8 +29,8 @@ Modal apps for System 1, System 2, Sapling, speech-to-text, and a finetune job. 
 
 ## Interfaces/contracts
 
-- `make sync` runs `scripts/sync_workspace.py`: stash + `git pull --ff-only`, bootstrap/merge `.env` from `.env.example` without overwriting values, create/use `.venv` and `pip install` root + Modal requirements, Modal login check, then secret sync when keys exist. Prints push readiness. Does not print secrets.
-- `make push` runs `scripts/push_workspace.py`: syncs Modal secrets from `.env`, optionally commits with `MSG=...` (skips `.env` / `.venv` / `.vscode`), then pushes `main` when ahead. Refuses if behind (run `make sync` first).
+- `make sync` runs `scripts/sync_workspace.py`: stash + pull (ff-only, else merge), auto-resolve conflicts via `SYNC_KEEP=local|remote|manual` (default `local`), bootstrap/merge `.env` from `.env.example` without overwriting values, create/use `.venv` and `pip install` root + Modal requirements, Modal login check, then secret sync when keys exist. Exits non-zero if conflicts remain. Does not print secrets.
+- `make push` runs `scripts/push_workspace.py`: syncs Modal secrets from `.env`, optionally commits with `MSG=...` (skips `.env` / `.venv` / `.vscode`), then pushes `main`. If behind origin, runs sync first (same conflict rules).
 - `make modal-secrets` runs `scripts/sync_modal_secrets.py`: pushes `HF_TOKEN` / `MUBIT_API_KEY` (and optional `S2_SERVE_API_KEY`) from gitignored `.env` into `baansafe-hf` / `baansafe-mubit`. Does not print values. Does not sync `OPENROUTER_API_KEY`.
 - `make modal-deploy-s1`, `modal-deploy-s2`, `modal-deploy-sapling`, `modal-deploy-stt` run `modal deploy`.
 - `make modal-finetune` runs `modal run -m infra.modal.finetune_app` with `DATASET` (default `eval/out/sft.jsonl`).
