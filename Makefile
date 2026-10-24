@@ -2,10 +2,11 @@ PYTHON ?= python3
 export PYTHONPATH := .
 
 .PHONY: validate test replay-stubs demo-stub demo-correction-loop eval-learning sim-eval latte-bench serve ingest ingest-refresh data-report \
-	modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune docker-build docker-run
+	export-training modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune docker-build docker-run
 
 IMAGE ?= baansafe-api:local
 DATASET ?= eval/out/sft.jsonl
+TRAINING_OUT ?= training/out
 
 validate:
 	$(PYTHON) scripts/validate.py
@@ -45,6 +46,9 @@ ingest-refresh:
 
 data-report:
 	$(PYTHON) -m ingest.report
+
+export-training:
+	$(PYTHON) -m training.export --out "$(TRAINING_OUT)"
 
 modal-deploy-s1:
 	$(PYTHON) -m modal deploy -m infra.modal.s1_app

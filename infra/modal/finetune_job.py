@@ -1,20 +1,24 @@
 """Correction-loop fine-tune, without a Modal import.
 
-The dataset is the messages JSONL written by eval/correction_loop.py.
-A dry run records a version and does not load weights. A real run is a short
-LoRA over that JSONL. It does not invent an accuracy number.
+One dataset per task. `s1_triage` is `{text, label}` and trains with SetFit.
+`s2_action`, `sapling_verdict`, and `prefs` train as a short LoRA. The legacy
+messages file `eval/out/sft.jsonl` is still task `sft` and still uses that LoRA.
+A dry run records a version and does not load weights. Accuracy is not invented.
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
 from contracts.models import ModelVersion, TrainingJob
+from contracts.training import S1Label, S2Action, SaplingVerdict
 
 ROLES = ("system_1", "system_2", "orchestrator")
+TASKS = ("sft", "s1_triage", "s2_action", "sapling_verdict", "prefs")
 
 
 class DatasetError(ValueError):
@@ -52,6 +56,243 @@ def parse_jsonl(text: str) -> list[list[dict]]:
     return rows
 
 
+def parse_dataset(text: str, task: str) -> list:
+    """Validate one task's JSONL. Messages tasks return a list of message lists."""
+
+    if task not in TASKS:
+        raise DatasetError(f"task {task!r} must be one of {', '.join(TASKS)}")
+    if task in {"sft", "s2_action"}:
+        rows = parse_jsonl(text)
+        if task == "s2_action":
+            _check_s2_actions(rows)
+        return rows
+    if task == "s1_triage":
+        return _parse_objects(text, _s1_row)
+    if task == "sapling_verdict":
+        return _parse_objects(text, _sapling_row)
+    return _parse_objects(text, _prefs_row)
+
+
+def infer_task(text: str) -> str:
+    """Read the first row. An explicit task still wins when the caller passes one."""
+
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        if not line.strip():
+            continue
+        payload = _object_at(line_number, line)
+        if "messages" in payload:
+            return "sft"
+        if "text" in payload and "label" in payload:
+            return "s1_triage"
+        if all(key in payload for key in ("policy", "evidence", "claim", "verdict")):
+            return "sapling_verdict"
+        if all(key in payload for key in ("prompt", "chosen", "rejected")):
+            return "prefs"
+        raise DatasetError(f"line {line_number} is not a known training dataset")
+    raise DatasetError("dataset has no rows")
+
+
+def task_for_text(text: str, task: str) -> str:
+    if task:
+        if task not in TASKS:
+            raise DatasetError(f"task {task!r} must be one of {', '.join(TASKS)}")
+        return task
+    return infer_task(text)
+
+
+def role_for(task: str, role: str = "") -> str:
+    chosen = role.strip() if role else ""
+    if not chosen:
+        chosen = "system_1" if task == "s1_triage" else "system_2"
+    if chosen not in ROLES:
+        raise DatasetError(f"role {chosen!r} must be one of {', '.join(ROLES)}")
+    return chosen
+
+
+def load_task_datasets(
+    dataset: str = "",
+    task: str = "",
+    s1: str = "",
+    s2: str = "",
+    sapling: str = "",
+    prefs: str = "",
+) -> list[tuple[str, str, str]]:
+    """Return (task, path, text). Named paths are one dataset per task.
+
+    With no named path, `dataset` is used. An empty task is inferred from the
+    file. `eval/out/sft.jsonl` stays the messages path.
+    """
+
+    specs = [
+        ("s1_triage", s1),
+        ("s2_action", s2),
+        ("sapling_verdict", sapling),
+        ("prefs", prefs),
+    ]
+    chosen = [(item_task, path) for item_task, path in specs if path]
+    if not chosen:
+        if not dataset:
+            raise DatasetError("pass a dataset path or one dataset per task")
+        chosen = [(task, dataset)]
+    loaded: list[tuple[str, str, str]] = []
+    for item_task, path in chosen:
+        file = Path(path)
+        if not file.is_file():
+            hint = ""
+            if path == "eval/out/sft.jsonl":
+                hint = " Run `make demo-correction-loop` or pass --dataset."
+            raise DatasetError(f"{path} is missing.{hint}")
+        text = file.read_text(encoding="utf-8")
+        resolved = task_for_text(text, item_task)
+        parse_dataset(text, resolved)
+        loaded.append((resolved, path, text))
+    return loaded
+
+
+def messages_for(task: str, parsed: list) -> list[list[dict]]:
+    """LoRA rows. SetFit does not use this. Prefs fits the chosen completion."""
+
+    if task == "sapling_verdict":
+        return sapling_as_messages(parsed)
+    if task == "prefs":
+        return prefs_as_messages(parsed)
+    return parsed
+
+
+def sapling_as_messages(rows: list[dict]) -> list[list[dict]]:
+    rendered: list[list[dict]] = []
+    for row in rows:
+        rendered.append(
+            [
+                {"role": "system", "content": row["policy"]},
+                {
+                    "role": "user",
+                    "content": f"Evidence:\n{row['evidence']}\n\nClaim:\n{row['claim']}",
+                },
+                {"role": "assistant", "content": row["verdict"]},
+            ]
+        )
+    return rendered
+
+
+def prefs_as_messages(rows: list[dict]) -> list[list[dict]]:
+    """The rejected string stays in the stored JSONL. The LoRA target is chosen."""
+
+    rendered: list[list[dict]] = []
+    for row in rows:
+        rendered.append(
+            [
+                {"role": "user", "content": row["prompt"]},
+                {"role": "assistant", "content": row["chosen"]},
+            ]
+        )
+    return rendered
+
+
+def setfit_base_model(lora_base: str) -> str:
+    """Checkpoint for System 1. FINETUNE_S1_MODEL wins. No id is hardcoded."""
+
+    chosen = os.environ.get("FINETUNE_S1_MODEL", "").strip()
+    if chosen and chosen != "TODO_HUMAN":
+        return chosen
+    if not lora_base or lora_base == "TODO_HUMAN":
+        raise DatasetError(
+            "System 1 SetFit needs FINETUNE_S1_MODEL or FINETUNE_BASE_MODEL. "
+            "This job does not pick a checkpoint."
+        )
+    return lora_base
+
+
+def dry_run_payload(runs: list[tuple[str, str, dict]]) -> dict:
+    """One dataset keeps the old version file. Several datasets are a list."""
+
+    if len(runs) == 1:
+        version_id, _task, addition = runs[0]
+        return {"version_id": version_id, **addition}
+    return {
+        "runs": [
+            {"version_id": version_id, "task": task, **addition}
+            for version_id, task, addition in runs
+        ]
+    }
+
+
+def _parse_objects(text: str, check) -> list[dict]:
+    rows: list[dict] = []
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        if not line.strip():
+            continue
+        rows.append(check(line_number, _object_at(line_number, line)))
+    if not rows:
+        raise DatasetError("dataset has no rows")
+    return rows
+
+
+def _object_at(line_number: int, line: str) -> dict:
+    try:
+        payload = json.loads(line)
+    except json.JSONDecodeError as exc:
+        raise DatasetError(f"line {line_number} is not JSON") from exc
+    if not isinstance(payload, dict):
+        raise DatasetError(f"line {line_number} is not an object")
+    return payload
+
+
+def _s1_row(line_number: int, payload: dict) -> dict:
+    text = payload.get("text")
+    label = payload.get("label")
+    if not isinstance(text, str) or not text.strip():
+        raise DatasetError(f"line {line_number} needs text")
+    if not isinstance(label, str):
+        raise DatasetError(f"line {line_number} needs a label")
+    try:
+        S1Label(label)
+    except ValueError as exc:
+        raise DatasetError(f"line {line_number} label {label!r} is not an S1Label") from exc
+    if "weight" in payload and payload["weight"] is not None:
+        weight = payload["weight"]
+        if isinstance(weight, bool) or not isinstance(weight, (int, float)) or float(weight) < 0:
+            raise DatasetError(f"line {line_number} weight must be >= 0")
+    group_id = payload.get("group_id")
+    if group_id is not None and (not isinstance(group_id, str) or not group_id.strip()):
+        raise DatasetError(f"line {line_number} group_id must be text")
+    return payload
+
+
+def _sapling_row(line_number: int, payload: dict) -> dict:
+    for key in ("policy", "evidence", "claim", "verdict"):
+        value = payload.get(key)
+        if not isinstance(value, str) or not value.strip():
+            raise DatasetError(f"line {line_number} needs {key}")
+    try:
+        SaplingVerdict(payload["verdict"])
+    except ValueError as exc:
+        raise DatasetError(
+            f"line {line_number} verdict {payload['verdict']!r} is not a SaplingVerdict"
+        ) from exc
+    return payload
+
+
+def _prefs_row(line_number: int, payload: dict) -> dict:
+    for key in ("prompt", "chosen", "rejected"):
+        value = payload.get(key)
+        if not isinstance(value, str) or not value.strip():
+            raise DatasetError(f"line {line_number} needs {key}")
+    if payload["chosen"] == payload["rejected"]:
+        raise DatasetError(f"line {line_number} chosen and rejected are the same")
+    return payload
+
+
+def _check_s2_actions(rows: list[list[dict]]) -> None:
+    for index, messages in enumerate(rows, start=1):
+        assistant = next(message["content"] for message in messages if message["role"] == "assistant")
+        action = assistant.splitlines()[0].strip()
+        try:
+            S2Action(action)
+        except ValueError as exc:
+            raise DatasetError(f"row {index} assistant action is not an S2Action") from exc
+
+
 def new_version_id(dataset_text: str, now: datetime | None = None) -> str:
     stamp = (now or datetime.now(timezone.utc)).strftime("%Y%m%dT%H%M%SZ")
     digest = hashlib.sha256(dataset_text.encode("utf-8")).hexdigest()[:8]
@@ -64,19 +305,25 @@ def plan_version(
     *,
     dry_run: bool,
     role: str = "system_2",
+    task: str = "sft",
     parent_version_id: str | None = None,
     now: datetime | None = None,
 ) -> tuple[str, dict]:
+    if task not in TASKS:
+        raise DatasetError(f"task {task!r} must be one of {', '.join(TASKS)}")
     if role not in ROLES:
         raise DatasetError(f"role {role!r} must be one of {', '.join(ROLES)}")
-    parse_jsonl(dataset_text)
+    parse_dataset(dataset_text, task)
     version_id = new_version_id(dataset_text, now)
     status = "stub" if dry_run else "completed"
-    note = (
-        "Dry run. No weights were trained."
-        if dry_run
-        else "LoRA adapter saved on the Modal volume. Accuracy was not scored here."
-    )
+    if dry_run:
+        note = "Dry run. No weights were trained."
+    elif task == "s1_triage":
+        note = "SetFit model saved on the Modal volume. Accuracy was not scored here."
+    else:
+        note = "LoRA adapter saved on the Modal volume. Accuracy was not scored here."
+    if task != "sft":
+        note = f"{note} Task {task}."
     version = ModelVersion(
         version_id=version_id,
         model_name=base_model,
@@ -200,6 +447,49 @@ def train_lora(
     return {"steps": steps, "last_loss": last_loss, "trainable_parameters": int(trainable)}
 
 
+def train_setfit(
+    rows: list[dict],
+    base_model: str,
+    out_dir: Path,
+    *,
+    max_steps: int,
+) -> dict:
+    """SetFit on {text, label}. Imports setfit only when a real job calls it.
+
+    Row weights are kept on the stored JSONL. This loop does not turn them
+    into a loss weight, and it does not score accuracy.
+    """
+
+    from datasets import Dataset
+    from setfit import SetFitModel, Trainer, TrainingArguments
+
+    dataset = Dataset.from_dict(
+        {
+            "text": [row["text"] for row in rows],
+            "label": [row["label"] for row in rows],
+        }
+    )
+    model = SetFitModel.from_pretrained(base_model)
+    try:
+        args = TrainingArguments(
+            output_dir=str(out_dir),
+            batch_size=1,
+            num_epochs=1,
+            max_steps=max_steps,
+        )
+    except TypeError:
+        args = TrainingArguments(
+            output_dir=str(out_dir),
+            batch_size=1,
+            num_epochs=max(1, max_steps),
+        )
+    trainer = Trainer(model=model, args=args, train_dataset=dataset)
+    trainer.train()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    model.save_pretrained(str(out_dir))
+    return {"steps": max_steps, "trainer": "setfit", "rows": len(rows)}
+
+
 def _hf_token() -> str | None:
     import os
 
@@ -251,25 +541,38 @@ def _encode(tokenizer, messages: list[dict], max_length: int):
 
 def _dry_run_main() -> None:
     import argparse
-    import os
 
     from infra.modal.common import resolve
 
     parser = argparse.ArgumentParser(description="Record a fine-tune version without training.")
     parser.add_argument("--dataset", default="eval/out/sft.jsonl")
+    parser.add_argument("--task", default=os.environ.get("FINETUNE_TASK", ""))
+    parser.add_argument("--s1", default="")
+    parser.add_argument("--s2", default="")
+    parser.add_argument("--sapling", default="")
+    parser.add_argument("--prefs", default="")
     parser.add_argument("--out", default=os.environ.get("FINETUNE_DRY_RUN_DIR", "eval/out"))
-    parser.add_argument("--role", default=os.environ.get("FINETUNE_ROLE", "system_2"))
+    parser.add_argument("--role", default=os.environ.get("FINETUNE_ROLE", ""))
     args = parser.parse_args()
-    text = Path(args.dataset).read_text(encoding="utf-8")
+    try:
+        jobs = load_task_datasets(args.dataset, args.task, args.s1, args.s2, args.sapling, args.prefs)
+    except DatasetError as exc:
+        raise SystemExit(str(exc)) from None
     base = resolve("modal.finetune_base_model", "FINETUNE_BASE_MODEL")
-    version_id, addition = plan_version(text, base, dry_run=True, role=args.role)
+    runs: list[tuple[str, str, dict]] = []
+    for item_task, _path, text in jobs:
+        chosen_role = role_for(item_task, args.role)
+        version_id, addition = plan_version(
+            text, base, dry_run=True, role=chosen_role, task=item_task
+        )
+        runs.append((version_id, item_task, addition))
+        print(version_id)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     (out / "modal_finetune_dry_run.json").write_text(
-        json.dumps({"version_id": version_id, **addition}, indent=2) + "\n",
+        json.dumps(dry_run_payload(runs), indent=2) + "\n",
         encoding="utf-8",
     )
-    print(version_id)
 
 
 def _render(tokenizer, messages: list[dict]) -> tuple[str, str]:

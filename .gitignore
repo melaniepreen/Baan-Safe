@@ -8,6 +8,7 @@ data/raw/
 traces.jsonl
 data/processed/corrections.jsonl
 training/events/*.jsonl
+training/out/
 eval/out/
 var/
 *.egg-info/

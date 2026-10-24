@@ -1,7 +1,8 @@
 """Correction-loop fine-tune. Writes a version directory on a Modal Volume.
 
-Returns the version id. The dataset is the messages JSONL from
-eval/correction_loop.py. Dry runs stay on the local machine and do not boot a GPU.
+One dataset per task. System 1 (`s1_triage`) trains SetFit on `{text, label}`.
+The other tasks train a short LoRA. `eval/out/sft.jsonl` is still the messages
+path. Dry runs stay on the local machine and do not boot a GPU.
 """
 
 from __future__ import annotations
@@ -15,11 +16,17 @@ import modal
 from infra.modal.common import parse_gpu, redact, resolve
 from infra.modal.finetune_job import (
     DatasetError,
+    dry_run_payload,
+    load_task_datasets,
     merge_registry,
+    messages_for,
     parent_from_registry,
-    parse_jsonl,
+    parse_dataset,
     plan_version,
+    role_for,
+    setfit_base_model,
     train_lora,
+    train_setfit,
 )
 from infra.modal.runtime import (
     HF_CACHE_PATH,
@@ -56,11 +63,14 @@ image = with_repo(
         "pydantic>=2.6",
         "pyyaml>=6",
         "huggingface_hub",
+        "setfit>=1.1",
+        "datasets>=2.14",
     )
 ).env(
     {
         "FINETUNE_BASE_MODEL": BASE_MODEL,
         "FINETUNE_GPU": GPU_LABEL,
+        "FINETUNE_S1_MODEL": os.environ.get("FINETUNE_S1_MODEL", ""),
         "HF_HOME": HF_CACHE_PATH,
     }
 )
@@ -90,6 +100,7 @@ def train(
     max_steps: int = 20,
     max_length: int = 512,
     role: str = "system_2",
+    task: str = "sft",
 ) -> str:
     volume.reload()
     root = Path(VERSIONS_PATH)
@@ -102,21 +113,30 @@ def train(
         BASE_MODEL,
         dry_run=False,
         role=role,
+        task=task,
         parent_version_id=parent_from_registry(existing),
     )
     version_dir = root / "versions" / version_id
     version_dir.mkdir(parents=True, exist_ok=True)
     (version_dir / "train.jsonl").write_text(dataset_text, encoding="utf-8")
     try:
-        rows = parse_jsonl(dataset_text)
-        metrics = train_lora(
-            rows,
-            BASE_MODEL,
-            version_dir / "adapter",
-            gpu_name=GPU_LABEL,
-            max_steps=max_steps,
-            max_length=max_length,
-        )
+        parsed = parse_dataset(dataset_text, task)
+        if task == "s1_triage":
+            metrics = train_setfit(
+                parsed,
+                setfit_base_model(BASE_MODEL),
+                version_dir / "adapter",
+                max_steps=max_steps,
+            )
+        else:
+            metrics = train_lora(
+                messages_for(task, parsed),
+                BASE_MODEL,
+                version_dir / "adapter",
+                gpu_name=GPU_LABEL,
+                max_steps=max_steps,
+                max_length=max_length,
+            )
     except Exception as exc:
         message = redact(str(exc))[:500]
         addition["jobs"][0]["status"] = "failed"
@@ -142,30 +162,41 @@ def main(
     dataset: str = "eval/out/sft.jsonl",
     max_steps: int = 20,
     max_length: int = 512,
-    role: str = "system_2",
+    role: str = "",
+    task: str = "",
+    s1: str = "",
+    s2: str = "",
+    sapling: str = "",
+    prefs: str = "",
     dry_run: bool = False,
 ) -> None:
-    path = Path(dataset)
-    if not path.is_file():
-        raise SystemExit(
-            f"{path} is missing. Run `make demo-correction-loop` or pass --dataset."
-        )
-    text = path.read_text(encoding="utf-8")
+    chosen_task = os.environ.get("FINETUNE_TASK", task).strip()
+    chosen_role = os.environ.get("FINETUNE_ROLE", role).strip()
     try:
-        parse_jsonl(text)
+        jobs = load_task_datasets(dataset, chosen_task, s1, s2, sapling, prefs)
     except DatasetError as exc:
         raise SystemExit(str(exc)) from None
+    steps = int(os.environ.get("FINETUNE_MAX_STEPS", str(max_steps)))
+    length = int(os.environ.get("FINETUNE_MAX_LENGTH", str(max_length)))
+    runs: list[tuple[str, str, dict]] = []
+    for item_task, _path, text in jobs:
+        item_role = role_for(item_task, chosen_role)
+        if dry_run:
+            version_id, addition = plan_version(
+                text,
+                BASE_MODEL,
+                dry_run=True,
+                role=item_role,
+                task=item_task,
+            )
+            runs.append((version_id, item_task, addition))
+            print(version_id)
+            continue
+        print(train.remote(text, steps, length, item_role, item_task))
     if dry_run:
-        version_id, addition = plan_version(text, BASE_MODEL, dry_run=True, role=role)
         out = Path(os.environ.get("FINETUNE_DRY_RUN_DIR", "eval/out"))
         out.mkdir(parents=True, exist_ok=True)
         (out / "modal_finetune_dry_run.json").write_text(
-            json.dumps({"version_id": version_id, **addition}, indent=2) + "\n",
+            json.dumps(dry_run_payload(runs), indent=2) + "\n",
             encoding="utf-8",
         )
-        print(version_id)
-        return
-    steps = int(os.environ.get("FINETUNE_MAX_STEPS", str(max_steps)))
-    length = int(os.environ.get("FINETUNE_MAX_LENGTH", str(max_length)))
-    chosen_role = os.environ.get("FINETUNE_ROLE", role)
-    print(train.remote(text, steps, length, chosen_role))
