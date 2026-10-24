@@ -1,0 +1,12 @@
+.git
+.venv
+**/__pycache__
+**/*.pyc
+.pytest_cache
+.mypy_cache
+.env
+data/raw
+eval/out
+traces.jsonl
+*.egg-info
+**/.DS_Store

@@ -57,6 +57,54 @@ LLM calls, when a human writes them, go through `llm/client.py`. That client req
 
 Public sources and row counts are in `data/SOURCES.md`. Raw responses are gitignored under `data/raw/`. SQLite is the overnight store. The production database is `TODO_HUMAN` in `config/decisions.yaml`.
 
+## Infra
+
+Modal apps live in `infra/modal/`. GPU sizes and the hourly arithmetic are in `infra/HARDWARE.md`. The committed decisions stay `TODO_HUMAN` so `make validate` keeps passing. Export the variable for the one deploy you are doing. The app refuses to guess a model or a GPU.
+
+One-time setup, done by a person:
+
+```bash
+pip install -r infra/modal/requirements.txt   # modal>=1.6
+modal token new                               # browser login; or `modal setup`
+modal secret create baansafe-hf HF_TOKEN=hf_...
+modal secret create baansafe-mubit MUBIT_API_KEY=mbt_...
+```
+
+`HF_TOKEN` and `MUBIT_API_KEY` are read from those Modal secrets. They are not written into the image or the repo. Optional: add `S2_SERVE_API_KEY` to `baansafe-mubit` (`modal secret create baansafe-mubit --force ...`). vLLM then requires that bearer token. Paste the same value into the Mubit console as the provider key for the self-hosted OpenAI base URL. The Modal URL is `https://<workspace>--baansafe-s2-serve.modal.run/v1`.
+
+```bash
+export S1_GPU=cpu
+export S1_MODEL_ID=convaiinnovations/laya-multilingual   # a human picks this
+make modal-deploy-s1
+
+export S2_GPU=T4
+export S2_MODEL_ID=nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1
+export NEMOTRON_SIZE=4B
+export S2_QUANT=bf16
+make modal-deploy-s2
+
+export FINETUNE_GPU=T4
+export FINETUNE_BASE_MODEL=nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1
+make demo-correction-loop
+make modal-finetune
+
+export STT_GPU=cpu
+export STT_MODEL_ID=openai/whisper-large-v3
+make modal-deploy-stt
+```
+
+The exports above are examples of the variable names, not a decision that those checkpoints are chosen. `infra/HARDWARE.md` is the sizing note. A dry run of the version id, with no GPU and no Modal token, is `python -m infra.modal.finetune_job --dataset eval/out/sft.jsonl` after `FINETUNE_BASE_MODEL` is set.
+
+Local API container (CPU). This is the same process as `make serve`:
+
+```bash
+make docker-build
+make docker-run          # http://127.0.0.1:8000/health
+docker compose up --build
+```
+
+`docker/Dockerfile.gpu` matches the System 2 CUDA image. It was not built in the setup pass. A GPU machine runs it with `S2_MODEL_ID`, `NEMOTRON_SIZE`, `S2_QUANT`, and `S2_GPU` set.
+
 ## Contracts
 
 `contracts/models.py` is the shared shape. JSON Schema for a UI is in `contracts/schemas/`. Do not edit a contract to suit one system. Propose a change in `contracts/CHANGE_REQUESTS.md`.

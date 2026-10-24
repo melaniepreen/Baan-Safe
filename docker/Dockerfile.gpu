@@ -1,0 +1,25 @@
+# GPU image aligned with infra/modal/s2_app.py.
+# Base and vLLM pin match Modal's vLLM example as checked on 24 October 2026:
+# https://modal.com/docs/examples/vllm_inference
+# This image was not built in the setup pass. It is large.
+FROM nvidia/cuda:12.9.0-devel-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/opt/baansafe \
+    HF_HOME=/root/.cache/huggingface
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3 python3-pip python3-venv \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install --no-cache-dir "vllm==0.21.0" "huggingface_hub"
+
+WORKDIR /opt/baansafe
+COPY infra /opt/baansafe/infra
+COPY config /opt/baansafe/config
+
+EXPOSE 8000
+
+# Refuses while S2_MODEL_ID, NEMOTRON_SIZE, S2_QUANT, or S2_GPU is TODO_HUMAN.
+CMD ["python3", "-m", "infra.modal.s2_cmd"]

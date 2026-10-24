@@ -27,3 +27,18 @@ data:
   production_db: TODO_HUMAN          # SQLite is used tonight
 correction_loop:
   graduation_threshold: TODO_HUMAN   # corrections before an S2 pattern becomes an S1 rule
+# Modal hosting. These do not replace system1.* or system2.*.
+# Apps read the environment variable first and refuse while the value is TODO_HUMAN.
+# Leave these as TODO_HUMAN in git: scripts/validate.py rejects any other committed value.
+# Set the matching environment variable at deploy time. See infra/HARDWARE.md.
+modal:
+  s1_gpu: TODO_HUMAN                 # cpu | T4 | L4
+  s1_model_id: TODO_HUMAN            # mDeBERTa XNLI id, or convaiinnovations/laya-multilingual
+  s2_gpu: TODO_HUMAN                 # T4 | L4 | A10 | L40S | A100-40GB | A100-80GB | H100 | H200
+  s2_model_id: TODO_HUMAN            # Nemotron checkpoint id
+  nemotron_size: TODO_HUMAN          # 4B | 8B | 9B | 30B-A3B | 49B | 70B | 120B-A12B
+  s2_quant: TODO_HUMAN               # bf16 | fp8 | awq
+  finetune_gpu: TODO_HUMAN           # cpu | T4 | L4 | A10 | L40S | A100-40GB | A100-80GB | H100 | H200
+  finetune_base_model: TODO_HUMAN    # checkpoint the correction-loop LoRA starts from
+  stt_gpu: TODO_HUMAN                # cpu | T4 | L4
+  stt_model_id: TODO_HUMAN           # Whisper or a Thai fine-tune id
