@@ -18,7 +18,8 @@ The Decision Router turns one system's outcome into the next action and, when di
 - `router/ledger.py` — in-process reservation ledger: `reserve`, `reserved_by_others`, `holds`, `release_case`, `reset`. Nothing is written to disk; reservations reset on restart.
 - `gateway/route.py` — calls `router.merge.merge` and traces `router.merge ran`.
 - `contracts/models.py` — `RouterDecision`, `NextAction`, `Dispatch` (CR-003).
-- `mocks/resources.json` — fictional resource snapshot (`load_resources()`).
+- `mocks/resources.json` — fictional resource snapshot (`load_resources()`). Router tests keep this default.
+- `mocks/loader.py` `load_dispatch_resources()` — fictional units plus public shelters, hospitals, and ferry terminals from `data/snapshots/places.json`. The gateway passes this snapshot. Real units are listed first.
 
 ## Interfaces/contracts
 

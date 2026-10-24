@@ -1,8 +1,10 @@
 """Keyword extraction for the fast path. Owner: Moly.
 
-This is the decided `system1.extraction_method` (`rules-only`). English only:
-caller turns are sentence-split, matched against phrase and regex families,
-and a match is dropped when a negator sits within the three words before it.
+This is the decided `system1.extraction_method` (`rules-only`). Keyword
+phrases are English: caller turns are sentence-split, matched against phrase
+and regex families, and a match is dropped when a negator sits within the
+three words before it. District names also match the Thai and English
+gazetteer.
 Aid phrases and minimising phrases are exempt from negation — "we cannot get
 the payment" and "not eligible" are exactly the signal. The returned flags
 are suggestions for `CaseState.policy_flags`; the gateway attaches them.
@@ -278,67 +280,101 @@ def _match_regex(sentence: str, pattern: re.Pattern) -> bool:
 
 def _district_entries(
     districts: list[str] | None,
-) -> list[tuple[str, str | None]]:
-    """(district name, province or None) pairs, gazetteer first."""
+) -> list[tuple[str, str, str | None, bool]]:
+    """(match text, canonical English name, province or None, thai)."""
     if districts is not None:
         entries = []
         for entry in districts:
             name, _, province = entry.partition(",")
-            entries.append((name.strip(), province.strip() or None))
+            canonical = name.strip()
+            entries.append((canonical, canonical, province.strip() or None, False))
         return entries
-    from ingest.db import DB_PATH, connect
+    entries: list[tuple[str, str, str | None, bool]] = []
+    seen: set[tuple[str, str | None, bool]] = set()
 
-    if not DB_PATH.exists():
-        return []
-    entries: list[tuple[str, str | None]] = []
-    seen: set[str] = set()
-    with connect() as conn:
-        try:
-            rows = conn.execute(
-                "SELECT name_en, province FROM admin_districts"
-            ).fetchall()
-        except Exception:  # noqa: BLE001 — a missing table means no gazetteer
-            rows = []
-        for row in rows:
-            name = row["name_en"]
-            if name:
-                seen.add(name)
-                entries.append((name, row["province"]))
-        try:
-            rows = conn.execute(
-                "SELECT name_en, province FROM districts"
-            ).fetchall()
-        except Exception:  # noqa: BLE001
-            rows = []
-        for row in rows:
-            name = row["name_en"]
-            if name and name not in seen:
-                seen.add(name)
-                entries.append((name, row["province"]))
+    def add(match: str | None, canonical: str | None, province: str | None, thai: bool) -> None:
+        if not match or not canonical:
+            return
+        if thai and len(match) < 5 and not match.startswith("อำเภอ"):
+            return
+        key = (match, province, thai)
+        if key in seen:
+            return
+        seen.add(key)
+        entries.append((match, canonical, province, thai))
+
+    from ingest.db import DB_PATH, connect
+    from ingest.snapshots import read_snapshot
+
+    if DB_PATH.exists():
+        with connect() as conn:
+            try:
+                rows = conn.execute(
+                    "SELECT name_en, name_th, province FROM admin_districts"
+                ).fetchall()
+            except Exception:  # noqa: BLE001 — a missing table means no gazetteer
+                rows = []
+            for row in rows:
+                add(row["name_en"], row["name_en"], row["province"], False)
+                add(row["name_th"], row["name_en"], row["province"], True)
+            try:
+                rows = conn.execute(
+                    "SELECT name_en, name_th, province FROM districts"
+                ).fetchall()
+            except Exception:  # noqa: BLE001
+                rows = []
+            for row in rows:
+                add(row["name_en"], row["name_en"], row["province"], False)
+                add(row["name_th"], row["name_en"], row["province"], True)
+    for row in (read_snapshot("gazetteer") or {}).get("districts") or []:
+        canonical = row.get("name_en") or ""
+        if canonical and not canonical.endswith("District"):
+            canonical = f"{canonical} District"
+        province = row.get("province_en") or None
+        if province and not str(province).endswith("Province"):
+            province = f"{province} Province"
+        add(canonical, canonical, province, False)
+        thai = row.get("name_th")
+        add(thai, canonical, province, True)
+        if thai and not str(thai).startswith("อำเภอ"):
+            add(f"อำเภอ{thai}", canonical, province, True)
     return entries
 
 
+def _name_hit(match: str, text: str, thai: bool) -> bool:
+    if not match:
+        return False
+    if thai:
+        return match in text
+    return re.search(r"\b" + re.escape(match.lower()) + r"\b", text) is not None
+
+
 def _location(sentences: list[str], districts: list[str] | None) -> tuple[str | None, float | None]:
+    entries = _district_entries(districts)
+    ordered = entries
+    if districts is None:
+        ordered = sorted(entries, key=lambda item: len(item[0]), reverse=True)
     text = " ".join(sentences)
-    matched: list[tuple[str, str | None]] = []
-    for name, province in _district_entries(districts):
-        if name and re.search(r"\b" + re.escape(name.lower()) + r"\b", text):
-            matched.append((name, province))
+    found: tuple[str, str | None] | None = None
+    for match, canonical, province, thai in ordered:
+        if _name_hit(match, text, thai):
+            found = (canonical, province)
             break
-    if not matched:
+    if found is None:
         return None, None
-    name, province = matched[0]
-    if province is None:
+    name, _province = found
+    provinces: list[str] = []
+    for _match, canonical, province, _thai in entries:
+        if canonical == name and province and province not in provinces:
+            provinces.append(province)
+    if not provinces:
         return name, 0.85
-    provinces = [
-        prov for n, prov in _district_entries(districts) if n == name and prov
-    ]
-    if len(set(provinces)) <= 1:
-        return f"{name}, {province}", 0.85
-    for prov in provinces:
-        short = prov.replace(" Province", "").lower()
+    if len(provinces) == 1:
+        return f"{name}, {provinces[0]}", 0.85
+    for province in provinces:
+        short = province.replace(" Province", "").lower()
         if re.search(r"\b" + re.escape(short) + r"\b", text):
-            return f"{name}, {prov}", 0.85
+            return f"{name}, {province}", 0.85
     return f"{name}, {provinces[0]}", 0.6
 
 

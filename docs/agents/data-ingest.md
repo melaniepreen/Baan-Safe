@@ -7,6 +7,8 @@ files:
   - ingest/reliefweb.py
   - ingest/db.py
   - data/SOURCES.md
+  - ingest/demo_sources.py
+  - ingest/snapshots.py
 ---
 
 ## Purpose
@@ -23,6 +25,7 @@ Pull public flood context into SQLite and write `data/SOURCES.md`. ReliefWeb is 
 - `ingest/reliefweb.py` — `RETIRED`. `ingest()` records status and does not send a request.
 - `data/SOURCES.md` — row counts. Raw bodies are gitignored under `data/raw/`.
 - `enrich/context.py` — flags for the gateway. Not a priority.
+- `ingest/demo_sources.py` — live checks for the fixture provinces, with committed snapshots. See `docs/agents/data-sources.md`. `make sources-status` sends no request.
 
 ## Interfaces/contracts
 

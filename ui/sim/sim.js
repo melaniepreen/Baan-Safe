@@ -2413,8 +2413,21 @@ function bindChrome() {
   });
 }
 
+function applyPublicPlaces(townBody, placeBody) {
+  const labels = (placeBody && placeBody.labels) || {};
+  for (const building of townBody.buildings || []) {
+    const label = labels[building.id];
+    if (!label || !label.name_th) continue;
+    if (building.fixture_id || building.resource_id || building.id === "bldg-temple") continue;
+    building.name_th = label.name_th;
+    if (label.name_en) building.name_en = label.name_en;
+  }
+  const note = document.getElementById("flood-note");
+  if (note && placeBody && placeBody.note) note.textContent = placeBody.note;
+}
+
 async function main() {
-  const [townBody, streetBody, floodBody, responseBody, eventBody, promptBody, ruleBody, replyBody] = await Promise.all([
+  const [townBody, streetBody, floodBody, responseBody, eventBody, promptBody, ruleBody, replyBody, placeBody] = await Promise.all([
     getJson("data/town.json"),
     getJson("data/streets.json"),
     getJson("data/flood.json"),
@@ -2423,8 +2436,10 @@ async function main() {
     getJson("data/prompts.json"),
     getJson("data/rulebook.json"),
     getJson("data/replies.json"),
+    getJson("data/places.json"),
   ]);
   town = townBody;
+  applyPublicPlaces(town, placeBody);
   streets = streetBody.streets;
   flood = floodBody;
   responses = responseBody;

@@ -41,10 +41,10 @@ python3 ui/sim/build_town.py
 | Hazard | `data/flood.json` and `town.json` `hazards` | `Hazard` with `kind: flood`. Local metres, not WGS84. |
 | Dispatch category on a drawn path | `town.json` `routes[].contract_route` | `Route` enum (`shelter_placement`, `rescue_coordination`). The enum is not a polyline. |
 | Path geometry | `town.json` `graph`, `routes[]`, and `response_routes[]` | No path API. `routes` keeps the F06 foot path and the F10 boat path. `response_routes` is one path per call from the jetty, shelter, water desk, and school. A run may change from foot to boat where the drawn street changes mode. Lanes are extra edges flagged `lane`. |
-| Boats, shelter, clinic van, water desk | placed on buildings, ids from `mocks/resources.json` | `Resource`, and `GET /resources` when the API is up. |
+| Boats, shelter, clinic van, water desk | placed on buildings, ids from `mocks/resources.json` | `Resource`. `GET /resources` adds public shelters and hospitals from the place snapshot. The drawn mock ids stay on the block. |
 | Live flood flags | not drawn as this grid | `GET /context?district=…` and `GET /map/flood`. The WGS84 polygons are a different picture. |
 
-Street names are in `data/streets.json`. Every name is marked placeholder (`จำลอง` / `PLACEHOLDER`). Replace that file to use real names. Household records do not store the street.
+Street names are in `data/streets.json`. Every name is marked placeholder (`จำลอง` / `PLACEHOLDER`). Replace that file to use real names. Household records do not store the street. The school, the cancer hospital, the disaster-prevention post, and one temple on the block use public OpenStreetMap names from `data/places.json` (Lampang). The blue temple and the north hall stay the invented fixture landmarks.
 
 The phone on the left is the caller. Type a line and press Send, or press Call and speak. Call uses the microphone (`MediaRecorder`) and, when the browser has it, the Web Speech API. If `POST /stt/transcribe` answers, that text is used instead. This API does not mount `infra/modal/stt_app`. `speech_to_text.provider` is still `TODO_HUMAN`. When neither path returns words, the phone shows a stub transcript and does not invent a sentence.
 

@@ -1,7 +1,7 @@
 PYTHON ?= $(shell test -x .venv/bin/python && echo .venv/bin/python || echo python3)
 export PYTHONPATH := .
 
-.PHONY: validate test replay-stubs demo-stub demo-correction-loop demo-graduation eval-learning sim-eval extract-eval latte-bench serve ingest ingest-refresh data-report \
+.PHONY: validate test replay-stubs demo-stub demo-correction-loop demo-graduation eval-learning sim-eval extract-eval latte-bench serve ingest ingest-refresh data-report sources-refresh sources-status \
 	export-training export-laya laya-train sync push modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune docker-build docker-run
 
 IMAGE ?= baansafe-api:local
@@ -53,6 +53,14 @@ ingest-refresh:
 
 data-report:
 	$(PYTHON) -m ingest.report
+
+# Live public sources for the demo provinces. Writes data/snapshots/.
+sources-refresh:
+	$(PYTHON) -m ingest.demo_sources --refresh
+
+# Offline status from the committed snapshots. Sends no request.
+sources-status:
+	$(PYTHON) -m ingest.demo_sources
 
 # Event-log export. SYNTHETIC=1 also writes SetFit rows from fixtures/synthetic.
 export-training:

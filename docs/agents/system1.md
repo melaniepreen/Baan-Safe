@@ -25,7 +25,7 @@ Fast path. Deterministic triage and keyword extraction are Moly's. The aid eligi
 ## Interfaces/contracts
 
 - `extract` reads caller turns plus operator turns the caller confirmed with an affirmative first sentence ("yes", "that's right") to a "?" question. Confirmed operator text counts for vulnerable, people_count, and danger only — never needs or flags. Aid and minimising phrases are negation-exempt; everything else drops a match when a negator sits within the three words before it. It suggests `conflicting_evidence`, `safeguarding`, and `aid_exception` flags; the gateway attaches them plus `keyword_extraction`.
-- When `districts` is None the extractor reads the `admin_districts` gazetteer (name_en + province), then any `districts` names not already covered. A matched name in more than one province returns confidence 0.6 unless the caller named the province. Location is "X District, Province" when the province is known. A missing DB means an empty list. Tests pass an explicit list.
+- When `districts` is None the extractor reads `admin_districts` and `districts` (English and Thai names), then the committed HDX COD-AB snapshot `data/snapshots/gazetteer.json`. The longest matching name wins. A Thai name is a substring of at least 5 characters, or an `อำเภอ` prefix. A matched name in more than one province returns confidence 0.6 unless the caller named the province. Location is "X District, Province" when the province is known. Tests that pass an explicit list keep that list's order.
 - People count understands "N of us", "there are N", "we are N", "a family of N", "me and my <word>" (2), bare-number answers, and "N adults and M children" breakdowns (N+M).
 - `decide` order: System 2 triggers → duplicate (`similar_case` memory at relevance ≥ `DUPLICATE_RELEVANCE` 0.9 → `duplicate_merge`) → needs table (`NEEDS_TABLE`; empty or unmatched needs escalate) → `location_confidence` below `system_1_min_confidence` (0.80) escalates → missing `people_count` asks "How many people are with you?" → `fast_route`.
 - `check` must return `AidEligibility`. Today it raises. It does not approve a payment and it does not read a baht amount.
@@ -48,7 +48,7 @@ Fast path. Deterministic triage and keyword extraction are Moly's. The aid eligi
 
 - Auto-approving aid. `check` must not approve a payment.
 - Calling Sapling from System 1. The verifier is System 2 only.
-- Expecting `extract` to understand Thai. It is English-only; Thai handling is undecided.
+- Expecting keyword phrases to understand Thai. Needs, danger, and vulnerability stay English. District names match the Thai and English gazetteer.
 - Operator turns count as evidence. They are ignored by the extractor.
 
 ## Open TODO_HUMAN keys

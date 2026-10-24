@@ -153,6 +153,26 @@
       ]
     },
     {
+      "path": "docs/agents/data-sources.md",
+      "title": "Live public data sources",
+      "summary": "GISTDA, Open-Meteo, Overpass, COD-AB, RID, and the TMD miss, with committed snapshots and data flags that do not change priority.",
+      "keywords": [
+        "ingest",
+        "gistda",
+        "open-meteo",
+        "overpass",
+        "gazetteer",
+        "snapshots"
+      ],
+      "files": [
+        "ingest/demo_sources.py",
+        "ingest/snapshots.py",
+        "config/escalation.yaml",
+        "system1/extract.py",
+        "enrich/context.py"
+      ]
+    },
+    {
       "path": "docs/agents/modal-infra.md",
       "title": "Modal infra",
       "summary": "Fine-tune takes one dataset per task. s1_triage uses SetFit. Other tasks use LoRA.",

@@ -16509,8 +16509,8 @@
     {
       "id": "bldg-school",
       "kind": "school",
-      "name_th": "อาคารเรียนจำลอง",
-      "name_en": "PLACEHOLDER long school block",
+      "name_th": "โรงเรียนวัดแท่ทรายคำ",
+      "name_en": "โรงเรียนวัดแท่ทรายคำ",
       "x": 238.0,
       "y": 92.0,
       "w": 122.0,
@@ -16553,8 +16553,8 @@
     {
       "id": "bldg-tower-white",
       "kind": "concrete",
-      "name_th": "อาคารขาวจำลอง",
-      "name_en": "PLACEHOLDER white block",
+      "name_th": "โรงพยาบาลมะเร็งลำปาง",
+      "name_en": "Lampang Cancer Hospital",
       "x": 436.0,
       "y": 22.0,
       "w": 26.0,
@@ -16570,8 +16570,8 @@
     {
       "id": "bldg-tower-pink",
       "kind": "concrete",
-      "name_th": "อาคารชมพูจำลอง",
-      "name_en": "PLACEHOLDER pink block",
+      "name_th": "หน่วยบรรเทาสาธารณะภัยหน่วย 2 บ้านปงสนุก",
+      "name_en": "หน่วยบรรเทาสาธารณะภัยหน่วย 2 บ้านปงสนุก",
       "x": 58.0,
       "y": 18.0,
       "w": 24.0,
@@ -16706,8 +16706,8 @@
     {
       "id": "bldg-sala",
       "kind": "temple",
-      "name_th": "ศาลาจำลอง",
-      "name_en": "PLACEHOLDER sala",
+      "name_th": "วัดห้วยฮี",
+      "name_en": "วัดห้วยฮี",
       "x": 150.0,
       "y": 360.0,
       "w": 16.0,

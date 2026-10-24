@@ -1,0 +1,18 @@
+{
+  "checked_at": "2026-10-24T17:37:26.936219+00:00",
+  "open_api": {
+    "url": "https://api-gateway.gistda.or.th/api/2.0/resources/features/flood/1day",
+    "catalogue": "https://opendata.gistda.or.th/dataset/flood-disaster-data",
+    "status": "blocked",
+    "http_status": 407,
+    "detail": "GISTDA_API_KEY was not set. A request without a key was sent and the server returned HTTP 407. No key was written."
+  },
+  "arcgis": {
+    "url": "https://gistdaportal.gistda.or.th/arcgis/rest/services/app/GISTDA_flood/MapServer",
+    "status": "ok",
+    "layer0_flood_extent_count": 0,
+    "layer1_flood_risk_count": 63
+  },
+  "licence": "GISTDA flood services. The keyed API needs a registered key. The ArcGIS MapServer counts are public.",
+  "rate_limit": "One probe per window plus two count queries. No national polygon download."
+}

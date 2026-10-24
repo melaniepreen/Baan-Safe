@@ -362,6 +362,15 @@ def base_building(**kwargs) -> dict:
     return {key: value for key, value in building.items() if value is not None}
 
 
+def place_label(building_id: str, fallback_th: str, fallback_en: str) -> tuple[str, str]:
+    """Public place name from ui/sim/data/places.json, or the placeholder."""
+    path = ROOT / "ui" / "sim" / "data" / "places.json"
+    if not path.is_file():
+        return fallback_th, fallback_en
+    label = (json.loads(path.read_text(encoding="utf-8")).get("labels") or {}).get(building_id) or {}
+    return label.get("name_th") or fallback_th, label.get("name_en") or fallback_en
+
+
 def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[dict]:
     def res(resource_id: str) -> str:
         if resource_id not in resources:
@@ -372,8 +381,8 @@ def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[di
         base_building(
             id="bldg-school",
             kind="school",
-            name_th="อาคารเรียนจำลอง",
-            name_en="PLACEHOLDER long school block",
+            name_th=place_label("bldg-school", "อาคารเรียนจำลอง", "PLACEHOLDER long school block")[0],
+            name_en=place_label("bldg-school", "อาคารเรียนจำลอง", "PLACEHOLDER long school block")[1],
             x=238,
             y=92,
             w=122,
@@ -387,8 +396,8 @@ def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[di
         base_building(
             id="bldg-tower-white",
             kind="concrete",
-            name_th="อาคารขาวจำลอง",
-            name_en="PLACEHOLDER white block",
+            name_th=place_label("bldg-tower-white", "อาคารขาวจำลอง", "PLACEHOLDER white block")[0],
+            name_en=place_label("bldg-tower-white", "อาคารขาวจำลอง", "PLACEHOLDER white block")[1],
             x=436,
             y=22,
             w=26,
@@ -402,8 +411,8 @@ def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[di
         base_building(
             id="bldg-tower-pink",
             kind="concrete",
-            name_th="อาคารชมพูจำลอง",
-            name_en="PLACEHOLDER pink block",
+            name_th=place_label("bldg-tower-pink", "อาคารชมพูจำลอง", "PLACEHOLDER pink block")[0],
+            name_en=place_label("bldg-tower-pink", "อาคารชมพูจำลอง", "PLACEHOLDER pink block")[1],
             x=58,
             y=18,
             w=24,
@@ -499,8 +508,8 @@ def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[di
         base_building(
             id="bldg-sala",
             kind="temple",
-            name_th="ศาลาจำลอง",
-            name_en="PLACEHOLDER sala",
+            name_th=place_label("bldg-sala", "ศาลาจำลอง", "PLACEHOLDER sala")[0],
+            name_en=place_label("bldg-sala", "ศาลาจำลอง", "PLACEHOLDER sala")[1],
             x=150,
             y=360,
             w=16,

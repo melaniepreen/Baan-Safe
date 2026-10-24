@@ -1,0 +1,66 @@
+{
+  "checked_at": "2026-10-24T17:38:17.308807+00:00",
+  "url": "https://app.rid.go.th/reservoir/api/dam/public",
+  "licence": "Royal Irrigation Department public dam JSON. No licence page is linked from the payload. Treat as a public operational feed and keep the attribution.",
+  "rate_limit": "No published limit. One request per refresh. robots.txt on app.rid.go.th is HTTP 404.",
+  "date": "2026-10-25",
+  "scope": "Northern region dams. The feed has no coordinates, so these rows are not joined to a district and do not change priority.",
+  "dams": [
+    {
+      "id": "100104",
+      "name": "เขื่อนแม่กวงอุดมธารา",
+      "capacity_mcm": 295,
+      "storage_mcm": 263,
+      "percent_storage": 89.2
+    },
+    {
+      "id": "100105",
+      "name": "เขื่อนกิ่วลม",
+      "capacity_mcm": 106.22,
+      "storage_mcm": 106.22,
+      "percent_storage": 100.0
+    },
+    {
+      "id": "100106",
+      "name": "เขื่อนกิ่วคอหมา",
+      "capacity_mcm": 208.6,
+      "storage_mcm": 170,
+      "percent_storage": 81.5
+    },
+    {
+      "id": "100107",
+      "name": "เขื่อนแควน้อยบำรุงแดน",
+      "capacity_mcm": 1080,
+      "storage_mcm": 939,
+      "percent_storage": 86.9
+    },
+    {
+      "id": "100108",
+      "name": "เขื่อนแม่มอก",
+      "capacity_mcm": 110,
+      "storage_mcm": 110,
+      "percent_storage": 100.0
+    },
+    {
+      "id": "200101",
+      "name": "เขื่อนภูมิพล",
+      "capacity_mcm": 13462,
+      "storage_mcm": 13462,
+      "percent_storage": 100.0
+    },
+    {
+      "id": "200102",
+      "name": "เขื่อนสิริกิติ์",
+      "capacity_mcm": 10508,
+      "storage_mcm": 9510,
+      "percent_storage": 90.5
+    },
+    {
+      "id": "200103",
+      "name": "เขื่อนแม่งัดสมบูรณ์ชล",
+      "capacity_mcm": 323,
+      "storage_mcm": 265,
+      "percent_storage": 82.0
+    }
+  ]
+}
