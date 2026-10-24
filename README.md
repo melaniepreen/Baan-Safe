@@ -23,9 +23,9 @@ flowchart TD
 
   subgraph L2["2 · Mubit gateway — gateway/route.py · routes, traces every stage to traces.jsonl, never reasons"]
     places_db[("districts.json · admin_districts.json<br/>gazetteer snapshot")]:::store
-    extract["Extract — system1/extract.py<br/>runs when a case arrives without fields<br/>needs · people · danger · location confidence"]
+    extract["Extract — system1/extract.py<br/>runs when a case arrives without fields<br/>English and Thai needs · people · danger · location confidence"]
     geo_db[("weather_observation.json · flood.geojson<br/>facilities.geojson: 4,218 facilities<br/>Open-Meteo and RID snapshots")]:::store
-    enrich["Enrich — enrich/context.py<br/>matches districts.json, 50 rows, province null<br/>rain · flood polygons · hospitals · shelters<br/>flags only, never changes priority"]
+    enrich["Enrich — enrich/context.py<br/>districts.json first, 50 rows, province null<br/>then admin_districts: Hat Yai · Mueang Songkhla<br/>rain null on admin-only · flags never change priority"]
     memory["Memory — memory/adapter.py<br/>similar cases · past corrections<br/>mock files"]
     mmem["Mubit memory<br/>memory/mubit.py raises"]:::unwired
     grad["Correction escalation — gateway/graduation.py<br/>2 cases with a high-risk human correction on one pattern<br/>tag complex_situation · sets no priority"]
