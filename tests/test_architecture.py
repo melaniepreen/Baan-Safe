@@ -10,7 +10,7 @@ from contracts.models import AidEligibility, Failure, Person
 from eval.correction_loop import run as correction_loop
 from fixtures.load import load_case
 from gateway.route import handle
-from llm.client import complete
+from llm.client import chat_completions_url, complete
 from trace import read_traces
 
 
@@ -77,6 +77,19 @@ def test_llm_refuses_openrouter_and_ignores_its_key(monkeypatch):
     assert "sk-should_not_appear" not in text
     assert "mbt_should_not_appear" not in text
     assert "openrouter.ai" in text
+
+
+def test_compat_openrouter_prefix_is_the_chat_url():
+    assert (
+        chat_completions_url("https://api.mubit.ai/compat/openrouter/v1")
+        == "https://api.mubit.ai/compat/openrouter/v1/chat/completions"
+    )
+    assert (
+        chat_completions_url("https://api.mubit.ai")
+        == "https://api.mubit.ai/openai/v1/chat/completions"
+    )
+    with pytest.raises(RuntimeError, match="not the gateway root"):
+        chat_completions_url("https://api.mubit.ai/openai/v1/models")
 
 
 def test_llm_does_not_call_out_while_provider_route_is_unset(monkeypatch):

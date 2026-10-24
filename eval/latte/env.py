@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from urllib.parse import urlparse, urlunparse
 
 from config.settings import UNSET
@@ -28,11 +29,15 @@ def _is_mubit(host: str) -> bool:
     return host == "api.mubit.ai" or host.endswith(".mubit.ai")
 
 
+_COMPAT_V1 = re.compile(r"^/compat/[A-Za-z0-9._-]+/v1$")
+
+
 def map_base(url: str, name: str = "MUBIT_BASE_URL") -> str:
     """Accept the gateway root this repo already uses, or latte-bench's OpenAI prefix.
 
     `https://api.mubit.ai` becomes `https://api.mubit.ai/openai/v1`, which is
-    the base latte-bench appends `/chat/completions` to. A query string is
+    the base latte-bench appends `/chat/completions` to. A compat prefix such
+    as `https://api.mubit.ai/compat/openrouter/v1` is kept. A query string is
     dropped so a key cannot hide in the URL.
     """
     raw = url.strip()
@@ -45,13 +50,14 @@ def map_base(url: str, name: str = "MUBIT_BASE_URL") -> str:
     path = (parsed.path or "").rstrip("/")
     if path.endswith("/chat/completions"):
         mapped = path[: -len("/chat/completions")]
-    elif path.endswith("/openai/v1"):
+    elif path.endswith("/openai/v1") or _COMPAT_V1.match(path):
         mapped = path
     elif path == "":
         mapped = "/openai/v1"
     else:
         raise GatewayEnvError(
-            f"{name} path {path!r} is not the gateway root or the OpenAI prefix."
+            f"{name} path {path!r} is not the gateway root, the OpenAI prefix, "
+            "or a /compat/{service}/v1 prefix."
         )
     return urlunparse(parsed._replace(path=mapped, params="", query="", fragment=""))
 

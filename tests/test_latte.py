@@ -19,6 +19,14 @@ def test_gateway_root_maps_onto_the_openai_prefix():
         map_base("https://api.mubit.ai/openai/v1/chat/completions")
         == "https://api.mubit.ai/openai/v1"
     )
+    assert (
+        map_base("https://api.mubit.ai/compat/openrouter/v1")
+        == "https://api.mubit.ai/compat/openrouter/v1"
+    )
+    assert (
+        map_base("https://api.mubit.ai/compat/openrouter/v1/chat/completions")
+        == "https://api.mubit.ai/compat/openrouter/v1"
+    )
     with pytest.raises(GatewayEnvError, match="not a Mubit host"):
         map_base("https://api.openai.com/v1")
 
