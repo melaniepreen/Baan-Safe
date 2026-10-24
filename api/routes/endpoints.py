@@ -43,11 +43,14 @@ from ingest import store
 from memory.adapter import retrieve, store_correction
 from training.log import append_event
 from mocks.loader import (
+    ResourceUnit,
+    ResourcesSnapshot,
     load_dispatch_resources,
     load_s1_stub,
     read_corrections,
 )
 from paths import ROOT
+from router import ledger
 from system1 import decide as system1
 from system2 import decide as system2
 from trace import emit, read_traces
@@ -135,6 +138,26 @@ class Health(BaseModel):
     status: str
     impl: dict[str, str]
     data_freshness: dict[str, Any]
+
+
+class HoldView(BaseModel):
+    """One ledger hold. API-only — does not change Dispatch / RouterDecision."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    resource_id: str
+    need: str
+    status: Literal["provisional", "confirmed", "released"]
+
+
+class DispatchActionResult(BaseModel):
+    """Case-level confirm or cancel of current ledger holds (HANDOVER #7)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    case_id: str
+    action: Literal["confirmed", "cancelled"]
+    holds: list[HoldView]
 
 
 def _now() -> datetime:
@@ -367,6 +390,54 @@ def case_trace(case_id: str) -> list[TraceEvent]:
     return read_traces(case_id)
 
 
+@router.post(
+    "/cases/{case_id}/dispatches/confirm",
+    response_model=DispatchActionResult,
+)
+def confirm_dispatches(case_id: str) -> DispatchActionResult:
+    """Confirm this case's current ledger holds. Does not mutate RouterDecision."""
+    _require_case(case_id)
+    try:
+        marked = ledger.confirm_case(case_id)
+    except KeyError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=f"no provisional holds for case {case_id}",
+        ) from exc
+    return DispatchActionResult(
+        case_id=case_id,
+        action="confirmed",
+        holds=[
+            HoldView(resource_id=rid, need=need, status="confirmed")
+            for rid, need in sorted(marked)
+        ],
+    )
+
+
+@router.post(
+    "/cases/{case_id}/dispatches/cancel",
+    response_model=DispatchActionResult,
+)
+def cancel_dispatches(case_id: str) -> DispatchActionResult:
+    """Cancel and release this case's ledger holds. Does not mutate RouterDecision."""
+    _require_case(case_id)
+    try:
+        released = ledger.cancel_case(case_id)
+    except KeyError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=f"no holds to cancel for case {case_id}",
+        ) from exc
+    return DispatchActionResult(
+        case_id=case_id,
+        action="cancelled",
+        holds=[
+            HoldView(resource_id=rid, need=need, status="released")
+            for rid, need in sorted(released)
+        ],
+    )
+
+
 @router.get("/context")
 def context(
     district: str | None = None,
@@ -378,9 +449,26 @@ def context(
     return location_context(district, lat, lon)
 
 
+def _with_ledger_availability(snapshot: ResourcesSnapshot) -> ResourcesSnapshot:
+    """Subtract in-process holds so the UI does not always show full stock."""
+
+    def adjust(unit: ResourceUnit) -> ResourceUnit:
+        if unit.available is None:
+            return unit
+        free = max(0, unit.available - ledger.reserved_total(unit.id))
+        return unit.model_copy(update={"available": free})
+
+    return ResourcesSnapshot(
+        boats=[adjust(u) for u in snapshot.boats],
+        ambulances=[adjust(u) for u in snapshot.ambulances],
+        shelters=[adjust(u) for u in snapshot.shelters],
+        welfare_points=[adjust(u) for u in snapshot.welfare_points],
+    )
+
+
 @router.get("/resources")
 def resources():
-    return load_dispatch_resources()
+    return _with_ledger_availability(load_dispatch_resources())
 
 
 def _geojson(path: Path) -> dict:

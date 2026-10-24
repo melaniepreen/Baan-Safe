@@ -72,15 +72,19 @@
     {
       "path": "docs/agents/decision-router.md",
       "title": "Decision router",
-      "summary": "merge() picks the next action and fans out provisional dispatches.",
+      "summary": "merge() picks the next action and fans out provisional dispatches; confirm/cancel and ledger-aware GET /resources.",
       "keywords": [
         "router",
         "merge",
-        "next-action"
+        "next-action",
+        "dispatch",
+        "ledger"
       ],
       "files": [
         "router/merge.py",
-        "gateway/route.py"
+        "router/ledger.py",
+        "gateway/route.py",
+        "api/routes/endpoints.py"
       ]
     },
     {
@@ -214,7 +218,7 @@
     {
       "path": "docs/agents/config-and-decisions.md",
       "title": "Config and decisions",
-      "summary": "decisions.yaml fails loud on TODO_HUMAN. Ten leaves are allowlisted in DECIDED.",
+      "summary": "decisions.yaml fails loud on TODO_HUMAN. Twelve leaves are allowlisted in DECIDED.",
       "keywords": [
         "config",
         "decisions",

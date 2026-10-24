@@ -119,6 +119,57 @@ def test_context_resources_maps(client):
     assert facilities.status_code == 200 and facilities.json()["features"]
 
 
+def _welfare_available(client) -> int:
+    units = {
+        unit["id"]: unit["available"]
+        for unit in client.get("/resources").json()["welfare_points"]
+    }
+    return units["welfare-fictional-01"]
+
+
+def test_confirm_and_cancel_dispatches(client):
+    before = _welfare_available(client)
+    client.post("/cases", json={"fixture_id": "F01"})
+    turned = client.post(
+        "/cases/F01/turns",
+        json={"t_ms": 90000, "speaker": "operator", "text": "Dispatch water desk."},
+    )
+    assert turned.status_code == 200
+    decision = turned.json()["decision"]
+    assert decision["next_action"] == "create_provisional_dispatch"
+    assert decision["dispatches"]
+    rid = decision["dispatches"][0]["resource_id"]
+    assert rid == "welfare-fictional-01"
+    assert _welfare_available(client) == before - 1
+
+    confirmed = client.post("/cases/F01/dispatches/confirm")
+    assert confirmed.status_code == 200
+    body = confirmed.json()
+    assert body["action"] == "confirmed"
+    assert body["holds"] == [
+        {"resource_id": rid, "need": "water", "status": "confirmed"}
+    ]
+    assert _welfare_available(client) == before - 1
+
+    cancelled = client.post("/cases/F01/dispatches/cancel")
+    assert cancelled.status_code == 200
+    assert cancelled.json()["action"] == "cancelled"
+    assert cancelled.json()["holds"][0]["status"] == "released"
+    assert _welfare_available(client) == before
+
+
+def test_confirm_without_holds_is_422(client):
+    client.post("/cases", json={"fixture_id": "F05"})
+    response = client.post("/cases/F05/dispatches/confirm")
+    assert response.status_code == 422
+    assert "no provisional holds" in response.json()["detail"]
+
+
+def test_cancel_unknown_case_is_404(client):
+    response = client.post("/cases/missing/dispatches/cancel")
+    assert response.status_code == 404
+
+
 def test_replay_and_metrics(client):
     replay = client.post("/replay", json={"fixture_ids": ["F01", "F10"], "s1_impl": "stub", "s2_impl": "stub"})
     assert replay.status_code == 200
