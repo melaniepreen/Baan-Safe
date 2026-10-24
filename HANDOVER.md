@@ -47,10 +47,10 @@ Owners stay as in `OWNERSHIP.md`. Contracts are `v0.3-contracts`.
 ### Consistency
 
 10. **Two graduation paths disagree.** Correction graduation (`gateway/graduation.py`) never moves a pattern into System 1. The RL loop (`eval/rl/learner.py` with `RL_OVERLAY`) writes System 1 rules. A person should confirm which story the demo tells. An agent also set `routing.yaml` `mode: cascade` and `system2.max_latency_ms`, and AGENTS.md invariant 2 says humans set decisions. Moly chose `system2.orchestrator_model` `nvidia/nemotron-3-nano-30b-a3b` on 24 Oct 2026.
-11. **The town shows outdated text.** `sim.js` still says `gateway.route_chooser` and `system2.orchestrator_model` are `TODO_HUMAN`. `ui/sim/data/sim_events.json` `learning.promote_after` is 3 and tells a promote-into-System-1 story.
-12. **`G01`–`G04` labels still say System 1.** `rescue` sends them to System 2. `mocks/s2_stub/G01.json` still says "pending correction_loop.graduation_threshold". Relabel them or change their need.
+11. **The town shows outdated text.** `sim.js` (and `index.html` / `sim_events.json` under `ui/sim/`) still say `gateway.route_chooser` and `system2.orchestrator_model` are `TODO_HUMAN`. Decided values are `field precheck` and `nvidia/nemotron-3-nano-30b-a3b`. Left for the wire-frontend agent after PR9 — do not large-edit `sim.js` here. `ui/sim/data/sim_events.json` `learning.promote_after` is 3 and tells a promote-into-System-1 story.
+12. **`G01`–`G04` labels (done).** `expected.system` is `system_2` to match the rescue precheck; s2 stub copy no longer says graduation_threshold is pending.
 13. **Modal limits.** `GET /rl/run` is 404 there because `.dockerignore` excludes `eval/out`. Stock holds live in one container's memory.
-14. **The map and the data are different places.** The town draws Sukhumvit, Watthana. Fixtures and `data/snapshots/places.json` are Lampang, Phrae, Nan, and Phayao. `data.demo_event` is `TODO_HUMAN`.
+14. **Geography story (decided).** `data.demo_event` is `Hat Yai / Songkhla` (allowlisted in `DECIDED`) so GISTDA/enrichment can light up. The local-metre town may still draw Sukhumvit; fixture households may stay Lampang/Phrae/Nan/Phayao until a follow-up moves basemap or call locations.
 15. **Ownership.** `9da21c7` changed Melanie's `system2/orchestrator.py` and `system2/decide.py`. Melanie should review them.
 
 ### Conflicting decision logic
@@ -98,10 +98,7 @@ Owners stay as in `OWNERSHIP.md`. Contracts are `v0.3-contracts`.
     - It gives the nearest hospitals with distances (F10: Sung Men Hospital, 3.8 km) and candidate shelters (real schools and temples) for all 22 fixtures with a usable district.
     - It also gives 24-hour rain, the forecast, reservoirs for Lampang, Phrae, Nan, and Phayao, and source freshness.
     - The UI shows none of it. The router does not use it: a dispatch could name the nearest real hospital or shelter.
-30. **The live water is where no call happens.** All 228 GISTDA 7-day and 30-day polygons are in Songkhla.
-    - The nearest is 1,237 km from any fixture.
-    - All 22 resolvable fixtures have no flood flag and at most 0.5 mm of rain, so enrichment does nothing in the demo.
-    - The Hat Yai flood of November 2025 (EOS-RS polygon) is in the database with no calls. Songkhla fixtures, or `data.demo_event` = Hat Yai, would light it up.
+30. **The live water is where no call happens (partially decided).** All 228 GISTDA 7-day and 30-day polygons are in Songkhla. `data.demo_event` is now `Hat Yai / Songkhla`. Fixture call locations are still northern (~1,237 km away), so enrichment on current fixtures stays dry until calls or the town move to Songkhla / Hat Yai. The Hat Yai flood of November 2025 (EOS-RS polygon) is in the database ready for that move.
 31. **The flood flag tests one point per district.** Thepha has 120 live polygons whose centres are within 5 km of its own. It still reads as dry: its centre is 2.4 km from water, and the buffer is 500 m. Test the district area or a wider radius.
 32. **Enrichment gazetteer fallback (done).** `_match_district` prefers `districts`, then `admin_districts`, so Hat Yai / Mueang Songkhla resolve a point and facilities. Weather gauge rows still only cover the 50 `districts` `location_id`s; admin-only names use snapshot rain / null rain.
 33. **Flood history is unused.** `disaster_report` names Nan in 9 events, Lampang in 7, Phrae in 6, and Songkhla in 3. That is a "past floods here" line, or System 2 evidence.

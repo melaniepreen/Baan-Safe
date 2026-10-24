@@ -5,7 +5,7 @@
 # system2.hosting, llm.provider_route, gateway.route_chooser,
 # system1.extraction_method, system2.orchestrator_model,
 # system2.max_latency_ms, correction_loop.graduation_threshold, and
-# correction_loop.escalation_threshold.
+# correction_loop.escalation_threshold, and data.demo_event.
 system1:
   extraction_method: rules-only      # decided: keyword rules in system1/extract.py; extraction_model stays TODO_HUMAN
   extraction_model: TODO_HUMAN       # only if a model is used
@@ -36,7 +36,7 @@ speech_to_text:
 ui:
   framework: TODO_HUMAN
 data:
-  demo_event: TODO_HUMAN             # which flood event / provinces anchor the demo
+  demo_event: Hat Yai / Songkhla     # decided: GISTDA/enrichment flood story (HANDOVER #14/#30); town basemap may still draw Sukhumvit until UI moves
   production_db: TODO_HUMAN          # committed JSON in data/processed tonight
 correction_loop:
   graduation_threshold: 2            # decided: matching S2 decisions before a pattern graduates to a System 1 rule (RL loop, eval/rl/); P1 and complex patterns become recommendations instead

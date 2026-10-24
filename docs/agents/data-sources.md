@@ -63,4 +63,4 @@ Keyword extraction matches Thai and English district names from the gazetteer. `
 
 ## Open TODO_HUMAN keys
 
-This catalogue does not set a leaf in `config/decisions.yaml`. `data.demo_event` and `data.production_db` stay `TODO_HUMAN`. `GISTDA_API_KEY` is an environment variable, not a decision leaf.
+This catalogue does not invent leaf values. `data.demo_event` is decided (`Hat Yai / Songkhla`). `data.production_db` stays `TODO_HUMAN`. `GISTDA_API_KEY` is an environment variable, not a decision leaf.

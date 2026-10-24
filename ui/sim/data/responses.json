@@ -1,5 +1,5 @@
 {
-  "framing": "Sukhumvit block in Watthana, drawn in local metres. data.demo_event is still TODO_HUMAN. The HDX set eos-rs-thailand-flood-bangkok-sep-2026 is listed in data/SOURCES.md and was not fetched. Household location_label stays the fixture district. flood.json is local metres, not that Bangkok map.",
+  "framing": "Sukhumvit block in Watthana, drawn in local metres. data.demo_event is Hat Yai / Songkhla (flood enrichment). Household location_label stays the fixture district. flood.json is local metres, not a Songkhla map.",
   "policy_source": "config/priorities.yaml",
   "suggestion_source": "research/thai-flood-management.md",
   "suggestion_label": "Suggestion for the demo, not repo policy. The research note says it is not a procedure for BaanSafe.",

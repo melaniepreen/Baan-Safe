@@ -51,7 +51,7 @@ Non-goals for this plan: Melanie’s caseworker view, a React/Vue app (`ui.frame
 
 5. **Demote the page-local chooser.** Label it demo-only or remove keyword → fixture mapping once free-text create works. Do not present it as `route_chooser`.
 6. **Rulebook as overlay, not authority.** If the table stays for teaching, mark rows that disagree with `dispatches`. Vehicle motion should follow provisional dispatches.
-7. **Geography.** Either set `data.demo_event` (e.g. Hat Yai / Songkhla so GISTDA floods light up) or move the town basemap toward fixture provinces (Lampang, Phrae, Nan, Phayao). Sukhumvit + northern fixtures will keep enrichment looking empty.
+7. **Geography (decided).** `data.demo_event` is `Hat Yai / Songkhla` so GISTDA/enrichment can light up (HANDOVER #14/#30). The local-metre town may still draw Sukhumvit and fixture households may stay northern until a follow-up moves the basemap or call locations; enrichment for Hat Yai / Songkhla is the demo flood story.
 8. **Stock.** Prefer ledger-aware availability once an endpoint exposes holds; until then, do not treat `GET /resources` as live stock after a dispatch.
 
 ### P2 — Endpoints and data the UI never calls
@@ -100,7 +100,7 @@ Leave alone unless named: `frontend-prototype/**`, trained-model loading, `count
 2. Dispatches → town.  
 3. `location_context` panel.  
 4. Demote rulebook / chooser / `sim_events` learning story.  
-5. Geography or `demo_event` so enrichment is visible.  
+5. Surface Hat Yai / Songkhla enrichment (decided `data.demo_event`); move basemap/fixtures later if the town must match.  
 6. Metrics / history / policies / replay as thin panels.  
 7. Map GeoJSON only if the basemap decision is settled.
 

@@ -1669,17 +1669,14 @@ def main() -> None:
             "id": "synthetic-operator-block",
             "title": "Sukhumvit block, Watthana",
             "district_anchor": (
-                "Fixture households stay labelled with their district (Lampang, Phrae, Nan, Phayao). "
-                "data.demo_event is still TODO_HUMAN. Drawn streets use Sukhumvit names in local metres."
+                "data.demo_event is Hat Yai / Songkhla (GISTDA/enrichment). "
+                "Fixture households stay labelled northern (Lampang, Phrae, Nan, Phayao). "
+                "Drawn streets use Sukhumvit names in local metres."
             ),
             "disclaimer": (
                 "Local-metre picture of streets around Soi Sukhumvit 49 in Watthana, Bangkok. Not a cadastral survey. "
-                "EOS-RS eos-rs-thailand-flood-bangkok-sep-2026 is listed in data/SOURCES.md and was not fetched. "
-                "Household location_label stays the fixture district. Plots are local metres, not home addresses. "
-                "Wat That Thong stands on Thanon Sukhumvit beside BTS Ekkamai; this block draws the compound on the south side of the drawn road. "
-                "Khlong Saen Saep is drawn along the west edge. "
-                "Access lanes link each call house to the nearest clear street or canal. "
-                "data.demo_event is still TODO_HUMAN."
+                "data.demo_event is Hat Yai / Songkhla for flood visibility; this block is still Sukhumvit until the basemap moves. "
+                "Household location_label stays the fixture district. Plots are local metres, not home addresses."
             ),
             "projection": "fixed isometric 2:1. x east, y south toward the camera. z up.",
             "camera": {"look_at": [186, 214], "zoom_px_per_m": 5.6},

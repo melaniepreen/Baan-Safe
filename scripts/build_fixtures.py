@@ -554,7 +554,7 @@ def build() -> list[dict]:
     ]
     for index, (fid, district, line) in enumerate(variations):
         graduation.append(scenario(
-            fid, "Graduated pattern: door, ground floor, elderly", ["graduation", "system_1", "rescue"],
+            fid, "Graduated pattern: door, ground floor, elderly", ["graduation", "system_2", "rescue"],
             [
                 ("caller", line),
                 ("operator", "Is this a ground-floor place, and is the elderly person mobile?"),
@@ -568,8 +568,10 @@ def build() -> list[dict]:
                 location=district, location_confidence=0.91, people_count=2,
                 vulnerable=["elderly"], danger=["rising_water"], needs=["rescue"],
             ),
-            expect("system_1", "P1", "rescue_coordination", ["rescue"], True),
-            "Illustrative S1 label after this pattern graduates. graduation_threshold in config/decisions.yaml is still TODO_HUMAN, so no rule was implemented. The stub only echoes this label.",
+            expect("system_2", "P1", "rescue_coordination", ["rescue"], True, ["water_depth"]),
+            "rescue need routes to System 2 via field precheck (needs_any). "
+            "Label matches live routing; RL graduation into System 1 is a separate path "
+            "(correction_loop.graduation_threshold=2).",
             f"synthetic:{fid.lower()}", hour=7 + index,
         ))
     return rows, graduation

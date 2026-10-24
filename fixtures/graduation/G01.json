@@ -3,7 +3,7 @@
   "title": "Graduated pattern: door, ground floor, elderly",
   "tags": [
     "graduation",
-    "system_1",
+    "system_2",
     "rescue"
   ],
   "transcript_stream": [
@@ -104,15 +104,17 @@
     "received_at": "2026-10-23T07:15:00Z"
   },
   "expected": {
-    "system": "system_1",
+    "system": "system_2",
     "priority": "P1",
     "route": "rescue_coordination",
     "needs": [
       "rescue"
     ],
     "requires_human": true,
-    "missing_evidence": [],
+    "missing_evidence": [
+      "water_depth"
+    ],
     "acceptable_next_questions": []
   },
-  "notes": "Illustrative S1 label after this pattern graduates. graduation_threshold in config/decisions.yaml is still TODO_HUMAN, so no rule was implemented. The stub only echoes this label."
+  "notes": "rescue need routes to System 2 via field precheck (needs_any). Label matches live routing; RL graduation into System 1 is a separate path (correction_loop.graduation_threshold=2)."
 }

@@ -38,8 +38,10 @@ One turn: enrich, retrieve memory, record a policy pre-check, route by the field
 - In: `CaseState`, optional `overlay`. Out of `handle`: `RouterDecision` with `source_outcomes` = [deciding outcome, *prior]. A cascade puts `[system_2, system_1]`.
 - `choose_system` returns the entry-point system via the field precheck (`route_to_system_2_if_any` in `config/escalation.yaml`). An `learned:demoted` overlay entry adds a demotion trigger. Trigger names land on the gateway trace note.
 - Before enrichment, `_extract` runs `system1/extract.py` when fields are empty or `keyword_extraction` is already in `policy_flags`. Fixture cases carry hand-filled fields and are never extracted.
-- `complete(messages, model, max_tokens, *, timeout, temperature, seed, reasoning)` posts to the Mubit chat URL only after the host check and `llm.provider_route` (`mubit`). Compat prefix `…/compat/openrouter/v1` maps to `…/chat/completions`. `temperature`, `seed`, and `reasoning` are sent only when set.
-- `make_client()` returns `OpenAI(base_url=MUBIT_BASE_URL, api_key=MUBIT_API_KEY)`.
+- `complete(messages, model, max_tokens, *, timeout, temperature, seed, reasoning, case_id)` posts to the Mubit chat URL only after the host check and `llm.provider_route` (`mubit`). Compat prefix `…/compat/openrouter/v1` maps to `…/chat/completions`. `temperature`, `seed`, and `reasoning` are sent only when set. Every socket attempt emits TraceEvent stage `mubit_chat` (model, `latency_ms`, `notes` with `status=ok` / `status=http_429` / other). Config refusals before a socket do not emit.
+- `make_client()` returns `OpenAI(base_url=MUBIT_BASE_URL, api_key=MUBIT_API_KEY)`. `openai_client.chat` is the SDK path with the same `mubit_chat` emit.
+- `handle` emits `enrich`, `memory`, `gateway`, system stage(s), and `router`. S2 real path: `mubit_chat` from `llm.complete`, then `system_2`.
+- `GET /metrics` includes `mubit_chat.call_count`, `ok_count`, `error_count`, `avg_latency_ms`, and `models` so a judge can see hops through Mubit.
 
 ## Invariants
 
@@ -56,11 +58,12 @@ One turn: enrich, retrieve memory, record a policy pre-check, route by the field
 - `make test` — `tests/test_gateway_and_replay.py`, `tests/test_architecture.py`.
 - `make demo-stub` — `python -m gateway`.
 - Host refusal: `tests/test_architecture.py` (`test_llm_refuses_openrouter_and_ignores_its_key`).
-- Live smoke: `python scripts/smoke_mubit.py` with `.env` set (lists models; never prints the key).
+- Live smoke: `python scripts/smoke_mubit.py` with `.env` set (lists models; never prints the key). Optional connectivity check only; chat tracing is covered by unit tests that mock httpx.
+- Mubit chat traces: `tests/test_mubit_trace.py` (mocked httpx; no live network).
 
 ## Common pitfalls
 
-- Expecting `expected.system` to drive routing. The precheck runs for fixtures too; G01–G04 therefore route to System 2 (`rescue` is a trigger) even though their labels say system_1.
+- Expecting `expected.system` to drive routing. The precheck runs for fixtures too; G01–G04 are labelled `system_2` because `rescue` is a `needs_any` trigger.
 - Adding a second HTTP client for OpenRouter. `system2.hosting` is already `openrouter via mubit gateway`.
 - Evaluating `config/escalation.yaml` inside `gateway/route.py`. `scripts/validate.py` fails if `fields.medical` or `oxygen_dependent` appears there.
 - Printing the bearer token in an exception.
