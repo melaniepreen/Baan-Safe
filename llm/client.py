@@ -8,18 +8,26 @@ https://api.mubit.ai/compat/openrouter/v1 is posted to as
 This module does not read OPENROUTER_API_KEY and it does not call
 openrouter.ai. It never prints the key. llm.provider_route is mubit.
 A call still needs system2.orchestrator_model.
+
+Each successful or failed chat POST emits a TraceEvent stage `mubit_chat`
+(model, latency_ms, status class). Config refusals before a socket opens
+do not emit.
 """
 
 from __future__ import annotations
 
 import os
 import re
+from datetime import datetime, timezone
+from time import perf_counter
 from typing import Any
 from urllib.parse import urlparse, urlunparse
 
 import httpx
 
 from config.settings import DecisionRequired, require_decision
+from contracts.models import TraceEvent
+from trace import emit
 
 _MUBIT_HOSTS = ("api.mubit.ai",)
 _COMPAT_V1 = re.compile(r"^/compat/[A-Za-z0-9._-]+/v1$")
@@ -80,6 +88,32 @@ def _require_mubit_host(base: str) -> str:
     return host
 
 
+def emit_mubit_chat_trace(
+    *,
+    case_id: str,
+    model: str | None,
+    latency_ms: int,
+    status: str,
+    host: str,
+    tokens_in: int | None = None,
+    tokens_out: int | None = None,
+    started_at: datetime | None = None,
+) -> None:
+    """Append one mubit_chat TraceEvent. Never include a key or bearer."""
+    emit(
+        TraceEvent(
+            case_id=case_id or "mubit",
+            stage="mubit_chat",
+            started_at=started_at or datetime.now(timezone.utc),
+            latency_ms=max(0, latency_ms),
+            tokens_in=tokens_in,
+            tokens_out=tokens_out,
+            model=model,
+            notes=f"mubit chat host={host} status={status}",
+        )
+    )
+
+
 def complete(
     messages: list[dict[str, str]],
     model: str | None = None,
@@ -89,15 +123,17 @@ def complete(
     temperature: float | None = None,
     seed: int | None = None,
     reasoning: dict | None = None,
+    case_id: str | None = None,
 ) -> dict[str, Any]:
     """POST a chat completion to the Mubit OpenAI-compatible prefix.
 
     Raises before any socket is opened when the URL, the key, the host, or
     llm.provider_route is missing. The key is not included in the error.
+    A socket attempt always records a `mubit_chat` trace (ok or error class).
     """
     base = _base_url()
     key = _api_key()
-    _require_mubit_host(base)
+    host = _require_mubit_host(base)
     try:
         require_decision("llm.provider_route")
     except DecisionRequired:
@@ -119,14 +155,54 @@ def complete(
         body["seed"] = seed
     if reasoning is not None:
         body["reasoning"] = reasoning
-    response = httpx.post(
-        url,
-        headers={
-            "Authorization": f"Bearer {key}",
-            "Content-Type": "application/json",
-        },
-        json=body,
-        timeout=timeout,
-    )
-    response.raise_for_status()
-    return response.json()
+
+    started_at = datetime.now(timezone.utc)
+    t0 = perf_counter()
+    status = "ok"
+    tokens_in: int | None = None
+    tokens_out: int | None = None
+    try:
+        response = httpx.post(
+            url,
+            headers={
+                "Authorization": f"Bearer {key}",
+                "Content-Type": "application/json",
+            },
+            json=body,
+            timeout=timeout,
+        )
+        code = response.status_code
+        if code == 429:
+            status = "http_429"
+        elif code >= 400:
+            status = f"http_{code}"
+        response.raise_for_status()
+        data = response.json()
+        usage = data.get("usage") if isinstance(data, dict) else None
+        if isinstance(usage, dict):
+            prompt = usage.get("prompt_tokens")
+            completion = usage.get("completion_tokens")
+            tokens_in = int(prompt) if prompt is not None else None
+            tokens_out = int(completion) if completion is not None else None
+        return data
+    except httpx.HTTPStatusError as exc:
+        code = exc.response.status_code
+        status = "http_429" if code == 429 else f"http_{code}"
+        raise
+    except httpx.TimeoutException:
+        status = "timeout"
+        raise
+    except httpx.HTTPError:
+        status = "transport_error"
+        raise
+    finally:
+        emit_mubit_chat_trace(
+            case_id=case_id or "mubit",
+            model=model,
+            latency_ms=int((perf_counter() - t0) * 1000),
+            status=status,
+            host=host,
+            tokens_in=tokens_in,
+            tokens_out=tokens_out,
+            started_at=started_at,
+        )

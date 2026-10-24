@@ -145,7 +145,7 @@ Produced by the gateway after a decision. Consumed by Mubit's write path (Melani
 
 ## TraceEvent
 
-Produced by the Mubit gateway at each stage (`gateway`, `system_1`, `system_2`, `router`, `memory_write`). Consumed by audit and `GET /metrics`. Appended to `traces.jsonl` by `trace.py`. `outcome` is optional. When System 1 or System 2 runs, that stage's event carries the outcome on its own. Older lines without `outcome` still validate. `model_version` is set by the correction-loop replay stub.
+Produced by the Mubit gateway at each stage (`gateway`, `enrich`, `memory`, `system_1`, `system_2`, `mubit_chat`, `router`, `memory_write`). Consumed by audit and `GET /metrics`. Appended to `traces.jsonl` by `trace.py`. `outcome` is optional. When System 1 or System 2 runs, that stage's event carries the outcome on its own. Older lines without `outcome` still validate. `model_version` is set by the correction-loop replay stub. Every LLM hop emits `mubit_chat` (model id, `latency_ms`, `notes` with `status=ok` / `status=http_429` / other error class). The API key and bearer token never appear in notes or exceptions.
 
 ## Ontology (v0.2)
 

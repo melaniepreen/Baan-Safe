@@ -179,7 +179,16 @@ class MemoryRecord(_Model):
 
 class TraceEvent(_Model):
     case_id: str = Field(min_length=1)
-    stage: Literal["gateway", "system_1", "system_2", "router", "memory_write"]
+    stage: Literal[
+        "gateway",
+        "enrich",
+        "memory",
+        "system_1",
+        "system_2",
+        "mubit_chat",
+        "router",
+        "memory_write",
+    ]
     started_at: datetime
     latency_ms: int = Field(ge=0)
     tokens_in: int | None = Field(default=None, ge=0)
