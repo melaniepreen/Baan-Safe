@@ -1,0 +1,408 @@
+# Thailand, the default and the demo. This file describes the code on main.
+# It is not loaded. No route, keyword, corpus file, or hotline changes
+# because this file exists.
+# Inventory of the assumptions: docs/agents/country-packs.md
+# Provider shapes: countries/TEMPLATE/providers.yaml
+
+schema_version: baansafe.country_pack.v0
+runtime: unloaded
+iso2: th
+iso3: THA
+name_en: Thailand
+default_demo: true
+
+locale:
+  languages:
+    - code: th
+      script: Thai
+      role: caller language and label language
+      verification:
+        status: verified
+        source_url: null
+        retrieved: "2026-10-24"
+        note: >
+          In-repo. policies/schema.py LANGS is en and th.
+          contracts/training.py Lang is th, en, or mixed.
+          policies/system1_labels.yaml carries Thai hypotheses.
+          The extractor does not read Thai. See system1/extract.py.
+    - code: en
+      script: Latin
+      role: fast-path language and the Sapling language that is allowed today
+      verification:
+        status: verified
+        source_url: null
+        retrieved: "2026-10-24"
+        note: system1/extract.py is English-only. Sapling refuses any other language while sapling.thai_handling is TODO_HUMAN.
+  timezone:
+    iana: Asia/Bangkok
+    verification:
+      status: verified
+      source_url: null
+      retrieved: "2026-10-24"
+      note: >
+        In-repo. ingest/open_meteo.py uses ZoneInfo("Asia/Bangkok") for
+        "today" and sends timezone=Asia/Bangkok on the forecast and archive calls.
+  currency:
+    code: THB
+    name_en: baht
+    minor_unit: null
+    verification:
+      status: verified
+      source_url: https://plan.doae.go.th/wp-content/uploads/2026/04/หลักเกณฑ์-ปี-69.pdf
+      retrieved: "2026-10-24"
+      note: >
+        The MoF criteria in policies/mof_relief.yaml state amounts in baht.
+        The ISO code THB is the code this pack uses for that name. The PDF
+        was not re-fetched for the alphabetic code. Aid eligibility does not
+        read a figure. The prototype formats a baht sign; that figure is simulated.
+  units:
+    rain: mm
+    distance: km
+    wind: kmh
+    temperature: celsius
+    area_in_aid_corpus: rai
+    verification:
+      status: verified
+      source_url: null
+      retrieved: "2026-10-24"
+      note: >
+        In-repo. config/escalation.yaml flags rain in mm per 24 hours.
+        config/ingest.yaml matches districts in km. ingest/open_meteo.py
+        requests wind_speed_unit kmh. Open-Meteo temperature default is celsius.
+        policies/mof_relief.yaml caps some farm help in rai. No rai-to-square-metre
+        conversion is stored.
+  phone:
+    country_code: "66"
+    national_prefix: "0"
+    description: >
+      The scanners match a Thailand-shaped number and redact it. They are
+      not a dial plan. A short public code such as 1669 does not match them.
+    verification:
+      status: verified
+      source_url: null
+      retrieved: "2026-10-24"
+      note: >
+        In-repo. scripts/validate.py and ingest/textutil.py use +66 or a
+        leading 0. A 13-digit run is treated as a national id. The token
+        PromptPay is banned in fixtures. Do not put an example number in a fixture.
+
+hotlines:
+  - service: medical
+    name: Narenthorn EMS Center
+    number: "1669"
+    wired: false
+    where_it_appears: policies/triage.yaml rule NIEMS-1669-PATH
+    verification:
+      status: verified
+      source_url: https://www.thailand.go.th/issue-focus-detail/003_003
+      retrieved: "2026-10-24"
+      note: >
+        The government list titles this row Narenthorn EMS Center, telephone 1669.
+        The NIEM slide already in policies/triage.yaml shows the public entry
+        as telephone 1669. Slide URL:
+        https://www.nstda.or.th/nac/2013/download/presentation/Set4/NT-106-02/04Pairoj.pdf
+        The router does not dial it.
+
+  - service: disaster
+    name: public flood-help line advertised with 1567
+    number: "1784"
+    wired: false
+    where_it_appears: ui/sim/data/responses.json suggestion text, and research/thai-flood-management.md
+    verification:
+      status: verified
+      source_url: https://prd.go.th/main/article/6ddb9b3d-e483-45db-a3eb-189085793ee5
+      retrieved: "2026-10-24"
+      note: >
+        The Government Public Relations Department article of 23 August 2024
+        (B.E. 2567) tells the public to call 1567 or 1784, free, 24 hours,
+        for help in the water situation. The research note names a department
+        for 1784 and cites a page on disaster.go.th. This pack does not repeat
+        that URL and does not add that department as a data source.
+        The router does not dial 1784.
+
+  - service: other
+    name: Damrongdhama Center of the Ministry of Interior
+    number: "1567"
+    wired: false
+    where_it_appears: ui/sim/data/responses.json, named together with 1784
+    verification:
+      status: verified
+      source_url: https://www.thailand.go.th/issue-focus-detail/003_003
+      retrieved: "2026-10-24"
+      note: >
+        The government emergency list titles 1567 as the Damrongdhama Center.
+        The same PRD article as 1784 tells people to call 1567 or 1784 for
+        flood help. The router does not dial it.
+
+  - service: police
+    name: Emergency report
+    number: "191"
+    wired: false
+    where_it_appears: not in the runtime, the corpus, or the town copy
+    verification:
+      status: verified
+      source_url: https://www.thailand.go.th/issue-focus-detail/003_003
+      retrieved: "2026-10-24"
+      note: >
+        The government list titles 191 as Emergency Report.
+        The police centre's own page titles the hotline 191:
+        https://www.191.go.th/th
+        The numbering bureau lists 191 under the Royal Thai Police:
+        https://numbering.nbtc.go.th/FixedExistingNumber/198/205.aspx
+        Not referenced by code.
+
+  - service: fire
+    name: Fire
+    number: "199"
+    wired: false
+    where_it_appears: not in the runtime, the corpus, or the town copy
+    verification:
+      status: verified
+      source_url: https://www.thailand.go.th/issue-focus-detail/003_003
+      retrieved: "2026-10-24"
+      note: >
+        The government list titles 199 as Sri Ayutthaya Fire Center / fire alarm.
+        The numbering bureau's three-digit table assigns 199 to the Bangkok
+        fire police. National coverage is not settled by that row alone:
+        https://numbering.nbtc.go.th/FixedExistingNumber/198/205.aspx
+        Not referenced by code.
+
+triage_scale:
+  id: niems-color-2013-slides
+  wired_into_decide: false
+  note: >
+    Five colour names are in policies/triage.yaml from a 2013 NIEM slide.
+    system1/decide.py maps needs onto P2, P3, and P4 and escalates medical
+    and rescue. It never reads a colour. The P1–P4 column below is a
+    hypothesis lined up with config/priorities.yaml. mapping_status stays
+    unverified. Black on the slide is "no patient". A Khon Kaen case study
+    calls black a false call. Those two texts are not the same rule.
+  levels:
+    - id: red
+      label_en: Life-threatening emergency, immediate
+      source_rule: NIEMS-COLOR-RED
+      baansafe_priority: P1
+      mapping_status: unverified
+      verification:
+        status: verified
+        source_url: https://www.nstda.or.th/nac/2013/download/presentation/Set4/NT-106-02/04Pairoj.pdf
+        retrieved: "2026-10-24"
+        note: Colour text is verified in the corpus. The P1 assignment is not in the slide.
+    - id: yellow
+      label_en: Urgent emergency, after red
+      source_rule: NIEMS-COLOR-YELLOW
+      baansafe_priority: P2
+      mapping_status: unverified
+      verification:
+        status: verified
+        source_url: https://www.nstda.or.th/nac/2013/download/presentation/Set4/NT-106-02/04Pairoj.pdf
+        retrieved: "2026-10-24"
+        note: Colour text is verified. The P2 assignment is not in the slide.
+    - id: green
+      label_en: Emergency that is not severe, after yellow
+      source_rule: NIEMS-COLOR-GREEN
+      baansafe_priority: P3
+      mapping_status: unverified
+      verification:
+        status: verified
+        source_url: https://www.nstda.or.th/nac/2013/download/presentation/Set4/NT-106-02/04Pairoj.pdf
+        retrieved: "2026-10-24"
+        note: Colour text is verified. The P3 assignment is not in the slide.
+    - id: white
+      label_en: General patient, elsewhere or after green
+      source_rule: NIEMS-COLOR-WHITE
+      baansafe_priority: P4
+      mapping_status: unverified
+      verification:
+        status: verified
+        source_url: https://www.nstda.or.th/nac/2013/download/presentation/Set4/NT-106-02/04Pairoj.pdf
+        retrieved: "2026-10-24"
+        note: Colour text is verified. The P4 assignment is not in the slide.
+    - id: black
+      label_en: No patient, another time or another place
+      source_rule: NIEMS-COLOR-BLACK
+      baansafe_priority: null
+      mapping_status: unverified
+      verification:
+        status: verified
+        source_url: https://www.nstda.or.th/nac/2013/download/presentation/Set4/NT-106-02/04Pairoj.pdf
+        retrieved: "2026-10-24"
+        note: >
+          The slide does not call this a resuscitation category. No BaanSafe
+          priority is assigned. Flood depth and a trapped caller have no
+          verified colour. See FLOOD-WATER-DEPTH and FLOOD-TRAPPED-DISPATCH.
+
+admin:
+  levels:
+    - id: province
+      name_en: Province
+      name_local: จังหวัด
+      osm_admin_level: 4
+      cod_ab_level: 1
+      verification:
+        status: verified
+        source_url: https://wiki.openstreetmap.org/wiki/Thailand/Places_and_Boundaries
+        retrieved: "2026-10-24"
+        note: OSM wiki, provincial administration. COD-AB admin 1 is Province on the HDX page.
+    - id: district
+      name_en: District
+      name_local: อำเภอ
+      osm_admin_level: 6
+      cod_ab_level: 2
+      also_called: amphoe
+      verification:
+        status: verified
+        source_url: https://wiki.openstreetmap.org/wiki/Thailand/Places_and_Boundaries
+        retrieved: "2026-10-24"
+        note: >
+          This is the grain the code loads. Bangkok uses khet at the same
+          OSM level on that wiki page. The code does not special-case Bangkok.
+    - id: subdistrict
+      name_en: Subdistrict
+      name_local: ตำบล
+      osm_admin_level: 8
+      cod_ab_level: 3
+      also_called: tambon
+      loaded: false
+      verification:
+        status: verified
+        source_url: https://wiki.openstreetmap.org/wiki/Thailand/Places_and_Boundaries
+        retrieved: "2026-10-24"
+        note: The code never queries admin_level 8. Tambon is not a column.
+  gazetteer:
+    grain: district
+    source: overpass
+    query_note: >
+      ingest/admin_districts.py loads admin_level 6 relations whose centre
+      falls inside a province polygon. The province query is
+      ISO3166-2=TH-{code} for the eight codes in config/ingest.yaml:
+      50 Chiang Mai, 51 Lamphun, 52 Lampang, 54 Phrae, 55 Nan, 56 Phayao,
+      57 Chiang Rai, 90 Songkhla. Names are the code's own table.
+      HDX COD-AB is not what the extractor reads.
+    verification:
+      status: verified
+      source_url: https://data.humdata.org/dataset/cod-ab-tha
+      retrieved: "2026-10-24"
+      note: >
+        The HDX page says admin 1 is 77 provinces, admin 2 is 928 districts,
+        admin 3 is 7425 sub-districts (tambon). That dataset is a fallback,
+        not the loaded gazetteer. OSM tagging is the wiki URL on each level.
+
+providers:
+  flood_extent:
+    national:
+      id: gistda-flood
+      wired: true
+      where: ingest/gistda.py
+      verification:
+        status: verified
+        source_url: https://gistdaportal.gistda.or.th/arcgis/rest/services/app/GISTDA_flood/MapServer
+        retrieved: "2026-10-24"
+        note: >
+          Keyed feature paths, already in the client:
+          https://api-gateway.gistda.or.th/api/2.0/resources/features/flood
+          and flood-freq, with windows 1day, 3days, 7days, 30days.
+          The key is GISTDA_API_KEY. This pack does not contain a key.
+          Catalogue: https://opendata.gistda.or.th/dataset/flood-disaster-data
+    global_fallback: copernicus-ems-rapid-mapping
+    forecast_not_used_as_extent: glofas
+
+  rain_and_forecast:
+    national:
+      id: thaiwater-rain-24h
+      wired: true
+      where: ingest/thaiwater.py and enrich/context.py
+      verification:
+        status: verified
+        source_url: https://api-v3.thaiwater.net/api/v1/thaiwater30/public/rain_24h
+        retrieved: "2026-10-24"
+        note: >
+          Public portal JSON. Not the keyed exchange at standard.thaiwater.net.
+          The enricher prefers this gauge over the Open-Meteo archive.
+    global_fallback: open-meteo
+    open_meteo_timezone: Asia/Bangkok
+
+  river_levels:
+    national:
+      id: thaiwater-waterlevel
+      wired: true
+      where: ingest/thaiwater.py
+      verification:
+        status: verified
+        source_url: https://api-v3.thaiwater.net/api/v1/thaiwater30/public/waterlevel_load
+        retrieved: "2026-10-24"
+        note: >
+          The client stores counts by the feed's own situation level.
+          Level 5 in that feed is over bank. Level 1 is critically low.
+          Those numbers are not BaanSafe priorities.
+    global_fallback: glofas
+
+  shelters_and_facilities:
+    national: null
+    wired_global: osm-overpass
+    where: ingest/overpass.py and enrich/context.py
+    global_fallback: hot-export
+    verification:
+      status: verified
+      source_url: https://overpass.openstreetmap.fr/api/interpreter
+      retrieved: "2026-10-24"
+      note: No national facility register is wired. OSM is the loaded source.
+
+  boundaries:
+    national: null
+    wired_global: osm-overpass
+    where: ingest/admin_districts.py
+    global_fallback: hdx-cod-ab
+    also: geoboundaries
+    verification:
+      status: verified
+      source_url: https://data.humdata.org/dataset/cod-ab-tha
+      retrieved: "2026-10-24"
+      note: COD-AB and geoBoundaries are fallbacks. The loaded gazetteer is Overpass.
+
+  stt_asr:
+    national: null
+    wired_global: whisper
+    where: infra/modal/stt_app.py
+    language_default: th
+    model_id: TODO_HUMAN
+    global_fallback: fleurs
+    verification:
+      status: verified
+      source_url: https://github.com/openai/whisper
+      retrieved: "2026-10-24"
+      note: >
+        The Modal app defaults the form language to th and loads whatever
+        STT_MODEL_ID names. modal.stt_model_id is TODO_HUMAN.
+        FLEURS lists Thai in its South-East Asia group and is an eval set:
+        https://huggingface.co/datasets/google/fleurs
+
+aid_policy_corpus:
+  id: policies-local-yaml
+  path: policies/
+  files:
+    - policies/mof_relief.yaml
+    - policies/triage.yaml
+    - policies/sphere.yaml
+    - policies/safeguarding.yaml
+  labels: policies/system1_labels.yaml
+  national_instrument: Ministry of Finance emergency-relief criteria, B.E. 2569
+  verification:
+    status: verified
+    source_url: https://plan.doae.go.th/wp-content/uploads/2026/04/หลักเกณฑ์-ปี-69.pdf
+    retrieved: "2026-10-24"
+    note: >
+      Hosted by the Department of Agricultural Extension. policies/corpus.py
+      loads this set. Jurisdiction TH is assigned by filename in
+      policies/sources/local_yaml.py. The B.E. 2569 date is not converted
+      to a Gregorian ISO date. Sphere and IFRC rows in the same corpus are
+      the international baseline. A separate countries policy file is not
+      needed for Thailand.
+
+system1_labels:
+  path: policies/system1_labels.yaml
+  languages: [en, th]
+  note: >
+    Hypotheses already live in that file, one English sentence and one Thai
+    sentence each. Thai lines are templates unless thai_is_quotation is true.
+    This pack does not copy them.

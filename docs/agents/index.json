@@ -211,6 +211,23 @@
         "ui/correct.js",
         "ui/transcript_player.py"
       ]
+    },
+    {
+      "path": "docs/agents/country-packs.md",
+      "title": "Country packs",
+      "summary": "Unloaded per-country packs. Thailand stays the default and the demo. A new country is files only until the loader refactor.",
+      "keywords": [
+        "country",
+        "locale",
+        "hotline",
+        "gazetteer",
+        "thailand"
+      ],
+      "files": [
+        "countries/TEMPLATE/pack.yaml",
+        "countries/th/pack.yaml",
+        "countries/ph/pack.yaml"
+      ]
     }
   ]
 }

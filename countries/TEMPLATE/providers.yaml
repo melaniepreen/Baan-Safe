@@ -1,0 +1,210 @@
+# Provider interface. One capability, one shape. A country pack binds a
+# national provider, or null, and names which global fallback it accepts.
+# These URLs were retrieved on 2026-10-24. They are not called by this file.
+# Do not add a host that is not listed here without a new retrieved page.
+# Do not fetch ReliefWeb. Do not add DDPM as a source.
+
+schema_version: baansafe.provider_interface.v0
+runtime: unloaded
+retrieved: "2026-10-24"
+
+# Every capability asks for the same fields. A client that does not exist yet
+# would return this object and nothing more. Missing data is null, the same
+# way enrich/context.py already behaves.
+response_fields:
+  - capability
+  - observed_at          # ISO 8601, timezone from the pack, or null
+  - geometry             # GeoJSON, or null when the product is a point
+  - value                # number in the pack's unit, or null
+  - unit
+  - label                # short source label, not a priority
+  - source_id
+  - licence
+  - fresh                # boolean. The caller decides the window.
+
+capabilities:
+
+  flood_extent:
+    purpose: >
+      Observed water on the ground, as a polygon, for the caller's point.
+      A forecast product is not an extent. Keep them on different capabilities.
+    inputs: [lat, lon, time]
+    outputs: [geometry, observed_at, label]
+    unit: null
+    national_slot: true
+    global_fallbacks:
+      - id: copernicus-ems-rapid-mapping
+        kind: observed_extent
+        verification:
+          status: verified
+          source_url: https://mapping.emergency.copernicus.eu/about/how-to-harvest-cems-mapping-data/emergency-response-data/
+          retrieved: "2026-10-24"
+          note: >
+            The harvest page documents activation details at
+            https://rapidmapping.emergency.copernicus.eu/backend/dashboard-api/public-activations/?code={code}
+            where {code} is a Copernicus activation id, not a country code.
+            This pack does not call that URL. Activations exist only where
+            an authorised user requested mapping.
+      - id: glofas
+        kind: river_forecast_not_an_extent
+        verification:
+          status: verified
+          source_url: https://global-flood.emergency.copernicus.eu/general-information/data-and-services/
+          retrieved: "2026-10-24"
+          note: >
+            GloFAS is the Copernicus global flood forecast. The page names
+            four download channels: the Copernicus Early Warning Data Store,
+            ECMWF MARS for operational use, FTP on request, and WMS-T.
+            No layer name is copied here. Do not treat a forecast raster
+            as a flood polygon.
+
+  rain_and_forecast:
+    purpose: >
+      Observed precipitation and a short forecast at a point. The enricher
+      already stores a daily millimetre total and flags 30 mm in 24 hours.
+      That threshold is a starting number in config/escalation.yaml, not a
+      universal flood rule.
+    inputs: [lat, lon, timezone]
+    outputs: [value, unit, observed_at]
+    unit: mm
+    national_slot: true
+    global_fallbacks:
+      - id: open-meteo
+        kind: forecast_and_archive
+        verification:
+          status: verified
+          source_url: https://open-meteo.com/en/docs
+          retrieved: "2026-10-24"
+          note: >
+            Documented forecast endpoint https://api.open-meteo.com/v1/forecast
+            and archive endpoint https://archive-api.open-meteo.com/v1/archive.
+            Daily variables require a timezone parameter. Default precipitation
+            unit is mm. The existing client is ingest/open_meteo.py. robots.txt
+            on those hosts is Disallow: /. config/ingest.yaml already records
+            why the client still calls the documented API. A new country does
+            not get a second client.
+
+  river_levels:
+    purpose: >
+      A measured river or gauge level near the caller. A forecast ensemble
+      is the fallback when the country has no public gauge feed.
+    inputs: [lat, lon, radius_km]
+    outputs: [value, unit, label, observed_at]
+    unit: null
+    national_slot: true
+    global_fallbacks:
+      - id: glofas
+        kind: discharge_forecast
+        verification:
+          status: verified
+          source_url: https://global-flood.emergency.copernicus.eu/general-information/data-and-services/
+          retrieved: "2026-10-24"
+          note: >
+            Same GloFAS page as the flood capability. It publishes forecast
+            discharge, not a national gauge network. There is no global
+            observed-gauge endpoint in this spec.
+
+  shelters_and_facilities:
+    purpose: >
+      Candidate shelters and clinical sites near a point. Today's enricher
+      uses OSM types hospital, clinic, school, place_of_worship, and
+      community_centre. A pack may add types. It may not rank them as the
+      dispatch.
+    inputs: [lat, lon, radius_km, types]
+    outputs: [name, type, lat, lon, distance_km, source_id]
+    unit: km
+    national_slot: true
+    global_fallbacks:
+      - id: osm-overpass
+        kind: live_query
+        verification:
+          status: verified
+          source_url: https://overpass.openstreetmap.fr/api/interpreter
+          retrieved: "2026-10-24"
+          note: >
+            This is the interpreter config/ingest.yaml already uses.
+            overpass-api.de is not used: its robots.txt disallows /api/.
+            Licence is ODbL. Attribute OpenStreetMap contributors.
+      - id: hot-export
+        kind: extract
+        verification:
+          status: verified
+          source_url: https://export.hotosm.org/v3
+          retrieved: "2026-10-24"
+          note: >
+            The HOT Export Tool builds an OSM extract for an area. The
+            product page says an API exists. No API path was copied, because
+            the page did not print one. An export needs an OSM account.
+            https://hotosm.org/en/tools-resources/tech-product-suite/hot-export-tool/
+
+  boundaries:
+    purpose: >
+      Admin polygons and names for the gazetteer. The grain comes from the
+      country pack. Thailand's code asks OSM for admin_level 6 inside a
+      province and does not load a tambon table.
+    inputs: [iso3, admin_level]
+    outputs: [name, name_local, admin_level, geometry, source_id]
+    unit: null
+    national_slot: true
+    global_fallbacks:
+      - id: geoboundaries
+        kind: metadata_api
+        verification:
+          status: verified
+          source_url: https://www.geoboundaries.org/api.html
+          retrieved: "2026-10-24"
+          note: >
+            The page documents one metadata endpoint:
+            https://www.geoboundaries.org/api/current/[RELEASE-TYPE]/[3-LETTER-ISO-CODE]/[BOUNDARY-TYPE]/
+            RELEASE-TYPE is gbOpen, gbHumanitarian, or gbAuthoritative.
+            gbOpen is the CC-BY line they recommend for most users.
+            BOUNDARY-TYPE is ADM0 through ADM5, or ALL. The JSON returns
+            a download path. It does not return a priority.
+      - id: hdx-cod-ab
+        kind: dataset
+        verification:
+          status: verified
+          source_url: https://data.humdata.org/dataset?q=cod-ab
+          retrieved: "2026-10-24"
+          note: >
+            COD-AB is a per-country dataset, not one global file. Cite the
+            country page you opened. Thailand is
+            https://data.humdata.org/dataset/cod-ab-tha
+            (admin 1 province, admin 2 district, admin 3 sub-district / tambon).
+            The search page above is only the catalogue. CKAN package_search
+            is the API the HDX client already uses:
+            https://data.humdata.org/api/3/action/package_search
+
+  stt_asr:
+    purpose: >
+      Turn a caller's audio into text in a pack language. The model id stays
+      a human decision (modal.stt_model_id). FLEURS is an evaluation set,
+      not a transcriber.
+    inputs: [audio, language]
+    outputs: [text, language]
+    unit: null
+    national_slot: true
+    global_fallbacks:
+      - id: whisper
+        kind: model
+        verification:
+          status: verified
+          source_url: https://github.com/openai/whisper
+          retrieved: "2026-10-24"
+          note: >
+            Multilingual speech recognition. The repo already depends on
+            faster-whisper in infra/modal/stt_app.py. The form language
+            defaults to th. A pack language is an argument, not a new model.
+            https://github.com/SYSTRAN/faster-whisper
+      - id: fleurs
+        kind: eval_corpus
+        verification:
+          status: verified
+          source_url: https://huggingface.co/datasets/google/fleurs
+          retrieved: "2026-10-24"
+          note: >
+            FLEURS is the speech side of FLoRes, 102 languages, for
+            evaluation. The card's South-East Asia group names Thai and
+            Filipino. The config id (the load_dataset name) was not copied.
+            Read it from the dataset card before a loader uses it.
+            This corpus is not an emergency-call corpus.

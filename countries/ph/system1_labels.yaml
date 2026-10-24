@@ -1,0 +1,162 @@
+# Draft hypotheses for a Philippine pack. Not loaded. Not quotations.
+# English lines paraphrase only where a PAGASA excerpt is attached.
+# Filipino lines are author drafts so the template has a second language.
+# They are not an official translation. quotation is false on every line.
+
+schema_version: baansafe.system1_labels.v0
+runtime: unloaded
+iso2: ph
+
+labels:
+  - id: ph_life_safety
+    status: unverified
+    baansafe_priority: P1
+    mapping_status: unverified
+    derived_from: []
+    languages:
+      en:
+        label: Immediate danger
+        hypothesis: This call describes a person in immediate danger who needs help now.
+        quotation: false
+      fil:
+        label: Agarang panganib
+        hypothesis: Ang tawag na ito ay tungkol sa taong nasa agarang panganib at nangangailangan ng tulong ngayon.
+        quotation: false
+    verification:
+      status: unverified
+      source_url: null
+      retrieved: "2026-10-24"
+      note: Draft only. No Philippine medical-dispatch card was retrieved.
+
+  - id: ph_pagasa_emergency_response
+    status: verified
+    baansafe_priority: P1
+    mapping_status: unverified
+    derived_from: [pagasa_rainfall_emergency_response]
+    languages:
+      en:
+        label: Severe flooding expected
+        hypothesis: >
+          Severe flooding is expected, and the caller is asking what to do
+          about that rainfall emergency.
+        quotation: false
+        source_excerpt: SEVERE Flooding is EXPECTED. Take necessary precautionary measures.
+      fil:
+        label: Malubhang pagbaha ang inaasahan
+        hypothesis: >
+          Inaasahang malubha ang pagbaha, at nagtatanong ang tumatawag kung ano ang gagawin.
+        quotation: false
+    verification:
+      status: verified
+      source_url: https://www.pagasa.dost.gov.ph/information/rainfall-and-thunderstorm-warning-system
+      retrieved: "2026-10-24"
+      note: >
+        The English source excerpt is the retrieved icon row. The hypothesis
+        around it is a draft. The Filipino line is a draft. The P1 link is not in the source.
+
+  - id: ph_pagasa_alert
+    status: verified
+    baansafe_priority: P2
+    mapping_status: unverified
+    derived_from: [pagasa_rainfall_alert]
+    languages:
+      en:
+        label: Flooding is threatening
+        hypothesis: Flooding is threatening in low-lying areas or near a river, and the household may need to prepare to leave.
+        quotation: false
+        source_excerpt: Flooding is THREATHENING in low-lying areas and near river channels.
+      fil:
+        label: Banta ng pagbaha
+        hypothesis: May banta ng pagbaha sa mababang lugar o malapit sa ilog, at maaaring kailangang maghandang lumikas ang sambahayan.
+        quotation: false
+    verification:
+      status: verified
+      source_url: https://www.pagasa.dost.gov.ph/information/rainfall-and-thunderstorm-warning-system
+      retrieved: "2026-10-24"
+      note: Excerpt keeps the page's spelling. Filipino line is a draft. P2 is not in the source.
+
+  - id: ph_pagasa_advisory
+    status: verified
+    baansafe_priority: P3
+    mapping_status: unverified
+    derived_from: [pagasa_rainfall_advisory]
+    languages:
+      en:
+        label: Flooding is possible
+        hypothesis: Flooding is possible in low-lying areas or near a river, and the call is about that advisory rather than a rescue.
+        quotation: false
+        source_excerpt: Flooding is POSSIBLE in low-lying areas and near river channels.
+      fil:
+        label: Posibleng bumaha
+        hypothesis: Posibleng bumaha sa mababang lugar o malapit sa ilog, at ang tawag ay tungkol sa babalang iyon at hindi pa isang rescue.
+        quotation: false
+    verification:
+      status: verified
+      source_url: https://www.pagasa.dost.gov.ph/information/rainfall-and-thunderstorm-warning-system
+      retrieved: "2026-10-24"
+      note: Excerpt is the retrieved row. Filipino line is a draft. P3 is not in the source.
+
+  - id: ph_drinking_water
+    status: unverified
+    baansafe_priority: P3
+    mapping_status: unverified
+    derived_from: [SPHERE-WASH-15L]
+    languages:
+      en:
+        label: Drinking water request
+        hypothesis: The household is asking for drinking water and has not described an immediate danger.
+        quotation: false
+      fil:
+        label: Hiling ng inuming tubig
+        hypothesis: Ang sambahayan ay humihingi ng inuming tubig at hindi pa inilalarawan ang agarang panganib.
+        quotation: false
+    verification:
+      status: unverified
+      source_url: https://spherestandards.org/wp-content/uploads/Sphere-Handbook-2018-EN.pdf
+      retrieved: "2026-10-24"
+      note: >
+        The Sphere minimum itself is in policies/sphere.yaml. This sentence
+        is a draft label, not a new Sphere quotation. The 15 litre figure
+        is not repeated here.
+
+  - id: ph_child
+    status: unverified
+    baansafe_priority: null
+    mapping_status: unverified
+    derived_from: [IFRC-PGI-UASC]
+    languages:
+      en:
+        label: A child needs a person to decide
+        hypothesis: A child is involved and a person responsible for child protection must decide.
+        quotation: false
+      fil:
+        label: May batang kasangkot
+        hypothesis: May batang kasangkot at kailangang magdesisyon ang taong responsable sa pangangalaga ng bata.
+        quotation: false
+    verification:
+      status: unverified
+      source_url: https://www.ifrc.org/sites/default/files/Minimum-standards-for-protection-gender-and-inclusion-in-emergencies-LR.pdf
+      retrieved: "2026-10-24"
+      note: >
+        The duty to refer is the loaded IFRC rule. These sentences are drafts.
+        No priority is assigned. A child-protection case stays with a person.
+
+  - id: ph_information
+    status: unverified
+    baansafe_priority: P4
+    mapping_status: unverified
+    derived_from: []
+    languages:
+      en:
+        label: Information only
+        hypothesis: The caller is asking for information and is not asking for a rescue.
+        quotation: false
+      fil:
+        label: Impormasyon lamang
+        hypothesis: Ang tumatawag ay humihingi ng impormasyon at hindi humihingi ng rescue.
+        quotation: false
+    verification:
+      status: unverified
+      source_url: null
+      retrieved: "2026-10-24"
+      note: Draft. P4 matches the BaanSafe information priority in config/priorities.yaml, which is not Philippine policy.

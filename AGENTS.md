@@ -70,6 +70,7 @@ Index: `docs/agents/index.json`. Read one topic file, not the whole set.
 | YAML decisions | `docs/agents/config-and-decisions.md` | `config/decisions.yaml`, `config/settings.py` |
 | Tests and validate | `docs/agents/testing.md` | `tests/`, `scripts/validate.py` |
 | UI, correct this | `docs/agents/frontend.md` | `ui/player.html`, `ui/correct.js` |
+| Country packs | `docs/agents/country-packs.md` | `countries/` |
 
 ## Done
 
