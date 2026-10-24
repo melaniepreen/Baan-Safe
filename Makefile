@@ -2,7 +2,7 @@ PYTHON ?= $(shell test -x .venv/bin/python && echo .venv/bin/python || echo pyth
 export PYTHONPATH := .
 
 .PHONY: validate test replay-stubs demo-stub demo-correction-loop eval-learning sim-eval extract-eval latte-bench serve ingest ingest-refresh data-report \
-	export-training sync push modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune docker-build docker-run
+	export-training sync push modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune deploy-modal docker-build docker-run
 
 IMAGE ?= baansafe-api:local
 DATASET ?= eval/out/sft.jsonl
@@ -76,6 +76,10 @@ modal-deploy-sapling:
 
 modal-deploy-stt:
 	$(PYTHON) -m modal deploy -m infra.modal.stt_app
+
+# Public stub demo: one *.modal.run URL for /ui/sim/, /triage, /cases, and /stt/transcribe.
+deploy-modal:
+	modal deploy infra/modal/gateway_app.py
 
 modal-finetune:
 	$(PYTHON) -m modal run -m infra.modal.finetune_app --dataset "$(DATASET)"

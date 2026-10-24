@@ -109,3 +109,167 @@ def test_app_modules_import_when_a_human_exports_the_env(monkeypatch):
     assert sapling.GPU == "L40S"
     assert sapling.MODEL_ID == "MubitLabs/banyan-sapling"
     sys.modules.pop("infra.modal.sapling_app", None)
+
+
+def test_policy_pin_dir_and_db_path_follow_env(monkeypatch, tmp_path):
+    from ingest.db import _default_db_path
+    from paths import ROOT
+    from policies.service import PolicyService
+
+    monkeypatch.delenv("POLICY_PIN_DIR", raising=False)
+    monkeypatch.delenv("BAANSAFE_DB_PATH", raising=False)
+    assert PolicyService().pin_dir == ROOT / "var" / "policy-pins"
+    explicit = tmp_path / "pins"
+    monkeypatch.setenv("POLICY_PIN_DIR", str(tmp_path / "from-env"))
+    assert PolicyService(pin_dir=explicit).pin_dir == explicit
+    assert PolicyService().pin_dir == tmp_path / "from-env"
+    assert _default_db_path() == ROOT / "data" / "processed" / "baansafe.sqlite"
+    monkeypatch.setenv("BAANSAFE_DB_PATH", str(tmp_path / "demo.sqlite"))
+    assert _default_db_path() == tmp_path / "demo.sqlite"
+
+
+def test_gateway_app_builds_stub_asgi_without_secrets(monkeypatch):
+    pytest.importorskip("modal")
+    for name in (
+        "S1_UPSTREAM",
+        "S2_UPSTREAM",
+        "SAPLING_UPSTREAM",
+        "STT_UPSTREAM",
+        "STT_GPU",
+        "STT_MODEL_ID",
+        "S1_GPU",
+        "S1_MODEL_ID",
+    ):
+        monkeypatch.delenv(name, raising=False)
+    import sys
+
+    sys.modules.pop("infra.modal.gateway_app", None)
+    import infra.modal.gateway_app as gateway
+
+    assert gateway.STUB_ENV["S1_IMPL"] == "stub"
+    assert gateway.STUB_ENV["S2_IMPL"] == "stub"
+    assert gateway.STUB_ENV["SAPLING_IMPL"] == "stub"
+    assert gateway.STUB_ENV["ENRICH_IMPL"] == "off"
+    assert gateway.STUB_ENV["TRACE_PATH"].startswith("/data/")
+    assert gateway.STUB_ENV["POLICY_PIN_DIR"].startswith("/data/")
+    assert "HF_TOKEN" not in gateway.image_env()
+    assert "STT_UPSTREAM" not in gateway.image_env()
+    from pathlib import Path
+
+    spec = gateway.web._spec_
+    assert list(spec.secrets) == []
+    assert spec.gpus is None
+    assert spec.cpu == 1.0
+    assert set(spec.volumes) == {"/data"}
+    assert gateway.web._is_web_endpoint()
+    assert gateway._ignore(Path(".env"))
+    assert gateway._ignore(Path(".git/config"))
+    assert gateway._ignore(Path("ui/sim/index.html")) is False
+    assert gateway._ignore(Path("api/main.py")) is False
+
+    from fastapi.testclient import TestClient
+
+    api = gateway.build_asgi()
+    with TestClient(api) as client:
+        health = client.get("/health")
+        assert health.status_code == 200
+        assert health.json()["impl"]["S1_IMPL"] == "stub"
+        page = client.get("/ui/sim/")
+        assert page.status_code == 200
+        assert "Baan-Safe" in page.text
+        hosting = client.get("/hosting")
+        assert hosting.status_code == 200
+        body = hosting.json()
+        assert body["backends"] == "stub"
+        assert body["secrets"] is False
+        assert body["upstreams"] == {
+            "S1_UPSTREAM": False,
+            "S2_UPSTREAM": False,
+            "SAPLING_UPSTREAM": False,
+            "STT_UPSTREAM": False,
+        }
+        speech = client.post(
+            "/stt/transcribe",
+            content=b"not-audio",
+            headers={"content-type": "application/octet-stream"},
+        )
+        assert speech.status_code == 200
+        assert speech.json()["text"] == ""
+        assert speech.json()["stub"] is True
+        created = client.post("/cases", json={"fixture_id": "F01"})
+        assert created.status_code == 200
+        case_id = created.json()["case"]["case_id"]
+        turned = client.post(
+            f"/cases/{case_id}/turns",
+            json={"t_ms": 90000, "speaker": "operator", "text": "Noted."},
+        )
+        assert turned.status_code == 200
+        triaged = client.post("/triage", json=created.json()["case"])
+        assert triaged.status_code == 200
+
+
+def test_stt_upstream_forwards_and_invents_nothing(monkeypatch):
+    pytest.importorskip("modal")
+    import infra.modal.gateway_app as gateway
+    from fastapi.testclient import TestClient
+
+    captured = {}
+
+    class _Response:
+        def json(self):
+            return {"text": "need a boat", "language": "en"}
+
+    class _Client:
+        def __init__(self, timeout):
+            captured["timeout"] = timeout
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            return False
+
+        async def post(self, url, content, headers):
+            captured["url"] = url
+            captured["content"] = content
+            return _Response()
+
+    monkeypatch.setenv("STT_UPSTREAM", "https://stt.example.test")
+    monkeypatch.setattr(gateway.httpx, "AsyncClient", _Client)
+    api = gateway.build_asgi()
+    with TestClient(api) as client:
+        speech = client.post(
+            "/stt/transcribe",
+            content=b"audio-bytes",
+            headers={"content-type": "audio/webm"},
+        )
+    assert speech.status_code == 200
+    assert speech.json()["text"] == "need a boat"
+    assert speech.json()["stub"] is False
+    assert captured["url"] == "https://stt.example.test/transcribe"
+    assert captured["content"] == b"audio-bytes"
+
+    class _Down:
+        def __init__(self, timeout):
+            return None
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            return False
+
+        async def post(self, url, content, headers):
+            raise RuntimeError("upstream unavailable")
+
+    monkeypatch.setattr(gateway.httpx, "AsyncClient", _Down)
+    with TestClient(api) as client:
+        failed = client.post("/stt/transcribe", content=b"audio-bytes")
+    assert failed.status_code == 200
+    assert failed.json()["text"] == ""
+    assert "invented" in failed.json()["note"]
+    monkeypatch.setenv("STT_UPSTREAM", "TODO_HUMAN")
+    with TestClient(api) as client:
+        refused = client.post("/stt/transcribe", content=b"audio-bytes")
+    assert refused.json()["text"] == ""
+    assert refused.json()["stub"] is True

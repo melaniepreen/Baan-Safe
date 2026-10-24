@@ -30,6 +30,27 @@ Regenerate the JSON after editing the layout script:
 python3 ui/sim/build_town.py
 ```
 
+## Hosting on Modal
+
+The public demo is the Modal app `baansafe-gateway` (`infra/modal/gateway_app.py`). One `*.modal.run` URL serves `/ui/sim/`, `POST /triage`, `/cases`, and `POST /stt/transcribe`. The default deploy uses the stub gateway. It does not need a secret, a GPU, or a Hugging Face token.
+
+From the repo root:
+
+```bash
+pip install modal
+modal setup
+modal deploy infra/modal/gateway_app.py
+```
+
+`make deploy-modal` runs that deploy command. Modal prints the URL when the deploy finishes. The same app is listed at https://modal.com/apps/baansafe/main. Open `/ui/sim/` on the printed host.
+
+Traces, corrections, training events, policy pins, and the hazard database are written to the `baansafe-demo` volume mounted at `/data`. Cases stay in memory until the container scales down.
+
+Optional upstreams, all unset by default. Export one before `modal deploy` to bake it into that deploy:
+
+- `STT_UPSTREAM` — base URL of a deployed `baansafe-stt` app. `POST /stt/transcribe` forwards the upload to `{STT_UPSTREAM}/transcribe`. When it is unset, the route returns an empty `text` and the phone keeps the stub transcript. No words are invented.
+- `S1_UPSTREAM`, `S2_UPSTREAM`, `SAPLING_UPSTREAM` — recorded on `GET /hosting` when they are http(s) URLs. Triage stays on stub outcomes. Those apps do not return a gateway outcome, and `S1_IMPL`, `S2_IMPL`, and `SAPLING_IMPL` stay `stub`.
+
 ## What is real, and what is a placeholder
 
 `data.demo_event` is still unset. The picture is a placeholder for a Bangkok flood demo. The HDX set `eos-rs-thailand-flood-bangkok-sep-2026` is listed in `data/SOURCES.md` and was not fetched. Household `location_label` stays the fixture district (Lampang, Phrae, Nan, Phayao). `flood.json` is local metres, not that Bangkok map.
