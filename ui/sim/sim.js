@@ -1430,7 +1430,7 @@ function updateMinimap() {
 
 function viewInsets() {
   const narrow = window.innerWidth <= 860;
-  return { left: narrow ? 12 : 388, right: narrow ? 16 : 344, top: 72 };
+  return { left: narrow ? 12 : 388, right: narrow ? 16 : 344, top: 88 };
 }
 
 function viewCenter() {

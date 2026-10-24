@@ -46,12 +46,14 @@ body {
 }
 
 .wordmark {
+  z-index: 4;
   top: 16px;
   left: 16px;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-width: 320px;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  max-width: min(760px, calc(100% - 360px));
 }
 
 .brand-lockup {
@@ -257,7 +259,7 @@ input[type="range"] { width: 100%; accent-color: var(--yellow); }
 
 #phone {
   z-index: 3;
-  top: 78px;
+  top: 96px;
   left: 16px;
   width: 348px;
   bottom: 12px;
@@ -462,7 +464,7 @@ input[type="range"] { width: 100%; accent-color: var(--yellow); }
   text-transform: none;
   color: var(--muted);
 }
-.step-headline { margin: 2px 0 0; font-size: 14px; font-weight: 400; line-height: 1.35; }
+#backend .step-headline { margin: 2px 0 0; font-size: 14px; font-weight: 400; line-height: 1.35; }
 .flow-card details { margin-top: 4px; color: var(--muted); font-size: 11px; line-height: 1.35; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 .flow-card summary { cursor: pointer; }
 @keyframes stepIn { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
