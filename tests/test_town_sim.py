@@ -425,6 +425,7 @@ def test_activity_prompts_and_rulebook_are_draft_simulations():
     assert 'approval: gated ? "pending" : "dispatched"' in source
     assert "if (gated)" in source
     assert "if (review.approval === \"pending\")" in source
+    assert "markerG.alpha = 0.55" not in source
 
 
 def test_scripted_replies_stay_in_human_language():

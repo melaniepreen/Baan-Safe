@@ -1183,15 +1183,11 @@ function drawSelection() {
 
 function drawMarkers() {
   markerG.clear();
+  markerG.alpha = 1;
   for (const building of town.buildings) {
-    if (building.sim_status !== "needs_help" && building.sim_status !== "evacuated") continue;
+    if (building.sim_status !== "evacuated") continue;
     const point = project(building.x + building.w * 0.5, building.y + building.d * 0.15, building.floors * 3.1 + 2.4);
-    if (building.sim_status === "needs_help") {
-      markerG.circle(point[0], point[1], 5.5).fill({ color: 0xff4b3a });
-      markerG.circle(point[0], point[1], 5.5).stroke({ color: 0xfff6ea, width: 1.4 });
-    } else {
-      markerG.rect(point[0], point[1] - 7, 9, 6).fill({ color: 0xf4f6fb });
-    }
+    markerG.rect(point[0], point[1] - 7, 9, 6).fill({ color: 0xf4f6fb });
   }
 }
 
@@ -3274,10 +3270,10 @@ async function main() {
     if (!reduce) advanceTrips(ticker.deltaMS);
     drawTrips(moverClock);
     if (reduce) return;
-    markerG.alpha = 0.55 + 0.45 * Math.sin(ticker.lastTime / 260);
-    const pulse = 0.74 + 0.26 * Math.sin(ticker.lastTime / 280);
+    const liveCall = !!activeCallId;
+    const pulse = liveCall ? 0.74 + 0.26 * Math.sin(ticker.lastTime / 280) : 1;
     if (callLightG) callLightG.alpha = pulse;
-    if (selectG) selectG.alpha = pulse;
+    if (selectG) selectG.alpha = selected ? pulse : 1;
   });
   loadLive();
 }
