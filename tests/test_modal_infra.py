@@ -35,8 +35,10 @@ def test_environment_overrides_todo_human(monkeypatch):
 
 def test_redact_hides_a_token(monkeypatch):
     monkeypatch.setenv("HF_TOKEN", "hf_secret_value")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-or-test-value")
     assert "hf_secret_value" not in redact("download failed for hf_secret_value")
     assert "[redacted]" in redact("download failed for hf_secret_value")
+    assert "sk-or-test-value" not in redact("openrouter sk-or-test-value")
 
 
 def test_correction_jsonl_plans_a_version(tmp_path):

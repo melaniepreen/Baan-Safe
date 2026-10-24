@@ -32,7 +32,7 @@ ALLOWED_GPUS = (
     "H200",
 )
 QUANTS = ("bf16", "fp8", "awq")
-SECRET_ENV_NAMES = ("HF_TOKEN", "MUBIT_API_KEY", "S2_SERVE_API_KEY")
+SECRET_ENV_NAMES = ("HF_TOKEN", "MUBIT_API_KEY", "S2_SERVE_API_KEY", "OPENROUTER_API_KEY")
 
 
 class UnsetDecision(RuntimeError):
