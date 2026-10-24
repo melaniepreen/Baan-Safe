@@ -3,123 +3,181 @@
 <meta name="viewport" content="width=1440">
 <title>BaanSafe · Swiss grid (simulated)</title>
 <style>
-* {box-sizing:border-box;margin:0}
-html,body {height:100%}
-body {
-  width:1440px;height:900px;overflow:hidden;
-  font-family:Inter,"Liberation Sans",sans-serif;
-  color:var(--ink);background:var(--bg);
-}
-.mono {font-family:"JetBrains Mono",ui-monospace,monospace}
-.dim {opacity:.68}
-.tiny {font-size:10px;margin-top:4px}
-b {font-weight:600}
-h2 {font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:650;margin-bottom:6px}
-.panel {min-height:0;overflow:hidden}
-.call {padding:5px 0;border-bottom:1px solid var(--line)}
-.ct {font-size:13px;font-weight:600;letter-spacing:-.01em;line-height:1.25}
-.cr {display:flex;gap:6px;align-items:center;margin-top:2px;font-size:11px;flex-wrap:wrap}
-.b {font-family:"JetBrains Mono",monospace;font-size:10px;padding:1px 5px;border:1px solid var(--line);border-radius:var(--radius)}
-.span {display:grid;grid-template-columns:148px 90px 1fr;gap:6px;align-items:center;margin:2px 0;font-size:11px}
-.span.d1 {padding-left:12px}
-.sn,.sm,.tid {font-family:"JetBrains Mono",monospace;font-size:10px}
-.tid {margin-bottom:4px}
-.sb {height:7px;background:var(--track);border-radius:var(--radius);overflow:hidden}
-.sb i {display:block;height:100%;background:var(--accent)}
-.act {font-size:18px;letter-spacing:-.03em;font-weight:560;line-height:1.1}
-.meta {font-size:12px;margin-top:3px;line-height:1.3}
-.pool {margin-bottom:5px}
-.pl {display:flex;justify-content:space-between;font-size:12px}
-.bar {height:5px;background:var(--track);border-radius:var(--radius);overflow:hidden;margin-top:2px}
-.bar i {display:block;height:100%;background:var(--accent)}
-.dcard {padding:4px 0;border-bottom:1px solid var(--line)}
-.dh {display:flex;justify-content:space-between;gap:8px;font-size:12px}
-.needs {display:flex;flex-wrap:wrap;gap:6px;font-size:10px;font-family:"JetBrains Mono",monospace;margin-top:2px}
-.needs em {font-style:normal;opacity:.6}
-.bind {font-size:10px;margin-top:2px}
-#loop-steps div {font-size:12px;padding:1px 0}
-#loop-steps div.on {font-weight:700}
-.metrics {display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;font-size:12px;margin:6px 0}
-.metrics b {font-family:"JetBrains Mono",monospace;font-weight:500}
-#versions div {font-family:"JetBrains Mono",monospace;font-size:11px;padding:1px 0}
-#constraints div {font-size:11px;padding:1px 0;line-height:1.3}
-.note {font-size:11px;line-height:1.35;margin-bottom:6px}
-.choice {font-size:12px;line-height:1.35;margin-bottom:6px}
-table {width:100%;border-collapse:collapse}
-th,td {text-align:left;padding:2px 4px;font-size:11px;border-bottom:1px solid var(--line);vertical-align:top}
-th {font-size:9px;letter-spacing:.06em;text-transform:uppercase;font-weight:650}
-.num {text-align:right;font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
 
-:root{--bg:#fff;--ink:#000;--accent:#0000ff;--line:#000;--track:#efefef;--radius:0px}
-body{display:grid;grid-template-rows:78px 46px 1fr 118px 36px;padding:10px 16px 6px}
-.top{display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"brand lede pills" "h1 lede pills";column-gap:18px;align-items:end;border-bottom:2px solid #000;padding-bottom:6px}
-.brand{grid-area:brand;font-size:11px;letter-spacing:.16em;text-transform:uppercase}
-h1{grid-area:h1;font-size:34px;font-weight:500;letter-spacing:-.045em;line-height:.9}
-.lede{grid-area:lede;font-size:13px;max-width:520px;align-self:center}
-.pills{grid-area:pills;display:flex;gap:6px;align-items:center}
-.pill{border:1px solid #000;padding:3px 7px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
-.pill:first-child{background:#0000ff;color:#fff;border-color:#0000ff}
-.kpis{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid #000}
-.kpis div{padding:4px 8px;border-right:1px solid #000}
-.kpis div:last-child{border:0}
-.kpis b{display:block;font-size:20px;font-weight:500;letter-spacing:-.03em}
-.kpis span{font-size:10px;letter-spacing:.08em;text-transform:uppercase}
-.board{display:grid;grid-template-columns:320px 1fr 420px;min-height:0}
-.col{display:flex;flex-direction:column;min-height:0;border-right:1px solid #000}
-.col:last-child{border-right:0}
-.col .panel{padding:8px 10px}
-.col .panel:first-child{flex:0.85}
-.split{border-top:1px solid #000;flex:1.15}
-.grow{flex:1.4}
-h2{color:#0000ff}
-.P1,.S2{background:#0000ff;color:#fff;border-color:#0000ff}
-.loopbar{display:grid;grid-template-columns:280px 1fr 220px;gap:12px;border-top:2px solid #000;padding-top:6px}
-.loopbar .metrics{grid-template-columns:1fr 1fr 1fr}
-#loop-steps div.on{color:#0000ff}
-footer{font-size:10px;line-height:1.35;border-top:1px solid #000;padding-top:4px}
-.pools{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+* { box-sizing: border-box; margin: 0 }
+html, body { height: 100% }
+body {
+  width: 1440px; height: 900px; overflow: hidden;
+  font-family: Inter, "Liberation Sans", sans-serif;
+  color: var(--ink); background: var(--bg);
+}
+.mono { font-family: "JetBrains Mono", ui-monospace, monospace }
+.dim { opacity: .68 }
+b { font-weight: 600 }
+h2 { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; font-weight: 650; margin: 0 }
+.fig { display: none }
+.panel { min-height: 0; overflow: hidden }
+.flowpan, .onto, .traces, .money { min-height: 0 }
+.flowhead { display: flex; align-items: center; gap: 12px; height: 22px; overflow: hidden; margin-bottom: 2px }
+.flowhead h2 { white-space: nowrap }
+.legend { display: flex; gap: 12px; list-style: none; font-size: 10px; letter-spacing: .05em; text-transform: uppercase; flex: 1; min-width: 0 }
+.legend li { display: flex; align-items: center; gap: 5px; white-space: nowrap }
+.legend svg { width: 13px; height: 13px; display: block }
+.legend circle, .legend rect, .legend polygon { fill: var(--card); stroke: var(--ink); stroke-width: 1.3 }
+#flow-meta { font-size: 10px; white-space: nowrap }
+.mid { min-height: 0; display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,.95fr) minmax(0,.9fr) }
+.note { font-size: 11px; line-height: 1.3; margin: 3px 0 4px }
+.also { font-size: 10px; line-height: 1.3; margin-top: 3px }
+#onto-detail { font-size: 12px; line-height: 1.35; margin-top: 4px }
+#onto-detail b { color: var(--accent) }
+#onto-detail .fields { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 10.5px; display: block; margin-top: 1px }
+.call { padding: 3px 0; border-bottom: 1px solid var(--line) }
+.ct { font-size: 12px; font-weight: 600; letter-spacing: -.01em; line-height: 1.2 }
+.cr { display: flex; gap: 6px; align-items: center; margin-top: 1px; font-size: 10px }
+.b { font-family: "JetBrains Mono", monospace; font-size: 10px; padding: 1px 5px; border: 1px solid var(--line); border-radius: var(--radius) }
+.span { display: grid; grid-template-columns: 132px 72px 1fr; gap: 6px; align-items: center; margin: 1px 0; font-size: 10.5px }
+.span.d1 { padding-left: 12px }
+.sn, .sm, .tid { font-family: "JetBrains Mono", monospace; font-size: 10px }
+.tid { margin-bottom: 3px }
+.sb { height: 6px; background: var(--track); border-radius: var(--radius); overflow: hidden }
+.sb i { display: block; height: 100%; background: var(--accent) }
+.act { font-size: 16px; letter-spacing: -.03em; font-weight: 560; line-height: 1.1 }
+.meta { font-size: 11px; margin-top: 2px; line-height: 1.3 }
+.gwline { font-size: 11px; line-height: 1.35 }
+.pool { margin-bottom: 3px }
+.pl { display: flex; justify-content: space-between; font-size: 11px }
+.bar { height: 4px; background: var(--track); border-radius: var(--radius); overflow: hidden; margin-top: 1px }
+.bar i { display: block; height: 100%; background: var(--accent) }
+.dcard { padding: 3px 0; border-bottom: 1px solid var(--line) }
+.dh { display: flex; justify-content: space-between; gap: 8px; font-size: 11px }
+.needs { display: flex; flex-wrap: wrap; gap: 5px; font-size: 10px; font-family: "JetBrains Mono", monospace; margin-top: 1px }
+.needs em { font-style: normal; opacity: .6 }
+.bind { font-size: 10px; margin-top: 1px }
+#constraints div { font-size: 11px; padding: 1px 0; line-height: 1.25 }
+.choice { font-size: 11px; line-height: 1.3; margin: 2px 0 4px }
+.pools { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px }
+#loop-steps div { font-size: 11px; padding: 0 }
+#loop-steps div.on { font-weight: 700 }
+.metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px 10px; font-size: 12px; align-content: center }
+.metrics b { font-family: "JetBrains Mono", monospace; font-weight: 500 }
+#grad { grid-column: 1 / -1; font-size: 10px; line-height: 1.3 }
+#versions div { font-family: "JetBrains Mono", monospace; font-size: 11px; padding: 0 }
+.gap { margin-top: 6px }
+svg text { user-select: none }
+.edge { fill: none; stroke: var(--edge); stroke-width: 1.15 }
+.edge.soft { stroke-dasharray: 3 3 }
+.rail { fill: none; stroke: var(--accent); stroke-width: 1.35; stroke-dasharray: 5 4; animation: march 1.15s linear infinite }
+.elabel { font-size: 10px; font-family: "JetBrains Mono", ui-monospace, monospace; fill: var(--ink); stroke: var(--card); stroke-width: 3.5px; paint-order: stroke fill }
+.nlabel { font-size: 11px; fill: var(--ink); text-anchor: middle; font-family: Inter, "Liberation Sans", sans-serif }
+.nlabel.side { text-anchor: start }
+#flow, #onto { width: 100%; display: block }
+#flow { height: calc(100% - 24px) }
+#onto { height: 186px }
+.shp { fill: var(--card); stroke: var(--ink); stroke-width: 1.35 }
+.fnode, .onode { cursor: pointer }
+.edge, .elabel, .tok, .rail, .bus { pointer-events: none }
+.tok { fill: var(--accent) }
+.live > .shp, .hot > .shp { fill: var(--accent); stroke: var(--accent); animation: glow 2.4s ease-in-out infinite }
+.now > .shp { stroke: var(--ink); stroke-width: 2.4 }
+.picked > .shp { stroke-width: 2.2 }
+.branch.hot .edge { stroke: var(--accent) }
+.branch.off { opacity: .28 }
+.onode:hover > .shp, .fnode:hover > .shp { stroke: var(--accent) }
+.onode:focus { outline: none }
+.onode:focus > .shp { stroke-width: 2.4 }
+marker path { fill: var(--edge) }
+#arrow-hot path, #arrow2-hot path { fill: var(--accent) }
+@keyframes march { to { stroke-dashoffset: -18 } }
+@keyframes glow { 50% { stroke-width: 2.3px } }
+.kpis { display: flex; gap: 10px }
+.kpis div { min-width: 0 }
+.kpis b { display: block; font-size: 15px; font-weight: 560; letter-spacing: -.03em; line-height: 1.1 }
+.kpis span { font-size: 9px; letter-spacing: .06em; text-transform: uppercase }
+.pills { display: flex; gap: 6px; align-items: center }
+.pill { border: 1px solid var(--line); padding: 2px 7px; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; border-radius: var(--radius) }
+footer { font-size: 10px; line-height: 1.3 }
+
+
+:root { --bg:#fff; --ink:#000; --accent:#0000ff; --line:#000; --track:#efefef; --radius:0px; --card:#fff; --edge:#222; --muted:#222 }
+body { display:grid; grid-template-rows: 58px 268px minmax(0,1fr) 86px 24px; padding: 8px 14px 4px }
+.fig { display: inline; color: #0000ff; margin-right: 6px }
+h2 { color: #0000ff }
+.top { display:grid; grid-template-columns: 300px 1fr auto; align-items: end; gap: 8px 16px; border-bottom: 2px solid #000; padding-bottom: 6px }
+.brand { font-size: 11px; letter-spacing: .16em; text-transform: uppercase }
+h1 { font-size: 28px; font-weight: 500; letter-spacing: -.045em; line-height: .9 }
+.lede { font-size: 13px; line-height: 1.3; align-self: center }
+.right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px }
+.pill:first-child { background: #0000ff; color: #fff; border-color: #0000ff }
+.flowpan { border-bottom: 1px solid #000; padding-top: 6px }
+.mid { border-bottom: 1px solid #000 }
+.onto, .traces { border-right: 1px solid #000; padding: 6px 10px 4px 0 }
+.money { padding: 6px 0 4px 10px }
+.P1, .S2 { background: #0000ff; color: #fff; border-color: #0000ff }
+.loopbar { display:grid; grid-template-columns: 250px 1fr 230px; gap: 12px; border-top: 2px solid #000; padding-top: 5px }
+#loop-steps div.on { color: #0000ff }
+footer { border-top: 1px solid #000; padding-top: 3px }
 
 </style></head>
-<body data-layout="cards">
+<body data-theme="swiss" data-layout="cards">
 
 <header class="top">
-  <div class="brand">BaanSafe 01</div>
-  <h1>Simulated flood desk.</h1>
-  <p class="lede">Swiss editorial grid. One electric blue for whatever is acting. HyperAktiv on Refero Styles: white paper, black rules, no radius, no shadow.</p>
-  <div class="pills"><span class="pill">Simulated</span><span class="pill">Synthetic callers</span><span class="pill mono" id="clock"></span></div>
+  <div><div class="brand">BaanSafe 01</div><h1>Simulated flood desk.</h1></div>
+  <p class="lede">HyperAktiv. White paper, black rules, sharp corners. Electric blue only on the mark that is acting.</p>
+  <div class="right">
+    <div class="pills"><span class="pill">Simulated</span><span class="pill">Synthetic callers</span><span class="pill mono" id="clock"></span></div>
+    <div class="kpis">
+      <div><b id="k-calls">0</b><span>Calls</span></div>
+      <div><b id="k-s1">0%</b><span>System 1</span></div>
+      <div><b id="k-mem">1,240</b><span>Memory</span></div>
+      <div><b id="k-corr">0</b><span>Rows</span></div>
+      <div><b id="ver">stub-1</b><span>Version</span></div>
+    </div>
+  </div>
 </header>
-<section class="kpis">
-  <div><b id="k-calls">0</b><span>Calls triaged</span></div>
-  <div><b id="k-s1">0%</b><span>System 1 share</span></div>
-  <div><b id="k-mem">1,240</b><span>Memory items</span></div>
-  <div><b id="k-corr">0</b><span>Correction rows</span></div>
-  <div><b id="ver">stub-1</b><span>Model version</span></div>
+
+
+<section class="panel flowpan">
+  <div class="flowhead">
+    <h2><span class="fig">01</span> End to end</h2>
+    <ul class="legend">
+      <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.2"/></svg> People and cases</li>
+      <li><svg viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="10"/></svg> Resources</li>
+      <li><svg viewBox="0 0 16 16"><polygon points="8,2 14,13.5 2,13.5"/></svg> Hazards</li>
+      <li><svg viewBox="0 0 16 16"><polygon points="8,1.5 14.5,8 8,14.5 1.5,8"/></svg> Decisions and policy</li>
+      <li><svg viewBox="0 0 16 16"><polygon points="8,1.5 13.6,4.7 13.6,11.3 8,14.5 2.4,11.3 2.4,4.7"/></svg> Mubit</li>
+    </ul>
+    <span class="mono dim" id="flow-meta">Simulated trace</span>
+  </div>
+  <svg id="flow" viewBox="0 0 1400 218" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Simulated flow from call ingress through the Mubit gateway, System 1 or System 2, the router, dispatch and the funding solver, then the correction loop back toward System 1 and System 2. Nothing is promoted."></svg>
 </section>
-<div class="board">
-  <div class="col">
-    <section class="panel"><h2>Incoming fixtures</h2><div id="feed"></div></section>
-    <section class="panel split"><h2>Mubit gateway</h2><div id="gateway-detail"></div></section>
-  </div>
-  <div class="col">
-    <section class="panel grow"><h2>Trace waterfall</h2><div id="waterfall"></div></section>
-    <section class="panel split"><h2>Decision router</h2><div id="router-out"></div></section>
-  </div>
-  <div class="col">
-    <section class="panel"><h2>Budgets · simulated</h2>
-      <p class="note">Central fund, DDPM, provinces, plus NGO, public and corporate inflows. Cash rule ฿9,000 is a stand-in, not the Act. F17 and F18 stay needs_human.</p>
-      <div id="pools" class="pools"></div>
-    </section>
-    <section class="panel split">
-      <h2>Solver</h2>
-      <p class="choice" id="solver-choice"></p>
-      <h2 class="gap">Binding</h2>
-      <div id="constraints"></div>
-      <div id="alloc"></div>
-    </section>
-  </div>
+<div class="mid">
+  <section class="panel onto">
+    <h2><span class="fig">02</span> Ontology</h2>
+    <p class="note">contracts/models.py. Click a mark. Solid lines are fields. Dashed lines share a district label. No Location, FundingSource, or Allocation type.</p>
+    <svg id="onto" viewBox="0 0 600 186" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Ontology graph of the contract models"></svg>
+    <div id="onto-detail" aria-live="polite"></div>
+    <p class="also dim">Also defined: ExtractedFields, MemoryItem, Evidence, Failure, AidEligibility, TraceEvent. Enums: Need, Priority, Route, System, NextAction.</p>
+  </section>
+  <section class="panel traces">
+    <h2><span class="fig">03</span> Trace waterfall</h2>
+    <div id="waterfall"></div>
+    <h2 class="gap"><span class="fig">04</span> Gateway and router</h2>
+    <div id="gateway-detail"></div>
+    <div id="router-out"></div>
+    <div id="feed"></div>
+  </section>
+  <section class="panel money">
+    <h2><span class="fig">05</span> Budgets · simulated</h2>
+    <p class="note">Central fund, DDPM, provinces, NGO, public, corporate. ฿9,000 is a stand-in. F17 and F18 stay needs_human.</p>
+    <div id="pools" class="pools"></div>
+    <h2 class="gap">Binding</h2>
+    <div id="constraints"></div>
+    <p class="choice" id="solver-choice"></p>
+    <div id="alloc"></div>
+  </section>
 </div>
 <section class="loopbar">
-  <div><h2>Relearning</h2><div id="loop-steps"></div></div>
+  <div><h2><span class="fig">06</span> Relearning</h2><div id="loop-steps"></div></div>
   <div class="metrics">
     <div>Accuracy <b id="acc"></b></div>
     <div>Latency <b id="lat"></b></div>
@@ -130,7 +188,7 @@ footer{font-size:10px;line-height:1.35;border-top:1px solid #000;padding-top:4px
   </div>
   <div><h2>Versions</h2><div id="versions"></div></div>
 </section>
-<footer>Repo counts, not a live feed · GISTDA extents 228 · repeat-flood 400 · risk layer 63 · GDACS 3 · GLIDE 109 · IDMC flood rows 14 · EOS-RS Hat Yai 1 polygon from 9,172 · UNOSAT 3 · ThaiWater 805 stations and 4,774 gauges · Open-Meteo 1,850 · facilities 4,218 · fixtures 24. Every person, baht figure and dollar cost here is simulated. llm.token_price_usd is TODO_HUMAN.</footer>
+<footer>Repo counts, not a live feed · GISTDA extents 228 · repeat-flood 400 · risk layer 63 · GDACS 3 · GLIDE 109 · IDMC flood rows 14 · EOS-RS Hat Yai 1 polygon from 9,172 · UNOSAT 3 · ThaiWater 805 stations and 4,774 gauges · Open-Meteo 1,850 · facilities 4,218 · fixtures 24. Every person, baht figure and dollar cost here is simulated. llm.token_price_usd is TODO_HUMAN. graduation_threshold is TODO_HUMAN.</footer>
 
 <script>
 
@@ -169,16 +227,44 @@ const DISTRICTS = [
 ];
 const NEEDS = ["shelter","boats","medical","food","cash"];
 const POOL_META = [
-  ["central","Thai central fund"],
-  ["ddpm","DDPM reserve"],
-  ["lampang","Lampang province"],
-  ["phrae","Phrae province"],
-  ["nan","Nan province"],
-  ["phayao","Phayao province"],
-  ["ngo","NGO donations"],
-  ["public","Public donations"],
-  ["corporate","Corporate donations"]
+  ["central","Thai central fund"],["ddpm","DDPM reserve"],["lampang","Lampang province"],
+  ["phrae","Phrae province"],["nan","Nan province"],["phayao","Phayao province"],
+  ["ngo","NGO donations"],["public","Public donations"],["corporate","Corporate donations"]
 ];
+const ONTO = [
+  {id:"turn", shape:"circle", x:42, y:20, short:"Turn", name:"TranscriptTurn", fields:"t_ms, speaker, text", blurb:"One turn of a call. speaker is caller or operator. Text here is synthetic."},
+  {id:"case", shape:"circle", x:156, y:20, short:"Case", name:"CaseState", fields:"case_id, caller_id_hash, transcript, fields, memory_context, policy_flags, resources, received_at", blurb:"The case. fields is ExtractedFields. memory_context is filled inside the gateway."},
+  {id:"outcome", shape:"diamond", x:286, y:20, short:"Outcome", name:"Outcome", fields:"system, outcome, priority, needs, route, confidence, reason, reasoning, requires_human, escalate, latency_ms", blurb:"One shape for both systems. reasoning is System 2 only. No case_id on this model. It is carried on RouterDecision.source_outcomes and TraceEvent.outcome."},
+  {id:"router", shape:"diamond", x:430, y:20, short:"Router", name:"RouterDecision", fields:"case_id, next_action, final_priority, final_route, requires_human, source_outcomes, policy_notes", blurb:"One next action. source_outcomes has length 1. merge() is not called. case_id points at CaseState."},
+  {id:"nver", shape:"hex", x:552, y:20, short:"Version", name:"ModelVersion", fields:"version_id, model_name, role, parent_version_id, training_job_id", blurb:"role is system_1, system_2, or orchestrator. parent_version_id chains versions. The demo id is stub-N."},
+  {id:"person", shape:"circle", x:42, y:82, short:"Person", name:"Person", fields:"person_id, household_id, role, vulnerability_tags", blurb:"Synthetic participant. No name, phone, or national id. household_id points at Household."},
+  {id:"request", shape:"circle", x:156, y:82, short:"Request", name:"Request", fields:"request_id, person_id, case_id, summary, needs", blurb:"needs is the Need enum: rescue, medical, water, food, shelter, evacuation, power, information, aid_payment."},
+  {id:"corr", shape:"diamond", x:286, y:82, short:"Correction", name:"Correction", fields:"correction_id, case_id, corrected_by, field, old_value, new_value, reason, created_at", blurb:"corrected_by is operator, supervisor, or caseworker. case_id points at CaseState. This starts the relearning loop."},
+  {id:"policy", shape:"diamond", x:430, y:82, short:"AidPolicy", name:"AidPolicy", fields:"policy_id, summary, needs", blurb:"Baht amounts are not stored here. AidEligibility has case_id and policy_id. status is only unset or needs_human, never an approval."},
+  {id:"job", shape:"hex", x:552, y:82, short:"Job", name:"TrainingJob", fields:"job_id, status, dataset_path, base_model, target_version_id", blurb:"Demo status is stub. base_model in the product is still TODO_HUMAN. target_version_id points at ModelVersion."},
+  {id:"house", shape:"circle", x:42, y:148, short:"Household", name:"Household", fields:"household_id, member_ids, location_label, people_count", blurb:"location_label is a district, not a street. There is no Location model. member_ids point at Person."},
+  {id:"hazard", shape:"triangle", x:176, y:148, short:"Hazard", name:"Hazard", fields:"hazard_id, kind, summary, location_label", blurb:"kind is flood, rain, medical, safeguarding, or other. location_label matches the household district. Not a foreign key."},
+  {id:"resource", shape:"square", x:330, y:148, short:"Resource", name:"Resource", fields:"resource_id, kind, name, district, available", blurb:"kind is boat, ambulance, shelter, welfare_point, or other. The funding solver is simulated desk state, not this model."},
+  {id:"mem", shape:"hex", x:490, y:148, short:"Memory", name:"MemoryRecord", fields:"record_id, case_id, case_summary, evidence, decision, outcome_label, failure, corrections", blurb:"Written through the Mubit adapter. decision is a RouterDecision. corrections is Correction. Recall returns MemoryItem."}
+];
+const OEDGES = [
+  ["turn","case","transcript",0],
+  ["person","house","household_id",0],
+  ["person","request","person_id",0],
+  ["request","case","case_id",0],
+  ["house","hazard","location_label",1],
+  ["hazard","resource","district",1],
+  ["outcome","router","source_outcomes",0],
+  ["corr","case","case_id",0],
+  ["mem","corr","corrections",0],
+  ["job","nver","target_version_id",0]
+];
+const FLOW_TO_ONTO = {
+  call:["turn","person"], stt:["turn"], gw:["case","mem"], auth:["case"], recall:["mem"],
+  policy:["policy"], route:["case"], trace:["case"], s1:["outcome","case"], s2:["outcome","hazard"],
+  router:["router"], dispatch:["resource","request"], solver:["resource"], out:["outcome"],
+  corr:["corr"], memw:["mem"], jsonl:["job"], lora:["job"], reg:["nver"], replay:["nver","outcome"], grad:["nver"]
+};
 const $ = id => document.getElementById(id);
 const hex = n => Array.from({length:n}, () => "0123456789abcdef"[Math.random()*16|0]).join("");
 const baht = n => {
@@ -191,22 +277,224 @@ let calls = 0, s1n = 0, mem = 1240, corr = 0, ver = 1;
 let acc = 0.62, lat = 28, cost = 0.0041, rows = 1;
 let prev = {acc:0.62, lat:28, cost:0.0041};
 let lastDelta = 0, drift = 0, lastChoice = "Solver waiting.", bindings = [];
+let callTrail = new Set(["case"]);
+let loopOn = false;
+let currentId = "case";
+const F = {};
 const alloc = {};
 DISTRICTS.forEach(d => {
   alloc[d.name] = {};
   NEEDS.forEach((k,i) => { alloc[d.name][k] = Math.round(d.hh * (60 + i * 35) * d.water / 8); });
 });
 const pools = {
-  central:{cap:420000000, left:318000000},
-  ddpm:{cap:85000000, left:64000000},
-  lampang:{cap:18000000, left:11200000},
-  phrae:{cap:22000000, left:9800000},
-  nan:{cap:9000000, left:6100000},
-  phayao:{cap:6500000, left:4200000},
-  ngo:{cap:4200000, left:2700000},
-  public:{cap:1800000, left:960000},
-  corporate:{cap:7600000, left:5100000}
+  central:{cap:420000000, left:318000000}, ddpm:{cap:85000000, left:64000000},
+  lampang:{cap:18000000, left:11200000}, phrae:{cap:22000000, left:9800000},
+  nan:{cap:9000000, left:6100000}, phayao:{cap:6500000, left:4200000},
+  ngo:{cap:4200000, left:2700000}, public:{cap:1800000, left:960000}, corporate:{cap:7600000, left:5100000}
 };
+function shapeTag(kind, x, y, r) {
+  if (kind === "circle") return `<circle class="shp" cx="${x}" cy="${y}" r="${r}"/>`;
+  if (kind === "square") return `<rect class="shp" x="${x-r}" y="${y-r}" width="${r*2}" height="${r*2}"/>`;
+  if (kind === "triangle") {
+    const h = r * 1.15;
+    return `<polygon class="shp" points="${x},${(y-h).toFixed(1)} ${(x+r).toFixed(1)},${(y+h*0.72).toFixed(1)} ${(x-r).toFixed(1)},${(y+h*0.72).toFixed(1)}"/>`;
+  }
+  if (kind === "diamond") {
+    const w = (r * 0.82).toFixed(1);
+    return `<polygon class="shp" points="${x},${y-r} ${(+x)+(+w)},${y} ${x},${(+y)+(+r)} ${x-w},${y}"/>`;
+  }
+  const pts = [];
+  for (let i = 0; i < 6; i++) {
+    const a = -Math.PI/2 + i * Math.PI/3;
+    pts.push((x + r*Math.cos(a)).toFixed(1) + "," + (y + r*Math.sin(a)).toFixed(1));
+  }
+  return `<polygon class="shp" points="${pts.join(" ")}"/>`;
+}
+function mount(svg, markup) {
+  const doc = new DOMParser().parseFromString(`<svg xmlns="http://www.w3.org/2000/svg">${markup}</svg>`, "image/svg+xml");
+  if (doc.querySelector("parsererror")) {
+    svg.insertAdjacentHTML("beforeend", `<text x="8" y="24">Diagram failed to parse</text>`);
+    return false;
+  }
+  [...doc.documentElement.children].forEach(n => svg.appendChild(document.importNode(n, true)));
+  return true;
+}
+function seg(a, b, pad) {
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const len = Math.hypot(dx, dy) || 1;
+  const p = pad || 7;
+  const ar = a.r || 12, br = b.r || 12;
+  return [a.x + dx/len*(ar+2), a.y + dy/len*(ar+2), b.x - dx/len*(br+p), b.y - dy/len*(br+p)];
+}
+function edge(a, b, label, soft, labId) {
+  const [x1,y1,x2,y2] = seg(a, b, 8);
+  const mx = (x1+x2)/2, my = (y1+y2)/2;
+  const dx = x2-x1, dy = y2-y1;
+  const len = Math.hypot(dx, dy) || 1;
+  if (!labId && len < 96) label = "";
+  let ox = -dy/len*16, oy = dx/len*16;
+  if (Math.abs(dx) >= Math.abs(dy) && oy > 0) { oy = -oy; ox = -ox; }
+  const ida = labId ? ` id="${labId}"` : "";
+  return `<line class="edge${soft?" soft":""}" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" marker-end="url(#arrow)"/>` +
+    (label ? `<text class="elabel"${ida} x="${(mx+ox).toFixed(1)}" y="${(my+oy).toFixed(1)}" text-anchor="middle">${label}</text>` : "");
+}
+function tokens(path, n, dur) {
+  let s = "";
+  for (let i = 0; i < n; i++) {
+    s += `<circle r="3.1" class="tok"><animateMotion dur="${dur}s" begin="${(-i*dur/n).toFixed(2)}s" repeatCount="indefinite" path="${path}"/></circle>`;
+  }
+  return s;
+}
+function poly(ids) {
+  return ids.map((id,i) => (i ? "L" : "M") + F[id].x + "," + F[id].y).join(" ");
+}
+function node(id, kind, x, y, r, name, lx, ly, anchor) {
+  F[id] = {id, x, y, r, shape: kind, name};
+  const cls = anchor === "start" ? "nlabel side" : "nlabel";
+  return `<g class="fnode" data-id="${id}" tabindex="0" role="button" aria-label="${name}">${shapeTag(kind,x,y,r)}<text class="${cls}" x="${lx}" y="${ly}">${name}</text></g>`;
+}
+function renderFlow() {
+  const specs = [
+    ["call","circle",78,44,13,"Call",78,68,"middle"],
+    ["stt","square",196,44,12,"STT",196,68,"middle"],
+    ["gw","hex",330,44,16,"Mubit",330,70,"middle"],
+    ["s1","circle",520,36,13,"S1",520,60,"middle"],
+    ["s2","diamond",520,118,13,"S2",520,144,"middle"],
+    ["router","diamond",710,78,13,"Router",710,102,"middle"],
+    ["dispatch","square",910,78,12,"Dispatch",910,100,"middle"],
+    ["solver","square",1090,78,12,"Solver",1090,100,"middle"],
+    ["out","diamond",1270,78,13,"Outcome",1270,102,"middle"],
+    ["auth","diamond",150,118,8,"auth",150,136,"middle"],
+    ["recall","hex",214,118,8,"recall",214,136,"middle"],
+    ["policy","diamond",278,118,8,"policy",278,136,"middle"],
+    ["route","diamond",342,118,8,"route",342,136,"middle"],
+    ["trace","hex",406,118,8,"trace",406,136,"middle"],
+    ["grad","diamond",100,186,12,"Graduate",100,208,"middle"],
+    ["replay","diamond",290,186,12,"Replay",290,208,"middle"],
+    ["reg","hex",480,186,12,"Version",480,208,"middle"],
+    ["lora","hex",670,186,12,"LoRA",670,208,"middle"],
+    ["jsonl","square",860,186,11,"JSONL",860,206,"middle"],
+    ["memw","hex",1060,186,12,"Memory",1060,208,"middle"],
+    ["corr","diamond",1270,186,12,"Correct",1270,208,"middle"]
+  ];
+  specs.forEach(s => { F[s[0]] = {id:s[0], x:s[2], y:s[3], r:s[4]}; });
+  const pairs = [
+    ["call","stt","80 ms · audio"],
+    ["stt","gw","40 ms · text"],
+    ["router","dispatch","12 ms · NextAction"],
+    ["dispatch","solver","8 ms · Resource"],
+    ["solver","out","4 ms · baht"],
+    ["out","corr",""],
+    ["corr","memw",""],
+    ["memw","jsonl",""],
+    ["jsonl","lora",""],
+    ["lora","reg",""],
+    ["reg","replay",""],
+    ["replay","grad",""]
+  ];
+  const minis = [["auth","recall","1 ms"],["recall","policy","MemoryItem"],["policy","route","2 ms"],["route","trace","TraceEvent"]];
+  let shared = pairs.map(([a,b,l]) => edge(F[a], F[b], l, 0)).join("");
+  shared += minis.map(([a,b,l]) => edge(F[a], F[b], "", 0)).join("");
+  shared += `<line class="bus" x1="${F.gw.x}" y1="${F.gw.y + F.gw.r}" x2="${F.policy.x}" y2="${F.policy.y - F.policy.r}" stroke="var(--edge)" stroke-width="1.15"/>`;
+  const s1 = edge(F.gw, F.s1, "18 ms · 0 tok", 0, "lab-s1") + edge(F.s1, F.router, "3 ms", 0);
+  const s2 = edge(F.gw, F.s2, "1.6 s · tokens", 0, "lab-s2") + edge(F.s2, F.router, "3 ms", 0);
+  const rail = `M ${F.grad.x},${F.grad.y} L 16,${F.grad.y} L 16,6 L ${F.s1.x},6 L ${F.s1.x},${F.s1.y - F.s1.r} M ${F.s1.x + 46},6 L ${F.s1.x + 46},${F.s2.y - F.s2.r - 4}`;
+  const railLabel = `<text class="elabel" x="270" y="152" text-anchor="middle">1 ms · 6 ms MemoryItem · 2 ms · TraceEvent</text>` +
+    `<text class="elabel" x="880" y="160" text-anchor="middle">recursive · re-enters S1 / S2 · not promoted · threshold TODO_HUMAN</text>`;
+  const nodes = specs.map(s => node(s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7], s[8])).join("");
+  const tok = tokens(poly(["call","stt","gw"]), 2, 4.5) +
+    tokens(poly(["router","dispatch","solver","out","corr","memw","jsonl","lora","reg","replay","grad"]), 3, 14) +
+    tokens(`M ${F.grad.x},${F.grad.y} L 16,${F.grad.y} L 16,6 L ${F.s1.x},6 L ${F.s1.x},${F.s1.y}`, 1, 9);
+  const markup =
+    `<defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z"/></marker>` +
+    `<marker id="arrow-hot" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z"/></marker></defs>` +
+    `<path class="rail" d="${rail}" marker-end="url(#arrow-hot)"/>` + railLabel +
+    `<g id="g-shared">${shared}${tok}</g>` +
+    `<g id="g-s1" class="branch">${s1}${tokens(poly(["gw","s1","router"]), 1, 5)}</g>` +
+    `<g id="g-s2" class="branch">${s2}${tokens(poly(["gw","s2","router"]), 1, 5)}</g>` +
+    nodes;
+  mount($("flow"), markup);
+  $("flow").querySelectorAll(".fnode").forEach(g => {
+    const open = () => {
+      g.parentNode.querySelectorAll(".fnode").forEach(n => n.classList.toggle("picked", n === g));
+      const ids = FLOW_TO_ONTO[g.dataset.id] || [];
+      if (ids[0]) selectOnto(ids[0]);
+    };
+    g.addEventListener("click", open);
+    g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+  });
+}
+function renderOnto() {
+  const by = Object.fromEntries(ONTO.map(n => [n.id, n]));
+  const lines = OEDGES.map(([a,b,label,soft]) => edge(by[a], by[b], "", soft)).join("");
+  const nodes = ONTO.map(n => `<g class="onode" data-id="${n.id}" tabindex="0" role="button" aria-label="${n.name}">${shapeTag(n.shape, n.x, n.y, 11)}<text class="nlabel" x="${n.x}" y="${n.y+22}">${n.short}</text></g>`).join("");
+  const markup = `<defs><marker id="arrow2" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z"/></marker></defs>${lines}${nodes}`;
+  mount($("onto"), markup);
+  $("onto").querySelectorAll(".onode").forEach(g => {
+    const open = () => selectOnto(g.dataset.id);
+    g.addEventListener("click", open);
+    g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+  });
+  selectOnto("case");
+}
+function trailIds() {
+  const s = new Set(callTrail);
+  if (loopOn) ["corr","mem","job","nver"].forEach(id => s.add(id));
+  return s;
+}
+function applyOnto() {
+  const live = trailIds();
+  document.querySelectorAll("#onto .onode").forEach(g => {
+    g.classList.toggle("live", live.has(g.dataset.id));
+    g.classList.toggle("now", g.dataset.id === currentId);
+  });
+}
+function selectOnto(id) {
+  const n = ONTO.find(d => d.id === id);
+  if (!n) return;
+  currentId = id;
+  $("onto-detail").innerHTML = `<b>${n.name}</b><span class="fields">${n.fields}</span><div>${n.blurb}</div>`;
+  applyOnto();
+}
+function entitiesFor(f) {
+  const ids = ["turn","person","house","case","request","outcome","router"];
+  if (f.system === 2 || f.priority === "P1" || f.priority === "P2") ids.push("hazard");
+  if (f.route !== "information_only") ids.push("resource");
+  if (f.id === "F15" || f.id === "F16" || f.id === "F17" || f.id === "F18") ids.push("policy");
+  return ids;
+}
+function showCall(f, id, info) {
+  callTrail = new Set(entitiesFor(f));
+  currentId = f.system === 2 ? "outcome" : "case";
+  applyOnto();
+  const s1 = $("g-s1"), s2 = $("g-s2");
+  if (s1 && s2) {
+    s1.classList.toggle("hot", f.system === 1);
+    s1.classList.toggle("off", f.system !== 1);
+    s2.classList.toggle("hot", f.system === 2);
+    s2.classList.toggle("off", f.system !== 2);
+    s1.querySelectorAll(".edge").forEach(el => el.setAttribute("marker-end", f.system === 1 ? "url(#arrow-hot)" : "url(#arrow)"));
+    s2.querySelectorAll(".edge").forEach(el => el.setAttribute("marker-end", f.system === 2 ? "url(#arrow-hot)" : "url(#arrow)"));
+  }
+  const a = document.getElementById("lab-s1");
+  const b = document.getElementById("lab-s2");
+  if (a) a.textContent = f.system === 1 ? (info.sMs + " ms · 0 tok") : "not called";
+  if (b) b.textContent = f.system === 2 ? (info.sMs + " ms · " + info.tokIn + "/" + info.tokOut + " tok") : "not called";
+  const hot = new Set(f.system === 1
+    ? ["call","stt","gw","auth","recall","policy","route","trace","s1","router","dispatch","solver","out"]
+    : ["call","stt","gw","auth","recall","policy","route","trace","s2","router","dispatch","solver","out"]);
+  if (loopOn) ["corr","memw","jsonl","lora","reg","replay","grad"].forEach(x => hot.add(x));
+  document.querySelectorAll("#flow .fnode").forEach(g => g.classList.toggle("hot", hot.has(g.dataset.id)));
+  $("flow-meta").textContent = id + " · " + f.id + " · system_" + f.system + " · " + info.pol + " · sim";
+}
+function showLoop() {
+  loopOn = true;
+  applyOnto();
+  ["corr","memw","jsonl","lora","reg","replay","grad"].forEach(id => {
+    const g = document.querySelector(`#flow .fnode[data-id="${id}"]`);
+    if (g) g.classList.add("hot");
+  });
+}
 function roadOpen(d){ return d.water < 2.7; }
 function policyFor(f){
   if (f.id === "F16" || f.id === "F15") return {code:"safeguarding_hold", note:"human keeps the decision"};
@@ -247,15 +535,16 @@ function makeTrace(f){
   html += spanRow("router", 3, f.action + " · one outcome · merge() not called", 0);
   $("waterfall").innerHTML = `<div class="tid">${id} · ${f.id} · ${model}</div>` + html;
   $("gateway-detail").innerHTML =
-    `<div><b>Auth</b> TODO_HUMAN · not rejected</div>` +
-    `<div><b>Memory</b> ${hits} hits · ${kinds.join(", ")}</div>` +
-    `<div><b>Policy</b> ${pol.code} · rules not evaluated in the product</div>` +
-    `<div><b>Route</b> system_${f.system} only · ${s1 ? "System 1 deterministic" : "System 2 Nemotron"}</div>` +
-    `<div><b>Audit</b> ${id} · tokens ${tokIn}/${tokOut} · sim $${callCost.toFixed(4)}</div>`;
+    `<div class="gwline"><b>Auth</b> TODO_HUMAN · not rejected</div>` +
+    `<div class="gwline"><b>Memory</b> ${hits} hits · ${kinds.join(", ")}</div>` +
+    `<div class="gwline"><b>Policy</b> ${pol.code} · rules not evaluated in the product</div>` +
+    `<div class="gwline"><b>Route</b> system_${f.system} only · ${s1 ? "System 1 deterministic" : "System 2 Nemotron"}</div>` +
+    `<div class="gwline"><b>Audit</b> ${id} · tokens ${tokIn}/${tokOut} · sim $${callCost.toFixed(4)}</div>`;
   $("router-out").innerHTML =
     `<div class="act">${f.action.replaceAll("_"," ")}</div>` +
     `<div class="meta"><span class="b ${f.priority}">${f.priority}</span> <span class="b S${f.system}">S${f.system}</span> ${f.route} · ${f.id}</div>` +
     `<div class="meta dim">${s1 ? "System 2 was not called." : "System 1 was not called."} Synthetic caller · ${f.district}. Router copied one outcome.</div>`;
+  showCall(f, id, {sMs, tokIn, tokOut, pol: pol.code});
   return id;
 }
 function renderFeedItem(f, id){
@@ -263,7 +552,7 @@ function renderFeedItem(f, id){
   el.className = "call";
   el.innerHTML = `<div class="ct">${f.title}</div><div class="cr"><span class="b ${f.priority}">${f.priority}</span><span class="b S${f.system}">S${f.system}</span><span class="mono">${f.id}</span><span class="dim">${f.district} · ${id}</span></div>`;
   $("feed").prepend(el);
-  while ($("feed").children.length > 6) $("feed").lastChild.remove();
+  while ($("feed").children.length > 2) $("feed").lastChild.remove();
 }
 function callOnce(){
   const f = FIXTURES[Math.random()*FIXTURES.length|0];
@@ -320,7 +609,7 @@ function solve(){
       });
     });
   });
-  lastChoice = moves.length ? "Solver moved " + moves.slice(0, 3).join(" · ") : "Solver held. Every ask was infeasible.";
+  lastChoice = moves.length ? "Solver moved " + moves.slice(0, 2).join(" · ") : "Solver held. Every ask was infeasible.";
   renderMoney();
 }
 function renderMoney(){
@@ -330,20 +619,11 @@ function renderMoney(){
     return `<div class="pool"><div class="pl"><span>${label}</span><span class="mono">${baht(p.left)}</span></div><div class="bar"><i style="width:${pct.toFixed(0)}%"></i></div></div>`;
   }).join("");
   const hot = [...DISTRICTS].sort((a,b) => b.water - a.water);
-  if (document.body.dataset.layout === "matrix") {
-    const body = hot.map(d => {
-      const cells = NEEDS.map(k => `<td class="num">${baht(alloc[d.name][k])}</td>`).join("");
-      const bind = bindings.find(b => b.startsWith(d.name)) || (roadOpen(d) ? "—" : "road");
-      return `<tr><td>${d.name}</td><td class="dim">${d.prov}</td><td class="num">${d.water.toFixed(2)}</td><td>${roadOpen(d)?"open":"shut"}</td><td class="num">${d.boats}/${d.crew}</td><td class="num">${d.ttr}</td>${cells}<td>${bind}</td></tr>`;
-    }).join("");
-    $("alloc").innerHTML = `<table><thead><tr><th>District</th><th>Prov</th><th>m</th><th>Road</th><th>Boat/crew</th><th>Min</th><th>Shelter</th><th>Boats</th><th>Medic</th><th>Food</th><th>Cash</th><th>Binding</th></tr></thead><tbody>${body}</tbody></table>`;
-  } else {
-    $("alloc").innerHTML = hot.slice(0, 3).map(d => {
-      const bits = NEEDS.map(k => `<span><em>${k}</em> ${baht(alloc[d.name][k])}</span>`).join("");
-      const bind = bindings.find(b => b.startsWith(d.name));
-      return `<div class="dcard"><div class="dh"><b>${d.name}</b><span class="dim">${d.prov} · ${d.water.toFixed(2)} m · ${roadOpen(d)?"road open":"road shut"} · crew ${d.crew} · ${d.ttr} min</span></div><div class="needs">${bits}</div>${bind ? `<div class="bind">${bind}</div>` : ""}</div>`;
-    }).join("") + `<p class="dim tiny">Three highest-water districts of eight in the solver. Simulated baht.</p>`;
-  }
+  $("alloc").innerHTML = hot.slice(0, 2).map(d => {
+    const bits = NEEDS.map(k => `<span><em>${k}</em> ${baht(alloc[d.name][k])}</span>`).join("");
+    const bind = bindings.find(b => b.startsWith(d.name));
+    return `<div class="dcard"><div class="dh"><b>${d.name}</b><span class="dim">${d.prov} · ${d.water.toFixed(2)} m · ${roadOpen(d)?"road open":"road shut"} · crew ${d.crew} · ${d.ttr} min</span></div><div class="needs">${bits}</div>${bind ? `<div class="bind">${bind}</div>` : ""}</div>`;
+  }).join("");
   $("constraints").innerHTML = (bindings.slice(0, 3).map(b => `<div>${b}</div>`).join("")) || "<div>No constraint binding this tick.</div>";
   $("solver-choice").textContent = lastChoice;
 }
@@ -354,20 +634,13 @@ function renderLoop(){
   $("cost").textContent = "$" + prev.cost.toFixed(4) + " → $" + cost.toFixed(4);
   $("drift").textContent = (lastDelta >= 0 ? "+" : "") + lastDelta.toFixed(3) + (drift ? " drift" : " steady");
   $("grad").textContent = acc >= 0.90
-    ? "Simulated cross of 0.90. Not written to decisions.yaml — graduation_threshold is still TODO_HUMAN."
+    ? "Simulated cross of 0.90. Not written to decisions.yaml. graduation_threshold is still TODO_HUMAN."
     : "Threshold drawn at 0.90 for the demo. The product value is TODO_HUMAN. Nothing is promoted into System 1.";
   $("rows").textContent = String(rows);
   $("k-corr").textContent = String(corr);
 }
 function correction(){
-  const steps = [
-    "Operator correction on C01-a",
-    "Mubit memory stores it",
-    "SFT/LoRA JSONL row appended",
-    "LoRA job stub · no weights",
-    "Version registered",
-    "Replay before / after"
-  ];
+  const steps = ["Operator correction on C01-a","Mubit memory stores it","SFT/LoRA JSONL row appended","LoRA job stub · no weights","Version registered","Replay before / after"];
   corr++; rows++;
   prev = {acc, lat, cost};
   ver++;
@@ -386,10 +659,13 @@ function correction(){
   const li = document.createElement("div");
   li.textContent = "stub-" + ver + "  acc " + acc.toFixed(2) + "  " + lat + " ms  " + (drift ? "drift" : "steady");
   $("versions").prepend(li);
-  while ($("versions").children.length > 4) $("versions").lastChild.remove();
+  while ($("versions").children.length > 3) $("versions").lastChild.remove();
   renderLoop();
+  showLoop();
 }
 function boot(){
+  renderFlow();
+  renderOnto();
   $("loop-steps").innerHTML = "<div>Waiting for the first correction.</div>";
   renderLoop();
   solve();
