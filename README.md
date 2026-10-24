@@ -4,7 +4,7 @@ Flood and disaster call-triage scaffold. Mubit governs memory, policy, and trace
 
 Sapling is [MubitLabs/banyan-sapling](https://huggingface.co/MubitLabs/banyan-sapling), the Apache-2.0 23B verifier (research preview). It takes a policy, evidence, and a claim, and returns `supported`, `violation`, `missing`, `contradicted`, or `unsure`, with probabilities. `supported` lets the proposed action stand. `violation` blocks it. `unsure`, `missing`, and `contradicted` hand the case to a human. The input limit is 16,384 tokens. It does not run on System 1. `system2.use_banyan_sapling` is true for those two checks. Hosting, the GPU, and Thai handling stay `TODO_HUMAN`. Tests use the stub client and do not load a GPU.
 
-The diagram follows one caller turn from top to bottom. Solid boxes and edges are implemented. Dashed ones are a stub, opt-in, or not wired. Green is System 1, blue is System 2, and yellow is where a person decides. By default both systems answer from stub files (`S1_IMPL=stub`, `S2_IMPL=stub`). `S1_IMPL=real` runs the needs table, and `S2_IMPL=real` calls Nemotron through Mubit. The Modal gateway app stays on stubs. `router/ledger.py` holds stock in this process only, and the hold resets on restart. Country packs are not loaded. The file-by-file request map is in `BaanSafe_Revised_Architecture.md`.
+The diagram follows one caller turn from top to bottom. Solid boxes and edges are implemented. Dashed ones are a stub, opt-in, or not wired. Green is System 1, blue is System 2, and yellow is where a person decides. A local `make serve` defaults to stub files (`S1_IMPL=stub`, `S2_IMPL=stub`). `S1_IMPL=real` runs the needs table, and `S2_IMPL=real` calls Nemotron through Mubit. The Modal gateway runs System 1 rules and auto enrichment, and promotes System 2 when `baansafe-mubit` is present. `router/ledger.py` holds stock in this process only. Accept confirms those holds and Reject cancels them. `GET /resources` subtracts the holds. Country packs are not loaded. The file-by-file request map is in `BaanSafe_Revised_Architecture.md`.
 
 <!-- Diagram guide for the agent that refreshes this README. This diagram is the model: keep its layout. Keep the numbered subgraphs (1 caller, 2 Mubit gateway with its data inputs, 3a System 1, 3b System 2, 4 decision router with the dispatch list, 5 operator review, 6 learning loops), the colour classes (s1 green, s2 blue, human yellow, store grey, unwired dashed with a transparent fill so it reads in dark mode), hexagons for decisions, data stores beside the step that reads them, and the legend above (solid = implemented, dashed = stub, opt-in, or not wired). Each box names its step, its file, and the rule or numbers it applies. When the code changes, update labels, edges, and status in place, and keep the legend paragraph true. Do not shrink it back to a file-by-file request map. That map lives in BaanSafe_Revised_Architecture.md. -->
 
@@ -23,7 +23,7 @@ flowchart TD
 
   subgraph L2["2 · Mubit gateway — gateway/route.py · routes, traces every stage to traces.jsonl, never reasons"]
     places_db[("districts.json · admin_districts.json<br/>gazetteer snapshot")]:::store
-    extract["Extract — system1/extract.py<br/>runs when a case arrives without fields<br/>English and Thai needs · people · danger · location confidence"]
+    extract["Extract — system1/extract.py<br/>runs when a case arrives without fields<br/>English needs · people · danger<br/>district names in Thai and English"]
     geo_db[("weather_observation.json · flood.geojson<br/>facilities.geojson: 4,218 facilities<br/>Open-Meteo and RID snapshots")]:::store
     enrich["Enrich — enrich/context.py<br/>districts.json first, 50 rows, province null<br/>then admin_districts: Hat Yai · Mueang Songkhla<br/>rain null on admin-only · flags never change priority"]
     memory["Memory — memory/adapter.py<br/>similar cases · past corrections<br/>mock files"]
@@ -37,7 +37,7 @@ flowchart TD
   end
 
   subgraph L3b["3b · System 2 — reasoned_recommendation"]
-    nemo["Nemotron nano 30B-A3B — system2/orchestrator.py<br/>through Mubit to OpenRouter · 10 s budget<br/>safeguarding and aid always need a human"]:::s2
+    nemo["Nemotron nano 30B-A3B — system2/orchestrator.py<br/>Mubit host only · case_id on the hop · 10 s budget<br/>safeguarding and aid always need a human"]:::s2
     down["No usable reply → system2_unavailable<br/>P1 if life-safety, else P2 · human"]:::s2
     sap["Banyan Sapling gate — system2/sapling.py<br/>aid eligibility and denial only<br/>supported stands · violation blocks · else human<br/>stub client, not hosted"]:::unwired
   end
@@ -49,23 +49,23 @@ flowchart TD
     ask["ask_next_question<br/>missing evidence, a question, or no location"]
     disp["create_provisional_dispatch<br/>one dispatch per need"]
     units[("Places snapshot: shelters, hospitals, boat points<br/>then mocks/resources.json units")]:::store
-    fan["rescue → boat · medical → ambulance<br/>water, food → welfare point<br/>shelter, evacuation → shelter<br/>same district first · held in router/ledger.py<br/>none free → unfilled, human confirms"]
+    fan["rescue → boat · medical → ambulance<br/>water, food → welfare point<br/>shelter, evacuation → shelter<br/>same district first · router/ledger.py<br/>GET /resources subtracts holds · none free → unfilled"]
   end
 
   subgraph L5["5 · Operator review — browser, ui/sim"]
-    hold["Operator Accept / Reject<br/>System 2 and cascade vehicles wait here"]:::human
+    hold["Operator Accept / Reject<br/>confirm or cancel this process's holds<br/>422 when another container has them"]:::human
     form["Correction form<br/>ui/correct.js"]:::human
   end
 
   subgraph L6["6 · Learning loops"]
     log[("Training event log<br/>training/events")]:::store
-    rl["RL loop — make rl-loop<br/>graduate · recommend · demote"]
+    rl["RL loop — make rl-loop<br/>live and cache hits trace mubit_chat<br/>replay miss → system2_unavailable"]
     overlay["Learned overlay<br/>only with RL_OVERLAY"]:::unwired
     ft["Fine-tune on Modal<br/>base model TODO · weights not loaded"]:::unwired
   end
 
   stt -.-> caller
-  caller -->|"POST /cases/{id}/turns"| extract
+  caller -->|"transcript or fixture_id, then /turns"| extract
   places_db --> extract
   extract --> enrich
   geo_db --> enrich
@@ -166,7 +166,7 @@ The town simulation is static files in `ui/sim/`. `make serve` mounts them at [h
 
 `real` on System 2 calls Nemotron through Mubit and returns HTTP 503 when `MUBIT_BASE_URL`/`MUBIT_API_KEY` is unset; `mubit` memory still returns HTTP 501. `S1_IMPL=real` is implemented.
 
-Stub gateway flow for `/triage` and `/cases/{id}/turns`: keyword-extract fields when the case has none (`system1/extract.py`) → enrich → memory through `memory/adapter.py` → route to System 1 or System 2 through the field precheck in `gateway/chooser.py` (`gateway.route_chooser` = `field precheck`; `mode: cascade` lets an S1 escalate hand off to S2 in the same turn — the no-stub fallback never cascades) → `router/merge.py` turns that one outcome into a `RouterDecision` with `next_action` and provisional dispatches → trace the gateway and the system that ran, with the outcome on the system event. With `use_stubs=True` the selected system's stub outcome stands in for `decide()`; a non-fixture id falls back to a generic escalation outcome.
+Stub gateway flow for `/triage` and `/cases/{id}/turns`: keyword-extract fields when the case has none (`system1/extract.py`) → enrich → memory through `memory/adapter.py` → route to System 1 or System 2 through the field precheck in `gateway/chooser.py` (`gateway.route_chooser` = `field precheck`; `mode: cascade` lets an S1 escalate hand off to S2 in the same turn — the no-stub fallback never cascades) → `router/merge.py` turns that one outcome into a `RouterDecision` with `next_action` and provisional dispatches → trace enrich, memory, the gateway, and the system that ran, with the outcome on the system event. A Mubit hop also emits `mubit_chat`. With `use_stubs=True` the selected system's stub outcome stands in for `decide()`; a non-fixture id falls back to a generic escalation outcome.
 
 `GET /aid/eligibility` and `POST /aid/exceptions` return HTTP 501. They do not approve a payment.
 
