@@ -218,7 +218,7 @@ function render(root) {
     el(
       "p",
       "muted",
-      `model nvidia/nemotron-3.5-lightning:free · epochs ${epochs(run).length} · seed ${run.seed}`,
+      `model ${run.model || "not recorded"} · epochs ${epochs(run).length} · seed ${run.seed}`,
     ),
   );
 

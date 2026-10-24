@@ -10,7 +10,7 @@ system1:
   extraction_method: rules-only      # decided: keyword rules in system1/extract.py; extraction_model stays TODO_HUMAN
   extraction_model: TODO_HUMAN       # only if a model is used
 system2:
-  orchestrator_model: nvidia/nemotron-3.5-lightning:free  # decided: Mubit compat id, free tier
+  orchestrator_model: nvidia/nemotron-3-nano-30b-a3b  # decided 24 Oct 2026: Mubit compat id, paid tier (the free tier shares a 50/day cap)
   hosting: openrouter via mubit gateway  # decided: Nemotron via OpenRouter; Mubit stays the hop
   use_banyan_sapling: true           # decided: verifier on, for sapling_scope only
   sapling_scope: aid_eligibility,denial

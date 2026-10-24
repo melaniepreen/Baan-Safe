@@ -114,6 +114,7 @@ def run(
     payload = {
         "schema": RUN_SCHEMA,
         "s2": s2,
+        "model": require_decision("system2.orchestrator_model"),
         "seed": seed,
         "epochs": epoch_rows,
         "episodes": episode_rows,

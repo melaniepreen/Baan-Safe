@@ -108,7 +108,7 @@ Stub gateway flow for `/triage` and `/cases/{id}/turns`: keyword-extract fields 
 
 `GET /aid/eligibility` and `POST /aid/exceptions` return HTTP 501. They do not approve a payment.
 
-LLM calls go through `llm/client.py` / `llm/openai_client.py`. `llm.provider_route` is `mubit`. The OpenAI SDK base is `MUBIT_BASE_URL` (compat OpenRouter prefix) with `MUBIT_API_KEY`. It does not print the key. `system2.orchestrator_model` is `nvidia/nemotron-3.5-lightning:free` and `system2.max_latency_ms` is 10000.
+LLM calls go through `llm/client.py` / `llm/openai_client.py`. `llm.provider_route` is `mubit`. The OpenAI SDK base is `MUBIT_BASE_URL` (compat OpenRouter prefix) with `MUBIT_API_KEY`. It does not print the key. `system2.orchestrator_model` is `nvidia/nemotron-3-nano-30b-a3b` and `system2.max_latency_ms` is 10000.
 
 `make demo-correction-loop` runs a synthetic correction through memory, writes an SFT/LoRA JSONL file under `eval/out/` (gitignored), registers stub model versions `stub-0` and `stub-1`, and prints quality, latency, and a null cost. It does not train weights and it does not promote a rule into System 1.
 
@@ -122,7 +122,7 @@ Public sources and row counts are in `data/SOURCES.md`. Raw responses are gitign
 
 ## Infra
 
-Modal apps live in `infra/modal/`. GPU sizes and the hourly arithmetic are in `infra/HARDWARE.md`. Model ids and GPU names stay `TODO_HUMAN` in git so the apps refuse to start until a human exports them. `make validate` allowlists decided leaves including Sapling on, `sapling.client` `stub`, `system2.hosting` `openrouter via mubit gateway`, `llm.provider_route` `mubit`, the Nemotron model id (`nvidia/nemotron-3.5-lightning:free`), `system2.max_latency_ms`, and `correction_loop.graduation_threshold`. The deploy-time `modal.*` ids stay `TODO_HUMAN`. The LLM client still refuses any host that is not Mubit. There is no OpenRouter client.
+Modal apps live in `infra/modal/`. GPU sizes and the hourly arithmetic are in `infra/HARDWARE.md`. Model ids and GPU names stay `TODO_HUMAN` in git so the apps refuse to start until a human exports them. `make validate` allowlists decided leaves including Sapling on, `sapling.client` `stub`, `system2.hosting` `openrouter via mubit gateway`, `llm.provider_route` `mubit`, the Nemotron model id (`nvidia/nemotron-3-nano-30b-a3b`), `system2.max_latency_ms`, and `correction_loop.graduation_threshold`. The deploy-time `modal.*` ids stay `TODO_HUMAN`. The LLM client still refuses any host that is not Mubit. There is no OpenRouter client.
 
 One-time setup, done by a person:
 

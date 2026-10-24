@@ -49,7 +49,7 @@ One turn: enrich, retrieve memory, record a policy pre-check, route by the field
 - `router/merge.py` builds the `RouterDecision`. The router trace note says `router.merge ran`.
 - `MUBIT_BASE_URL` must be `api.mubit.ai` or a subdomain of `mubit.ai`. `openrouter.ai` is refused.
 - The client does not read `OPENROUTER_API_KEY` and does not print `MUBIT_API_KEY`.
-- `llm.provider_route` is `mubit`. `system2.orchestrator_model` is `nvidia/nemotron-3.5-lightning:free` and `system2.max_latency_ms` is 10000. The key is never printed.
+- `llm.provider_route` is `mubit`. `system2.orchestrator_model` is `nvidia/nemotron-3-nano-30b-a3b` and `system2.max_latency_ms` is 10000. The key is never printed.
 
 ## How to test
 

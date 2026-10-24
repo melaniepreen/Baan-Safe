@@ -182,6 +182,18 @@ def _post_rules(case: CaseState, outcome: Outcome) -> Outcome:
     return outcome
 
 
+def _strings(value: Any) -> list[str]:
+    """A reply list field as strings. Models also send one string or a bool."""
+    if value is None or value is False:
+        return []
+    if value is True:
+        return ["unspecified"]
+    if isinstance(value, (list, tuple)):
+        return [str(item) for item in value if item not in (None, "")]
+    text = str(value).strip()
+    return [text] if text else []
+
+
 def _outcome_from_reply(reply: dict[str, Any], latency_ms) -> Outcome:
     content = (
         (reply.get("choices") or [{}])[0].get("message", {}).get("content") or ""
@@ -194,10 +206,10 @@ def _outcome_from_reply(reply: dict[str, Any], latency_ms) -> Outcome:
     priority = Priority(data["priority"])
     route = Route(data["route"])
     known = {need.value for need in Need}
-    raw_needs = [str(need) for need in data.get("needs") or []]
+    raw_needs = _strings(data.get("needs"))
     dropped = [need for need in raw_needs if need not in known]
     needs = [Need(need) for need in raw_needs if need in known]
-    plan = [str(item) for item in data.get("plan") or []][:3]
+    plan = _strings(data.get("plan"))[:3]
     reasoning = str(data.get("rationale") or "")
     if plan:
         steps = " ".join(f"{index}) {item}" for index, item in enumerate(plan, 1))
@@ -214,7 +226,7 @@ def _outcome_from_reply(reply: dict[str, Any], latency_ms) -> Outcome:
         reason=str(data.get("rationale") or "Nemotron reasoned over the case.")[:400]
         or "Nemotron reasoned over the case.",
         reasoning=reasoning or None,
-        missing_evidence=[str(item) for item in data.get("missing_evidence") or []],
+        missing_evidence=_strings(data.get("missing_evidence")),
         next_question=data.get("next_question") or None,
         requires_human=bool(data.get("requires_human")) or bool(dropped),
         escalate=False,
@@ -247,7 +259,8 @@ def _messages(
         "one of the Needs values above; do not invent need names. "
         "Reply with one JSON object only, keys: "
         + ", ".join(REPLY_KEYS)
-        + ". plan is at most 3 strings."
+        + ". needs, missing_evidence, and plan are JSON arrays of strings "
+        "(empty when there are none); plan is at most 3 strings."
     )
     payload = {
         "case_id": case.case_id,

@@ -24,7 +24,7 @@ Product choices live in `config/decisions.yaml`. Readers fail loudly while a val
 
 - `require_decision(path)` returns the value or raises `DecisionRequired`.
 - `unset_decisions(paths)` returns the paths that are missing, `None`, `""`, or `TODO_HUMAN`.
-- Allowlisted today (`DECIDED`, eleven leaves): `system2.use_banyan_sapling` `true`, `system2.sapling_scope` `aid_eligibility,denial`, `sapling.client` `stub`, `system2.hosting` `openrouter via mubit gateway`, `llm.provider_route` `mubit`, `gateway.route_chooser` `field precheck`, `system1.extraction_method` `rules-only`, `system2.orchestrator_model` `nvidia/nemotron-3.5-lightning:free`, `system2.max_latency_ms` `10000`, `correction_loop.graduation_threshold` `2` (System 2 → System 1, RL loop), `correction_loop.escalation_threshold` `2` (human corrections → System 2 `complex_situation`, `gateway/graduation.py`).
+- Allowlisted today (`DECIDED`, eleven leaves): `system2.use_banyan_sapling` `true`, `system2.sapling_scope` `aid_eligibility,denial`, `sapling.client` `stub`, `system2.hosting` `openrouter via mubit gateway`, `llm.provider_route` `mubit`, `gateway.route_chooser` `field precheck`, `system1.extraction_method` `rules-only`, `system2.orchestrator_model` `nvidia/nemotron-3-nano-30b-a3b`, `system2.max_latency_ms` `10000`, `correction_loop.graduation_threshold` `2` (System 2 → System 1, RL loop), `correction_loop.escalation_threshold` `2` (human corrections → System 2 `complex_situation`, `gateway/graduation.py`).
 - A new decided value needs the yaml leaf and a matching `DECIDED` entry. Validate fails if they differ.
 
 ## Invariants

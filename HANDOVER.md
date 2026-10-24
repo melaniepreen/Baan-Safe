@@ -14,7 +14,7 @@ One call goes through these parts in order. `gateway/route.py` `handle` is the e
 | Graduation to System 2 | `gateway/graduation.py` | `correction_loop.escalation_threshold` 2. Two human `s1_triage` corrections with a high-risk label on one field pattern tag it `complex_situation` and send it to System 2 with a recommendation. Never sets a priority. `make demo-graduation`. |
 | Route chooser | `gateway/chooser.py`, `config/escalation.yaml` | `field precheck`. `routing.yaml` is `mode: cascade`: a System 1 escalate hands the same turn to System 2. |
 | System 1 | `system1/decide.py` | Rules-only needs table, duplicate check, confidence floor 0.80. Learned rules from the RL overlay apply only when `RL_OVERLAY` names a file. |
-| System 2 | `system2/decide.py`, `system2/orchestrator.py` | Live Nemotron (`nvidia/nemotron-3.5-lightning:free`) through the Mubit compat route when `S2_IMPL=real`. Stub outcomes otherwise. Outages become a safe `system2_unavailable` escalation. |
+| System 2 | `system2/decide.py`, `system2/orchestrator.py` | Live Nemotron (`nvidia/nemotron-3-nano-30b-a3b`) through the Mubit compat route when `S2_IMPL=real`. Stub outcomes otherwise. Outages become a safe `system2_unavailable` escalation. |
 | Sapling | `system2/sapling.py` | Aid eligibility and denial only. Stub client (`mocks/sapling_stub/`). |
 | Router | `router/merge.py`, `router/ledger.py` | Next action, one provisional dispatch per need, in-process stock holds. |
 | RL loop | `eval/rl/`, `gateway/overlay.py`, `ui/sim/rl_panel.js` | `correction_loop.graduation_threshold` 2. Graduates repeated System 2 decisions into System 1 rules, demotes coarse ones. `make rl-loop` (spends quota), `make rl-loop-replay` (cached). |
@@ -46,7 +46,7 @@ Owners stay as in `OWNERSHIP.md`. Contracts are `v0.3-contracts`.
 
 ### Consistency
 
-10. **Two graduation paths disagree.** Correction graduation (`gateway/graduation.py`) never moves a pattern into System 1. The RL loop (`eval/rl/learner.py` with `RL_OVERLAY`) writes System 1 rules. A person should confirm which story the demo tells. An agent also set `routing.yaml` `mode: cascade`, `system2.orchestrator_model`, and `system2.max_latency_ms`, and AGENTS.md invariant 2 says humans set decisions.
+10. **Two graduation paths disagree.** Correction graduation (`gateway/graduation.py`) never moves a pattern into System 1. The RL loop (`eval/rl/learner.py` with `RL_OVERLAY`) writes System 1 rules. A person should confirm which story the demo tells. An agent also set `routing.yaml` `mode: cascade` and `system2.max_latency_ms`, and AGENTS.md invariant 2 says humans set decisions. Moly chose `system2.orchestrator_model` `nvidia/nemotron-3-nano-30b-a3b` on 24 Oct 2026.
 11. **The town shows outdated text.** `sim.js` still says `gateway.route_chooser` and `system2.orchestrator_model` are `TODO_HUMAN`. `ui/sim/data/sim_events.json` `learning.promote_after` is 3 and tells a promote-into-System-1 story.
 12. **`G01`–`G04` labels still say System 1.** `rescue` sends them to System 2. `mocks/s2_stub/G01.json` still says "pending correction_loop.graduation_threshold". Relabel them or change their need.
 13. **Modal limits.** `GET /rl/run` is 404 there because `.dockerignore` excludes `eval/out`. Stock holds live in one container's memory.
@@ -55,7 +55,11 @@ Owners stay as in `OWNERSHIP.md`. Contracts are `v0.3-contracts`.
 
 ## Live System 2
 
-The free OpenRouter tier allows 50 requests a day and resets at 00:00 UTC. When it is used up, every live call returns 429 and `orchestrate` falls back to `system2_unavailable`. `make rl-loop` spends that quota. `make rl-loop-replay` does not. Adding credits is a spending decision for a person.
+System 2 runs `nvidia/nemotron-3-nano-30b-a3b`, the paid tier, through Mubit. It replaced `nvidia/nemotron-3.5-lightning:free`. OpenRouter's 50-a-day free cap covers every `:free` model on the account, and today's cap was spent. On 24 Oct 2026, nano answered 6 fixture prompts in 1.1–1.7 s. 3 of the 6 matched the fixture priority and route. C01-a came back P2 welfare where P1 rescue was expected. A call costs about $0.0003 (the OpenRouter list price is $0.06 per million input tokens and $0.24 per million output tokens).
+
+The RL replay cache (`eval/out/rl/s2_cache.jsonl`) is keyed by model. Until `make rl-loop` runs live with nano, `make rl-loop-replay` misses every entry and scores them as fallbacks. `run.json` now records `model`.
+
+The full routing walk-through, the loops, and the Modal status are in `BaanSafe_Revised_Architecture.md` under "Routing in detail".
 
 ## Housekeeping
 
