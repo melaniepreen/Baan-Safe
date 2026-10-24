@@ -4,8 +4,10 @@
   "badge": "simulated",
   "confidence_threshold": 0.8,
   "learning": {
-    "promote_after": 3,
+    "promote_after": 2,
     "simulated": true,
+    "story": "correction_escalation_to_s2",
+    "note": "Matches correction_loop.escalation_threshold. After enough consistent corrections the pattern graduates to System 2 as complex_situation. This desk memory does not promote into System 1; that path is RL_OVERLAY only.",
     "life_safety_rule": "Life-safety calls stay with System 2 until an operator presses Accept. Repeats are remembered, and the fast path does not take them on its own."
   },
   "stream": {
@@ -82,7 +84,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - drinking water for the house, no danger signs Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - drinking water for the house, no danger signs System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",
@@ -176,7 +178,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - rice finished, child is with adults Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - rice finished, child is with adults System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",
@@ -270,7 +272,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - asking which shelter has space tonight Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - asking which shelter has space tonight System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",
@@ -364,7 +366,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - power has been out since morning, people are safe Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - power has been out since morning, people are safe System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",
@@ -458,7 +460,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - asking what time the district posts the flood news Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - asking what time the district posts the flood news System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",
@@ -552,7 +554,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - the lane was told to move to a shelter today Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - the lane was told to move to a shelter today System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",
@@ -646,7 +648,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - asking if the school is open tomorrow Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - asking if the school is open tomorrow System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",
@@ -740,7 +742,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - drinking water for the market-canal household Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - drinking water for the market-canal household System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",
@@ -834,7 +836,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - same household calling again about water Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - same household calling again about water System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",
@@ -928,7 +930,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - oxygen-dependent, water rising Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - oxygen-dependent, water rising System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",
@@ -1022,7 +1024,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - the person cannot get out of bed Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - the person cannot get out of bed System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",
@@ -1116,7 +1118,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - water in the lane, road name unknown Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - water in the lane, road name unknown System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",
@@ -1210,7 +1212,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - where to sleep if they have to leave Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - where to sleep if they have to leave System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",
@@ -1304,7 +1306,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - the caller says they are fine and not to send anyone Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - the caller says they are fine and not to send anyone System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",
@@ -1398,7 +1400,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - asking if the road is still open Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - asking if the road is still open System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",
@@ -1492,7 +1494,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - a child arrived at the shelter without an adult Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - a child arrived at the shelter without an adult System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",
@@ -1586,7 +1588,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - told they cannot get the flood relief aid because they rent Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - told they cannot get the flood relief aid because they rent System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",
@@ -1689,7 +1691,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - a sister staying in the house is not on the aid list Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - a sister staying in the house is not on the aid list System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",
@@ -1792,7 +1794,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - the words ask for drinking water; the case is a rescue Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - the words ask for drinking water; the case is a rescue System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",
@@ -1886,7 +1888,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - water bottles; the case is a rescue Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - water bottles; the case is a rescue System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway."
         },
         {
           "id": "s2",

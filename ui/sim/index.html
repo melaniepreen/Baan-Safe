@@ -35,7 +35,7 @@
       <span class="status-glyphs" aria-hidden="true">●● LTE</span>
     </div>
     <p id="phone-line" class="phone-line"><strong>Baan-Safe</strong> +66 81 555 0149</p>
-    <p id="chooser-note" class="demo-note">DEMO-ONLY chooser. It lives in this page. gateway.route_chooser is still TODO_HUMAN.</p>
+    <p id="chooser-note" class="demo-note">DEMO-ONLY house pin. Free-text and phone create a case with transcript; the gateway field precheck routes it. One-click households still use fixture_id.</p>
     <div class="phone-screen">
       <div id="prompt-drawer" hidden>
         <p class="kicker">Saved prompts</p>
@@ -127,8 +127,13 @@
       </div>
       <ol id="flow"></ol>
       <div id="priority-legend" class="legend"></div>
+      <section id="location-context" class="location-context" aria-label="Location context" hidden>
+        <h2>Nearby from enrichment</h2>
+        <p id="location-context-note" class="demo-note">From case.resources.location_context. Distances are gateway values only.</p>
+        <div id="location-context-body"></div>
+      </section>
       <h2>Patterns <span class="sim-badge">simulated</span></h2>
-      <p id="pattern-rule" class="demo-note">Repeats of the same theme raise the fast-path score. Life-safety stays with System 2 until Accept.</p>
+      <p id="pattern-rule" class="demo-note">Simulated desk memory mirrors correction escalation to System 2 (not RL_OVERLAY promotion into System 1). Life-safety stays with System 2 until Accept.</p>
       <div class="pattern-wrap">
         <table id="pattern-list" hidden>
           <thead>
@@ -145,7 +150,7 @@
         <p id="pattern-empty" class="pattern-empty">No patterns yet — repeated calls will show up here</p>
       </div>
       <button type="button" id="pattern-reset">Reset patterns</button>
-      <h2>Rulebook</h2>
+      <h2>Rulebook <span class="sim-badge">overlay</span></h2>
       <p id="rulebook-label" class="demo-note"></p>
       <table id="rulebook"><tbody></tbody></table>
       <h2>Decision log</h2>

@@ -368,7 +368,7 @@ def test_activity_prompts_and_rulebook_are_draft_simulations():
         assert theme["id"] and theme["label"]
         assert isinstance(theme["learns"], bool)
         assert isinstance(theme["life_safety"], bool)
-    assert events["learning"]["promote_after"] == 3
+    assert events["learning"]["promote_after"] == 2
     assert events["learning"]["simulated"] is True
     water = events["scenarios"]["F01"]["theme"]["id"]
     assert water == events["scenarios"]["F08"]["theme"]["id"] == events["scenarios"]["F09"]["theme"]["id"]
@@ -530,6 +530,32 @@ def test_town_files_do_not_look_like_personal_data():
             assert PHONE.search(text) is None, text
             assert NATIONAL_ID.search(text) is None, text
             assert "promptpay" not in text.lower()
+
+
+
+
+def test_wire_frontend_p0_contracts():
+    """Town desk posts transcripts, prefers dispatches, and drops stale TODO copy."""
+    source = (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
+    page = (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
+    events = _load("sim_events.json")
+    rules = _load("rulebook.json")
+    assert "useFixtureCreate" in source
+    assert 'transcript: [{ t_ms: 0, speaker: "caller", text: spoken }]' in source
+    assert "{ fixture_id: call.id }" in source
+    assert "ruleFromDispatches" in source
+    assert "renderLocationContext" in source
+    assert 'id="location-context"' in page
+    assert "gateway.route_chooser is still TODO_HUMAN" not in source
+    assert "gateway.route_chooser is still TODO_HUMAN" not in page
+    assert "system2.orchestrator_model is still TODO_HUMAN" not in source
+    assert "system2.orchestrator_model is still TODO_HUMAN" not in json.dumps(events)
+    assert "field precheck" in source
+    assert "Nemotron" in source
+    assert events["learning"]["promote_after"] == 2
+    assert events["learning"].get("story") == "correction_escalation_to_s2"
+    assert rules.get("overlay") is True
+    assert "dispatches" in rules["label"].lower()
 
 
 def test_sim_threshold_matches_system1_min_confidence():

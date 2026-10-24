@@ -1817,7 +1817,10 @@ function showWelcome() {
   );
   pushPhone("note", framingNote());
   const note = document.getElementById("chooser-note");
-  if (note) note.textContent = "DEMO-ONLY chooser. It lives in this page. gateway.route_chooser is still TODO_HUMAN.";
+  if (note) {
+    note.textContent =
+      "DEMO-ONLY house pin. Free-text and phone POST /cases with transcript; gateway.route_chooser is field precheck. One-click households still use fixture_id.";
+  }
   const line = document.getElementById("phone-line");
   if (line) line.textContent = "Baan-Safe · " + PHONE_NUMBER;
   setPhoneStatus("Connected");
@@ -1885,13 +1888,22 @@ function demoChoose(text) {
   };
 }
 
-function chooserSentence(call, how) {
+function chooserSentence(call, how, mode) {
+  if (mode === "fixture") {
+    return (
+      "One-click household demo. POST /cases with fixture_id " +
+      call.id +
+      " (" +
+      how +
+      "). Gateway field precheck routes the fixture transcript."
+    );
+  }
   return (
-    "DEMO-ONLY chooser in this page, not backend policy. gateway.route_chooser is TODO_HUMAN, so a free-text case is not routed by the gateway. Matched fixture " +
+    "Free-text / phone path. POST /cases with transcript (empty fields). Gateway field precheck + extraction read this sentence. Town pin matched " +
     call.id +
     " by " +
     how +
-    ". The stub gateway answers that fixture id. It does not read this sentence with a live model."
+    " for the drawn house and scripted feed only."
   );
 }
 
@@ -1923,7 +1935,7 @@ function replyMatches(template, ctx) {
 }
 
 function operatorReply(decision, call, text) {
-  const rule = matchRule(call, decision, text);
+  const rule = ruleFromDispatches(call, decision, text);
   const source = (decision.source_outcomes && decision.source_outcomes[0]) || {};
   const needs = new Set((source.needs || []).map(String));
   const ctx = {
@@ -2112,6 +2124,65 @@ function matchRule(call, decision, text) {
   );
 }
 
+const KIND_VEHICLE = {
+  boat: { vehicle: "boat", outbound: "rescue", return_to: "shelter", eta_min: 10 },
+  ambulance: { vehicle: "boat", outbound: "rescue", return_to: "clinic", eta_min: 12 },
+  shelter: { vehicle: "truck", outbound: "evac", return_to: "shelter", eta_min: 15 },
+  welfare_point: { vehicle: "van", outbound: "welfare", return_to: null, eta_min: 20 },
+};
+
+function buildingForResource(resourceId) {
+  if (!town || !resourceId) return null;
+  return (town.buildings || []).find((building) => building.resource_id === resourceId) || null;
+}
+
+function ruleFromDispatches(call, decision, text) {
+  const draft = matchRule(call, decision, text);
+  const dispatches = (decision && decision.dispatches) || [];
+  const chosen =
+    dispatches.find((row) => row.status === "provisional" && row.resource_id) ||
+    dispatches.find((row) => row.status === "provisional") ||
+    dispatches[0] ||
+    null;
+  if (!chosen) {
+    return {
+      ...draft,
+      fromDispatches: false,
+      overlay: true,
+      disagree: false,
+      draft_id: draft.id,
+      dispatches,
+    };
+  }
+  const pack = KIND_VEHICLE[chosen.resource_kind] || { vehicle: "none", outbound: null, return_to: null };
+  const base = buildingForResource(chosen.resource_id);
+  const disagree = !!(draft && draft.vehicle && pack.vehicle && draft.vehicle !== pack.vehicle);
+  return {
+    id: chosen.resource_id || "dispatch-" + chosen.resource_kind,
+    action:
+      "Gateway dispatch: " +
+      chosen.need +
+      " → " +
+      (chosen.resource_id || chosen.resource_kind) +
+      " (" +
+      chosen.status +
+      ")" +
+      (disagree ? ". Overlay rulebook would have used " + draft.id + "." : ""),
+    vehicle: pack.vehicle,
+    outbound: pack.outbound,
+    return_to: pack.return_to,
+    eta_min: pack.eta_min,
+    resource_id: chosen.resource_id || null,
+    resource_kind: chosen.resource_kind,
+    base_id: base ? base.id : null,
+    fromDispatches: true,
+    overlay: false,
+    disagree,
+    draft_id: draft.id,
+    dispatches,
+  };
+}
+
 function lastNode(route) {
   const legs = route.legs || [];
   const ids = legs.length ? legs[legs.length - 1].node_ids : [];
@@ -2183,8 +2254,10 @@ function startTrip(call, rule) {
     drawTrips(moverClock);
     return;
   }
+  const depotId = rule.base_id || null;
   let outbound = null;
-  if (pinned) {
+  if (depotId) outbound = routeBetween(depotId, targetId, "boat");
+  if (!outbound && pinned) {
     if (rule.vehicle === "truck") outbound = routeBetween(targetId, "bldg-shelter", "boat");
     else if (rule.vehicle === "van") outbound = routeBetween("bldg-welfare", targetId, "boat");
     else outbound = routeBetween("bldg-jetty", targetId, "boat");
@@ -2266,19 +2339,24 @@ function highlightRule(id) {
   document.querySelectorAll("#rulebook tr").forEach((row) => row.classList.toggle("hit", row.dataset.rule === id));
 }
 
-function renderRulebook() {
+function renderRulebook(activeRule) {
   const label = document.getElementById("rulebook-label");
   if (label) label.textContent = (rulebook && rulebook.label) || "";
   const body = document.querySelector("#rulebook tbody");
   if (!body || !rulebook) return;
   body.replaceChildren();
+  const disagreeId = activeRule && activeRule.disagree ? activeRule.draft_id : null;
+  const hitId = activeRule && activeRule.fromDispatches ? activeRule.draft_id : activeRule && activeRule.id;
   for (const rule of rulebook.rules) {
     const row = document.createElement("tr");
     row.dataset.rule = rule.id;
+    if (hitId && rule.id === hitId) row.classList.add("hit");
+    if (disagreeId && rule.id === disagreeId) row.classList.add("disagree");
     const id = document.createElement("td");
     id.textContent = rule.id;
     const action = document.createElement("td");
-    action.textContent = rule.action;
+    action.textContent =
+      rule.action + (disagreeId && rule.id === disagreeId ? " · disagrees with gateway dispatches" : "");
     row.append(id, action);
     body.append(row);
   }
@@ -2299,7 +2377,9 @@ function readPatterns() {
 
 function patternStatus(row) {
   if (row.lifeSafety && !row.confirmed) return "Needs approval";
-  if (row.owner === "system_1") return "Promoted";
+  const after = (eventsFile && eventsFile.learning && eventsFile.learning.promote_after) || 2;
+  if (row.hold === "escalated" || (row.owner === "system_2" && row.count >= after)) return "Graduated to S2";
+  if (row.owner === "system_1") return "System 1";
   return "Learning";
 }
 
@@ -2331,7 +2411,8 @@ function renderPatterns(rows) {
     const tr = document.createElement("tr");
     const path = row.owner === "system_1" ? "System 1" : "System 2";
     const status = patternStatus(row);
-    const statusClass = status === "Needs approval" ? "approval" : status === "Promoted" ? "promoted" : "learning";
+    const statusClass =
+      status === "Needs approval" ? "approval" : status === "Graduated to S2" || status === "System 1" ? "promoted" : "learning";
     tr.append(el("td", null, row.label));
     tr.append(el("td", "num", String(row.count)));
     const pathCell = document.createElement("td");
@@ -2359,6 +2440,7 @@ function rememberPattern(theme, decision, path, stored, consistent) {
     lastPriority: decision.final_priority,
     lastRoute: decision.final_route,
     owner: path.owner,
+    hold: path.hold || null,
     confirmed: !!(stored && stored.confirmed && consistent),
     lifeSafety: !!theme.life_safety,
     learns: theme.learns !== false,
@@ -2428,8 +2510,8 @@ function stepDetail(step, call, decision, source, bag) {
   if (step.kind === "system_1" || step.kind === "system_2" || step.kind === "router" || step.kind === "sapling" || step.kind === "handoff") {
     lines.push("Gateway stub: " + bag.priority + " · " + bag.route + " · " + bag.next_action + ". " + (source.reason || ""));
   }
-  if ((step.kind === "system_2" || step.kind === "handoff") && !String(step.text || "").includes("TODO_HUMAN")) {
-    lines.push("Simulated. system2.orchestrator_model is still TODO_HUMAN.");
+  if (step.kind === "system_2" || step.kind === "handoff") {
+    lines.push("System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway.");
   }
   if (step.kind === "rule") {
     const pack = responses && responses.priorities ? responses.priorities[decision.final_priority] : null;
@@ -2466,7 +2548,7 @@ function pathFor(call, decision, scenario) {
   const baseScores = (scenario && scenario.scores) || {};
   const baseTop = topScore(baseScores);
   const theme = scenario && scenario.theme;
-  const promoteAfter = (eventsFile && eventsFile.learning && eventsFile.learning.promote_after) || 3;
+  const promoteAfter = (eventsFile && eventsFile.learning && eventsFile.learning.promote_after) || 2;
   const stored = theme ? readPatterns().find((row) => row.id === theme.id) || null : null;
   const consistent = !stored || stored.lastPriority === decision.final_priority;
   if (!theme) {
@@ -2609,7 +2691,8 @@ async function playFeed(call, decision, trace, text, fast) {
   const gated = needsOperatorApproval(decision, path);
   const source = (decision.source_outcomes && decision.source_outcomes[0]) || {};
   const aid = decision.final_route === "aid_caseworker" || (source.needs || []).map(String).includes("aid_payment");
-  const rule = matchRule(call, decision, text);
+  const rule = ruleFromDispatches(call, decision, text);
+  renderLocationContext(caseStates.get(call.id) || (live.triage && live.triage.caseState) || null);
   renderScores(scores, needs, accepted);
   setPriorityBadge(decision.final_priority);
   clearApprovalChrome();
@@ -2672,7 +2755,7 @@ async function playFeed(call, decision, trace, text, fast) {
       kind: "dispatch",
       delay_ms: 480,
       source: "simulated",
-      text: "Dispatched after operator approval. Rulebook draft {rule_id}: {action}",
+      text: "Dispatched after operator approval. {action}",
     };
     steps.push(
       scenarioKind(scenario, "operator_approval") || {
@@ -2683,13 +2766,21 @@ async function playFeed(call, decision, trace, text, fast) {
         text: "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}.",
       }
     );
+  } else if (rule.fromDispatches) {
+    steps.push({
+      id: "dispatch-live",
+      kind: "router",
+      delay_ms: 480,
+      source: "gateway",
+      text: rule.action,
+    });
   } else {
     steps.push({
       id: "rule",
       kind: "rule",
       delay_ms: 480,
       source: "simulated",
-      text: "Rulebook draft " + rule.id + ": " + rule.action,
+      text: "Rulebook overlay " + rule.id + ": " + rule.action,
     });
   }
   if (planned.theme) rememberPattern(planned.theme, decision, path, planned.stored, planned.consistent);
@@ -2757,7 +2848,8 @@ async function playFeed(call, decision, trace, text, fast) {
     if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
   }
   if (token !== flowToken) return;
-  highlightRule(rule.id);
+  renderRulebook(rule);
+  highlightRule(rule.fromDispatches ? rule.draft_id || rule.id : rule.id);
   review = {
     call,
     decision,
@@ -2934,6 +3026,56 @@ function placeCall(text, choice, options = {}) {
   return job;
 }
 
+function useFixtureCreate(choice, options) {
+  if (options.useFixture === true) return true;
+  if (options.useFixture === false) return false;
+  const how = choice && choice.how ? String(choice.how) : "";
+  return /^scripted/.test(how);
+}
+
+function facilityLine(row) {
+  const name = row.name && row.name !== "unnamed" ? row.name : row.type || "facility";
+  const dist = Number.isFinite(row.distance_km) ? row.distance_km + " km" : null;
+  return dist ? name + " · " + dist : name;
+}
+
+function renderLocationContext(caseState) {
+  const panel = document.getElementById("location-context");
+  const body = document.getElementById("location-context-body");
+  if (!panel || !body) return;
+  const ctx = caseState && caseState.resources && caseState.resources.location_context;
+  if (!ctx) {
+    panel.hidden = true;
+    body.replaceChildren();
+    return;
+  }
+  panel.hidden = false;
+  body.replaceChildren();
+  const bits = [];
+  if (ctx.matched_district) bits.push("District: " + ctx.matched_district);
+  if (ctx.matched_province) bits.push("Province: " + ctx.matched_province);
+  if (ctx.rainfall_last_24h_mm != null) bits.push("Rain last 24h: " + ctx.rainfall_last_24h_mm + " mm");
+  if (ctx.rainfall_forecast_24h_mm != null) bits.push("Rain forecast 24h: " + ctx.rainfall_forecast_24h_mm + " mm");
+  if (bits.length) body.append(el("p", null, bits.join(" · ")));
+  const hospitals = ctx.nearest_hospitals || [];
+  if (hospitals.length) {
+    body.append(el("p", "muted", "Hospitals"));
+    const list = document.createElement("ul");
+    for (const row of hospitals.slice(0, 3)) list.append(el("li", null, facilityLine(row)));
+    body.append(list);
+  }
+  const shelters = ctx.candidate_shelters || [];
+  if (shelters.length) {
+    body.append(el("p", "muted", "Shelters / candidates"));
+    const list = document.createElement("ul");
+    for (const row of shelters.slice(0, 3)) list.append(el("li", null, facilityLine(row)));
+    body.append(list);
+  }
+  if (!hospitals.length && !shelters.length && !bits.length) {
+    body.append(el("p", "muted", "Enrichment returned location_context with no hospital, shelter, or rain rows."));
+  }
+}
+
 async function runPlaceCall(text, choice, options = {}) {
   const generation = callGeneration;
   const speak = options.speak !== false;
@@ -2949,7 +3091,8 @@ async function runPlaceCall(text, choice, options = {}) {
   const call = town.calls.find((item) => item.id === match.fixtureId);
   if (!call) throw new Error("No fixture for " + match.fixtureId);
   pinnedBuildingId = landmark ? landmark.buildingId : null;
-  const sentence = chooserSentence(call, match.how);
+  const household = useFixtureCreate(match, options);
+  const sentence = chooserSentence(call, match.how, household ? "fixture" : "transcript");
   document.getElementById("chooser-note").textContent = sentence;
   activeCallId = call.id;
   const node = document.getElementById("mubit-node");
@@ -2972,7 +3115,11 @@ async function runPlaceCall(text, choice, options = {}) {
     }
   }
   try {
-    const created = await postJson("/cases", { fixture_id: call.id });
+    const created = household
+      ? await postJson("/cases", { fixture_id: call.id })
+      : await postJson("/cases", {
+          transcript: [{ t_ms: 0, speaker: "caller", text: spoken }],
+        });
     const caseId = created.case.case_id;
     phoneCases.set(call.id, caseId);
     const transcript = created.case.transcript || [];
@@ -2987,6 +3134,7 @@ async function runPlaceCall(text, choice, options = {}) {
     callResults.set(call.id, decision);
     caseStates.set(call.id, turned.case);
     live.triage = { forId: call.id, decision, caseState: turned.case };
+    renderLocationContext(turned.case);
     let trace = [];
     try {
       trace = await getJson("/cases/" + encodeURIComponent(caseId) + "/trace");
@@ -3265,6 +3413,7 @@ function resetCalls() {
   syncPlayButton();
   document.getElementById("flow").replaceChildren();
   document.getElementById("backend-log").replaceChildren();
+  renderLocationContext(null);
   setPriorityBadge(null);
   setFeedProgress(0, 0);
   renderPatterns();
