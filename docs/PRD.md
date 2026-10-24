@@ -2,6 +2,8 @@
 
 Shared product and interface note for Moly and Melanie. Every claim below is what the code on `main` does. This file does not set a value in `config/decisions.yaml`. Owners in the status table are from `OWNERSHIP.md`. Callers are synthetic: `caller_id_hash` values look like `synthetic:f02`, and `scripts/validate.py` rejects phones, 13-digit ids, PromptPay, passport, immigration status, and bank account.
 
+The PRD and diagrams are refreshed at most every 30 minutes, in one docs-only commit, and only when something changed. Code pushes don't trigger it. If your push is rejected, run git pull --rebase; it only conflicts if you edited docs/PRD.md.
+
 ## 1. Product
 
 BaanSafe is a flood call-triage scaffold for a synthetic Thai flood. A call is triaged, a provisional dispatch can be named, and aid casework is a separate check that does not approve a payment. Mubit governs memory, policy, and traceability and does not reason. The field precheck picks one entry point; `config/routing.yaml` `mode: cascade` lets a System 1 escalate continue to System 2 in the same turn (the no-stub fallback outcome never cascades). Every LLM call goes through `llm/client.py` or `llm/openai_client.py`. Both refuse a host that is not `api.mubit.ai` or a `mubit.ai` subdomain. `llm.provider_route` is `mubit`. The OpenAI SDK base is the Mubit compat prefix (`/compat/openrouter/v1`). There is no OpenRouter client.
