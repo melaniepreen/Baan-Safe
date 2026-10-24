@@ -1,35 +1,63 @@
 # Morning report
 
-Phase 0 contracts are tagged `v0.1-contracts`. System 1 and System 2 decision logic are not implemented. Callers in fixtures are synthetic (`caller_id_hash` starts with `synthetic:`).
+Contracts are now `v0.2-contracts` (change request CR-002, accepted because you asked for the ontology). System 1 and System 2 still do not decide a case. Callers in fixtures are synthetic.
 
-Background for Phase 1 is in `research/INDEX.md`. Nothing in that folder changes config.
+## What changed for the revised architecture
+
+Mubit is the gateway, and it does not reason. `gateway/` now does auth (recorded, not enforced: `gateway.auth` is `TODO_HUMAN`), memory retrieval through `memory/adapter.py`, a policy pre-check that only records that safeguarding rules were not evaluated, and a route to **System 1 or System 2**. It does not run System 1 and then System 2. `config/routing.yaml` is `exclusive`. For a fixture id the harness reads `expected.system`. That lookup is not a product rule. Any other case returns HTTP 501 until `gateway.route_chooser` is set.
+
+There is no memory fetch in front of the gateway. `MEMORY_IMPL=mock` still reads the fixture files. `MEMORY_IMPL=mubit` still raises in `memory/mubit.py`.
+
+System 2's `decide()` calls `system2/orchestrator.py` (the Nemotron stub). The orchestrator raises while its decisions are unset, before any network call. The only LLM client is `llm/client.py`. It requires `MUBIT_BASE_URL` on a `mubit.ai` host and `MUBIT_API_KEY`, it never prints the key, and it still refuses while `llm.provider_route` is `TODO_HUMAN`.
+
+Each turn writes one system trace, and that event carries the outcome. `make demo-stub` now prints `sources=1` for every fixture.
+
+New contract models: Person, Household, Request, Evidence, Hazard, Resource, AidPolicy, Failure, AidEligibility, TrainingJob, ModelVersion. `Need` was already the need enum. `CaseState` is the case. Aid eligibility cannot store an approval. `GET /aid/eligibility` and `POST /aid/exceptions` return 501 for Melanie.
+
+Ownership is the A/B split in `OWNERSHIP.md`. Background for the hackathon is `research/MUBIT.md`, `research/MODELS.md`, `research/PAPERS.md`, `research/DATASETS.md`, and `research/DEMO_PLAN.md`.
+
+## How to run the correction loop
+
+```bash
+PYTHON=.venv/bin/python make demo-correction-loop
+```
+
+Synthetic case `CORR-LOOP-1` only. It stores a correction via the memory adapter, writes `eval/out/sft.jsonl` (one SFT/LoRA `messages` row), records training job `stub-job-1` with status `stub`, registers model versions `stub-0` then `stub-1`, and prints a before/after comparison: route accuracy 0.0 → 1.0, latency 20 ms → 28 ms, cost null. `llm.token_price_usd` is unset, so no USD figure was invented. `correction_loop.graduation_threshold` is still `TODO_HUMAN`. This run does not promote a rule into System 1 and does not call Mubit. `eval/out/` is gitignored.
+
+## Top decisions to make first
+
+1. **Which track** (recurring tasks, own-your-intelligence, or fast refresh). The stub loop covers the first and prints the second's three numbers. It does not retrain when the flood data changes. `research/DEMO_PLAN.md`.
+2. **`gateway.route_chooser`.** Until this is set, only fixture ids can be triaged. The harness reading `expected.system` must not become the live rule by accident.
+3. **`system2.orchestrator_model` and `system2.hosting`.** Nemotron options, with sizes and Thai notes, are in `research/MODELS.md`. Not chosen here.
+4. **`llm.provider_route`, plus `MUBIT_API_KEY` and `MUBIT_BASE_URL` in `.env`.** The client will not call out before the decision is set, even if the URL is present. Do not put the key in chat or in git.
+5. **`data.demo_event`.** Northern fixture districts, Hat Yai, or the central plain. The polygons do not decide this.
+6. **`correction_loop.graduation_threshold`.** Leave it unset unless you want a correction to become a System 1 rule. The demo does not.
+7. **`speech_to_text.provider`.** Scripted is enough for the three beats. Model options are in `research/MODELS.md`.
+8. Do not hardcode a relief amount. Aid stubs refuse an approval on purpose.
 
 ## 1. Status
 
 | Check | Result |
 |---|---|
 | `make validate` | passed (20 scenarios + 4 graduation fixtures) |
-| `make test` | passed (27 tests) |
+| `make test` | passed (36 tests) |
 | `make replay-stubs` | passed. System 1 stubs 13/13 on priority, route, and system. System 2 stubs 11/11. |
-| `make demo-stub` | passed. Stub gateway printed a `RouterDecision` for all 24 fixtures. |
-| `make serve` | passed. Every endpoint below returned a non-error response, including `/docs`. |
+| `make demo-stub` | passed. One source outcome on all 24 fixtures. |
+| `make demo-correction-loop` | passed. Accuracy 0.0 → 1.0, cost null, job status `stub`. |
+| Live API on `127.0.0.1:8000` | `/health` ok, `F01` routed only to System 1, `F10` only to System 2, `GET /aid/eligibility` returned 501 naming Melanie, OpenAPI lists both aid routes. Server was stopped after the smoke. |
 
 Run those with `PYTHON=.venv/bin/python` if `python3` has no pytest. This environment is Python 3.12. The code targets 3.11.
 
-Endpoints hit on `:8000`: `GET /health`, `GET /fixtures`, `GET /fixtures/F01`, `GET /fixtures/F01/stream?pace=0`, `POST /cases`, `POST /cases/{id}/turns`, `GET /cases/{id}`, `POST /triage`, `POST /cases/{id}/corrections`, `GET /cases/{id}/trace`, `GET /context` (district and lat/lon), `GET /resources`, `GET /map/flood`, `GET /map/facilities`, `POST /replay`, `GET /metrics`, `GET /docs`, `GET /openapi.json`, `GET /ui/player.html`.
-
-The correction pair works on the stub service: a correction posted on `C01-a` is retrieved as a `MemoryItem` when `C01-b` is loaded.
-
 ### Data sources
 
-Counts below are the database committed with this report. Full sentences, licences, and the HDX candidate list are in `data/SOURCES.md`. Times are Europe/London (UTC+1).
+Counts below are the database already on main. This pass did not re-ingest. Full sentences, licences, and the HDX candidate list are in `data/SOURCES.md`. Times are Europe/London (UTC+1).
 
 | Source | Rows | Freshness / blocker |
 |---|---|---|
 | GISTDA open API, live extent | 228 polygons (Songkhla 7-day 120, 30-day 108) | Key read from `GISTDA_API_KEY` in the gitignored `.env`. The key is not in the repo, the cache URLs, or this report. National `numberMatched`: 1-day 0, 3-day 0, 7-day 70,630, 30-day 185,645. Stored pages are Songkhla only. A count-only scan (codes 10–96) shows the 7-day water is in the central plain (Suphan Buri, Ayutthaya, and Nakhon Sawan each above 10,000) plus Pattani (404) and Songkhla (120). Those central pages were not stored: a first page of a 10,000-cell layer would look like a complete flood. |
 | GISTDA repeat flood | 400 | National frequency layer is 7,874,656 polygons. Cap 400, split across the eight configured provinces. Not a national layer. |
 | GISTDA ArcGIS risk layer | 63 | Public MapServer layer 1. Layer 0 count was 0. `duration_window=flood_risk_layer`. Not a 1/3/7/30-day extent. |
-| GDACS | 3 reports, 3 polygons | Fetched 05:05–05:08 Europe/London on 24 Oct 2026, inside `Visit-time` 05:00–07:45, one request a minute. robots.txt was read as text. An earlier attempt at 02:43 Europe/London is not in this commit: a JSON `Accept` header made `/robots.txt` return HTTP 406 HTML, the client treated that as no rules, and those rows and the cache were deleted. |
+| GDACS | 3 reports, 3 polygons | Fetched 05:05–05:08 Europe/London on 24 Oct 2026, inside `Visit-time` 05:00–07:45, one request a minute. robots.txt was read as text. An earlier attempt at 02:43 Europe/London is not in the tree: a JSON `Accept` header made `/robots.txt` return HTTP 406 HTML, the client treated that as no rules, and those rows and the cache were deleted. |
 | GLIDE via HDX | 109 | CC BY-IGO. `event_id` is the GLIDE number. Comments clipped to 280 characters. https://data.humdata.org/dataset/tha-glide-events |
 | IDMC via HDX | 14 flood rows | CC BY-IGO. 9 non-flood rows skipped (conflict and wildfire). 1 extra flood figure dropped because a recommended figure exists. `affected_people` is a displacement flow, not a census. A standalone GLIDE token is the `event_id`. An AHA-only code stays `idmc-event-<id>`. The 17 Nov 2025 multi-province figure (219,000) has an empty `event_codes` field, so it was not joined. https://data.humdata.org/dataset/tha-idmc-idu-events |
 | EOS-RS Hat Yai | 1 dissolved polygon | CC BY, preliminary, 23 Nov 2025, v0.9, 9,172 source polygons. `duration_window=observed`. Sentinel-1, analysed by EOS-RS. `event_id` `FL-2025-000210-THA` is a judgement: that GLIDE record is the southern flood of 17 Nov 2025, and the location text says Thailand, not Hat Yai. Confirm it before treating the join as exact. |
@@ -39,7 +67,7 @@ Counts below are the database committed with this report. Full sentences, licenc
 | Open-Meteo | 1,850 daily rows, 50 districts | Archive 24 Sep–23 Oct 2026, forecast 7 days. API robots.txt is `Disallow: /`. Calls happened because `open_meteo_documented_api_despite_robots_disallow` is true. |
 | Overpass | 50 districts, 4,218 facilities | Host `overpass.openstreetmap.fr` (no robots file). `overpass-api.de` was not used. Four clusters kept of seven: risk layer (14 districts), EOS-RS (3), two GDACS clusters (34 and 2 before the cap). All 14 fixture districts still resolve. Hat Yai District is not one of the 50. |
 | ReliefWeb | 0 | Retired. No request is sent. robots.txt disallows `/v2/`, and the API wants a pre-approved appname. |
-| DDPM | not added | Left out of this run on the owner's instruction. |
+| DDPM | not added | Left out on the owner's instruction. |
 
 Facility mix: 176 hospitals, 183 clinics, 166 pharmacies, 807 schools, 1,487 places of worship, 53 community centres, 541 bridges, 805 waterways. Flags: `inside_flood_extent` 0, `near_flood_extent` 0, `inside_observed_event` 1,363, `near_observed_event` 251, `clear` 2,604. Live 1/3/7/30-day polygons are Songkhla and were not one of the four Overpass clusters, so the queried facilities do not sit on a live extent. Observed polygons do set `in_observed_event_extent`. They do not set `in_flood_extent_1d/7d/30d` or the gateway's active-extent flag.
 
@@ -51,16 +79,23 @@ No phone numbers or 13-digit ids were written into SQLite text. Summaries are cl
 |---|---|
 | `research/thai-flood-management.md` | DDPM, RID, ONWR / the water command, TMD, GISTDA, 1784, governors and local government, the 2007 Act, relief payments without a baht figure. |
 | `research/international-practice.md` | Sendai, IASC clusters, Sphere water/shelter/food figures, CAP alerts. |
-| `research/triage-philosophy.md` | MPDS/NHS 111 style dispositions, START/SALT, vulnerability, human sign-off, and a reading of Priority / Route / escalation. Suggestions only. |
-| `research/lessons-thai-floods.md` | 2011 and Hat Yai in November 2025, for call triage: moving water, vague locations, duplicates, comms loss. |
+| `research/triage-philosophy.md` | MPDS/NHS 111 style dispositions, START/SALT, vulnerability, human sign-off. Suggestions only. |
+| `research/lessons-thai-floods.md` | 2011 and Hat Yai in November 2025, for call triage. |
 | `research/glossary-and-risk-areas.md` | Thai/English flood words, caller phrases, and the places the public records actually name. |
+| `research/MUBIT.md` | Public Mubit docs. Gateway, SDK, memory, learning loop, adapters. Thin on a correction-to-weights API. |
+| `research/MODELS.md` | Nemotron, Thai small models, speech, embeddings. Options, not a pick. |
+| `research/PAPERS.md` | Annotated links for triage, crisis tweets, fast/slow systems, routing, LoRA, corrections, floods. |
+| `research/DATASETS.md` | HumAID, CrisisLex, LST20, and the absence of a public call corpus. Licences as checked. |
+| `research/DEMO_PLAN.md` | Three beats, four judging criteria, track options, check-ins, A/B Saturday list, 19:00. |
 | `research/INDEX.md` | One line per file, plus "Other context worth getting". |
 
 ## 2. Start here
 
-**Moly.** `make serve`, open `/docs`. Write `system1/decide.py`, set `S1_IMPL=real`, and `POST /replay` on the 7 clear System 1 fixtures (`F01`–`F07`) plus the 2 duplicate fixtures (`F08`, `F09`). Then replace the stub copy in `gateway/route.py` and implement `router/merge.py`. Read `research/triage-philosophy.md` before changing a threshold. The UI can build on `GET /fixtures/{id}/stream`, `/cases/*`, and `/map/*`. `ui/player.html` is only a transcript player. The UI framework is `TODO_HUMAN`.
+The Saturday split and the 19:00 point are in `research/DEMO_PLAN.md`. Short version:
 
-**Melanie.** Write `system2/decide.py` using the model named in `config/decisions.yaml` (still unset). Set `S2_IMPL=real` and target the 9 System 2 fixtures plus the correction pair (`F10`–`F18`, `C01-a`, `C01-b`). Then implement `memory/mubit.py`, set `MEMORY_IMPL=mubit`, and extend `eval/`. Do not call Mubit unless `MUBIT_API_KEY` and `MUBIT_BASE_URL` are set. `scripts/smoke_mubit.py` prints status and latency only. `research/lessons-thai-floods.md` and `research/glossary-and-risk-areas.md` are the background for vague locations, duplicates, and Thai phrases. They are not fixtures.
+**Moly (A).** `make serve`, open `/docs`, rehearse `F01` and `F10`. Write `system1/decide.py` only after the route chooser is a conscious decision. The UI can build on `GET /fixtures/{id}/stream`, `/cases/*`, and `/map/*`. `ui/player.html` is only a transcript player.
+
+**Melanie (B).** `make demo-correction-loop` is the model-update beat. Then `memory/mubit.py` and `system2/orchestrator.py`, in that order, once the Mubit project and the Nemotron name exist. `GET /aid/eligibility` and `POST /aid/exceptions` are yours. Do not approve a payment from a stub. `research/MUBIT.md` is the constraint: the public docs do not show a correction-to-LoRA HTTP call, so a live replacement has to be checked against the adapter guide.
 
 Stub outcomes live in `mocks/s1_stub/` and `mocks/s2_stub/`. They are fixtures for the harness, not the decision logic.
 
@@ -72,10 +107,12 @@ Code that needs one of these raises until a human sets it. None were filled in.
 
 - `system1.extraction_method`, `system1.extraction_model`
 - `system2.orchestrator_model`, `system2.hosting`, `system2.use_banyan_sapling`, `system2.max_latency_ms`
+- `gateway.route_chooser`, `gateway.auth`
 - `memory.mubit_project`, `memory.retrieval_top_k`, `memory.token_budget`
+- `llm.provider_route`, `llm.token_price_usd`
 - `speech_to_text.provider`
 - `ui.framework`
-- `data.demo_event` (not chosen; the new polygons make Hat Yai a candidate alongside the northern fixture districts)
+- `data.demo_event` (not chosen)
 - `data.production_db` (SQLite is only the overnight store)
 - `correction_loop.graduation_threshold`
 
@@ -85,7 +122,8 @@ These are in config or in the ingest code. They are not System 1 or System 2 rul
 
 - Priority wording in `config/priorities.yaml`.
 - Route list and need map in `config/routes.yaml`. **Power has no route**; `F04` uses `information_only`.
-- Escalation rule strings in `config/escalation.yaml`. The stub gateway does **not** evaluate them. `research/triage-philosophy.md` suggests how a human might read them. It does not edit them.
+- Escalation rule strings in `config/escalation.yaml`. The gateway does **not** evaluate them. `research/triage-philosophy.md` suggests how a human might read them. It does not edit them.
+- `config/routing.yaml` is `mode: exclusive`. That is a harness setting. A cascade is not implemented. The fixture `expected.system` lookup is harness-only.
 - Enrichment thresholds: heavy rain forecast 30 mm / 24 h, heavy rain observed 30 mm / 24 h, near-flood buffer 500 m. A ThaiWater gauge, when one was matched, supplies `rainfall_last_24h_mm`.
 - Historical and preliminary polygons use `duration_window=observed`. They set `in_observed_event_extent` and the facility flags `inside_observed_event` / `near_observed_event`. They do not set the live extent flags.
 - Stub next-action order (first match): `requires_human` → `escalate_to_supervisor`; missing evidence or a next question → `ask_next_question`; `escalate` → `escalate_to_supervisor`; else `create_provisional_dispatch`.
@@ -102,6 +140,7 @@ These are in config or in the ingest code. They are not System 1 or System 2 rul
 - Dev CORS on the API is allow-all so `ui/player.html` can call it.
 - Bridges are OSM `bridge=yes` ways.
 - One correction pair (`C01-a` / `C01-b`), not two. The brief asks for 20 scenarios and also "2 × correction pairs". 7 + 2 + 9 + one pair (2 files) = 20. A second pair would make 22.
+- The correction-loop demo uses a synthetic case that is not one of F01–F18. It does not rewrite golden labels.
 
 ### Doubtful fixture labels (not changed)
 
@@ -126,10 +165,13 @@ Not done in this run. Each one is a human call.
 6. Put `GISTDA_API_KEY` in `.env` on any machine that will refresh. It is not in git.
 7. Read `research/triage-philosophy.md` before editing `config/escalation.yaml`. The note's extra triggers (a child alone, oxygen, "we can't climb") are proposals, not changes.
 8. Do not hardcode a relief-payment amount. `research/thai-flood-management.md` stops at the Act on purpose.
+9. Read `research/MUBIT.md` before treating the stub training job as a real Mubit adapter run.
 
 ## 4. Blockers needing a human
 
-**GISTDA key on a new machine.** This ingest used a key from the gitignored `.env`. The key was not written to SQLite, cache metadata, or the report. Another checkout needs its own `GISTDA_API_KEY` before `make ingest-refresh` can refresh the feature API. Registration: https://api-gateway.gistda.or.th and https://api-gateway.gistda.or.th/v2. Catalogue: https://opendata.gistda.or.th/dataset/flood-disaster-data. Contact: disaster@gistda.or.th.
+**GISTDA key on a new machine.** The earlier ingest used a key from the gitignored `.env`. The key was not written to SQLite, cache metadata, or the report. Another checkout needs its own `GISTDA_API_KEY` before `make ingest-refresh` can refresh the feature API. Registration: https://api-gateway.gistda.or.th and https://api-gateway.gistda.or.th/v2. Catalogue: https://opendata.gistda.or.th/dataset/flood-disaster-data. Contact: disaster@gistda.or.th.
+
+**Mubit key and project.** `MUBIT_API_KEY`, `MUBIT_BASE_URL`, and `memory.mubit_project` are unset in the decisions file (the env vars are not decisions; the project id is). The public docs do not describe a correction-to-LoRA endpoint. See `research/MUBIT.md`.
 
 **GDACS clock.** `https://www.gdacs.org/robots.txt` sets `Request-rate: 1/60` and `Visit-time: 0400-0645` UTC, which is 05:00–07:45 Europe/London. The client fails closed if that file cannot be read. A refresh outside the window does not delete rows already stored.
 
@@ -141,10 +183,12 @@ Not done in this run. Each one is a human call.
 
 **DDPM, TMD's registered warning API, RID reservoir levels, WorldPop, HDX admin boundaries, and a live CAP feed** were not fetched. Reasons are in `research/INDEX.md` under "Other context worth getting".
 
+**No public emergency-call audio** turned up. `research/DATASETS.md`. Do not drop a real recording into the repo.
+
 ## 5. Open change requests
 
-None. `contracts/CHANGE_REQUESTS.md` is empty. Contracts stay at `v0.1-contracts` until a human accepts a proposal.
+None open. CR-002 is accepted and the shapes are in `contracts/models.py`. Tag `v0.2-contracts`. Further edits go through `contracts/CHANGE_REQUESTS.md`.
 
 ## 6. Integration point
 
-Saturday 19:00. Both `S1_IMPL=real` and `S2_IMPL=real`, with `MEMORY_IMPL=mubit`. Contracts stay frozen at the latest tag until then.
+Saturday 19:00 Europe/London. Both `S1_IMPL=real` and `S2_IMPL=real`, with `MEMORY_IMPL=mubit`, for the paths that exist by then. Contracts stay frozen at `v0.2-contracts` until a new accepted change. The task split is `research/DEMO_PLAN.md`.

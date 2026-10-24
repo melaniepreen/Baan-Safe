@@ -1,7 +1,7 @@
 PYTHON ?= python3
 export PYTHONPATH := .
 
-.PHONY: validate test replay-stubs demo-stub serve ingest ingest-refresh data-report
+.PHONY: validate test replay-stubs demo-stub demo-correction-loop serve ingest ingest-refresh data-report
 
 validate:
 	$(PYTHON) scripts/validate.py
@@ -14,6 +14,9 @@ replay-stubs:
 
 demo-stub:
 	$(PYTHON) -m gateway
+
+demo-correction-loop:
+	$(PYTHON) -m eval.correction_loop
 
 serve:
 	$(PYTHON) -m uvicorn api.main:app --host 0.0.0.0 --port 8000

@@ -1,0 +1,39 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "failure_id": {
+      "minLength": 1,
+      "title": "Failure Id",
+      "type": "string"
+    },
+    "case_id": {
+      "minLength": 1,
+      "title": "Case Id",
+      "type": "string"
+    },
+    "summary": {
+      "minLength": 1,
+      "title": "Summary",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "wrong_priority",
+        "wrong_route",
+        "missed_safeguarding",
+        "wrong_aid",
+        "other"
+      ],
+      "title": "Kind",
+      "type": "string"
+    }
+  },
+  "required": [
+    "failure_id",
+    "case_id",
+    "summary",
+    "kind"
+  ],
+  "title": "Failure",
+  "type": "object"
+}

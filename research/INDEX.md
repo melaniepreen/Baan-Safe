@@ -9,6 +9,11 @@ Notes for Moly and Melanie before Phase 1. They are background, not product rule
 | `research/triage-philosophy.md` | Phone triage, START/SALT, vulnerability, human sign-off, and how that sits next to Priority / Route / escalation. Suggestions only. |
 | `research/lessons-thai-floods.md` | What 2011 and Hat Yai in November 2025 imply for a call-taker. |
 | `research/glossary-and-risk-areas.md` | Thai and English flood words, caller phrases, and provinces that show up in the public records we actually hold. |
+| `research/MUBIT.md` | Public Mubit docs: gateway, SDK, memory, learning loop, adapters. Thin on a correction-to-LoRA API. |
+| `research/MODELS.md` | Open-model options for Nemotron, Thai extraction, speech, and embeddings. Not a selection. |
+| `research/PAPERS.md` | Annotated links: call triage, crisis tweets, fast/slow systems, routing, LoRA, human corrections, floods. |
+| `research/DATASETS.md` | Labelled sets and their licences. HumAID, CrisisLex, LST20. No public emergency-call audio. |
+| `research/DEMO_PLAN.md` | Three-beat demo, the four judging criteria, track options, 12:00 and 12:00–18:00 check-ins, A/B tasks, 19:00. |
 
 ## Other context worth getting
 
@@ -26,4 +31,4 @@ Not fetched in this run, and why.
 - **Full GISTDA repeat-flood layer.** The frequency service reports millions of polygons. We store a per-province cap. A national layer does not belong in git.
 - **A live CAP feed.** If TMD or DDPM publishes Common Alerting Protocol alerts, that is the warning text System 1 should point at. We do not have that feed.
 - **`data.demo_event`.** Still `TODO_HUMAN`. Fixtures talk about Lampang, Phrae, Nan, and Phayao. The new observed polygons also include Hat Yai. Picking the demo event is a human decision.
-- **Mubit project, retrieval budget, speech-to-text, UI framework, production database, graduation threshold.** Still unset in `config/decisions.yaml`.
+- **Mubit project, retrieval budget, the route chooser, the auth scheme, speech-to-text, UI framework, production database, graduation threshold, token price.** Still unset in `config/decisions.yaml`. What the public docs do say is in `research/MUBIT.md`.

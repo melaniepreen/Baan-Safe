@@ -57,6 +57,9 @@ def check_decisions() -> None:
     for path, value in iter_decision_leaves():
         if value != "TODO_HUMAN":
             fail(f"config/decisions.yaml:{path} was set to {value!r}; leave it TODO_HUMAN")
+    routing = (ROOT / "config" / "routing.yaml").read_text(encoding="utf-8")
+    if "mode: exclusive" not in routing:
+        fail("config/routing.yaml mode must stay exclusive (System 1 or System 2, not both)")
 
 
 def check_stubs_are_stubs() -> None:

@@ -152,6 +152,105 @@ class TraceEvent(_Model):
     tokens_in: int | None = Field(default=None, ge=0)
     tokens_out: int | None = Field(default=None, ge=0)
     model: str | None = None
+    model_version: str | None = None
+    outcome: Outcome | None = None
+    notes: str | None = None
+
+
+class Person(_Model):
+    """A synthetic participant. No name, phone, or national id."""
+
+    person_id: str = Field(min_length=1)
+    household_id: str | None = None
+    role: Literal["caller", "household_member", "operator", "caseworker", "supervisor"] = "caller"
+    vulnerability_tags: list[str] = Field(default_factory=list)
+
+
+class Household(_Model):
+    """A synthetic household. location_label is a district, not a street address."""
+
+    household_id: str = Field(min_length=1)
+    member_ids: list[str] = Field(default_factory=list)
+    location_label: str | None = None
+    people_count: int | None = Field(default=None, ge=0)
+
+
+class Hazard(_Model):
+    hazard_id: str = Field(min_length=1)
+    kind: Literal["flood", "rain", "medical", "safeguarding", "other"]
+    summary: str = Field(min_length=1)
+    location_label: str | None = None
+
+
+class Evidence(_Model):
+    evidence_id: str = Field(min_length=1)
+    request_id: str | None = None
+    source: Literal["transcript", "operator", "public_data", "correction"]
+    summary: str = Field(min_length=1)
+    fields: ExtractedFields | None = None
+
+
+class Request(_Model):
+    request_id: str = Field(min_length=1)
+    person_id: str = Field(min_length=1)
+    case_id: str | None = None
+    summary: str = Field(min_length=1)
+    needs: list[Need] = Field(default_factory=list)
+
+
+class Resource(_Model):
+    resource_id: str = Field(min_length=1)
+    kind: Literal["boat", "ambulance", "shelter", "welfare_point", "other"]
+    name: str = Field(min_length=1)
+    district: str | None = None
+    available: int | None = Field(default=None, ge=0)
+
+
+class AidPolicy(_Model):
+    """A policy summary. Baht amounts are not stored here."""
+
+    policy_id: str = Field(min_length=1)
+    summary: str = Field(min_length=1)
+    needs: list[Need] = Field(default_factory=list)
+
+
+class Failure(_Model):
+    failure_id: str = Field(min_length=1)
+    case_id: str = Field(min_length=1)
+    summary: str = Field(min_length=1)
+    kind: Literal[
+        "wrong_priority",
+        "wrong_route",
+        "missed_safeguarding",
+        "wrong_aid",
+        "other",
+    ]
+
+
+class AidEligibility(_Model):
+    """Stub result. status is never an approval."""
+
+    case_id: str = Field(min_length=1)
+    status: Literal["unset", "needs_human"] = "unset"
+    policy_id: str | None = None
+    notes: str | None = None
+
+
+class TrainingJob(_Model):
+    job_id: str = Field(min_length=1)
+    status: Literal["stub", "queued", "running", "failed", "completed"]
+    dataset_path: str = Field(min_length=1)
+    base_model: str = Field(min_length=1)
+    target_version_id: str = Field(min_length=1)
+    notes: str | None = None
+
+
+class ModelVersion(_Model):
+    version_id: str = Field(min_length=1)
+    model_name: str = Field(min_length=1)
+    role: Literal["system_1", "system_2", "orchestrator"]
+    parent_version_id: str | None = None
+    training_job_id: str | None = None
     notes: str | None = None
 
 
@@ -170,4 +269,15 @@ MODEL_TYPES: list[type[_Model] | type[Enum]] = [
     Correction,
     MemoryRecord,
     TraceEvent,
+    Person,
+    Household,
+    Hazard,
+    Evidence,
+    Request,
+    Resource,
+    AidPolicy,
+    Failure,
+    AidEligibility,
+    TrainingJob,
+    ModelVersion,
 ]

@@ -1,0 +1,48 @@
+{
+  "additionalProperties": false,
+  "description": "A synthetic household. location_label is a district, not a street address.",
+  "properties": {
+    "household_id": {
+      "minLength": 1,
+      "title": "Household Id",
+      "type": "string"
+    },
+    "member_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Member Ids",
+      "type": "array"
+    },
+    "location_label": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Location Label"
+    },
+    "people_count": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "People Count"
+    }
+  },
+  "required": [
+    "household_id"
+  ],
+  "title": "Household",
+  "type": "object"
+}

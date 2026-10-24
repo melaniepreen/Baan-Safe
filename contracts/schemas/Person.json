@@ -1,0 +1,47 @@
+{
+  "additionalProperties": false,
+  "description": "A synthetic participant. No name, phone, or national id.",
+  "properties": {
+    "person_id": {
+      "minLength": 1,
+      "title": "Person Id",
+      "type": "string"
+    },
+    "household_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Household Id"
+    },
+    "role": {
+      "default": "caller",
+      "enum": [
+        "caller",
+        "household_member",
+        "operator",
+        "caseworker",
+        "supervisor"
+      ],
+      "title": "Role",
+      "type": "string"
+    },
+    "vulnerability_tags": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Vulnerability Tags",
+      "type": "array"
+    }
+  },
+  "required": [
+    "person_id"
+  ],
+  "title": "Person",
+  "type": "object"
+}

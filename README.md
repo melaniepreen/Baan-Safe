@@ -1,6 +1,6 @@
 # BaanSafe
 
-Flood and disaster call-triage scaffold. Mubit governs memory, policy, and traceability. System 1 (Moly) will act with deterministic rules. System 2 (Melanie) will reason with a Nemotron orchestrator. The decision router will turn both outcomes into one next action.
+Flood and disaster call-triage scaffold. Mubit governs memory, policy, and traceability. System 1 acts fast. System 2 reasons deeply with Nemotron as its orchestrator. The decision router turns one system's outcome into the next action. Mubit does not reason.
 
 This tree is Phase 0 plus a Phase 1 API. **System 1 and System 2 decision logic are not implemented.** Callers, households, and transcripts are synthetic. Real district names and public flood polygons are used only to anchor scenarios.
 
@@ -25,6 +25,7 @@ make validate       # fixtures, mocks, decisions, personal-data scan
 make test           # pytest
 make replay-stubs   # accuracy of s1/s2 stub files against expected labels
 make demo-stub      # gateway.handle(..., use_stubs=True) for every fixture
+make demo-correction-loop  # stub: correction -> JSONL -> model version -> before/after
 make serve          # API on :8000, docs at /docs
 make ingest         # public sources, using the cache
 make ingest-refresh # ignore the cache
@@ -44,7 +45,13 @@ make data-report    # rewrite data/SOURCES.md
 
 `real` and `mubit` return HTTP 501 (`not implemented yet — owner: …`) until that code exists.
 
-Stub gateway flow for `/triage` and `/cases/{id}/turns`: enrich → mock memory → System 1 stub → System 2 stub if the System 1 stub sets `escalate` → copy the selected stub into a `RouterDecision` → trace each stage. `router/merge.py` is not called.
+Stub gateway flow for `/triage` and `/cases/{id}/turns`: enrich → memory through `memory/adapter.py` → route to System 1 **or** System 2 (fixture `expected.system` until `gateway.route_chooser` is set; never both) → copy that one stub into a `RouterDecision` → trace the gateway and the system that ran, with the outcome on the system event. `router/merge.py` is not called. A case id that is not a fixture returns HTTP 501 until a human sets `gateway.route_chooser`.
+
+`GET /aid/eligibility` and `POST /aid/exceptions` return HTTP 501. They do not approve a payment.
+
+LLM calls, when a human writes them, go through `llm/client.py`. That client requires `MUBIT_BASE_URL` on a `mubit.ai` host and `MUBIT_API_KEY`, and it still refuses while `llm.provider_route` is `TODO_HUMAN`. It does not print the key.
+
+`make demo-correction-loop` runs a synthetic correction through memory, writes an SFT/LoRA JSONL file under `eval/out/` (gitignored), registers stub model versions `stub-0` and `stub-1`, and prints quality, latency, and a null cost. It does not train weights and it does not promote a rule into System 1.
 
 ## Data
 

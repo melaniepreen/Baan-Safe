@@ -1,0 +1,57 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "job_id": {
+      "minLength": 1,
+      "title": "Job Id",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "stub",
+        "queued",
+        "running",
+        "failed",
+        "completed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "dataset_path": {
+      "minLength": 1,
+      "title": "Dataset Path",
+      "type": "string"
+    },
+    "base_model": {
+      "minLength": 1,
+      "title": "Base Model",
+      "type": "string"
+    },
+    "target_version_id": {
+      "minLength": 1,
+      "title": "Target Version Id",
+      "type": "string"
+    },
+    "notes": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "job_id",
+    "status",
+    "dataset_path",
+    "base_model",
+    "target_version_id"
+  ],
+  "title": "TrainingJob",
+  "type": "object"
+}

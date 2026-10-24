@@ -1,97 +1,135 @@
-"""Stub gateway.
+"""Mubit gateway stub. Owner: Moly.
 
-use_stubs=True retrieves mock memory, loads stub outcomes, and copies the
-selected stub into a RouterDecision. It does not evaluate escalation rules
-and it does not call System 1 or System 2.
+One turn retrieves memory, records a policy pre-check, and routes to System 1
+or System 2. It does not call both. Mubit does not reason: this module does
+not evaluate escalation rules and it does not choose a priority.
 
-Enrichment may attach flood and rain flags from public data. Those flags do
-not change priority or route.
+use_stubs=True loads the stub for the chosen system. The live chooser is
+gateway.route_chooser and stays TODO_HUMAN. For a fixture id only, the harness
+reads expected.system. That lookup is not a product rule.
+
+use_stubs=False, or S1_IMPL=real / S2_IMPL=real on the chosen system, calls
+that system's decide() and lets the NotImplementedError through.
 """
 
 from __future__ import annotations
 
+import os
 from datetime import datetime, timezone
 
-from config.settings import load_yaml
-from contracts.models import CaseState, NextAction, Outcome, Priority, Route, RouterDecision, System
+from config.settings import DecisionRequired, load_yaml, require_decision
+from contracts.models import (
+    CaseState,
+    NextAction,
+    Outcome,
+    Priority,
+    Route,
+    RouterDecision,
+    System,
+    TraceEvent,
+)
 from enrich.context import location_context
-from mocks.loader import has_s1_stub, has_s2_stub, load_memory, load_s1_stub, load_s2_stub
+from fixtures.load import load_fixture
+from gateway.auth import status as auth_status
+from gateway.policy import precheck_notes
+from memory.adapter import retrieve
+from mocks.loader import has_s1_stub, has_s2_stub, load_s1_stub, load_s2_stub
+from system1 import decide as system1
+from system2 import decide as system2
 from trace import emit
-from contracts.models import TraceEvent
 
 
 def handle(case: CaseState, use_stubs: bool = True) -> RouterDecision:
-    if not use_stubs:
-        raise NotImplementedError(
-            "not implemented yet — owner: Moly. "
-            "Pass use_stubs=True until system1, system2, and router.merge exist."
-        )
     started = _now()
     _enrich(case)
-    case.memory_context = load_memory(case.case_id)
+    case.memory_context = retrieve(case)
+    system = choose_system(case)
+    notes = [auth_status(), *precheck_notes()]
     emit(
         TraceEvent(
             case_id=case.case_id,
             stage="gateway",
             started_at=started,
             latency_ms=0,
-            notes="stub gateway: memory retrieved from mocks",
+            notes=(
+                "mubit gateway stub: "
+                + "; ".join(notes)
+                + f"; memory via adapter; exclusive route {system.value}"
+            ),
         )
     )
-
-    s1_started = _now()
-    if has_s1_stub(case.case_id):
-        system_1 = load_s1_stub(case.case_id)
-    else:
-        system_1 = _fallback_outcome(case.case_id)
+    outcome = _run(case, system, use_stubs=use_stubs)
+    system_started = _now()
     emit(
         TraceEvent(
             case_id=case.case_id,
-            stage="system_1",
-            started_at=s1_started,
-            latency_ms=system_1.latency_ms or 0,
+            stage=system.value,
+            started_at=system_started,
+            latency_ms=outcome.latency_ms or 0,
             model=None,
-            notes="stub outcome",
+            outcome=outcome,
+            notes="stub outcome" if use_stubs else "real interface",
         )
     )
-    outcomes = [system_1]
-    chosen = system_1
-    if system_1.escalate:
-        s2_started = _now()
-        if has_s2_stub(case.case_id):
-            system_2 = load_s2_stub(case.case_id)
-        else:
-            system_2 = _fallback_outcome(case.case_id, system=System.system_2)
-        outcomes.append(system_2)
-        chosen = system_2
-        emit(
-            TraceEvent(
-                case_id=case.case_id,
-                stage="system_2",
-                started_at=s2_started,
-                latency_ms=system_2.latency_ms or 0,
-                model=None,
-                notes="stub outcome",
-            )
-        )
-
     router_started = _now()
-    decision = _assemble(case, outcomes, chosen)
+    decision = _assemble(case, [outcome], outcome, notes)
     emit(
         TraceEvent(
             case_id=case.case_id,
             stage="router",
             started_at=router_started,
             latency_ms=0,
-            notes="stub copy of selected outcome; router.merge was not called",
+            notes="stub copy of the single selected outcome; router.merge was not called",
         )
     )
     return decision
 
 
-def _enrich(case: CaseState) -> None:
-    import os
+def choose_system(case: CaseState) -> System:
+    """Pick System 1 or System 2. Never both.
 
+    Fixture ids use expected.system as a harness stand-in. Any other case
+    needs gateway.route_chooser, which is TODO_HUMAN and raises.
+    """
+    mode = load_yaml("routing.yaml").get("mode")
+    if mode != "exclusive":
+        raise RuntimeError(
+            f"config/routing.yaml mode is {mode!r}. "
+            "The stub gateway only implements exclusive routing "
+            "(System 1 or System 2, not System 1 then System 2)."
+        )
+    try:
+        expected = load_fixture(case.case_id)["expected"]["system"]
+    except KeyError:
+        require_decision("gateway.route_chooser")
+        raise DecisionRequired(
+            "config/decisions.yaml:gateway.route_chooser did not name a system."
+        )
+    return System(expected)
+
+
+def _run(case: CaseState, system: System, use_stubs: bool) -> Outcome:
+    real = (system is System.system_1 and _impl("S1_IMPL") == "real") or (
+        system is System.system_2 and _impl("S2_IMPL") == "real"
+    )
+    if real or not use_stubs:
+        if system is System.system_1:
+            return system1.decide(case)
+        return system2.decide(case)
+    if system is System.system_1:
+        if has_s1_stub(case.case_id):
+            return load_s1_stub(case.case_id)
+        return _fallback_outcome(case.case_id, System.system_1)
+    if has_s2_stub(case.case_id):
+        return load_s2_stub(case.case_id)
+    return _fallback_outcome(case.case_id, System.system_2)
+
+
+def _impl(name: str) -> str:
+    return os.environ.get(name, "stub").strip().lower() or "stub"
+
+
+def _enrich(case: CaseState) -> None:
     from ingest.db import db_exists
 
     mode = os.environ.get("ENRICH_IMPL", "").strip().lower()
@@ -123,7 +161,12 @@ def _add(flags: list[str], flag: str) -> None:
         flags.append(flag)
 
 
-def _assemble(case: CaseState, outcomes: list[Outcome], chosen: Outcome) -> RouterDecision:
+def _assemble(
+    case: CaseState,
+    outcomes: list[Outcome],
+    chosen: Outcome,
+    extra_notes: list[str],
+) -> RouterDecision:
     order = load_yaml("escalation.yaml").get("stub_next_action_order") or []
     action = NextAction.create_provisional_dispatch
     for rule in order:
@@ -143,8 +186,9 @@ def _assemble(case: CaseState, outcomes: list[Outcome], chosen: Outcome) -> Rout
             action = NextAction(rule["action"])
             break
     notes = [
-        f"stub gateway selected {chosen.system.value}",
+        f"stub gateway selected {chosen.system.value} exclusively",
         f"memory items: {len(case.memory_context)}",
+        *extra_notes,
     ]
     for item in case.memory_context:
         if item.kind == "correction":

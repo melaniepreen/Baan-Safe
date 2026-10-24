@@ -1,4 +1,4 @@
-# BaanSafe contracts (v0.1)
+# BaanSafe contracts (v0.2)
 
 These Pydantic v2 models are the only shared language between Moly (System 1, gateway, router, UI) and Melanie (System 2, memory, eval). JSON Schemas in `contracts/schemas/` are exported for a TypeScript or JavaScript UI. The schemas describe shapes. They do not choose a priority or a route.
 
@@ -139,4 +139,21 @@ Produced by the gateway after a decision. Consumed by Mubit's write path (Melani
 
 ## TraceEvent
 
-Produced by the gateway at each stage (`gateway`, `system_1`, `system_2`, `router`, `memory_write`). Consumed by audit and `GET /metrics`. Appended to `traces.jsonl` by `trace.py`.
+Produced by the Mubit gateway at each stage (`gateway`, `system_1`, `system_2`, `router`, `memory_write`). Consumed by audit and `GET /metrics`. Appended to `traces.jsonl` by `trace.py`. `outcome` is optional. When System 1 or System 2 runs, that stage's event carries the outcome on its own. Older lines without `outcome` still validate. `model_version` is set by the correction-loop replay stub.
+
+## Ontology (v0.2)
+
+These shapes were added so Moly and Melanie can pass the same objects. They do not decide a case. `Need` was already the need entity (the enum above). `CaseState` is the case. No model stores a name, a phone number, or a street address.
+
+- `Person` — synthetic id, household id, role, vulnerability tags.
+- `Household` — members and a district label.
+- `Request` — a person asks for something; needs use the `Need` enum.
+- `Evidence` — transcript, operator, public data, or a correction.
+- `Hazard` — flood, rain, medical, safeguarding, or other.
+- `Resource` — a boat, ambulance, shelter, welfare point, or other unit.
+- `AidPolicy` — a policy summary. Baht amounts are not a field.
+- `Failure` — what a later correction is about.
+- `AidEligibility` — `status` is only `unset` or `needs_human`. It cannot record an approval.
+- `TrainingJob` and `ModelVersion` — the stub correction loop. A job status of `stub` means no weights were trained.
+
+`MemoryRecord` still describes a case, holds evidence, records the decision, and can note a failure and corrections. Mubit retrieves and writes it. The gateway is the caller.

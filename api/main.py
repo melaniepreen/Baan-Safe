@@ -14,7 +14,7 @@ load_env_file()
 
 app = FastAPI(
     title="BaanSafe",
-    version="0.1.0",
+    version="0.2.0",
     summary="Flood call-triage scaffold. System 1 and System 2 logic are not implemented.",
 )
 # Dev-only, so the static transcript player can call the API. Human sign-off.

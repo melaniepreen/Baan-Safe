@@ -1,0 +1,7 @@
+# Harness setting, not a product decision. The live chooser is
+# gateway.route_chooser in config/decisions.yaml and stays TODO_HUMAN.
+#
+# exclusive: one turn calls System 1 or System 2, never both.
+# The stub harness, only when the case id is a fixture, uses that fixture's
+# expected.system. That lookup is a test convenience. It is not a routing rule.
+mode: exclusive

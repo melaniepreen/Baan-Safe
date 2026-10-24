@@ -8,10 +8,16 @@ system2:
   hosting: TODO_HUMAN                # via Mubit gateway / self-hosted / provider
   use_banyan_sapling: TODO_HUMAN     # true | false, and for which checks
   max_latency_ms: TODO_HUMAN
+gateway:
+  route_chooser: TODO_HUMAN          # how a live (non-fixture) case picks system_1 or system_2
+  auth: TODO_HUMAN                   # auth scheme in front of the Mubit gateway
 memory:
   mubit_project: TODO_HUMAN
   retrieval_top_k: TODO_HUMAN
   token_budget: TODO_HUMAN
+llm:
+  provider_route: TODO_HUMAN         # must be confirmed as mubit; the client refuses any other host
+  token_price_usd: TODO_HUMAN        # do not invent a price; cost stays null until this is set
 speech_to_text:
   provider: TODO_HUMAN               # or "scripted only" for the demo
 ui:

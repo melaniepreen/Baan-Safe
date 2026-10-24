@@ -1,4 +1,4 @@
-"""BaanSafe v0.1 contracts."""
+"""BaanSafe v0.2 contracts."""
 
 from contracts.models import (
     CaseState,

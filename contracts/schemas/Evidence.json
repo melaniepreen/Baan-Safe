@@ -1,0 +1,144 @@
+{
+  "$defs": {
+    "ExtractedFields": {
+      "additionalProperties": false,
+      "properties": {
+        "location": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Location"
+        },
+        "location_confidence": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Location Confidence"
+        },
+        "people_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "People Count"
+        },
+        "vulnerable": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Vulnerable",
+          "type": "array"
+        },
+        "medical": {
+          "default": false,
+          "title": "Medical",
+          "type": "boolean"
+        },
+        "danger": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Danger",
+          "type": "array"
+        },
+        "needs": {
+          "items": {
+            "$ref": "#/$defs/Need"
+          },
+          "title": "Needs",
+          "type": "array"
+        }
+      },
+      "title": "ExtractedFields",
+      "type": "object"
+    },
+    "Need": {
+      "enum": [
+        "rescue",
+        "medical",
+        "water",
+        "food",
+        "shelter",
+        "evacuation",
+        "power",
+        "information",
+        "aid_payment"
+      ],
+      "title": "Need",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "evidence_id": {
+      "minLength": 1,
+      "title": "Evidence Id",
+      "type": "string"
+    },
+    "request_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Request Id"
+    },
+    "source": {
+      "enum": [
+        "transcript",
+        "operator",
+        "public_data",
+        "correction"
+      ],
+      "title": "Source",
+      "type": "string"
+    },
+    "summary": {
+      "minLength": 1,
+      "title": "Summary",
+      "type": "string"
+    },
+    "fields": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExtractedFields"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "evidence_id",
+    "source",
+    "summary"
+  ],
+  "title": "Evidence",
+  "type": "object"
+}

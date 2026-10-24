@@ -17,6 +17,8 @@ def test_stub_gateway_matches_expected_labels():
         assert isinstance(decision, RouterDecision)
         assert decision.final_priority.value == expected["priority"]
         assert decision.final_route.value == expected["route"]
+        assert len(decision.source_outcomes) == 1
+        assert decision.source_outcomes[0].system.value == expected["system"]
         assert case.memory_context == [] or decision.policy_notes
 
 

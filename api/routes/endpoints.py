@@ -13,14 +13,13 @@ from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field
 
-from api.deps import enrich_impl, impl_snapshot, memory_impl, not_ready, s1_impl, s2_impl
+from api.deps import enrich_impl, impl_snapshot, not_ready, s1_impl, s2_impl
 from api.store import StoredCase, get, put
 from contracts.models import (
     CaseState,
     Correction,
     ExtractedFields,
     MemoryItem,
-    Outcome,
     RouterDecision,
     TraceEvent,
     TranscriptTurn,
@@ -28,13 +27,11 @@ from contracts.models import (
 from enrich.context import location_context
 from eval.replay import replay
 from fixtures.load import all_ids, list_entries, load_case, load_fixture
+from config.settings import DecisionRequired
 from gateway.route import handle
 from ingest.db import DB_PATH, connect
-from memory import mubit
+from memory.adapter import retrieve, store_correction
 from mocks.loader import (
-    append_correction,
-    has_s1_stub,
-    load_memory,
     load_resources,
     load_s1_stub,
     read_corrections,
@@ -114,31 +111,21 @@ def _require_case(case_id: str) -> StoredCase:
 
 
 def _refresh_memory(stored: StoredCase) -> None:
-    if memory_impl() != "mock":
+    try:
+        stored.state.memory_context = retrieve(stored.state)
+    except NotImplementedError:
         return
-    stored.state.memory_context = load_memory(stored.state.case_id)
 
 
 def execute(case: CaseState) -> RouterDecision:
-    """Enrichment and stubs, or a 501 when an owner has flipped their switch."""
-    if memory_impl() == "mubit":
-        try:
-            mubit.retrieve(case)
-        except NotImplementedError as exc:
-            raise not_ready("Melanie", exc) from exc
-    if s1_impl() == "real":
-        try:
-            system1.decide(case)
-        except NotImplementedError as exc:
-            raise not_ready("Moly", exc) from exc
-    if s2_impl() == "real":
-        preview: Outcome | None = load_s1_stub(case.case_id) if has_s1_stub(case.case_id) else None
-        if preview is None or preview.escalate:
-            try:
-                system2.decide(case)
-            except NotImplementedError as exc:
-                raise not_ready("Melanie", exc) from exc
-    return handle(case, use_stubs=True)
+    """Mubit gateway. Memory retrieval happens inside handle(), not before it."""
+    try:
+        return handle(case, use_stubs=True)
+    except NotImplementedError as exc:
+        owner = "Melanie" if "Melanie" in str(exc) else "Moly"
+        raise not_ready(owner, exc) from exc
+    except DecisionRequired as exc:
+        raise not_ready("Moly", exc) from exc
 
 
 @router.get("/health", response_model=Health)
@@ -260,13 +247,10 @@ def correct(case_id: str, body: CorrectionIn) -> CorrectionResult:
         reason=body.reason,
         created_at=_now(),
     )
-    if memory_impl() == "mubit":
-        try:
-            mubit.write_correction(correction)
-        except NotImplementedError as exc:
-            raise not_ready("Melanie", exc) from exc
-    else:
-        append_correction(correction)
+    try:
+        store_correction(correction)
+    except NotImplementedError as exc:
+        raise not_ready("Melanie", exc) from exc
     stored.corrections.append(correction)
     emit(
         TraceEvent(
@@ -361,6 +345,34 @@ def replay_endpoint(body: ReplayIn) -> dict:
         "system_1": replay(s1_system, s1_ids),
         "system_2": replay(s2_system, s2_ids),
     }
+
+
+@router.get("/aid/eligibility")
+def aid_eligibility(case_id: str = Query(min_length=1)) -> dict:
+    """Melanie's System 1 aid stub. Never approves a payment."""
+    try:
+        if case_id in all_ids():
+            case = load_case(case_id)
+        else:
+            case = _require_case(case_id).state
+        from system1.aid_eligibility import check
+
+        check(case)
+    except NotImplementedError as exc:
+        raise not_ready("Melanie", exc) from exc
+    raise not_ready("Melanie")
+
+
+@router.post("/aid/exceptions")
+def aid_exceptions(case: CaseState) -> dict:
+    """Melanie's System 2 aid-exception stub. Never approves an exception."""
+    try:
+        from system2.aid_exceptions import propose
+
+        propose(case)
+    except NotImplementedError as exc:
+        raise not_ready("Melanie", exc) from exc
+    raise not_ready("Melanie")
 
 
 @router.get("/metrics")

@@ -1,0 +1,45 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "hazard_id": {
+      "minLength": 1,
+      "title": "Hazard Id",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "flood",
+        "rain",
+        "medical",
+        "safeguarding",
+        "other"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "summary": {
+      "minLength": 1,
+      "title": "Summary",
+      "type": "string"
+    },
+    "location_label": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Location Label"
+    }
+  },
+  "required": [
+    "hazard_id",
+    "kind",
+    "summary"
+  ],
+  "title": "Hazard",
+  "type": "object"
+}

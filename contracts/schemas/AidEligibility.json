@@ -1,0 +1,49 @@
+{
+  "additionalProperties": false,
+  "description": "Stub result. status is never an approval.",
+  "properties": {
+    "case_id": {
+      "minLength": 1,
+      "title": "Case Id",
+      "type": "string"
+    },
+    "status": {
+      "default": "unset",
+      "enum": [
+        "unset",
+        "needs_human"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "policy_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Policy Id"
+    },
+    "notes": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "case_id"
+  ],
+  "title": "AidEligibility",
+  "type": "object"
+}

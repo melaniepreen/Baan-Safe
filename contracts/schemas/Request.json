@@ -1,0 +1,63 @@
+{
+  "$defs": {
+    "Need": {
+      "enum": [
+        "rescue",
+        "medical",
+        "water",
+        "food",
+        "shelter",
+        "evacuation",
+        "power",
+        "information",
+        "aid_payment"
+      ],
+      "title": "Need",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "request_id": {
+      "minLength": 1,
+      "title": "Request Id",
+      "type": "string"
+    },
+    "person_id": {
+      "minLength": 1,
+      "title": "Person Id",
+      "type": "string"
+    },
+    "case_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Case Id"
+    },
+    "summary": {
+      "minLength": 1,
+      "title": "Summary",
+      "type": "string"
+    },
+    "needs": {
+      "items": {
+        "$ref": "#/$defs/Need"
+      },
+      "title": "Needs",
+      "type": "array"
+    }
+  },
+  "required": [
+    "request_id",
+    "person_id",
+    "summary"
+  ],
+  "title": "Request",
+  "type": "object"
+}

@@ -1,0 +1,67 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "version_id": {
+      "minLength": 1,
+      "title": "Version Id",
+      "type": "string"
+    },
+    "model_name": {
+      "minLength": 1,
+      "title": "Model Name",
+      "type": "string"
+    },
+    "role": {
+      "enum": [
+        "system_1",
+        "system_2",
+        "orchestrator"
+      ],
+      "title": "Role",
+      "type": "string"
+    },
+    "parent_version_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parent Version Id"
+    },
+    "training_job_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Training Job Id"
+    },
+    "notes": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "version_id",
+    "model_name",
+    "role"
+  ],
+  "title": "ModelVersion",
+  "type": "object"
+}

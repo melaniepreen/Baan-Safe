@@ -1,0 +1,58 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "resource_id": {
+      "minLength": 1,
+      "title": "Resource Id",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "boat",
+        "ambulance",
+        "shelter",
+        "welfare_point",
+        "other"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "name": {
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "district": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "District"
+    },
+    "available": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Available"
+    }
+  },
+  "required": [
+    "resource_id",
+    "kind",
+    "name"
+  ],
+  "title": "Resource",
+  "type": "object"
+}
