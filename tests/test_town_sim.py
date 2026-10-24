@@ -384,12 +384,15 @@ def test_activity_prompts_and_rulebook_are_draft_simulations():
     assert etas["p2-evac"] == 15
     assert etas["p3-welfare"] == 20
     groups = {group["id"]: group["prompts"] for group in prompts["groups"]}
-    assert set(groups) == {"system_1", "system_2", "sapling"}
-    for rows in groups.values():
-        assert len(rows) >= 4
+    assert set(groups) == {"system_1", "system_2", "sapling", "location"}
+    assert len(groups["location"]) >= 3
+    for key, rows in groups.items():
+        assert len(rows) >= (3 if key == "location" else 4)
         for prompt in rows:
             assert prompt["fixture_id"] in call_ids
             assert prompt["en"]
+            assert "the payment" not in prompt["en"]
+            assert "payment list" not in prompt["en"]
     assert rules["draft"] is True
     assert "not repo policy" in rules["label"].lower()
     vehicles = {rule["vehicle"] for rule in rules["rules"]}
@@ -406,6 +409,8 @@ def test_activity_prompts_and_rulebook_are_draft_simulations():
     subprocess.run(["node", "ui/sim/check_patterns.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_approval.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_titles.mjs"], cwd=ROOT, check=True)
+    subprocess.run(["node", "ui/sim/check_pace.mjs"], cwd=ROOT, check=True)
+    subprocess.run(["node", "ui/sim/check_landmarks.mjs"], cwd=ROOT, check=True)
     assert 'id="rl-open"' not in (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
     assert "initRlPanel" not in (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
     assert "No patterns yet — repeated calls will show up here" in (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
@@ -426,6 +431,15 @@ def test_activity_prompts_and_rulebook_are_draft_simulations():
     assert "if (gated)" in source
     assert "if (review.approval === \"pending\")" in source
     assert "markerG.alpha = 0.55" not in source
+    assert "You are connected to Baan-Safe. How can we help?" in source
+    assert "Caller IP recorded" in source
+    assert "phaseDurationMs" in source
+    assert "matchLandmark" in source
+    landmarks = (ROOT / "ui" / "sim" / "landmarks.js").read_text(encoding="utf-8")
+    phone_page = (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
+    assert "+66 81 555 0149" in landmarks
+    assert "+66 81 555 0149" in phone_page
+    assert "คุณเชื่อมต่อกับ Baan-Safe แล้ว มีอะไรให้ช่วยไหมคะ" in source
 
 
 def test_scripted_replies_stay_in_human_language():

@@ -24,7 +24,7 @@ const NEEDS = [
   ["food", "food"],
   ["shelter", "shelter"],
   ["rent", "rent"],
-  ["payment", "payment"],
+  ["flood relief", "flood relief"],
   ["water", "water"],
 ];
 

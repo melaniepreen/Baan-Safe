@@ -44,7 +44,7 @@ export function decidePath({
       owner: "system_2",
       hold: "aid",
       explain:
-        "Payment decisions stay with System 2 and Sapling. This pattern is remembered, and the fast path does not take it.",
+        "Flood relief aid stays with System 2 and Sapling. This pattern is remembered, and the fast path does not take it.",
       timesBefore: prior,
     };
   }

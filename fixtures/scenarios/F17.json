@@ -9,12 +9,12 @@
     {
       "t_ms": 0,
       "speaker": "caller",
-      "text": "They said we cannot get the payment because we rent."
+      "text": "They said we cannot get the flood relief aid because we rent."
     },
     {
       "t_ms": 4050,
       "speaker": "operator",
-      "text": "Is this about a payment decision, not a rescue?"
+      "text": "Is this about flood relief aid, not a rescue?"
     },
     {
       "t_ms": 8350,
@@ -29,7 +29,7 @@
     {
       "t_ms": 17700,
       "speaker": "caller",
-      "text": "Ban Luang District, Nan. I will not read out an address."
+      "text": "Soi Sukhumvit 40, Khlong Tan Nuea, Watthana. I will not read out a house number."
     },
     {
       "t_ms": 22750,
@@ -49,12 +49,12 @@
       {
         "t_ms": 0,
         "speaker": "caller",
-        "text": "They said we cannot get the payment because we rent."
+        "text": "They said we cannot get the flood relief aid because we rent."
       },
       {
         "t_ms": 4050,
         "speaker": "operator",
-        "text": "Is this about a payment decision, not a rescue?"
+        "text": "Is this about flood relief aid, not a rescue?"
       },
       {
         "t_ms": 8350,
@@ -69,7 +69,7 @@
       {
         "t_ms": 17700,
         "speaker": "caller",
-        "text": "Ban Luang District, Nan. I will not read out an address."
+        "text": "Soi Sukhumvit 40, Khlong Tan Nuea, Watthana. I will not read out a house number."
       },
       {
         "t_ms": 22750,
@@ -83,7 +83,7 @@
       }
     ],
     "fields": {
-      "location": "Ban Luang District, Nan",
+      "location": "Soi Sukhumvit 40, Khlong Tan Nuea, Watthana",
       "location_confidence": 0.87,
       "people_count": 4,
       "vulnerable": [],

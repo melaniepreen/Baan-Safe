@@ -1533,7 +1533,7 @@
       "top_need": "aid",
       "theme": {
         "id": "rent-payment",
-        "label": "Rent payment",
+        "label": "Renter denied flood relief",
         "learns": false,
         "life_safety": false
       },
@@ -1586,7 +1586,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - told they cannot get the payment because they rent Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - told they cannot get the flood relief aid because they rent Simulated. system2.orchestrator_model is still TODO_HUMAN."
         },
         {
           "id": "s2",
@@ -1594,7 +1594,7 @@
           "when": "rejected",
           "delay_ms": 680,
           "source": "simulated",
-          "text": "System 2: told they cannot get the payment because they rent Gateway reason: {reason}"
+          "text": "System 2: told they cannot get the flood relief aid because they rent Gateway reason: {reason}"
         },
         {
           "id": "sapling",
@@ -1636,7 +1636,7 @@
       "top_need": "aid",
       "theme": {
         "id": "payment-list",
-        "label": "Payment list",
+        "label": "Left off the aid list",
         "learns": false,
         "life_safety": false
       },
@@ -1689,7 +1689,7 @@
           "when": "rejected",
           "delay_ms": 720,
           "source": "simulated",
-          "text": "Escalated to System 2: Nemotron reasoning - a sister staying in the house is not on the payment list Simulated. system2.orchestrator_model is still TODO_HUMAN."
+          "text": "Escalated to System 2: Nemotron reasoning - a sister staying in the house is not on the aid list Simulated. system2.orchestrator_model is still TODO_HUMAN."
         },
         {
           "id": "s2",
@@ -1697,7 +1697,7 @@
           "when": "rejected",
           "delay_ms": 680,
           "source": "simulated",
-          "text": "System 2: a sister staying in the house is not on the payment list Gateway reason: {reason}"
+          "text": "System 2: a sister staying in the house is not on the aid list Gateway reason: {reason}"
         },
         {
           "id": "sapling",

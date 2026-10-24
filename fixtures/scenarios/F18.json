@@ -9,7 +9,7 @@
     {
       "t_ms": 0,
       "speaker": "caller",
-      "text": "My sister is staying with us. She is not on the payment list."
+      "text": "My sister is staying with us. She is not on the aid list."
     },
     {
       "t_ms": 4050,
@@ -29,7 +29,7 @@
     {
       "t_ms": 17700,
       "speaker": "caller",
-      "text": "Chiang Muan District, Phayao. Same place as the rest of the household."
+      "text": "Soi Sukhumvit 42, Khlong Tan Nuea, Watthana. Same place as the rest of the household."
     },
     {
       "t_ms": 22750,
@@ -39,7 +39,7 @@
     {
       "t_ms": 28050,
       "speaker": "caller",
-      "text": "No. This is only the payment question."
+      "text": "No. This is only the flood relief question."
     }
   ],
   "case_state": {
@@ -49,7 +49,7 @@
       {
         "t_ms": 0,
         "speaker": "caller",
-        "text": "My sister is staying with us. She is not on the payment list."
+        "text": "My sister is staying with us. She is not on the aid list."
       },
       {
         "t_ms": 4050,
@@ -69,7 +69,7 @@
       {
         "t_ms": 17700,
         "speaker": "caller",
-        "text": "Chiang Muan District, Phayao. Same place as the rest of the household."
+        "text": "Soi Sukhumvit 42, Khlong Tan Nuea, Watthana. Same place as the rest of the household."
       },
       {
         "t_ms": 22750,
@@ -79,11 +79,11 @@
       {
         "t_ms": 28050,
         "speaker": "caller",
-        "text": "No. This is only the payment question."
+        "text": "No. This is only the flood relief question."
       }
     ],
     "fields": {
-      "location": "Chiang Muan District, Phayao",
+      "location": "Soi Sukhumvit 42, Khlong Tan Nuea, Watthana",
       "location_confidence": 0.86,
       "people_count": 5,
       "vulnerable": [],
