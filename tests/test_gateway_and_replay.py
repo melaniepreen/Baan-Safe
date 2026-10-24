@@ -42,9 +42,11 @@ def test_real_interfaces_raise():
     case = load_case("F01")
     assert decide1(case).system.value == "system_1"
     assert merge(case, decide1(case)).case_id == "F01"
-    with pytest.raises(NotImplementedError, match="Melanie"):
+    # The decisions are set, so a real System 2 call reaches the Mubit
+    # client, which refuses before any socket: the key is unset in tests.
+    with pytest.raises(RuntimeError, match="MUBIT_API_KEY is not set"):
         decide2(case)
-    with pytest.raises(NotImplementedError, match="Melanie"):
+    with pytest.raises(RuntimeError, match="MUBIT_API_KEY is not set"):
         handle(load_case("F10"), use_stubs=False)
 
 

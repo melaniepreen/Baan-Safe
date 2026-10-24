@@ -15,7 +15,7 @@ Do these before any other country can affect a call. After each one, the Thai fi
 Effort: small for a dormant loader, medium to thread it through the gateway. Risk: medium on the hot path, high if a contract field is required.
 
 - `config/settings.py:20` reads only `config/<name>`.
-- `gateway/route.py:150` calls `extract` with the transcript and no country.
+- `gateway/route.py:201` calls `extract` with the transcript and no country.
 - `contracts/models.py:203` has a district label and no country field.
 
 Later: an optional country code, default `th`, and a loader that nothing calls until a later step. Leave the field off the contract until a human accepts a schema change.
@@ -70,7 +70,7 @@ Only after the five above keep the Thai fixtures green.
 
 - Speech default. `infra/modal/stt_app.py:62` posts `language=th`. Read the pack language only when the request omitted one. Risk stays low if the default remains `th`. `modal.stt_model_id` stays `TODO_HUMAN`.
 - Sapling language gate. `system2/sapling_client.py:199` refuses non-English. Do not send another language until `sapling.thai_handling` is decided. Removing the gate is high risk.
-- Router district match. `router/merge.py:138` uses a substring of the location string, and `router/merge.py:27` sends rescue to a boat. Boats are a resource kind for this flood demo, not a national rule.
+- Router district match. `router/merge.py:144` uses a substring of the location string, and `router/merge.py:27` sends rescue to a boat. Boats are a resource kind for this flood demo, not a national rule.
 - Enrichment thresholds. `config/escalation.yaml:32` flags 30 mm in 24 hours for every caller. A pack may name a different flag later. It must not change the Thai flag in the same change.
 
 ## What not to change

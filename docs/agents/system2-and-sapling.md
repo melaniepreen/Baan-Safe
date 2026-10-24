@@ -10,12 +10,12 @@ files:
 
 ## Purpose
 
-Nemotron reasons. Sapling then checks System 2 aid-eligibility and denial claims. The Decision Router sees the result. The orchestrator still raises, so the live verifier does not run.
+Nemotron reasons. Sapling then checks System 2 aid-eligibility and denial claims. The Decision Router sees the result. `system2.orchestrator_model` and `system2.max_latency_ms` are decided, so `orchestrate` calls the model through `llm.complete`.
 
 ## Key files
 
-- `system2/decide.py` — `orchestrate`, then `verify_before_router`. Owner: Melanie.
-- `system2/orchestrator.py` — raises while model id or `max_latency_ms` is unset. Does not build an `Outcome`.
+- `system2/decide.py` — `orchestrate(case, handoff, recommendation)`, then `verify_before_router`. Owner: Melanie.
+- `system2/orchestrator.py` — prompts Nemotron, parses one JSON object into `reasoned_recommendation`, falls back to a safe `system2_unavailable` outcome on timeout, HTTP error, empty content, or parse/enum failure. `use_completer(fn)` swaps the model call for tests and the RL loop. The call sends `reasoning={"enabled": false}` and `max_tokens=700`: the model otherwise spends its whole budget on `<think>`.
 - `system2/sapling.py` — scope, verdict application.
 - `system2/sapling_client.py` — stub client. `SAPLING_IMPL=live` refuses before any socket.
 - `mocks/sapling_stub/` — `S01`–`S05`.
@@ -23,7 +23,7 @@ Nemotron reasons. Sapling then checks System 2 aid-eligibility and denial claims
 
 ## Interfaces/contracts
 
-- `decide(case) -> Outcome`. `NotImplementedError` from `orchestrate` is re-raised. Sapling does not run in that case.
+- `decide(case, handoff=None, recommendation=None) -> Outcome`. The handoff is the System 1 outcome on a cascade; the recommendation is a learned rule System 2 may weigh. `NotImplementedError` from `orchestrate` is re-raised; Sapling does not run in that case.
 - Scope is `system2.sapling_scope`: `aid_eligibility,denial`. System 1 is skipped.
 - Verdicts: `supported` leaves the action. `violation` sets `requires_human` and route `supervisor_escalation`. `unsure`, `missing`, `contradicted` set `requires_human`, keep the route, and append `sapling_<verdict>` to `missing_evidence`.
 - Checkpoint labels: `insufficient_information` → `missing`, `inconsistent_context` → `contradicted`.
@@ -32,7 +32,7 @@ Nemotron reasons. Sapling then checks System 2 aid-eligibility and denial claims
 
 ## Invariants
 
-- `system2.hosting` is `openrouter via mubit gateway`. The orchestrator does not call OpenRouter. A future `llm.complete` call still refuses non-Mubit hosts.
+- `system2.hosting` is `openrouter via mubit gateway`. The orchestrator does not call OpenRouter; `llm.complete` refuses non-Mubit hosts and never prints the key. Hard post-rules force `requires_human` on a `safeguarding` flag, an aid need, or aid flags.
 - `system2.use_banyan_sapling` is `true`. `sapling.client` is `stub`. Tests do not load a GPU.
 - `scripts/validate.py` rejects an `Outcome(` constructor in `system2/decide.py`.
 - Unknown policy/evidence/claim triples from the stub client are `unsure`, not `supported`.
@@ -52,5 +52,4 @@ Nemotron reasons. Sapling then checks System 2 aid-eligibility and denial claims
 
 ## Open TODO_HUMAN keys
 
-- `system2.orchestrator_model`, `system2.max_latency_ms`
 - `sapling.hosting`, `sapling.gpu`, `sapling.thai_handling`, `sapling.model_id`

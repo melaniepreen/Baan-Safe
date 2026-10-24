@@ -3,16 +3,18 @@
 # scripts/validate.py allowlists only the decisions a human has already made:
 # system2.use_banyan_sapling, system2.sapling_scope, sapling.client,
 # system2.hosting, llm.provider_route, gateway.route_chooser,
-# system1.extraction_method, and correction_loop.graduation_threshold.
+# system1.extraction_method, system2.orchestrator_model,
+# system2.max_latency_ms, correction_loop.graduation_threshold, and
+# correction_loop.escalation_threshold.
 system1:
   extraction_method: rules-only      # decided: keyword rules in system1/extract.py; extraction_model stays TODO_HUMAN
   extraction_model: TODO_HUMAN       # only if a model is used
 system2:
-  orchestrator_model: TODO_HUMAN     # Nemotron variant/size
+  orchestrator_model: nvidia/nemotron-3.5-lightning:free  # decided: Mubit compat id, free tier
   hosting: openrouter via mubit gateway  # decided: Nemotron via OpenRouter; Mubit stays the hop
   use_banyan_sapling: true           # decided: verifier on, for sapling_scope only
   sapling_scope: aid_eligibility,denial
-  max_latency_ms: TODO_HUMAN
+  max_latency_ms: 10000
 sapling:
   hosting: TODO_HUMAN                # mubit gateway or self-hosted; Mubit stays the hop; unconfirmed that Mubit can route to a self-hosted endpoint
   gpu: TODO_HUMAN                    # L40S on Modal, or A6000 self-hosted; 48GB class
@@ -37,7 +39,8 @@ data:
   demo_event: TODO_HUMAN             # which flood event / provinces anchor the demo
   production_db: TODO_HUMAN          # SQLite is used tonight
 correction_loop:
-  graduation_threshold: 2            # decided: distinct corrected cases before a pattern graduates to System 2 (never into System 1)
+  graduation_threshold: 2            # decided: matching S2 decisions before a pattern graduates to a System 1 rule (RL loop, eval/rl/); P1 and complex patterns become recommendations instead
+  escalation_threshold: 2            # decided: distinct human-corrected cases before a pattern escalates to System 2 as complex_situation (gateway/graduation.py; never into System 1)
 learning_eval:
   promotion: TODO_HUMAN              # do not promote a version from eval/learning
   freeze_mubit_auto_adapters: TODO_HUMAN  # freeze auto-adapters before a live eval run

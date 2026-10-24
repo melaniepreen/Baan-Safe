@@ -4,13 +4,13 @@ This file is the repo copy of that revision. The code follows it. It is not a pr
 
 Key corrections:
 
-- Mubit Gateway owns: authenticated API gateway, memory retrieval (similar cases, prior failures, policies, corrections), policy and safeguarding checks, routing to System 1 or System 2, tracing/versioning/latency/token/audit, and a validated structured response. Mubit does not reason.
+- Mubit Gateway owns: authenticated API gateway, memory retrieval (similar cases, prior failures, policies, corrections), policy and safeguarding checks, routing to System 1 or System 2, tracing/versioning/latency/token/audit, and a validated structured response. Routing mode is `cascade`: a System 1 escalate continues to System 2 in the same turn. Mubit does not reason.
 - No separate BaanSafe memory-retrieval service in front of Mubit. The call agent sends the live case to Mubit. Mubit retrieves memory and provides it to whichever system handles the case.
 - System 1 is a separate fast deterministic system (rules, keyword or field extraction, priority rules, simple routing, duplicate checks, fast evidence-gap detection). Its outcome is `fast_route`. It never handles ambiguous or high-risk cases.
 - System 2 is a separate deliberative system orchestrated by Nemotron (evidence synthesis, ambiguity, medical dependency, safeguarding, complex routing, aid exceptions, correction proposals and root cause). Its outcome is `reasoned_recommendation`. It never handles routine low-risk cases.
 - Nemotron is the System 2 orchestrator. It is not embedded in Mubit. Mubit calls Nemotron when System 2 is required. Nemotron returns the result to Mubit for policy validation, tracing, and the memory write.
 - Banyan Sapling (`MubitLabs/banyan-sapling`, Apache-2.0, about 23B stored parameters) verifies System 2 claims after that reasoning and before the Decision Router. It runs only for aid eligibility and denials. System 1 does not call it. The input is a policy, evidence, and a claim, capped at 16,384 tokens. `supported` lets the proposed action stand. `violation` blocks it. `unsure`, `missing` (the checkpoint label `insufficient_information`), and `contradicted` (the checkpoint label `inconsistent_context`) hand the case to a human. The committed client is a stub. Hosting, the 48GB-class GPU, and whether Thai is translated first stay `TODO_HUMAN` in `config/decisions.yaml`.
-- The Decision Router merges the System 1 or System 2 outcome, applies final policy and safeguarding, requires human review when needed, and returns one of `ask_next_question`, `create_provisional_dispatch`, `escalate_to_supervisor`, `finalize_case`, or `request_more_evidence`.
+- The Decision Router merges the deciding outcome (System 2 after a cascade), applies final policy and safeguarding, requires human review when needed, and returns one of `ask_next_question`, `create_provisional_dispatch`, `escalate_to_supervisor`, `finalize_case`, or `request_more_evidence`. `source_outcomes` lists the deciding outcome first, then priors.
 - Every System 1 outcome and every System 2 outcome is recorded separately. Humans keep authority over denials, safeguarding exceptions, and irreversible actions.
 
 Target flow: Caller → live speech-to-text → Call Agent → Mubit Gateway (memory retrieval, policy pre-check, route) → System 1 (simple, clear, low-risk) or System 2 (ambiguous or high-risk, Nemotron, then Sapling when the claim is aid eligibility or a denial) → Decision Router → Call Agent (next question, update case, or provisional dispatch).
@@ -30,6 +30,8 @@ flowchart TD
   grad --> pick{"field precheck"}
   pick -->|no trigger| s1["S1 stub file"]
   pick -->|any trigger| s2["S2 stub file"]
+  s1 -->|"S1 escalate, cascade"| s2
+  ov["RL overlay if RL_OVERLAY"] -.-> pick
   s1 --> merge["router.merge + process ledger"]
   s2 --> merge
   snap["committed snapshots"] --> places["places → dispatch units"]
@@ -39,9 +41,9 @@ flowchart TD
   merge --> out["RouterDecision + dispatches"]
   s1 -.-> rules["system1.decide if S1_IMPL=real"]
   rules -.-> merge
-  s2 -.-> s2d["system2.decide raises"]:::unwired
+  s2 -.-> s2d["system2.decide if S2_IMPL=real"]
   s2d -.-> sap["Sapling gate, client stub"]:::unwired
-  s2d -.-> llm["Mubit LLM clients, model TODO"]:::unwired
+  s2d -.-> llm["Mubit LLM client, Nemotron"]
   packs["country packs, not loaded"]:::unwired
 ```
 
