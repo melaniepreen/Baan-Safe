@@ -23,7 +23,7 @@ def test_chooser_agrees_with_expected_system():
 
 def test_graduation_fixtures_route_to_system_2():
     """G01–G04 are labelled system_1 for after graduation. rescue is a
-    needs_any trigger, so the precheck sends them to System 2 until
+    needs_any trigger, so the precheck sends them to System 2 even though
     correction_loop.graduation_threshold is set."""
     for fixture_id in ("G01", "G02", "G03", "G04"):
         system, triggers = choose(load_case(fixture_id))

@@ -44,6 +44,14 @@ def test_one_correction_does_not_graduate():
     assert choose_system(case) is System.system_1
 
 
+def test_new_correction_refreshes_the_cached_result():
+    _twin("F02", "TEST-F02-b")
+    append_event(_event("F02"))
+    assert graduated_patterns() == []
+    append_event(_event("TEST-F02-b"))
+    assert [g.count for g in graduated_patterns()] == [2]
+
+
 def test_two_corrections_graduate_the_pattern():
     _twin("F02", "TEST-F02-b")
     append_event(_event("F02"))

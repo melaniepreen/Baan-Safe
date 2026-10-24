@@ -115,6 +115,11 @@ def orchestrate(
 
 
 def _unavailable(exc: Exception, latency_ms: int) -> Outcome:
+    cause = type(exc).__name__
+    if isinstance(exc, httpx.HTTPStatusError):
+        cause += f" {exc.response.status_code}"
+        if exc.response.status_code == 429:
+            cause += " (rate limited)"
     return Outcome(
         system=System.system_2,
         outcome="escalate",
@@ -122,7 +127,7 @@ def _unavailable(exc: Exception, latency_ms: int) -> Outcome:
         needs=[],
         route=Route.supervisor_escalation,
         confidence=0.0,
-        reason=f"System 2 unavailable: {type(exc).__name__}.",
+        reason=f"System 2 unavailable: {cause}.",
         reasoning=None,
         missing_evidence=["system2_unavailable"],
         next_question=None,

@@ -24,9 +24,8 @@ def test_stub_gateway_matches_expected_labels():
 
 def test_graduation_fixture_routes_to_system_2():
     # G01 is labelled system_1 ("after graduation"), but rescue is a
-    # needs_any trigger and graduation_threshold is still TODO_HUMAN, so the
-    # field precheck sends it to System 2. There is no G01 s2 stub, so the
-    # outcome is the fallback escalation.
+    # needs_any trigger, so the field precheck sends it to System 2 whatever
+    # correction_loop.graduation_threshold is. mocks/s2_stub/G01.json answers.
     decision = handle(load_case("G01"), use_stubs=True)
     assert len(decision.source_outcomes) == 1
     assert decision.source_outcomes[0].system.value == "system_2"

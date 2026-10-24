@@ -64,6 +64,18 @@ def test_timeout_falls_back():
     assert "TimeoutException" in outcome.reason
 
 
+def test_rate_limit_names_the_status():
+    def limited(*a, **k):
+        request = httpx.Request("POST", "https://api.mubit.ai/compat/openrouter/v1/chat/completions")
+        response = httpx.Response(429, request=request)
+        raise httpx.HTTPStatusError("429", request=request, response=response)
+
+    with use_completer(limited):
+        outcome = orchestrate(load_case("F10"))
+    assert outcome.missing_evidence == ["system2_unavailable"]
+    assert "HTTPStatusError 429 (rate limited)" in outcome.reason
+
+
 def test_handoff_and_recommendation_reach_the_prompt():
     seen = {}
 

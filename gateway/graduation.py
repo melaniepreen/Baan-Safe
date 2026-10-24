@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from config.settings import load_yaml, require_decision
 from contracts.models import CaseState, MemoryItem
 from fixtures.load import load_case
-from training.log import read_events
+from training.log import events_path, read_events
 
 
 @dataclass(frozen=True)
@@ -54,6 +54,11 @@ def graduated_patterns(
     threshold = int(require_decision("correction_loop.escalation_threshold"))
     labels = set(load_yaml("escalation.yaml").get("graduation_labels") or [])
     resolver = resolve or _default_resolve
+    cache_key = None
+    if events is None and resolve is None:
+        cache_key = _log_key(threshold, labels)
+        if cache_key is not None and _cache and _cache[0] == cache_key:
+            return list(_cache[1])
     if events is None:
         events = read_events()
     groups: dict[tuple, set[str]] = {}
@@ -68,11 +73,28 @@ def graduated_patterns(
             continue
         key = (pattern_of(case), label)
         groups.setdefault(key, set()).add(event.input_ref.case_id)
-    return [
+    found = [
         Graduation(pattern=pattern, label=label, case_ids=tuple(sorted(ids)), count=len(ids))
         for (pattern, label), ids in groups.items()
         if len(ids) >= threshold
     ]
+    if cache_key is not None:
+        _cache[:] = [cache_key, found]
+    return list(found)
+
+
+# One entry: the default event log's (path, mtime, size, threshold, labels)
+# and its graduations, so a turn does not re-read an unchanged log.
+_cache: list = []
+
+
+def _log_key(threshold: int, labels: set[str]) -> tuple | None:
+    path = events_path()
+    try:
+        stat = path.stat()
+    except FileNotFoundError:
+        return None
+    return (str(path), stat.st_mtime_ns, stat.st_size, threshold, tuple(sorted(labels)))
 
 
 def _flag(flags: list[str], flag: str) -> None:
