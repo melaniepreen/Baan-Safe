@@ -1,6 +1,6 @@
 # Candidate models
 
-Options for a human, plus one verifier the humans have already selected. `system2.orchestrator_model`, `system1.extraction_model`, `system2.hosting`, and `speech_to_text.provider` stay `TODO_HUMAN`. Sizes and licences move; read the card on the day you pick.
+Options for a human, plus one verifier the humans have already selected. `system2.hosting` is `openrouter via mubit gateway`: Nemotron is served via OpenRouter, and Mubit stays the hop. `system2.orchestrator_model`, `system1.extraction_model`, and `speech_to_text.provider` stay `TODO_HUMAN`. Sizes and licences move; read the card on the day you pick. There is no direct OpenRouter client.
 
 ## Banyan Sapling, selected for verification
 
@@ -21,7 +21,7 @@ Two public checkpoints, as options:
 | `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16` | About 30B total, about 3B active | The card's language list does not feature Thai | 15 Dec 2025 | https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16 |
 | `nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-Base-BF16` | About 120B total, about 12B active. This card is a base model | The README lists Thai among supported languages | 4 Mar 2026 | https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-Base-BF16 |
 
-Trade-off, not a recommendation. Nano is the one you can realistically serve on a single large GPU, and it is a weak bet for Thai calls. Super is the one whose card claims Thai, and it is a base checkpoint at a size that needs serious hardware or a hosted endpoint. Other Nemotron sizes exist. A human should open the current NVIDIA and Hugging Face lists before locking `system2.orchestrator_model`. Hosting (`system2.hosting`) is a separate decision: through Mubit, self-hosted, or another provider, still with Mubit as the application hop.
+Trade-off, not a recommendation. Nano is the one you can realistically serve on a single large GPU, and it is a weak bet for Thai calls. Super is the one whose card claims Thai, and it is a base checkpoint at a size that needs serious hardware or a hosted endpoint. Other Nemotron sizes exist. A human should open the current NVIDIA and Hugging Face lists before locking `system2.orchestrator_model`. Hosting is already `openrouter via mubit gateway`. The model id and size are still open. Mubit stays the application hop.
 
 ## Small models for System 1 extraction
 

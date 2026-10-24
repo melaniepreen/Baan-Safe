@@ -58,6 +58,7 @@ DECIDED = {
     "system2.use_banyan_sapling": True,
     "system2.sapling_scope": "aid_eligibility,denial",
     "sapling.client": "stub",
+    "system2.hosting": "openrouter via mubit gateway",
 }
 
 

@@ -8,7 +8,7 @@ Mubit is the gateway, and it does not reason. `gateway/` now does auth (recorded
 
 There is no memory fetch in front of the gateway. `MEMORY_IMPL=mock` still reads the fixture files. `MEMORY_IMPL=mubit` still raises in `memory/mubit.py`.
 
-System 2's `decide()` calls `system2/orchestrator.py` (the Nemotron stub), then `system2/sapling.py` when that call returns. The orchestrator still raises while its model, hosting, and latency budget are unset, before any network call. The Sapling step sits between that reasoning and the Decision Router. It runs only for aid eligibility and denials, and it does not run on System 1. `supported` leaves the proposed action in place. `violation` blocks it. `unsure`, `missing`, and `contradicted` set `requires_human`. The committed client is the stub in `mocks/sapling_stub/` (`S01`–`S05`). `SAPLING_IMPL=live` refuses while `sapling.hosting`, `sapling.gpu`, `sapling.model_id`, or `sapling.thai_handling` is unset, and it does not open a socket.
+System 2's `decide()` calls `system2/orchestrator.py` (the Nemotron stub), then `system2/sapling.py` when that call returns. The orchestrator still raises while its model id and latency budget are unset, before any network call. `system2.hosting` is `openrouter via mubit gateway`. That path does not call OpenRouter directly. The Sapling step sits between that reasoning and the Decision Router. It runs only for aid eligibility and denials, and it does not run on System 1. `supported` leaves the proposed action in place. `violation` blocks it. `unsure`, `missing`, and `contradicted` set `requires_human`. The committed client is the stub in `mocks/sapling_stub/` (`S01`–`S05`). `SAPLING_IMPL=live` refuses while `sapling.hosting`, `sapling.gpu`, `sapling.model_id`, or `sapling.thai_handling` is unset, and it does not open a socket.
 
 The chat client is `llm/client.py`. It requires `MUBIT_BASE_URL` on a `mubit.ai` host and `MUBIT_API_KEY`, it never prints the key, and it still refuses while `llm.provider_route` is `TODO_HUMAN`. Sapling's live call is the same rule: Mubit stays the hop, and a route from Mubit to a self-hosted Sapling endpoint is unconfirmed.
 
@@ -30,7 +30,7 @@ Synthetic case `CORR-LOOP-1` only. It stores a correction via the memory adapter
 
 1. **Which track** (recurring tasks, own-your-intelligence, or fast refresh). The stub loop covers the first and prints the second's three numbers. It does not retrain when the flood data changes. `research/DEMO_PLAN.md`.
 2. **`gateway.route_chooser`.** Until this is set, only fixture ids can be triaged. The harness reading `expected.system` must not become the live rule by accident.
-3. **`system2.orchestrator_model` and `system2.hosting`.** Nemotron options, with sizes and Thai notes, are in `research/MODELS.md`. Not chosen here.
+3. **`system2.orchestrator_model`.** Hosting is already `openrouter via mubit gateway`. The Nemotron id and size are not chosen. Options and Thai notes are in `research/MODELS.md`.
 4. **`llm.provider_route`, plus `MUBIT_API_KEY` and `MUBIT_BASE_URL` in `.env`.** The client will not call out before the decision is set, even if the URL is present. Do not put the key in chat or in git.
 5. **`data.demo_event`.** Northern fixture districts, Hat Yai, or the central plain. The polygons do not decide this.
 6. **`correction_loop.graduation_threshold`.** Leave it unset unless you want a correction to become a System 1 rule. The demo does not.
@@ -110,7 +110,7 @@ Stub outcomes live in `mocks/s1_stub/` and `mocks/s2_stub/`. They are fixtures f
 Code that needs one of these raises until a human sets it. The Sapling decisions below are the ones already filled in.
 
 - `system1.extraction_method`, `system1.extraction_model`
-- `system2.orchestrator_model`, `system2.hosting`, `system2.max_latency_ms`
+- `system2.orchestrator_model`, `system2.max_latency_ms` (`system2.hosting` is `openrouter via mubit gateway`)
 - `sapling.hosting`, `sapling.gpu`, `sapling.thai_handling`, `sapling.model_id`
 - `gateway.route_chooser`, `gateway.auth`
 - `memory.mubit_project`, `memory.retrieval_top_k`, `memory.token_budget`

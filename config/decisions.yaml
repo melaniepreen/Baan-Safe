@@ -1,13 +1,14 @@
 # Every value starts as TODO_HUMAN. Code reading these must fail loudly if unset.
 # Humans fill these in. Do not resolve them in code.
 # scripts/validate.py allowlists only the decisions a human has already made:
-# system2.use_banyan_sapling, system2.sapling_scope, and sapling.client.
+# system2.use_banyan_sapling, system2.sapling_scope, sapling.client,
+# and system2.hosting.
 system1:
   extraction_method: TODO_HUMAN      # rules-only | small model | hybrid
   extraction_model: TODO_HUMAN       # only if a model is used
 system2:
   orchestrator_model: TODO_HUMAN     # Nemotron variant/size
-  hosting: TODO_HUMAN                # via Mubit gateway / self-hosted / provider
+  hosting: openrouter via mubit gateway  # decided: Nemotron via OpenRouter; Mubit stays the hop
   use_banyan_sapling: true           # decided: verifier on, for sapling_scope only
   sapling_scope: aid_eligibility,denial
   max_latency_ms: TODO_HUMAN

@@ -81,7 +81,7 @@ Public sources and row counts are in `data/SOURCES.md`. Raw responses are gitign
 
 ## Infra
 
-Modal apps live in `infra/modal/`. GPU sizes and the hourly arithmetic are in `infra/HARDWARE.md`. Model ids and GPU names stay `TODO_HUMAN` in git so the apps refuse to start until a human exports them. `make validate` allowlists only the three Sapling decisions a human already made: the verifier is on, its scope is aid eligibility and denial, and `sapling.client` is `stub`.
+Modal apps live in `infra/modal/`. GPU sizes and the hourly arithmetic are in `infra/HARDWARE.md`. Model ids and GPU names stay `TODO_HUMAN` in git so the apps refuse to start until a human exports them. `make validate` allowlists four decisions a human already made: the Sapling verifier is on, its scope is aid eligibility and denial, `sapling.client` is `stub`, and `system2.hosting` is `openrouter via mubit gateway`. The Nemotron model id and size stay `TODO_HUMAN`. The LLM client still refuses any host that is not Mubit. There is no OpenRouter client.
 
 One-time setup, done by a person:
 
