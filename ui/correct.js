@@ -236,6 +236,11 @@ export function mountCorrectForm(parent, options) {
   facts.append(el("dd", null, task));
   facts.append(el("dt", null, "Input"));
   facts.append(el("dd", null, describeInput(inputRef)));
+  const deciding = (options.decision && options.decision.source_outcomes && options.decision.source_outcomes[0]) || null;
+  if (deciding && deciding.system === "system_2") {
+    facts.append(el("dt", null, "Model path"));
+    facts.append(el("dd", null, "Mubit → Nemotron (server hop via llm/client.py; browser never holds keys or calls OpenRouter)"));
+  }
   form.append(facts);
 
   const valueLabel = el("label", "correct-field");

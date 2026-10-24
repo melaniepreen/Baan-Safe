@@ -546,6 +546,8 @@ def test_wire_frontend_p0_contracts():
     assert "ruleFromDispatches" in source
     assert "renderLocationContext" in source
     assert "mubitHopSummary" in source
+    assert "Mubit → Nemotron" in source
+    assert "token_cost_usd: null" in source
     assert "renderMetricsStrip" in source
     assert "postDispatchAction" in source
     assert "/dispatches/" in source
@@ -555,6 +557,10 @@ def test_wire_frontend_p0_contracts():
     assert "Mubit" in source
     assert "MUBIT_API_KEY" not in source
     assert "OPENROUTER_API_KEY" not in source
+    correct = (ROOT / "ui" / "correct.js").read_text(encoding="utf-8")
+    assert "Mubit → Nemotron" in correct
+    assert "OPENROUTER_API_KEY" not in correct
+    assert "MUBIT_API_KEY" not in correct
     assert 'id="location-context"' in page
     assert "gateway.route_chooser is still TODO_HUMAN" not in source
     assert "gateway.route_chooser is still TODO_HUMAN" not in page
