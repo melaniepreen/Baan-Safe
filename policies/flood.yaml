@@ -1,0 +1,649 @@
+# International flood-safety rules. Thai 1669 colours stay in triage.yaml.
+# Each figure is the number printed on that rule's own page. The pages do
+# not agree on the depth that carries a vehicle, so no single vehicle depth
+# is chosen. None of these pages is a 1669 colour or a baht amount.
+
+license_nws: &nws_license >
+  US National Weather Service, "During a Flood", retrieved 24 October 2026.
+  US government material. Short quotation for this research corpus.
+  https://www.weather.gov/safety/flood-during
+
+license_ready_flood: &ready_flood_license >
+  FEMA Ready.gov, "Floods", retrieved 24 October 2026.
+  US government material. Short quotation for this research corpus.
+  https://www.ready.gov/floods
+
+license_ready_dis: &ready_dis_license >
+  FEMA Ready.gov, "People with Disabilities", last updated 9 September 2026,
+  retrieved 24 October 2026. US government material. Short quotation.
+  The line about not leaving a person alone is in the Alzheimer's section
+  of that page. It is not a flood-only age rule and it is not a score.
+  https://www.ready.gov/disability
+
+license_cdc_flood: &cdc_flood_license >
+  US Centers for Disease Control and Prevention, "Safety Guidelines:
+  Floodwater", updated 24 August 2026, retrieved 24 October 2026.
+  US government material. Short quotation.
+  https://www.cdc.gov/floods/safety/floodwater-after-a-disaster-or-emergency-safety.html
+
+license_cdc_insulin: &cdc_insulin_license >
+  US Centers for Disease Control and Prevention, "Managing Insulin in an
+  Emergency", 15 May 2024, retrieved 24 October 2026. US government
+  material. Short quotation.
+  https://www.cdc.gov/diabetes/articles/managing-insulin-in-emergency.html
+
+license_ea: &ea_license >
+  UK Environment Agency guidance on GOV.UK, retrieved 24 October 2026.
+  The pages apply to England. Open Government Licence v3.0 unless a page
+  says otherwise. These pages did not print a contrary licence in the body.
+  Short quotation.
+  https://www.gov.uk/guidance/flash-flooding
+  https://www.gov.uk/guidance/flood-alerts-and-warnings-what-they-are-and-what-to-do
+
+license_ifrc_flood: &ifrc_flood_license >
+  © International Federation of Red Cross and Red Crescent Societies, 2018,
+  with Save the Children. Public awareness and public education for disaster
+  risk reduction, second edition, floods chapter. The copyright page does
+  not print a redistribution licence beyond the disclaimer that
+  interpretation lies with the reader. Short quotation. Confirm before
+  redistribution. Retrieved 24 October 2026 from
+  https://www.ifrc.org/sites/default/files/2021-06/18-FLOODS-HR.pdf
+
+license_mafp: &mafp_license >
+  GOV.UK, "Developing a multi-agency flood plan", retrieved 24 October 2026.
+  Open Government Licence v3.0 unless the page says otherwise. The body
+  did not print a contrary licence. Short quotation. England flood-rescue
+  assets, not a Thai dispatch code.
+  https://www.gov.uk/government/publications/flooding-developing-a-multi-agency-flood-plan/developing-a-multi-agency-flood-plan
+
+license_frco: &frco_license >
+  Department for Environment, Food and Rural Affairs, Flood Rescue Concept
+  of Operations, November 2019. The GOV.UK publication page says this
+  guidance was withdrawn on 13 January 2026 as out of date. The PDF was
+  still reachable on 24 October 2026. Short quotation of the withdrawn
+  text. It is not adopted as a current dispatch order.
+  https://assets.publishing.service.gov.uk/media/5faa9ca5e90e0730666d4162/frco-november-2019a.pdf
+  https://www.gov.uk/government/publications/flood-rescue-concept-of-operations-2019
+
+license_gap: &gap_license >
+  No further boat order was adopted, so there is no licence in a ranking.
+  The withdrawal page is cited to show that the 2019 document is not
+  current. ReliefWeb and DDPM were not used.
+
+nws: &nws_url https://www.weather.gov/safety/flood-during
+ready_flood: &ready_flood_url https://www.ready.gov/floods
+ready_dis: &ready_dis_url https://www.ready.gov/disability
+cdc_flood: &cdc_flood_url https://www.cdc.gov/floods/safety/floodwater-after-a-disaster-or-emergency-safety.html
+cdc_insulin: &cdc_insulin_url https://www.cdc.gov/diabetes/articles/managing-insulin-in-emergency.html
+ea_flash: &ea_flash_url https://www.gov.uk/guidance/flash-flooding
+ea_warn: &ea_warn_url https://www.gov.uk/guidance/flood-alerts-and-warnings-what-they-are-and-what-to-do
+ifrc_flood: &ifrc_flood_url https://www.ifrc.org/sites/default/files/2021-06/18-FLOODS-HR.pdf
+mafp: &mafp_url https://www.gov.uk/government/publications/flooding-developing-a-multi-agency-flood-plan/developing-a-multi-agency-flood-plan
+frco: &frco_url https://assets.publishing.service.gov.uk/media/5faa9ca5e90e0730666d4162/frco-november-2019a.pdf
+frco_page: &frco_page_url https://www.gov.uk/government/publications/flood-rescue-concept-of-operations-2019
+retrieved: &flood_date "2026-10-24"
+
+rules:
+  - id: FLOOD-WATER-DEPTH
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      The National Weather Service says it only takes 6 inches of moving
+      water to knock you off your feet. The same page says 12 inches of
+      water can float a car or small SUV, and 18 inches of water can carry
+      away large vehicles. It also says not to drive into flooded roadways
+      or around a barricade. These are that page's figures. Other retrieved
+      pages print different vehicle depths. This corpus does not pick one
+      of them. None of them is a 1669 colour.
+    text_th: ""
+    source_url: *nws_url
+    source_excerpt: >
+      It only takes 6 inches of moving water to knock you off your feet.
+      Do NOT drive into flooded roadways or around a barricade; Turn Around,
+      Don't Drown! A vehicle caught in swiftly moving water can be swept
+      away in seconds 12 inches of water can float a car or small SUV, 18
+      inches of water can carry away large vehicles.
+    retrieved: *flood_date
+    license_note: *nws_license
+    locator: "NWS, During a Flood, Avoid Flood Waters."
+    caveat: >
+      The page prints the 12-inch sentence without a period before it.
+      The quotation keeps that. This is US flood-safety guidance, not a
+      Thai dispatch threshold.
+
+  - id: READY-FLOOD-DEPTH
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      Ready.gov says just six inches of moving water can knock you down,
+      and one foot of moving water can sweep your vehicle away. That vehicle
+      figure is not the same as the National Weather Service page, the
+      Environment Agency flash-flood page, or the IFRC floods messages.
+      The corpus keeps each figure on its own rule.
+    text_th: ""
+    source_url: *ready_flood_url
+    source_excerpt: >
+      Remember, just six inches of moving water can knock you down, and one
+      foot of moving water can sweep your vehicle away.
+    retrieved: *flood_date
+    license_note: *ready_flood_license
+    locator: "Ready.gov, Floods, If you are under a flood warning."
+    caveat: "US guidance. Not a 1669 colour."
+
+  - id: EA-FLOOD-DEPTH
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      The Environment Agency says shallow flood water, around 15cm or
+      6 inches, that does not look dangerous can knock a person over or
+      conceal hazards. It says it only takes around 60cm, or 2 feet, of
+      water to carry away a vehicle of any size. That vehicle figure is
+      the one on this page. It is not substituted for the other pages.
+    text_th: ""
+    source_url: *ea_flash_url
+    source_excerpt: >
+      Shallow flood water (around 15cm or 6 inches) that does not look
+      dangerous can knock a person over or conceal hazards. It only takes
+      around 60cm (2 feet) of water to carry away a vehicle of any size.
+    retrieved: *flood_date
+    license_note: *ea_license
+    locator: "GOV.UK, Flash flooding, Staying safe. Environment Agency. Applies to England. Last updated 20 September 2023."
+    caveat: "England guidance. Not a 1669 colour."
+
+  - id: IFRC-FLOOD-DEPTH
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      The IFRC floods messages say fast-moving water only 15 centimetres
+      or 6 inches deep can sweep a person off their feet, and that flowing
+      water above the ankles means stop, turn around, and go the other way.
+      The same chapter says as little as 20 centimetres or 6 inches of
+      water can cause loss of control of a vehicle, and as little as
+      50 centimetres, i.e. 2 feet, of rushing water can carry away most
+      vehicles, including trucks. Those two vehicle sentences print
+      conversions that do not match each other. They are quoted as printed.
+      They are not corrected into one number, and they are not a 1669 colour.
+    text_th: ""
+    source_url: *ifrc_flood_url
+    source_excerpt: >
+      Never try to walk, swim or drive through swift water. If you come
+      across flowing water above your ankles, stop, turn around and go the
+      other way. Fast moving water only 15 centimetres or 6 inches deep can
+      sweep a person off their feet. As little as 20 centimetres or 6 inches
+      of water can cause you to lose control of your vehicle. As little as
+      50 centimetres, i.e. 2 feet of rushing water can carry away most
+      vehicles, including trucks.
+    retrieved: *flood_date
+    license_note: *ifrc_flood_license
+    locator: "IFRC PAPE floods messages, printed pages 102-103."
+    caveat: >
+      The 20-centimetre sentence equates that depth with 6 inches, and the
+      50-centimetre sentence equates that depth with 2 feet. Both are
+      quoted. Neither conversion is repaired.
+
+  - id: NWS-EVACUATION-ORDER
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      The National Weather Service says to obey evacuation orders, and that
+      if you are told to evacuate, do so immediately. If there is time,
+      disconnect utilities and appliances. The same page also says to
+      evacuate immediately when water starts to rise, and not to wait.
+      "When water starts to rise" is that sentence. It is not a depth in
+      centimetres, and it is not a 1669 colour.
+    text_th: ""
+    source_url: *nws_url
+    source_excerpt: >
+      Avoid flood waters at all costs and evacuate immediately when water
+      starts to rise. Don't wait until it's too late! Obey Evacuation
+      Orders: If told to evacuate, do so immediately. Lock your home when
+      you leave. If you have time, disconnect utilities and appliances.
+    retrieved: *flood_date
+    license_note: *nws_license
+    locator: "NWS, During a Flood, opening paragraph and Obey Evacuation Orders."
+    caveat: "US guidance. An evacuation order is for the authority that issues it."
+
+  - id: EA-FLOOD-WARNINGS
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      In England the Environment Agency provides three flood warnings.
+      A flood alert means flooding is possible, so prepare. A flood warning
+      means flooding is expected, so act now, including moving to higher
+      ground or the upper floor and doing what the emergency services say.
+      A severe flood warning means flooding could be a risk to life and
+      significant disruption. On a severe warning, stay in a safe place,
+      be ready to evacuate, do what the emergency services say, and call
+      999 if you are in immediate danger. A flood alert is not itself an
+      order to leave. These codes are not 1669 colours.
+    text_th: ""
+    source_url: *ea_warn_url
+    source_excerpt: >
+      flood alert – flooding is possible. flood warning – flooding is
+      expected. severe flood warning – flooding could be a risk to life
+      and significant disruption to communities. If a warning is issued,
+      you should: move to higher ground or the upper floor of a building.
+      do as the emergency services tell you. If a severe warning is issued,
+      you should: stay in a safe place. be ready to evacuate your home.
+      do as the emergency services tell you. call 999 if you are in
+      immediate danger.
+    retrieved: *flood_date
+    license_note: *ea_license
+    locator: "GOV.UK, Flood alerts and warnings: what they are and what to do. Environment Agency. Applies to England."
+    caveat: "England warning codes. Not a Thai evacuation statute."
+
+  - id: IFRC-FLOOD-EVACUATE
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      The IFRC floods messages say that if you are advised to evacuate, or
+      if you think you are in danger, evacuate immediately. If instructed,
+      or if there is time before evacuating, disconnect heating and cooking
+      or gas tanks and unplug electrical appliances. Household members
+      should know where to evacuate to, what route to take, and where to
+      meet. This is a public message. It is not a 1669 colour.
+    text_th: ""
+    source_url: *ifrc_flood_url
+    source_excerpt: >
+      Make sure household members know where to evacuate to, what route to
+      take, and where to meet if they have to leave. If you are advised to
+      evacuate, or if you think you are in danger, evacuate immediately.
+      If you are instructed, or if you have time before evacuating,
+      disconnect heating and cooking or gas tanks and unplug electrical
+      appliances.
+    retrieved: *flood_date
+    license_note: *ifrc_flood_license
+    locator: "IFRC PAPE floods messages, printed page 101."
+    caveat: "Public education. Not an order issued by a Thai authority."
+
+  - id: NWS-FLOOD-TRAPPED
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      The National Weather Service says if you are trapped by moving water,
+      move to the highest possible point and call 911 if possible. Do not
+      walk through the water. This sentence does not name a 1669 colour
+      and it does not rank boat jobs.
+    text_th: ""
+    source_url: *nws_url
+    source_excerpt: >
+      If you are trapped by moving water, move to the highest possible
+      point and call 911 if possible.
+    retrieved: *flood_date
+    license_note: *nws_license
+    locator: "NWS, During a Flood, Avoid Flood Waters."
+    caveat: "The number it gives the public is 911, not 1669."
+
+  - id: READY-FLOOD-TRAPPED
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      Ready.gov says to evacuate immediately if told to do so, and never
+      to drive around barricades. If a car is trapped in rapidly moving
+      water, stay inside, and get on the roof if water is rising inside
+      the car. If trapped in a building, get to the highest level. Only
+      get on the roof if necessary, and once there, signal for help. Do
+      not climb into a closed attic, to avoid getting trapped by rising
+      floodwater. This is caller guidance. It is not a boat-priority list
+      and it is not a 1669 colour.
+    text_th: ""
+    source_url: *ready_flood_url
+    source_excerpt: >
+      Evacuate immediately, if told to do so. Never drive around barricades.
+      Stay inside your car if it is trapped in rapidly moving water. Get on
+      the roof if water is rising inside the car. Get to the highest level
+      if trapped in a building. Only get on the roof if necessary and once
+      there, signal for help. Do not climb into a closed attic to avoid
+      getting trapped by rising floodwater.
+    retrieved: *flood_date
+    license_note: *ready_flood_license
+    locator: "Ready.gov, Floods, During a Flood."
+    caveat: "US guidance for the person who is trapped. Not a rescue-boat roster."
+
+  - id: UK-BOAT-TEAMS
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      The live GOV.UK multi-agency flood-plan guidance says Defra flood
+      rescue team types B and C can carry out search in water, technical
+      water rescue, and in-water operations. B teams use powered boats.
+      C teams use non-powered boats. The page says those teams comply with
+      the November 2019 Flood Rescue Concept of Operations. It does not
+      print an order that puts a person in the water ahead of a person on
+      a roof. The concept-of-operations publication was later withdrawn.
+      That withdrawal is UK-FRCO-MOST-AT-RISK and FLOOD-BOAT-ORDER. This
+      rule quotes only the team types on the live page.
+    text_th: ""
+    source_url: *mafp_url
+    source_excerpt: >
+      "B" and "C" typed teams are able to carry out search operations within
+      water environments, technical water rescue, and in-water operations.
+      "B" teams operate using powered boats and "C" teams non-powered boat
+      operations.
+    retrieved: *flood_date
+    license_note: *mafp_license
+    locator: "GOV.UK, Developing a multi-agency flood plan, Defra Flood Rescue National Asset Register."
+    caveat: >
+      The same page still points at the 2019 concept of operations. The
+      publication page for that document says it was withdrawn on
+      13 January 2026. This rule does not treat the withdrawn PDF as current.
+
+  - id: UK-FRCO-MOST-AT-RISK
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      The 2019 Flood Rescue Concept of Operations says a search cell triages
+      search requests so that those most at risk are prioritised. Its rescue
+      philosophy is self, then team, then casualty. Conditional rescue
+      relies on the person assisting, for example a throw line. True rescue
+      needs no assistance from the person, for example when they are
+      unconscious or injured. The document does not print a ranking of a
+      person in the water against a person on a roof, and it does not name
+      a 1669 colour. The GOV.UK page says the guidance was withdrawn on
+      13 January 2026 as out of date. The quotation is from the PDF. It is
+      not a current order.
+    text_th: ""
+    source_url: *frco_url
+    source_excerpt: >
+      To triage the search requests and ensure that those most at risk are
+      prioritised. Rescue Philosophy - The basic principles of any rescue
+      organisation are: 1. Self 2. Team 3. Casualty. Conditional rescue –
+      Relies upon the victim doing something to assist in their rescue, e.g.
+      a throw line rescue. True Rescue – Requires no assistance from the
+      victim in their rescue, e.g. unconscious or injured victims.
+    retrieved: *flood_date
+    license_note: *frco_license
+    locator: "FRCO November 2019 PDF, printed pages 28 and 36."
+    caveat: >
+      Withdrawn on 13 January 2026. Quoted so the sentence is not
+      misremembered. Not a Thai rule and not a current English order.
+
+  - id: FLOOD-BOAT-ORDER
+    status: unverified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      TODO_HUMAN. Team assumption: do not rank a person in the water, a
+      person on a roof, and a person who cannot climb, and do not assign a
+      1669 colour to a boat task. Rationale: the live multi-agency page names
+      powered and unpowered boat teams and does not print that ranking. The
+      2019 concept of operations was withdrawn on 13 January 2026 as out of
+      date. Its sentences about those most at risk, and about self then team
+      then casualty, stay under UK-FRCO-MOST-AT-RISK with that withdrawal.
+      They are not turned into a further order here. The B.E. 2554
+      announcement does not mention boats.
+    text_th: ""
+    source_url: *frco_page_url
+    source_excerpt: >
+      This publication was withdrawn on 13 January 2026. This guidance has
+      been withdrawn as it is out of date.
+    retrieved: *flood_date
+    license_note: *gap_license
+    locator: "GOV.UK withdrawal notice for the 2019 Flood Rescue Concept of Operations. The ranking is the gap."
+    caveat: "Team assumption. Do not fill the gap with a remembered boat order."
+
+  - id: NWS-FLOOD-ELECTRICAL
+    status: verified
+    topic: triage
+    checks: [triage, safeguarding]
+    text_en: >
+      The National Weather Service says not to go into a basement, or any
+      room, if water covers the electrical outlets or if cords are
+      submerged. If you see sparks or hear buzzing, crackling, snapping, or
+      popping, get out. Stay out of water that may have electricity in it.
+      This is a safety instruction. It is not a 1669 colour.
+    text_th: ""
+    source_url: *nws_url
+    source_excerpt: >
+      Don't go into a basement, or any room, if water covers the electrical
+      outlets or if cords are submerged. If you see sparks or hear buzzing,
+      crackling, snapping or popping noises--get out! Stay out of water that
+      may have electricity in it!
+    retrieved: *flood_date
+    license_note: *nws_license
+    locator: "NWS, During a Flood, Practice Electrical Safety."
+    caveat: "US guidance."
+
+  - id: CDC-FLOOD-ELECTRICAL
+    status: verified
+    topic: triage
+    checks: [triage, safeguarding]
+    text_en: >
+      CDC says to shut off electrical power and natural gas or propane tanks
+      to avoid fire, electrocution, or explosions. Never touch a fallen
+      power line. Do not drive through standing water if downed power lines
+      are in the water. If you believe someone has been electrocuted, call
+      911 or emergency medical help. The public number on the page is 911.
+    text_th: ""
+    source_url: *cdc_flood_url
+    source_excerpt: >
+      Shut off electrical power and natural gas or propane tanks in your
+      home to avoid fire, electrocution, or explosions. NEVER touch a fallen
+      power line. Call the power company to report fallen power lines. Do
+      not drive through standing water if downed power lines are in the
+      water. If you believe someone has been electrocuted, call or have
+      someone else call 911 or emergency medical help.
+    retrieved: *flood_date
+    license_note: *cdc_flood_license
+    locator: "CDC, Safety Guidelines: Floodwater, Avoid electrical hazards."
+    caveat: "US guidance. The page lists floodwater as able to contain downed power lines."
+
+  - id: IFRC-FLOOD-ELECTRICAL
+    status: verified
+    topic: triage
+    checks: [triage, safeguarding]
+    text_en: >
+      The IFRC floods messages say standing water may be electrically
+      charged from underground or downed power lines. After a flood, avoid
+      touching an electrical item that is wet, or any water that is in
+      contact with electrical wires. The wording "electrical item" is the
+      page's. If appliances are wet, turn off the electricity at the main
+      fuse box or circuit breaker, and have a professional check the system
+      before turning power on.
+    text_th: ""
+    source_url: *ifrc_flood_url
+    source_excerpt: >
+      Standing water may be electrically charged from underground or downed
+      power lines. Avoid touching electrical item that is wet or any water
+      that is in contact with electrical wires. If appliances are wet, turn
+      off the electricity at main fuse box or circuit breaker. Ensure that
+      a professional checks the electrical system and appliances before
+      turning power on and using them.
+    retrieved: *flood_date
+    license_note: *ifrc_flood_license
+    locator: "IFRC PAPE floods messages, printed pages 102-103."
+    caveat: "Public education. Not a Thai electrical code."
+
+  - id: READY-MEDICAL-NEEDS
+    status: verified
+    topic: safeguarding
+    checks: [safeguarding]
+    text_en: >
+      Ready.gov says a person on dialysis or other life-sustaining treatment
+      should know more than one facility that can help. A person who uses
+      medical equipment that needs electricity should ask a clinician how
+      to keep it running in a power cut, and may ask the power provider
+      about priority power restoration. The kit list includes a backup
+      supply of oxygen, and a cooler and chemical ice packs for medicines
+      that must be refrigerated. A person who uses a power wheelchair should
+      have a lightweight manual chair as backup if possible, and should
+      tell neighbours who can help if they need to leave the building.
+      These are preparation lines. They are not a 1669 colour and not a
+      reason to deny assistance.
+    text_th: ""
+    source_url: *ready_dis_url
+    source_excerpt: >
+      If you are on dialysis or other life-sustaining medical treatment know
+      the location and availability of more than one facility that can help
+      you. If you use medical equipment in your home that requires
+      electricity, talk to your doctor or health care provider about what
+      you may be able to do to keep it running during a power outage. You
+      can also ask your power provider to put you on a list for priority
+      power restoration. Have a cooler and chemical ice packs available to
+      chill medicines that need to be refrigerated. If you use a power
+      wheelchair have a lightweight manual chair available as a backup if
+      possible. Communicate with neighbors who can assist you if you need
+      to evacuate the building. A backup supply of oxygen.
+    retrieved: *flood_date
+    license_note: *ready_dis_license
+    locator: "Ready.gov, People with Disabilities, Make a Plan, Tips for Medications, Tips for People with a Mobility Disability, and Additional Items."
+    caveat: >
+      US preparedness page. Priority power restoration is a request to the
+      power company. It is not a triage score.
+
+  - id: CDC-INSULIN-OUTAGE
+    status: verified
+    topic: safeguarding
+    checks: [safeguarding]
+    text_en: >
+      CDC says that in a power cut, when refrigerated insulin is not
+      available, try to keep insulin cool and do not freeze it. Frozen
+      insulin can break down and will be less effective. Keep it away from
+      direct heat and out of direct sunlight. The page says you may have to
+      use insulin stored above 86 degrees Fahrenheit, and if so to monitor
+      blood sugar regularly. In a shelter, tell someone in charge if blood
+      sugar is too high or low. This is storage guidance. It is not a dose
+      and not a 1669 colour.
+    text_th: ""
+    source_url: *cdc_insulin_url
+    source_excerpt: >
+      Try to keep your insulin cool, but make sure not to freeze it. Insulin
+      that has been frozen can break down and will be less effective. Keep
+      your insulin away from direct heat and out of direct sunlight. Heat
+      and sunlight will also make it less effective. Realistically, you may
+      have to use insulin that's been stored above 86°F. If so, monitor your
+      blood sugar regularly. If you're staying in an emergency shelter, let
+      someone in charge know if your blood sugar is too high or low.
+    retrieved: *flood_date
+    license_note: *cdc_insulin_license
+    locator: "CDC, Managing Insulin in an Emergency, In a power outage when refrigerated insulin isn't available."
+    caveat: "The 86°F figure is the page's. This rule does not convert it and does not state a dose."
+
+  - id: CDC-FLOOD-HEALTH
+    status: verified
+    topic: safeguarding
+    checks: [safeguarding]
+    text_en: >
+      CDC says floodwater can cause wound infections, skin rash,
+      gastrointestinal illness, tetanus, and leptospirosis, which the page
+      marks as not common, and that the best protection is to stay out of
+      the water. Wash with soap and clean water as soon as possible after
+      contact. Avoid floodwater if you have an open wound, cover a clean
+      open wound with a waterproof bandage, and seek medical attention if a
+      wound develops redness, swelling, or oozing. The page does not give a
+      Thai incidence figure for leptospirosis. Do not add one.
+    text_th: ""
+    source_url: *cdc_flood_url
+    source_excerpt: >
+      Exposure to contaminated floodwater can cause: Wound infections. Skin
+      rash. Gastrointestinal illness. Tetanus. Leptospirosis (not common).
+      The best way to protect yourself is to stay out of the water. Wash the
+      area with soap and clean water as soon as possible. Avoid exposure to
+      floodwater if you have an open wound. Cover clean, open wounds with a
+      waterproof bandage to reduce chance of infection. Keep open wounds as
+      clean as possible by washing well with soap and clean water. If a
+      wound develops redness, swelling, or oozing, seek immediate medical
+      attention.
+    retrieved: *flood_date
+    license_note: *cdc_flood_license
+    locator: "CDC, Safety Guidelines: Floodwater, Exposure to contaminated floodwater and Prevent infection of open wounds."
+    caveat: >
+      "Leptospirosis (not common)" is the page's own marking. It is not a
+      statement about Thailand.
+
+  - id: IFRC-FLOOD-WOUND
+    status: verified
+    topic: safeguarding
+    checks: [safeguarding]
+    text_en: >
+      The IFRC floods messages say not to drink from, play, or swim in
+      floodwater. After a flood, disinfect any cuts and protect them with
+      a waterproof dressing. Wash hands before eating, drinking, or smoking.
+      This is wound and hygiene guidance. It is not a diagnosis and not a
+      1669 colour.
+    text_th: ""
+    source_url: *ifrc_flood_url
+    source_excerpt: >
+      Do not drink from, play or swim in floodwater. Disinfect any cuts and
+      protect them with a waterproof dressing. Wash hands before eating,
+      drinking or smoking.
+    retrieved: *flood_date
+    license_note: *ifrc_flood_license
+    locator: "IFRC PAPE floods messages, printed pages 102-103."
+    caveat: "Public education. Not a treatment protocol."
+
+  - id: CDC-FLOOD-CHILDREN
+    status: verified
+    topic: safeguarding
+    checks: [safeguarding]
+    text_en: >
+      CDC says swiftly moving shallow water can be deadly, and even shallow
+      standing water can be dangerous for small children. Do not allow
+      children to play in floodwater areas, and do not allow them to play
+      with toys that floodwater has contaminated and that have not been
+      disinfected. A child in floodwater is a safeguarding matter for a
+      person. The page does not state an age cutoff.
+    text_th: ""
+    source_url: *cdc_flood_url
+    source_excerpt: >
+      Swiftly moving shallow water can be deadly, and even shallow standing
+      water can be dangerous for small children. Do not allow children to
+      play in floodwater areas. Do not allow children to play with toys that
+      have been contaminated by floodwater and have not been disinfected.
+    retrieved: *flood_date
+    license_note: *cdc_flood_license
+    locator: "CDC, Safety Guidelines: Floodwater, Turn around, don't drown, and Protect yourself from diarrheal diseases."
+    caveat: "US guidance. The age line already in the corpus is the IFRC under-18 definition, not this page."
+
+  - id: IFRC-FLOOD-CHILDREN
+    status: verified
+    topic: safeguarding
+    checks: [safeguarding]
+    text_en: >
+      The IFRC floods messages say to keep children away during the clean-up.
+      A child left with the clean-up, or left without a caregiver, remains
+      the safeguarding case already stated in the IFRC protection standards.
+      This sentence does not add an age cutoff.
+    text_th: ""
+    source_url: *ifrc_flood_url
+    source_excerpt: "Keep children away during the clean-up."
+    retrieved: *flood_date
+    license_note: *ifrc_flood_license
+    locator: "IFRC PAPE floods messages, printed page 103, After a flood, take sanitation precautions."
+    caveat: "One sentence of public education. Pair it with IFRC-PGI-UASC. Do not question a child for a graphic account."
+
+  - id: READY-NOT-ALONE
+    status: verified
+    topic: safeguarding
+    checks: [safeguarding]
+    text_en: >
+      Ready.gov, in its section on Alzheimer's and related dementia, says
+      not to leave the person alone. Even people who are not prone to
+      wandering may do so in an unfamiliar place. If evacuating, bring a
+      comforting item. This is an individual-care line. It is not a rule
+      that every older person is at the same risk, and it is not a 1669
+      colour.
+    text_th: ""
+    source_url: *ready_dis_url
+    source_excerpt: >
+      Do not leave the person alone. Even those who aren't prone to
+      wandering away may do so in unfamiliar environments or situations.
+      If evacuating, help manage the change in environment by bringing a
+      pillow and blanket or other comforting items they can hold onto.
+    retrieved: *flood_date
+    license_note: *ready_dis_license
+    locator: "Ready.gov, People with Disabilities, Tips for Individuals with Alzheimer's and Related Dementia."
+    caveat: >
+      The sentence is about a person with dementia, not about age alone.
+      UNHCR-DO-NOT-SCORE still applies.

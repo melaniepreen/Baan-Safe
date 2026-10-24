@@ -21,10 +21,8 @@ UNVERIFIED = {
     "MOF-2569-TEMP-SHELTER-CAP",
     "MOF-2569-TOILET-BLOCK-COST",
     "MOF-2569-PM25",
-    "NIEMS-ANNOUNCEMENT-2554",
     "CBD-RESPONSE-MINUTES",
-    "FLOOD-WATER-DEPTH",
-    "FLOOD-TRAPPED-DISPATCH",
+    "FLOOD-BOAT-ORDER",
 }
 BANNED_HOSTS = ("reliefweb.int", "disaster.go.th", "ddpm.go.th")
 AMOUNT = re.compile(r"\d[\d,]*(?:\.\d+)?\s*(?:baht|litres|minutes|cm)\b", re.I)
@@ -90,6 +88,48 @@ def test_unverified_shelter_cap_does_not_pick_a_number():
 def test_unknown_rule_is_refused():
     with pytest.raises(ValueError, match="Unknown policy rule"):
         get_rule("MOF-2569-NOT-A-RULE")
+
+
+def test_flood_rules_quote_their_own_depths_and_do_not_assign_a_colour():
+    depth = get_rule("FLOOD-WATER-DEPTH")
+    ready = get_rule("READY-FLOOD-DEPTH")
+    agency = get_rule("EA-FLOOD-DEPTH")
+    ifrc = get_rule("IFRC-FLOOD-DEPTH")
+    trapped = get_rule("FLOOD-TRAPPED-DISPATCH")
+    for rule in (depth, ready, agency, ifrc, trapped):
+        assert rule.verified
+    assert "does not map" in trapped.text_en
+    assert "1669" in trapped.text_en
+    assert "6 inches" in depth.source_excerpt
+    assert "12 inches" in depth.source_excerpt
+    assert "18 inches" in depth.source_excerpt
+    assert "one foot" in ready.source_excerpt
+    assert "60cm" in agency.source_excerpt
+    assert "15 centimetres" in ifrc.source_excerpt
+    assert "20 centimetres" in ifrc.source_excerpt
+    assert "50 centimetres" in ifrc.source_excerpt
+    assert "สีแดง" in trapped.source_excerpt
+    assert "น้ำท่วม" not in trapped.source_excerpt
+    boat = get_rule("FLOOD-BOAT-ORDER")
+    assert not boat.verified
+    assert "Team assumption" in boat.text_en
+    assert "withdrawn" in boat.source_excerpt
+    minutes = get_rule("CBD-RESPONSE-MINUTES")
+    assert not minutes.verified
+    assert "ทันที" in minutes.source_excerpt
+    announcement = get_rule("NIEMS-ANNOUNCEMENT-2554")
+    assert announcement.verified
+    assert "ทันที" in announcement.text_th
+    labels = load_labels()
+    assert labels["flood_water_depth"].status == "verified"
+    assert "FLOOD-WATER-DEPTH" in labels["flood_water_depth"].derived_from
+    assert "EA-FLOOD-WARNINGS" in labels["flood_trapped"].derived_from
+    assert "CDC-FLOOD-CHILDREN" in labels["safeguarding_child"].derived_from
+    assert "READY-NOT-ALONE" in labels["safeguarding_older_person"].derived_from
+    assert "READY-MEDICAL-NEEDS" in labels["safeguarding_disability"].derived_from
+    assert "CDC-INSULIN-OUTAGE" in labels["safeguarding_serious_health"].derived_from
+    assert labels["flood_water_depth"].thai_is_quotation is False
+    assert labels["flood_trapped"].thai_is_quotation is False
 
 
 def test_labels_are_bilingual_and_point_at_real_rules():

@@ -10,7 +10,7 @@ labels:
     label_th: ผู้ป่วยฉุกเฉินวิกฤติ ทันที
     hypothesis_en: This call is a life-threatening emergency that must be handled immediately.
     hypothesis_th: สายนี้เป็นผู้ป่วยฉุกเฉินวิกฤติที่คุกคามชีวิต และต้องจัดการทันที
-    derived_from: [NIEMS-COLOR-RED]
+    derived_from: [NIEMS-COLOR-RED, NIEMS-ANNOUNCEMENT-2554]
     thai_is_quotation: false
 
   - id: niems_yellow_urgent
@@ -19,7 +19,7 @@ labels:
     label_th: ผู้ป่วยฉุกเฉินเร่งด่วน หลังสีแดง
     hypothesis_en: This call is an urgent emergency that is handled after a life-threatening case.
     hypothesis_th: สายนี้เป็นผู้ป่วยฉุกเฉินเร่งด่วน และต้องจัดการหลังผู้ป่วยที่คุกคามชีวิต
-    derived_from: [NIEMS-COLOR-YELLOW]
+    derived_from: [NIEMS-COLOR-YELLOW, NIEMS-ANNOUNCEMENT-2554]
     thai_is_quotation: false
 
   - id: niems_green_not_severe
@@ -28,7 +28,7 @@ labels:
     label_th: ผู้ป่วยฉุกเฉินไม่รุนแรง หลังสีเหลือง
     hypothesis_en: This call is an emergency that is not severe and is handled after urgent cases.
     hypothesis_th: สายนี้เป็นผู้ป่วยฉุกเฉินไม่รุนแรง และต้องจัดการหลังผู้ป่วยเร่งด่วน
-    derived_from: [NIEMS-COLOR-GREEN]
+    derived_from: [NIEMS-COLOR-GREEN, NIEMS-ANNOUNCEMENT-2554]
     thai_is_quotation: false
 
   - id: niems_white_general
@@ -37,7 +37,7 @@ labels:
     label_th: ผู้ป่วยทั่วไป
     hypothesis_en: This call is a general patient who can be directed elsewhere or after the emergency cases.
     hypothesis_th: สายนี้เป็นผู้ป่วยทั่วไป ที่ไปรับบริการที่อื่นหรือหลังผู้ป่วยฉุกเฉินไม่รุนแรง
-    derived_from: [NIEMS-COLOR-WHITE]
+    derived_from: [NIEMS-COLOR-WHITE, NIEMS-ANNOUNCEMENT-2554]
     thai_is_quotation: false
 
   - id: niems_black_not_a_patient
@@ -46,7 +46,7 @@ labels:
     label_th: ไม่มีผู้ป่วย
     hypothesis_en: This call has no patient and is another public-health request, for another time or another place.
     hypothesis_th: สายนี้ไม่มีผู้ป่วย และเป็นคำขอรับบริการสาธารณสุขอย่างอื่น ในเวลาอื่นหรือที่อื่น
-    derived_from: [NIEMS-COLOR-BLACK]
+    derived_from: [NIEMS-COLOR-BLACK, NIEMS-ANNOUNCEMENT-2554]
     thai_is_quotation: false
 
   - id: niems_not_conscious_or_breathing
@@ -55,7 +55,7 @@ labels:
     label_th: ไม่รู้สึกตัวหรือหายใจไม่ปกติ
     hypothesis_en: The person is not conscious or is not breathing normally.
     hypothesis_th: ผู้ป่วยไม่รู้สึกตัว หรือหายใจไม่ปกติ
-    derived_from: [CBD-STEP1-CONSCIOUS-BREATHING]
+    derived_from: [CBD-STEP1-CONSCIOUS-BREATHING, NIEMS-ANNOUNCEMENT-2554]
     thai_is_quotation: false
 
   - id: sphere_water_short
@@ -100,36 +100,36 @@ labels:
     status: verified
     label_en: A child needs a person to decide
     label_th: มีเด็ก และต้องให้คนตัดสินใจ
-    hypothesis_en: A child is involved and a person responsible for child protection must decide.
-    hypothesis_th: มีเด็กเกี่ยวข้อง และต้องให้คนที่รับผิดชอบการคุ้มครองเด็กเป็นผู้ตัดสินใจ
-    derived_from: [IFRC-PGI-UASC, IFRC-PGI-CHILD-HUMAN, SPHERE-CHILD-REFERRAL]
+    hypothesis_en: A child is involved, including a child left alone or in floodwater, and a person responsible for child protection must decide.
+    hypothesis_th: มีเด็กเกี่ยวข้อง รวมถึงเด็กที่อยู่คนเดียวหรืออยู่ในน้ำท่วม และต้องให้คนที่รับผิดชอบการคุ้มครองเด็กเป็นผู้ตัดสินใจ
+    derived_from: [IFRC-PGI-UASC, IFRC-PGI-CHILD-HUMAN, SPHERE-CHILD-REFERRAL, CDC-FLOOD-CHILDREN, IFRC-FLOOD-CHILDREN]
     thai_is_quotation: false
 
   - id: safeguarding_older_person
     status: verified
     label_en: An older person needs an individual assessment
     label_th: มีผู้สูงอายุ และต้องประเมินรายคน
-    hypothesis_en: An older person is involved and the risk has to be assessed for that person rather than by age alone.
-    hypothesis_th: มีผู้สูงอายุเกี่ยวข้อง และต้องประเมินความเสี่ยงของคนนั้น ไม่ใช่ตัดสินจากอายุอย่างเดียว
-    derived_from: [IFRC-PGI-MARGINALISED, UNHCR-HEIGHTENED-RISK, UNHCR-DO-NOT-SCORE]
+    hypothesis_en: An older person is involved, including an older person left alone or a person with dementia who must not be left alone, and the risk has to be assessed for that person rather than by age alone.
+    hypothesis_th: มีผู้สูงอายุเกี่ยวข้อง รวมถึงผู้สูงอายุที่อยู่คนเดียว หรือคนที่มีภาวะสมองเสื่อมซึ่งไม่ควรอยู่คนเดียว และต้องประเมินความเสี่ยงของคนนั้น ไม่ใช่ตัดสินจากอายุอย่างเดียว
+    derived_from: [IFRC-PGI-MARGINALISED, UNHCR-HEIGHTENED-RISK, UNHCR-DO-NOT-SCORE, READY-NOT-ALONE]
     thai_is_quotation: false
 
   - id: safeguarding_disability
     status: verified
     label_en: A person with a disability needs an individual assessment
     label_th: มีคนพิการ และต้องประเมินรายคน
-    hypothesis_en: A person with a disability is involved and barriers, not the label alone, have to be assessed by a person.
-    hypothesis_th: มีคนพิการเกี่ยวข้อง และต้องให้คนประเมินอุปสรรค ไม่ใช่ตัดสินจากคำว่าพิการอย่างเดียว
-    derived_from: [IFRC-PGI-DISABILITY, UNHCR-DO-NOT-SCORE]
+    hypothesis_en: A person with a disability is involved, including a person who cannot leave without help or whose mobility device needs power, and barriers, not the label alone, have to be assessed by a person.
+    hypothesis_th: มีคนพิการเกี่ยวข้อง รวมถึงคนที่ออกไปไม่ได้ถ้าไม่มีคนช่วย หรือคนที่อุปกรณ์ช่วยเดินทางต้องใช้ไฟฟ้า และต้องให้คนประเมินอุปสรรค ไม่ใช่ตัดสินจากคำว่าพิการอย่างเดียว
+    derived_from: [IFRC-PGI-DISABILITY, UNHCR-DO-NOT-SCORE, READY-MEDICAL-NEEDS]
     thai_is_quotation: false
 
   - id: safeguarding_serious_health
     status: verified
     label_en: Serious health condition, a person must decide
     label_th: มีปัญหาสุขภาพรุนแรง และต้องให้คนตัดสินใจ
-    hypothesis_en: A serious health condition is described and a person must decide the medical response.
-    hypothesis_th: มีปัญหาสุขภาพรุนแรง และต้องให้คนตัดสินใจเรื่องการรักษา
-    derived_from: [UNHCR-HEIGHTENED-RISK, CBD-ONLINE-MEDICAL-DIRECTION]
+    hypothesis_en: A serious health condition is described, including dialysis, home oxygen, insulin during a power cut, a floodwater wound, or possible electrocution, and a person must decide the medical response.
+    hypothesis_th: มีปัญหาสุขภาพรุนแรง รวมถึงการฟอกไต ออกซิเจนที่บ้าน อินซูลินขณะไฟดับ แผลที่สัมผัสน้ำท่วม หรือไฟดูด และต้องให้คนตัดสินใจเรื่องการรักษา
+    derived_from: [UNHCR-HEIGHTENED-RISK, CBD-ONLINE-MEDICAL-DIRECTION, READY-MEDICAL-NEEDS, CDC-INSULIN-OUTAGE, CDC-FLOOD-HEALTH, IFRC-FLOOD-WOUND, NWS-FLOOD-ELECTRICAL, CDC-FLOOD-ELECTRICAL, IFRC-FLOOD-ELECTRICAL]
     thai_is_quotation: false
 
   - id: safeguarding_protection_referral
@@ -142,25 +142,23 @@ labels:
     thai_is_quotation: false
 
   - id: flood_water_depth
-    status: unverified
-    label_en: Flood water depth
-    label_th: ความลึกของน้ำท่วม
+    status: verified
+    label_en: Flood water deep enough to knock a person down
+    label_th: น้ำท่วมที่ลึกพอจะทำให้คนล้ม
     hypothesis_en: >
-      TODO_HUMAN. No verified flood water-depth threshold is in the corpus.
-      This hypothesis must not be used as a priority.
+      Moving floodwater about 6 inches or 15 centimetres deep is enough, on the cited pages, to knock a person down. Those pages do not print one shared depth for carrying a vehicle, and none of them is a 1669 colour or a priority score.
     hypothesis_th: >
-      TODO_HUMAN ยังไม่มีเกณฑ์ความลึกของน้ำท่วมที่ยืนยันจากแหล่งที่มา ห้ามใช้สมมติฐานนี้เป็นลำดับความสำคัญ
-    derived_from: [FLOOD-WATER-DEPTH]
+      น้ำท่วมที่ไหลลึกประมาณ 6 นิ้วหรือ 15 เซนติเมตร ถูกระบุในแหล่งที่อ้างว่าพอทำให้คนล้มได้ แหล่งเหล่านั้นไม่ได้พิมพ์ความลึกเดียวกันสำหรับรถที่ถูกน้ำพัด และไม่ได้กำหนดสีของสายด่วน 1669 หรือลำดับความสำคัญ
+    derived_from: [FLOOD-WATER-DEPTH, READY-FLOOD-DEPTH, EA-FLOOD-DEPTH, IFRC-FLOOD-DEPTH]
     thai_is_quotation: false
 
   - id: flood_trapped
-    status: unverified
-    label_en: Trapped by floodwater
-    label_th: ติดอยู่ในน้ำท่วม
+    status: verified
+    label_en: Trapped by floodwater, or told to leave
+    label_th: ติดอยู่ในน้ำท่วม หรือถูกบอกให้ย้าย
     hypothesis_en: >
-      TODO_HUMAN. No verified rule maps being trapped by floodwater to a 1669 colour or a time target.
-      This hypothesis must not be used as a priority.
+      A person is trapped by floodwater or has been told to leave. Cited guidance says to move to the highest place and call for help, and to evacuate when ordered. The B.E. 2554 announcement does not assign a 1669 colour to being trapped. No cited page ranks boat rescues beyond prioritising those most at risk and protecting the rescuer first, and the 2019 document that uses those words was withdrawn on 13 January 2026. This hypothesis is not a priority score.
     hypothesis_th: >
-      TODO_HUMAN ยังไม่มีเกณฑ์ที่ยืนยันว่าคนติดอยู่ในน้ำท่วมตรงกับสีใดของ 1669 ห้ามใช้สมมติฐานนี้เป็นลำดับความสำคัญ
-    derived_from: [FLOOD-TRAPPED-DISPATCH]
+      มีคนติดอยู่ในน้ำท่วม หรือถูกบอกให้ย้าย แหล่งที่อ้างบอกให้ขึ้นที่สูงและขอความช่วยเหลือ และให้ออกเมื่อมีคำสั่ง ประกาศ พ.ศ. 2554 ไม่ได้กำหนดสีของสายด่วน 1669 ให้กับการติดอยู่ในน้ำท่วม ไม่มีแหล่งที่อ้างจัดลำดับเรือกู้ภัยเกินกว่าช่วยคนที่เสี่ยงที่สุดและปกป้องผู้กู้ก่อน และเอกสารปี 2019 ที่ใช้ถ้อยคำนั้นถูกถอนเมื่อ 13 มกราคม 2026 สมมติฐานนี้ไม่ใช่ลำดับความสำคัญ
+    derived_from: [FLOOD-TRAPPED-DISPATCH, NWS-FLOOD-TRAPPED, READY-FLOOD-TRAPPED, NWS-EVACUATION-ORDER, EA-FLOOD-WARNINGS, IFRC-FLOOD-EVACUATE, UK-BOAT-TEAMS, UK-FRCO-MOST-AT-RISK, FLOOD-BOAT-ORDER]
     thai_is_quotation: false
