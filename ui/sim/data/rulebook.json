@@ -5,7 +5,7 @@
     {
       "id": "hospital-flood",
       "when": { "text": "hospital", "flooded": true },
-      "action": "Needs a hospital and the street is flooded: send a boat to the fictional clinic.",
+      "action": "Needs a hospital and the street is flooded: send a boat to the clinic.",
       "vehicle": "boat",
       "outbound": "rescue",
       "return_to": "clinic",
@@ -32,7 +32,7 @@
     {
       "id": "p2-evac",
       "when": { "priority": "P2" },
-      "action": "P2 evacuate: truck from the shelter to the house, then back to the shelter. A flooded segment of that drawn path uses a boat.",
+      "action": "P2 evacuate: evacuation boat from the shelter to the house, then back to the shelter. A flooded segment of that drawn path stays on the same boat.",
       "vehicle": "truck",
       "outbound": "evac",
       "return_to": "shelter",
@@ -49,7 +49,7 @@
     {
       "id": "p3-shelter",
       "when": { "priority": "P3", "needs_any": ["shelter"] },
-      "action": "P3 shelter question: truck from the shelter to the house, then back. No supply van.",
+      "action": "P3 shelter question: evacuation boat from the shelter to the house, then back. No separate supply boat.",
       "vehicle": "truck",
       "outbound": "evac",
       "return_to": "shelter",
@@ -58,7 +58,7 @@
     {
       "id": "p3-welfare",
       "when": { "priority": "P3" },
-      "action": "P3 food or water: welfare van from the water desk to the house.",
+      "action": "P3 food or water: supply boat from the water desk to the house.",
       "vehicle": "van",
       "outbound": "welfare",
       "return_to": null,

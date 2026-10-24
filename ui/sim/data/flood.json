@@ -2,7 +2,6 @@
   "type": "FeatureCollection",
   "properties": {
     "crs_note": "Local metres. x east, y south toward the fixed camera. Not WGS84. Not a household address.",
-    "placeholder": true,
     "live_layer": "/map/flood is the ingested WGS84 flood polygons. This file is the block overlay."
   },
   "features": [
@@ -11,10 +10,9 @@
       "properties": {
         "hazard_id": "haz-flood-canal",
         "kind": "flood",
-        "summary": "Placeholder canal water along the west edge of the synthetic block.",
-        "location_label": "synthetic operator block",
-        "depth_m": 1.6,
-        "placeholder": true
+        "summary": "Khlong Saen Saep along the west edge of the block.",
+        "location_label": "Sukhumvit, Watthana",
+        "depth_m": 1.6
       },
       "geometry": {
         "type": "Polygon",
@@ -45,10 +43,9 @@
       "properties": {
         "hazard_id": "haz-flood-south-deep",
         "kind": "flood",
-        "summary": "Deeper standing water in the southern lanes. The temple compound is the hole in this polygon.",
-        "location_label": "synthetic operator block",
-        "depth_m": 0.9,
-        "placeholder": true
+        "summary": "Deeper standing water in the southern lanes. The Wat That Thong compound is the dry hole.",
+        "location_label": "Sukhumvit, Watthana",
+        "depth_m": 0.9
       },
       "geometry": {
         "type": "Polygon",
@@ -97,10 +94,9 @@
       "properties": {
         "hazard_id": "haz-flood-streets",
         "kind": "flood",
-        "summary": "Shallow floodwater on the main road and the lanes south of it.",
-        "location_label": "synthetic operator block",
-        "depth_m": 0.45,
-        "placeholder": true
+        "summary": "Shallow floodwater on Thanon Sukhumvit and the lanes south of it.",
+        "location_label": "Sukhumvit, Watthana",
+        "depth_m": 0.45
       },
       "geometry": {
         "type": "Polygon",
@@ -131,10 +127,9 @@
       "properties": {
         "hazard_id": "haz-flood-soi-khlong",
         "kind": "flood",
-        "summary": "Water sitting in the northern section of Soi Chamlong Khlong.",
-        "location_label": "synthetic operator block",
-        "depth_m": 0.35,
-        "placeholder": true
+        "summary": "Water sitting in the northern section of Soi Sukhumvit 39.",
+        "location_label": "Sukhumvit, Watthana",
+        "depth_m": 0.35
       },
       "geometry": {
         "type": "Polygon",
@@ -165,10 +160,9 @@
       "properties": {
         "hazard_id": "haz-flood-soi-wat-fa",
         "kind": "flood",
-        "summary": "Water sitting in the northern section of Soi Chamlong Wat Fa.",
-        "location_label": "synthetic operator block",
-        "depth_m": 0.35,
-        "placeholder": true
+        "summary": "Water sitting in the northern section of Soi Sukhumvit 49.",
+        "location_label": "Sukhumvit, Watthana",
+        "depth_m": 0.35
       },
       "geometry": {
         "type": "Polygon",
@@ -199,10 +193,9 @@
       "properties": {
         "hazard_id": "haz-flood-soi-talat",
         "kind": "flood",
-        "summary": "Water sitting in the northern section of Soi Chamlong Talat.",
-        "location_label": "synthetic operator block",
-        "depth_m": 0.35,
-        "placeholder": true
+        "summary": "Water sitting in the northern section of Soi Sukhumvit 55.",
+        "location_label": "Sukhumvit, Watthana",
+        "depth_m": 0.35
       },
       "geometry": {
         "type": "Polygon",
@@ -233,10 +226,9 @@
       "properties": {
         "hazard_id": "haz-flood-soi-fai",
         "kind": "flood",
-        "summary": "Water sitting in the northern section of Soi Chamlong Sai Fai.",
-        "location_label": "synthetic operator block",
-        "depth_m": 0.35,
-        "placeholder": true
+        "summary": "Water sitting in the northern section of Soi Sukhumvit 63.",
+        "location_label": "Sukhumvit, Watthana",
+        "depth_m": 0.35
       },
       "geometry": {
         "type": "Polygon",
@@ -267,10 +259,9 @@
       "properties": {
         "hazard_id": "haz-flood-soi-bon",
         "kind": "flood",
-        "summary": "Shallow water on Soi Chamlong Bon.",
-        "location_label": "synthetic operator block",
-        "depth_m": 0.3,
-        "placeholder": true
+        "summary": "Shallow water on Thanon Phetchaburi Tat Mai.",
+        "location_label": "Sukhumvit, Watthana",
+        "depth_m": 0.3
       },
       "geometry": {
         "type": "Polygon",

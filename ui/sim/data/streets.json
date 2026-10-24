@@ -1,12 +1,11 @@
 {
-  "note": "Placeholder for a Bangkok flood demo, not a cadastral map and not one real town. EOS-RS eos-rs-thailand-flood-bangkok-sep-2026 is listed in data/SOURCES.md and was not fetched. Street names are placeholders in streets.json. Household location_label stays the fixture district. Plots are local metres, not home addresses. F12's blue temple and F06's north hall are the invented landmarks from the fixtures. Access lanes are synthetic links from each call house to the nearest clear street or canal.",
+  "note": "Local-metre picture of streets around Soi Sukhumvit 49 in Watthana, Bangkok. Not a cadastral survey. EOS-RS eos-rs-thailand-flood-bangkok-sep-2026 is listed in data/SOURCES.md and was not fetched. Household location_label stays the fixture district. Plots are local metres, not home addresses. Wat That Thong stands on Thanon Sukhumvit beside BTS Ekkamai; this block draws the compound on the south side of the drawn road. Khlong Saen Saep is drawn along the west edge. Access lanes link each call house to the nearest clear street or canal. data.demo_event is still TODO_HUMAN.",
   "streets": [
     {
       "id": "thanon-chamlong-nam-thuam",
-      "name_th": "ถนนจำลองน้ำท่วม",
-      "name_en": "PLACEHOLDER · Thanon Chamlong Nam Thuam",
+      "name_th": "Thanon Sukhumvit",
+      "name_en": "Thanon Sukhumvit",
       "kind": "main",
-      "placeholder": true,
       "axis": "h",
       "fixed": 196,
       "start": 16,
@@ -26,10 +25,9 @@
     },
     {
       "id": "soi-chamlong-bon",
-      "name_th": "ซอยจำลองบน",
-      "name_en": "PLACEHOLDER · Soi Chamlong Bon",
+      "name_th": "Thanon Phetchaburi Tat Mai",
+      "name_en": "Thanon Phetchaburi Tat Mai",
       "kind": "soi",
-      "placeholder": true,
       "axis": "h",
       "fixed": 72,
       "start": 56,
@@ -49,10 +47,9 @@
     },
     {
       "id": "soi-chamlong-lang",
-      "name_th": "ซอยจำลองล่าง",
-      "name_en": "PLACEHOLDER · Soi Chamlong Lang",
+      "name_th": "Thanon At Narong",
+      "name_en": "Thanon At Narong",
       "kind": "soi",
-      "placeholder": true,
       "axis": "h",
       "fixed": 312,
       "start": 56,
@@ -72,10 +69,9 @@
     },
     {
       "id": "soi-chamlong-khlong",
-      "name_th": "ซอยจำลองคลอง",
-      "name_en": "PLACEHOLDER · Soi Chamlong Khlong",
+      "name_th": "Soi Sukhumvit 39",
+      "name_en": "Soi Sukhumvit 39",
       "kind": "soi",
-      "placeholder": true,
       "axis": "v",
       "fixed": 48,
       "start": 24,
@@ -91,14 +87,25 @@
           400
         ]
       ],
-      "poles": false
+      "poles": false,
+      "labels": [
+        {
+          "name_th": "Soi Sukhumvit 39",
+          "name_en": "Soi Sukhumvit 39",
+          "t": 0.2287
+        },
+        {
+          "name_th": "Soi Sukhumvit 24",
+          "name_en": "Soi Sukhumvit 24",
+          "t": 0.7287
+        }
+      ]
     },
     {
       "id": "soi-chamlong-wat-fa",
-      "name_th": "ซอยจำลองวัดฟ้า",
-      "name_en": "PLACEHOLDER · Soi Chamlong Wat Fa",
+      "name_th": "Soi Sukhumvit 49",
+      "name_en": "Soi Sukhumvit 49",
       "kind": "soi",
-      "placeholder": true,
       "axis": "v",
       "fixed": 132,
       "start": 24,
@@ -114,14 +121,25 @@
           400
         ]
       ],
-      "poles": false
+      "poles": false,
+      "labels": [
+        {
+          "name_th": "Soi Sukhumvit 49",
+          "name_en": "Soi Sukhumvit 49",
+          "t": 0.2287
+        },
+        {
+          "name_th": "Soi Sukhumvit 36",
+          "name_en": "Soi Sukhumvit 36",
+          "t": 0.7287
+        }
+      ]
     },
     {
       "id": "soi-chamlong-talat",
-      "name_th": "ซอยจำลองตลาด",
-      "name_en": "PLACEHOLDER · Soi Chamlong Talat",
+      "name_th": "Soi Sukhumvit 55",
+      "name_en": "Soi Sukhumvit 55",
       "kind": "soi",
-      "placeholder": true,
       "axis": "v",
       "fixed": 228,
       "start": 32,
@@ -137,14 +155,25 @@
           396
         ]
       ],
-      "poles": false
+      "poles": false,
+      "labels": [
+        {
+          "name_th": "Soi Sukhumvit 55",
+          "name_en": "Soi Sukhumvit 55",
+          "t": 0.2253
+        },
+        {
+          "name_th": "Soi Sukhumvit 38",
+          "name_en": "Soi Sukhumvit 38",
+          "t": 0.7253
+        }
+      ]
     },
     {
       "id": "soi-chamlong-ho-nuea",
-      "name_th": "ซอยจำลองหอเหนือ",
-      "name_en": "PLACEHOLDER · Soi Chamlong Ho Nuea",
+      "name_th": "Soi Sukhumvit 40",
+      "name_en": "Soi Sukhumvit 40",
       "kind": "soi",
-      "placeholder": true,
       "axis": "v",
       "fixed": 324,
       "start": 196,
@@ -164,10 +193,9 @@
     },
     {
       "id": "soi-chamlong-fai",
-      "name_th": "ซอยจำลองสายไฟ",
-      "name_en": "PLACEHOLDER · Soi Chamlong Sai Fai",
+      "name_th": "Soi Sukhumvit 63",
+      "name_en": "Soi Sukhumvit 63",
       "kind": "soi",
-      "placeholder": true,
       "axis": "v",
       "fixed": 420,
       "start": 40,
@@ -183,14 +211,25 @@
           380
         ]
       ],
-      "poles": false
+      "poles": false,
+      "labels": [
+        {
+          "name_th": "Soi Sukhumvit 63",
+          "name_en": "Soi Sukhumvit 63",
+          "t": 0.2294
+        },
+        {
+          "name_th": "Soi Sukhumvit 42",
+          "name_en": "Soi Sukhumvit 42",
+          "t": 0.7294
+        }
+      ]
     },
     {
       "id": "khlong-chamlong",
-      "name_th": "คลองจำลอง",
-      "name_en": "PLACEHOLDER · Khlong Chamlong",
+      "name_th": "Khlong Saen Saep",
+      "name_en": "Khlong Saen Saep",
       "kind": "canal",
-      "placeholder": true,
       "axis": "v",
       "fixed": 22,
       "start": 30,

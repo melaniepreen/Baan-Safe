@@ -2,7 +2,7 @@
 
 The renderer does not invent layout. It reads the JSON this script writes:
 
-- ui/sim/data/streets.json  placeholder names and centerlines (swap names here)
+- ui/sim/data/streets.json  romanised Sukhumvit names and centerlines
 - ui/sim/data/flood.json    local-metre flood polygons, not WGS84
 - ui/sim/data/town.json     buildings, households, graph, demo routes
 
@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import random
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -123,7 +124,12 @@ def load_resources() -> list[dict]:
                 {
                     "resource_id": row["id"],
                     "kind": row["kind"],
-                    "name": row["name"],
+                    "name": {
+                        "boat-fictional-01": "Rescue boat",
+                        "amb-fictional-01": "Clinic ambulance",
+                        "shelter-fictional-01": "Evacuation shelter",
+                        "welfare-fictional-01": "Water desk",
+                    }.get(row["id"], row["name"]),
                     "district": row["district"],
                     "available": row["available"],
                 }
@@ -141,17 +147,17 @@ def street(
     start: float,
     end: float,
     width_m: float,
+    labels: list | None = None,
 ) -> dict:
     if axis == "h":
         points = [[start, fixed], [end, fixed]]
     else:
         points = [[fixed, start], [fixed, end]]
-    return {
+    row = {
         "id": street_id,
         "name_th": name_th,
-        "name_en": f"PLACEHOLDER · {name_en}",
+        "name_en": name_en,
         "kind": kind,
-        "placeholder": True,
         "axis": axis,
         "fixed": fixed,
         "start": start,
@@ -160,14 +166,27 @@ def street(
         "points": points,
         "poles": kind == "main",
     }
+    if labels:
+        row["labels"] = labels
+    return row
+
+
+def span_labels(north: str, south: str, start: float, end: float) -> list[dict]:
+    """Odd soi on the north side of Thanon Sukhumvit, even soi on the south side."""
+    span = end - start
+
+    def row(name: str, y: float) -> dict:
+        return {"name_th": name, "name_en": name, "t": round((y - start) / span, 4)}
+
+    return [row(north, (start + H_MAIN) / 2), row(south, (H_MAIN + end) / 2)]
 
 
 def build_streets() -> list[dict]:
     return [
         street(
             "thanon-chamlong-nam-thuam",
-            "ถนนจำลองน้ำท่วม",
-            "Thanon Chamlong Nam Thuam",
+            "Thanon Sukhumvit",
+            "Thanon Sukhumvit",
             "main",
             "h",
             H_MAIN,
@@ -175,11 +194,21 @@ def build_streets() -> list[dict]:
             524,
             16,
         ),
-        street("soi-chamlong-bon", "ซอยจำลองบน", "Soi Chamlong Bon", "soi", "h", H_BON, 56, 470, 6.5),
+        street(
+            "soi-chamlong-bon",
+            "Thanon Phetchaburi Tat Mai",
+            "Thanon Phetchaburi Tat Mai",
+            "soi",
+            "h",
+            H_BON,
+            56,
+            470,
+            6.5,
+        ),
         street(
             "soi-chamlong-lang",
-            "ซอยจำลองล่าง",
-            "Soi Chamlong Lang",
+            "Thanon At Narong",
+            "Thanon At Narong",
             "soi",
             "h",
             H_LANG,
@@ -189,41 +218,44 @@ def build_streets() -> list[dict]:
         ),
         street(
             "soi-chamlong-khlong",
-            "ซอยจำลองคลอง",
-            "Soi Chamlong Khlong",
+            "Soi Sukhumvit 39",
+            "Soi Sukhumvit 39",
             "soi",
             "v",
             V_KHLONG,
             24,
             400,
             5.5,
+            labels=span_labels("Soi Sukhumvit 39", "Soi Sukhumvit 24", 24, 400),
         ),
         street(
             "soi-chamlong-wat-fa",
-            "ซอยจำลองวัดฟ้า",
-            "Soi Chamlong Wat Fa",
+            "Soi Sukhumvit 49",
+            "Soi Sukhumvit 49",
             "soi",
             "v",
             V_WAT,
             24,
             400,
             7,
+            labels=span_labels("Soi Sukhumvit 49", "Soi Sukhumvit 36", 24, 400),
         ),
         street(
             "soi-chamlong-talat",
-            "ซอยจำลองตลาด",
-            "Soi Chamlong Talat",
+            "Soi Sukhumvit 55",
+            "Soi Sukhumvit 55",
             "soi",
             "v",
             V_TALAT,
             32,
             396,
             7,
+            labels=span_labels("Soi Sukhumvit 55", "Soi Sukhumvit 38", 32, 396),
         ),
         street(
             "soi-chamlong-ho-nuea",
-            "ซอยจำลองหอเหนือ",
-            "Soi Chamlong Ho Nuea",
+            "Soi Sukhumvit 40",
+            "Soi Sukhumvit 40",
             "soi",
             "v",
             V_HO,
@@ -233,16 +265,17 @@ def build_streets() -> list[dict]:
         ),
         street(
             "soi-chamlong-fai",
-            "ซอยจำลองสายไฟ",
-            "Soi Chamlong Sai Fai",
+            "Soi Sukhumvit 63",
+            "Soi Sukhumvit 63",
             "soi",
             "v",
             V_FAI,
             40,
             380,
             6.5,
+            labels=span_labels("Soi Sukhumvit 63", "Soi Sukhumvit 42", 40, 380),
         ),
-        street("khlong-chamlong", "คลองจำลอง", "Khlong Chamlong", "canal", "v", 22, 30, 400, 14),
+        street("khlong-chamlong", "Khlong Saen Saep", "Khlong Saen Saep", "canal", "v", 22, 30, 400, 14),
     ]
 
 
@@ -252,49 +285,49 @@ def build_flood() -> dict:
         poly(
             "haz-flood-canal",
             1.6,
-            "Placeholder canal water along the west edge of the synthetic block.",
+            "Khlong Saen Saep along the west edge of the block.",
             [[[0, 8], [34, 8], [34, 412], [0, 412]]],
         ),
         poly(
             "haz-flood-south-deep",
             0.9,
-            "Deeper standing water in the southern lanes. The temple compound is the hole in this polygon.",
+            "Deeper standing water in the southern lanes. The Wat That Thong compound is the dry hole.",
             [[[30, 328], [530, 328], [530, 412], [30, 412]], temple_hole],
         ),
         poly(
             "haz-flood-streets",
             0.45,
-            "Shallow floodwater on the main road and the lanes south of it.",
+            "Shallow floodwater on Thanon Sukhumvit and the lanes south of it.",
             [[[30, 180], [530, 180], [530, 328], [30, 328]]],
         ),
         poly(
             "haz-flood-soi-khlong",
             0.35,
-            "Water sitting in the northern section of Soi Chamlong Khlong.",
+            "Water sitting in the northern section of Soi Sukhumvit 39.",
             [[[V_KHLONG - 4, 40], [V_KHLONG + 4, 40], [V_KHLONG + 4, 180], [V_KHLONG - 4, 180]]],
         ),
         poly(
             "haz-flood-soi-wat-fa",
             0.35,
-            "Water sitting in the northern section of Soi Chamlong Wat Fa.",
+            "Water sitting in the northern section of Soi Sukhumvit 49.",
             [[[V_WAT - 4.2, 36], [V_WAT + 4.2, 36], [V_WAT + 4.2, 180], [V_WAT - 4.2, 180]]],
         ),
         poly(
             "haz-flood-soi-talat",
             0.35,
-            "Water sitting in the northern section of Soi Chamlong Talat.",
+            "Water sitting in the northern section of Soi Sukhumvit 55.",
             [[[V_TALAT - 4.2, 40], [V_TALAT + 4.2, 40], [V_TALAT + 4.2, 180], [V_TALAT - 4.2, 180]]],
         ),
         poly(
             "haz-flood-soi-fai",
             0.35,
-            "Water sitting in the northern section of Soi Chamlong Sai Fai.",
+            "Water sitting in the northern section of Soi Sukhumvit 63.",
             [[[V_FAI - 4, 48], [V_FAI + 4, 48], [V_FAI + 4, 180], [V_FAI - 4, 180]]],
         ),
         poly(
             "haz-flood-soi-bon",
             0.3,
-            "Shallow water on Soi Chamlong Bon.",
+            "Shallow water on Thanon Phetchaburi Tat Mai.",
             [[[56, H_BON - 3.6], [470, H_BON - 3.6], [470, H_BON + 3.6], [56, H_BON + 3.6]]],
         ),
     ]
@@ -302,7 +335,6 @@ def build_flood() -> dict:
         "type": "FeatureCollection",
         "properties": {
             "crs_note": "Local metres. x east, y south toward the fixed camera. Not WGS84. Not a household address.",
-            "placeholder": True,
             "live_layer": "/map/flood is the ingested WGS84 flood polygons. This file is the block overlay.",
         },
         "features": features,
@@ -316,9 +348,8 @@ def poly(hazard_id: str, depth_m: float, summary: str, rings: list) -> dict:
             "hazard_id": hazard_id,
             "kind": "flood",
             "summary": summary,
-            "location_label": "synthetic operator block",
+            "location_label": "Sukhumvit, Watthana",
             "depth_m": depth_m,
-            "placeholder": True,
         },
         "geometry": {"type": "Polygon", "coordinates": rings},
     }
@@ -330,7 +361,7 @@ def hazards_from(flood: dict) -> list[dict]:
             "hazard_id": feature["properties"]["hazard_id"],
             "kind": "flood",
             "summary": feature["properties"]["summary"],
-            "location_label": "synthetic operator block",
+            "location_label": "Sukhumvit, Watthana",
         }
         for feature in flood["features"]
     ]
@@ -362,13 +393,24 @@ def base_building(**kwargs) -> dict:
     return {key: value for key, value in building.items() if value is not None}
 
 
+_THAI_SCRIPT = re.compile(r"[\u0e00-\u0e7f]")
+
+
 def place_label(building_id: str, fallback_th: str, fallback_en: str) -> tuple[str, str]:
-    """Public place name from ui/sim/data/places.json, or the placeholder."""
+    """Romanised name for this plot.
+
+    ui/sim/data/places.json keeps the Lampang, Phrae, Nan, and Phayao catalog.
+    A Thai label from that catalog is not drawn on the Sukhumvit block.
+    """
     path = ROOT / "ui" / "sim" / "data" / "places.json"
     if not path.is_file():
         return fallback_th, fallback_en
     label = (json.loads(path.read_text(encoding="utf-8")).get("labels") or {}).get(building_id) or {}
-    return label.get("name_th") or fallback_th, label.get("name_en") or fallback_en
+    name_th = label.get("name_th") or fallback_th
+    name_en = label.get("name_en") or fallback_en
+    if _THAI_SCRIPT.search(name_th) or _THAI_SCRIPT.search(name_en):
+        return fallback_th, fallback_en
+    return name_th, name_en
 
 
 def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[dict]:
@@ -381,8 +423,8 @@ def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[di
         base_building(
             id="bldg-school",
             kind="school",
-            name_th=place_label("bldg-school", "อาคารเรียนจำลอง", "PLACEHOLDER long school block")[0],
-            name_en=place_label("bldg-school", "อาคารเรียนจำลอง", "PLACEHOLDER long school block")[1],
+            name_th=place_label("bldg-school", "School", "School")[0],
+            name_en=place_label("bldg-school", "School", "School")[1],
             x=238,
             y=92,
             w=122,
@@ -396,8 +438,8 @@ def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[di
         base_building(
             id="bldg-tower-white",
             kind="concrete",
-            name_th=place_label("bldg-tower-white", "อาคารขาวจำลอง", "PLACEHOLDER white block")[0],
-            name_en=place_label("bldg-tower-white", "อาคารขาวจำลอง", "PLACEHOLDER white block")[1],
+            name_th=place_label("bldg-tower-white", "White apartment block", "White apartment block")[0],
+            name_en=place_label("bldg-tower-white", "White apartment block", "White apartment block")[1],
             x=436,
             y=22,
             w=26,
@@ -411,8 +453,8 @@ def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[di
         base_building(
             id="bldg-tower-pink",
             kind="concrete",
-            name_th=place_label("bldg-tower-pink", "อาคารชมพูจำลอง", "PLACEHOLDER pink block")[0],
-            name_en=place_label("bldg-tower-pink", "อาคารชมพูจำลอง", "PLACEHOLDER pink block")[1],
+            name_th=place_label("bldg-tower-pink", "Pink apartment block", "Pink apartment block")[0],
+            name_en=place_label("bldg-tower-pink", "Pink apartment block", "Pink apartment block")[1],
             x=58,
             y=18,
             w=24,
@@ -426,8 +468,8 @@ def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[di
         base_building(
             id="bldg-shelter",
             kind="shelter",
-            name_th="หอเหนือจำลอง",
-            name_en="Fictional North Canal hall",
+            name_th="Evacuation shelter",
+            name_en="Evacuation shelter",
             x=236,
             y=158,
             w=42,
@@ -442,8 +484,8 @@ def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[di
         base_building(
             id="bldg-clinic",
             kind="clinic",
-            name_th="คลินิกจำลอง",
-            name_en="Fictional clinic",
+            name_th="Clinic",
+            name_en="Clinic",
             x=392,
             y=158,
             w=18,
@@ -458,8 +500,8 @@ def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[di
         base_building(
             id="bldg-welfare",
             kind="welfare",
-            name_th="จุดน้ำจำลอง",
-            name_en="Fictional market-day water desk",
+            name_th="Water desk",
+            name_en="Water desk",
             x=156,
             y=40,
             w=12,
@@ -474,8 +516,8 @@ def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[di
         base_building(
             id="bldg-jetty",
             kind="jetty",
-            name_th="ท่าเรือจำลอง",
-            name_en="Fictional river boat A",
+            name_th="Jetty",
+            name_en="Jetty",
             x=8,
             y=188,
             w=18,
@@ -491,8 +533,8 @@ def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[di
         base_building(
             id="bldg-temple",
             kind="temple",
-            name_th="วัดฟ้าจำลอง",
-            name_en="PLACEHOLDER blue temple",
+            name_th="Wat That Thong",
+            name_en="Wat That Thong",
             x=158,
             y=334,
             w=30,
@@ -508,8 +550,8 @@ def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[di
         base_building(
             id="bldg-sala",
             kind="temple",
-            name_th=place_label("bldg-sala", "ศาลาจำลอง", "PLACEHOLDER sala")[0],
-            name_en=place_label("bldg-sala", "ศาลาจำลอง", "PLACEHOLDER sala")[1],
+            name_th=place_label("bldg-sala", "Sala", "Sala")[0],
+            name_en=place_label("bldg-sala", "Sala", "Sala")[1],
             x=150,
             y=360,
             w=16,
@@ -525,8 +567,8 @@ def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[di
         base_building(
             id="bldg-stupa",
             kind="stupa",
-            name_th="เจดีย์จำลอง",
-            name_en="PLACEHOLDER stupa",
+            name_th="Chedi",
+            name_en="Chedi",
             x=198,
             y=344,
             w=9,
@@ -687,7 +729,7 @@ def build_calls(ids: list[str], summaries: dict[str, dict], buildings: list[dict
 
 
 def fill_houses(rng: random.Random, reserved: list[dict], flood: dict, trees: list[dict]) -> list[dict]:
-    """Pack ordinary lots into the blocks between placeholder roads."""
+    """Pack ordinary lots into the blocks between the drawn roads."""
     blocks = [
         # North of the upper soi. Columns skip Soi Ho Nuea; that lane starts at the main road.
         (54, 14, 126, 66),
@@ -1546,7 +1588,7 @@ def build_routes(graph: dict, buildings: dict[str, dict]) -> list[dict]:
     specs = [
         {
             "id": "route-f06-evac",
-            "label": "F06 walk to the fictional north hall",
+            "label": "F06 walk to the evacuation shelter",
             "fixture_id": "F06",
             "contract_route": "shelter_placement",
             "needs": ["evacuation"],
@@ -1556,7 +1598,7 @@ def build_routes(graph: dict, buildings: dict[str, dict]) -> list[dict]:
         },
         {
             "id": "route-f10-rescue",
-            "label": "F10 boat from the fictional jetty",
+            "label": "F10 boat from the jetty",
             "fixture_id": "F10",
             "contract_route": "rescue_coordination",
             "needs": ["rescue", "medical"],
@@ -1584,7 +1626,7 @@ def build_routes(graph: dict, buildings: dict[str, dict]) -> list[dict]:
                 "source": "mock",
                 "note": (
                     "contracts.Route is the dispatch category, not a polyline. "
-                    "This path is the shortest allowed walk on the synthetic graph."
+                    "This path is the shortest allowed walk on the drawn street graph."
                 ),
             }
         )
@@ -1625,18 +1667,19 @@ def main() -> None:
     town = {
         "meta": {
             "id": "synthetic-operator-block",
-            "title": "Placeholder block for a Bangkok flood demo",
+            "title": "Sukhumvit block, Watthana",
             "district_anchor": (
                 "Fixture households stay labelled with their district (Lampang, Phrae, Nan, Phayao). "
-                "data.demo_event is still TODO_HUMAN. This picture is not a Bangkok street map."
+                "data.demo_event is still TODO_HUMAN. Drawn streets use Sukhumvit names in local metres."
             ),
             "disclaimer": (
-                "Placeholder for a Bangkok flood demo, not a cadastral map and not one real town. "
+                "Local-metre picture of streets around Soi Sukhumvit 49 in Watthana, Bangkok. Not a cadastral survey. "
                 "EOS-RS eos-rs-thailand-flood-bangkok-sep-2026 is listed in data/SOURCES.md and was not fetched. "
-                "Street names are placeholders in streets.json. Household location_label stays the fixture district. "
-                "Plots are local metres, not home addresses. "
-                "F12's blue temple and F06's north hall are the invented landmarks from the fixtures. "
-                "Access lanes are synthetic links from each call house to the nearest clear street or canal."
+                "Household location_label stays the fixture district. Plots are local metres, not home addresses. "
+                "Wat That Thong stands on Thanon Sukhumvit beside BTS Ekkamai; this block draws the compound on the south side of the drawn road. "
+                "Khlong Saen Saep is drawn along the west edge. "
+                "Access lanes link each call house to the nearest clear street or canal. "
+                "data.demo_event is still TODO_HUMAN."
             ),
             "projection": "fixed isometric 2:1. x east, y south toward the camera. z up.",
             "camera": {"look_at": [186, 214], "zoom_px_per_m": 5.6},

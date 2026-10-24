@@ -19,14 +19,72 @@ def _load(name: str) -> dict:
     return json.loads((SIM / name).read_text(encoding="utf-8"))
 
 
-def test_placeholder_streets_are_labelled_and_swappable():
+ROMAN_STREETS = {
+    "thanon-chamlong-nam-thuam": "Thanon Sukhumvit",
+    "soi-chamlong-bon": "Thanon Phetchaburi Tat Mai",
+    "soi-chamlong-lang": "Thanon At Narong",
+    "soi-chamlong-khlong": "Soi Sukhumvit 39",
+    "soi-chamlong-wat-fa": "Soi Sukhumvit 49",
+    "soi-chamlong-talat": "Soi Sukhumvit 55",
+    "soi-chamlong-ho-nuea": "Soi Sukhumvit 40",
+    "soi-chamlong-fai": "Soi Sukhumvit 63",
+    "khlong-chamlong": "Khlong Saen Saep",
+}
+SOUTH_SOIS = {
+    "soi-chamlong-khlong": "Soi Sukhumvit 24",
+    "soi-chamlong-wat-fa": "Soi Sukhumvit 36",
+    "soi-chamlong-talat": "Soi Sukhumvit 38",
+    "soi-chamlong-fai": "Soi Sukhumvit 42",
+}
+LANDMARKS = {
+    "bldg-school": "School",
+    "bldg-tower-white": "White apartment block",
+    "bldg-tower-pink": "Pink apartment block",
+    "bldg-shelter": "Evacuation shelter",
+    "bldg-clinic": "Clinic",
+    "bldg-welfare": "Water desk",
+    "bldg-jetty": "Jetty",
+    "bldg-temple": "Wat That Thong",
+    "bldg-sala": "Sala",
+    "bldg-stupa": "Chedi",
+}
+THAI_SCRIPT = re.compile(r"[\u0e00-\u0e7f]")
+SOI_NUMBER = re.compile(r"Soi Sukhumvit (\d+)")
+BANNED_COPY = re.compile(r"fictional|placeholder|demo street|\bsample\b", re.IGNORECASE)
+RESOURCE_ID = re.compile(r"^(?:boat|amb|shelter|welfare)-fictional-01$")
+
+
+def test_sukhumvit_streets_use_real_romanised_names():
     body = _load("streets.json")
-    assert body["streets"], "streets.json is the file to replace with real names"
+    assert body["streets"]
+    assert BANNED_COPY.search(body["note"]) is None
+    seen = set()
+    sukhumvit = next(street for street in body["streets"] if street["id"] == "thanon-chamlong-nam-thuam")
     for street in body["streets"]:
-        assert street["placeholder"] is True
-        assert "จำลอง" in street["name_th"]
-        assert street["name_en"].startswith("PLACEHOLDER")
+        assert "placeholder" not in street
+        assert street["name_th"] == street["name_en"] == ROMAN_STREETS[street["id"]]
+        assert THAI_SCRIPT.search(street["name_th"]) is None
         assert len(street["points"]) >= 2
+        seen.add(street["id"])
+        for label in street.get("labels") or []:
+            assert label["name_th"] == label["name_en"]
+            assert THAI_SCRIPT.search(label["name_en"]) is None
+        if street["id"] in SOUTH_SOIS:
+            north, south = street["labels"]
+            assert north["name_en"] == street["name_en"]
+            assert south["name_en"] == SOUTH_SOIS[street["id"]]
+            assert north["t"] < 0.5 < south["t"]
+            assert int(SOI_NUMBER.search(north["name_en"]).group(1)) % 2 == 1
+            assert int(SOI_NUMBER.search(south["name_en"]).group(1)) % 2 == 0
+            assert street["axis"] == "v"
+            assert street["start"] < sukhumvit["fixed"] < street["end"]
+    assert seen == set(ROMAN_STREETS)
+    north_road = next(street for street in body["streets"] if street["id"] == "soi-chamlong-bon")
+    south_road = next(street for street in body["streets"] if street["id"] == "soi-chamlong-lang")
+    assert north_road["fixed"] < sukhumvit["fixed"] < south_road["fixed"]
+    ho = next(street for street in body["streets"] if street["id"] == "soi-chamlong-ho-nuea")
+    assert ho["start"] == sukhumvit["fixed"]
+    assert int(SOI_NUMBER.search(ho["name_en"]).group(1)) % 2 == 0
 
 
 def test_buildings_match_household_contract_and_are_addressable():
@@ -48,7 +106,22 @@ def test_hazards_resources_and_routes_use_contracts():
     town = _load("town.json")
     flood = _load("flood.json")
     assert flood["type"] == "FeatureCollection"
-    assert flood["properties"]["placeholder"] is True
+    assert "placeholder" not in flood["properties"]
+    assert flood["properties"]["live_layer"].startswith("/map/flood")
+    depths = {feature["properties"]["hazard_id"]: feature["properties"]["depth_m"] for feature in flood["features"]}
+    assert depths["haz-flood-canal"] > depths["haz-flood-south-deep"] > depths["haz-flood-streets"]
+    for feature in flood["features"]:
+        assert feature["properties"]["location_label"] == "Sukhumvit, Watthana"
+        assert "placeholder" not in feature["properties"]
+        assert BANNED_COPY.search(feature["properties"]["summary"]) is None
+    town_names = {row["hazard_id"]: row["summary"] for row in town["hazards"]}
+    flood_names = {feature["properties"]["hazard_id"]: feature["properties"]["summary"] for feature in flood["features"]}
+    assert town_names == flood_names
+    page = (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
+    assert "Flooded" in page
+    source = (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
+    assert "0x3a5854" in source
+    assert "drawFloodRipple" in source
     hazard_ids = set()
     for feature in flood["features"]:
         hazard = Hazard.model_validate(
@@ -148,7 +221,13 @@ def test_twenty_calls_link_fixtures_to_buildings():
     assert priorities == {"P1", "P2", "P3", "P4"}
     page = (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
     assert 'id="calls-play"' in page
-    assert "Mubit" in page
+    assert "Mubit" not in page
+    assert 'id="mubit-node"' not in page
+    assert "link-to-mubit" not in page
+    assert 'id="town-reset"' in page
+    assert 'id="dispatch-reset"' in page
+    assert 'alt="Baan-Safe"' in page
+    assert "baansafe-logo.png" in page
     assert 'id="phone"' in page
     assert 'id="phone-record"' in page
     assert 'id="backend"' in page
@@ -179,6 +258,11 @@ def test_twenty_calls_link_fixtures_to_buildings():
     assert "log-export" not in source
     assert "operatorLine" not in source
     assert "right: narrow ? 16 : 344" in source
+    assert "Mubit" in source
+    assert "paintWat" in source
+    assert "paintStilt" in source
+    assert "outlineBuilding" in source
+    assert "drawBoatSprite" in source
 
 
 def _inside(building: dict, x: float, y: float) -> bool:
@@ -310,6 +394,11 @@ def test_activity_prompts_and_rulebook_are_draft_simulations():
     assert "not repo policy" in rules["label"].lower()
     vehicles = {rule["vehicle"] for rule in rules["rules"]}
     assert {"boat", "truck", "van", "pulse", "none"} <= vehicles
+    actions = " ".join(rule["action"] for rule in rules["rules"]).lower()
+    assert "truck" not in actions
+    assert "van" not in actions
+    assert "evacuation boat" in actions
+    assert "supply boat" in actions
     blob = json.dumps({"events": events, "prompts": prompts, "rules": rules}).lower()
     assert "baht" not in blob
     assert "฿" not in blob
@@ -326,6 +415,10 @@ def test_scripted_replies_stay_in_human_language():
     spoken = "\n".join(row["en"] + "\n" + row.get("th", "") for row in templates)
     assert "Help is on the way. A rescue boat is leaving the jetty now" in spoken
     lowered = spoken.lower()
+    assert "truck" not in lowered
+    assert "van" not in lowered
+    assert "supply boat" in lowered
+    assert "evacuation boat" in lowered
     assert "baht" not in lowered
     assert "฿" not in spoken
     for banned in (
@@ -341,6 +434,57 @@ def test_scripted_replies_stay_in_human_language():
     for text in _strings({"spoken": spoken}):
         assert PHONE.search(text) is None, text
         assert NATIONAL_ID.search(text) is None, text
+
+
+def test_raised_houses_are_mixed_through_the_block():
+    town = _load("town.json")
+    houses = [building for building in town["buildings"] if building["kind"] in {"house", "stilt", "wood_house"}]
+    raised = [building for building in houses if building["kind"] in {"stilt", "wood_house"}]
+    assert houses
+    assert 1 / 3 <= len(raised) / len(houses) <= 0.5
+    variants = {building.get("stilt") for building in town["buildings"] if building["kind"] == "stilt"}
+    assert variants == {"teak", "dark", "amber"}
+    for building in town["buildings"]:
+        if building["kind"] != "stilt":
+            continue
+        assert building["roof"] == "brown"
+        assert building["wall"] == "wood"
+        assert not building.get("landmark")
+
+
+def test_town_copy_uses_sukhumvit_names_and_logo_colours():
+    town = _load("town.json")
+    by_id = {building["id"]: building for building in town["buildings"]}
+    for building_id, label in LANDMARKS.items():
+        building = by_id[building_id]
+        assert building["name_th"] == building["name_en"] == label
+        assert THAI_SCRIPT.search(label) is None
+    names = {row["resource_id"]: row["name"] for row in town["resources"]}
+    assert names["boat-fictional-01"] == "Rescue boat"
+    assert names["amb-fictional-01"] == "Clinic ambulance"
+    assert names["shelter-fictional-01"] == "Evacuation shelter"
+    assert names["welfare-fictional-01"] == "Water desk"
+    labels = {route["id"]: route["label"] for route in town["routes"]}
+    assert labels["route-f06-evac"] == "F06 walk to the evacuation shelter"
+    assert labels["route-f10-rescue"] == "F10 boat from the jetty"
+    visible = []
+    for name in ("town.json", "streets.json", "flood.json", "responses.json", "prompts.json", "rulebook.json", "replies.json"):
+        for text in _strings(_load(name)):
+            if RESOURCE_ID.fullmatch(text):
+                continue
+            visible.append(text)
+    readme = (ROOT / "ui" / "sim" / "README.md").read_text(encoding="utf-8")
+    page = (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
+    page = page.replace('placeholder="Message"', "")
+    source = (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
+    for text in visible + [readme, page, source]:
+        assert BANNED_COPY.search(text) is None, text
+    css = (ROOT / "ui" / "sim" / "sim.css").read_text(encoding="utf-8")
+    for colour in ("#ED7401", "#0076D8", "#014855", "#012246", "#0b1220", "#e6edf5", "#9aa8bb", "#d1241a"):
+        assert colour in css
+    assert ".bubble.caller { margin-left: auto; background: #0076D8;" in css
+    assert ".bubble.operator { margin-right: auto; background: #014855;" in css
+    assert "#side-stack #op-reject { background: #d1241a;" in css
 
 
 def test_town_files_do_not_look_like_personal_data():

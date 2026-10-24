@@ -23,32 +23,32 @@
     {
       "id": "food-van",
       "when": { "vehicle": "van", "needs_any": ["food"] },
-      "en": "A welfare van is leaving the water desk with food. It should reach your lane in about {eta} minutes. Please keep your phone with you.",
-      "th": "รถสวัสดิการกำลังออกไปพร้อมอาหาร ประมาณ {eta} นาที"
+      "en": "A supply boat is leaving the water desk with food. It should reach your lane in about {eta} minutes. Please keep your phone with you.",
+      "th": "เรือสวัสดิการกำลังออกไปพร้อมอาหาร ประมาณ {eta} นาที"
     },
     {
       "id": "water-van",
       "when": { "vehicle": "van", "needs_any": ["water"] },
-      "en": "A welfare van is leaving the water desk with drinking water. It should reach your lane in about {eta} minutes. Please keep your phone with you.",
-      "th": "รถสวัสดิการกำลังออกไปพร้อมน้ำดื่ม ประมาณ {eta} นาที"
+      "en": "A supply boat is leaving the water desk with drinking water. It should reach your lane in about {eta} minutes. Please keep your phone with you.",
+      "th": "เรือสวัสดิการกำลังออกไปพร้อมน้ำดื่ม ประมาณ {eta} นาที"
     },
     {
       "id": "shelter",
       "when": { "needs_any": ["shelter"] },
-      "en": "There is space at the north hall. A truck can collect you in about {eta} minutes. Please pack a small bag and keep your phone with you.",
-      "th": "ที่พักทางเหนือยังมีที่ รถจะไปรับประมาณ {eta} นาที"
+      "en": "There is space at the evacuation shelter. An evacuation boat can collect you in about {eta} minutes. Please pack a small bag and keep your phone with you.",
+      "th": "ที่พักอพยพยังมีที่ เรือจะไปรับประมาณ {eta} นาที"
     },
     {
       "id": "truck",
       "when": { "vehicle": "truck" },
-      "en": "A truck is leaving the shelter to collect you. It should arrive in about {eta} minutes. Please stay reachable on this phone.",
-      "th": "รถกำลังออกจากที่พักไปรับ ประมาณ {eta} นาที"
+      "en": "An evacuation boat is leaving the shelter to collect you. It should arrive in about {eta} minutes. Please stay reachable on this phone.",
+      "th": "เรือกำลังออกจากที่พักไปรับ ประมาณ {eta} นาที"
     },
     {
       "id": "sms",
       "when": { "priority": "P4" },
       "en": "I have the update. I will send the same flood note to this phone as a text. No vehicle is coming out for this one.",
-      "th": "จะส่งข้อความอัปเดตน้ำท่วมให้ ไม่มีรถออกไปค่ะ"
+      "th": "จะส่งข้อความอัปเดตน้ำท่วมให้ ไม่มีเรือออกไปค่ะ"
     },
     {
       "id": "fallback",

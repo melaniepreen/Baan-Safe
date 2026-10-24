@@ -1,6 +1,5 @@
 {
-  "placeholder": true,
-  "framing": "Placeholder block for a Bangkok flood demo. data.demo_event is still TODO_HUMAN. The HDX set eos-rs-thailand-flood-bangkok-sep-2026 is listed in data/SOURCES.md and was not fetched. Household location_label stays the fixture district. flood.json is a local-metre placeholder, not that Bangkok map.",
+  "framing": "Sukhumvit block in Watthana, drawn in local metres. data.demo_event is still TODO_HUMAN. The HDX set eos-rs-thailand-flood-bangkok-sep-2026 is listed in data/SOURCES.md and was not fetched. Household location_label stays the fixture district. flood.json is local metres, not that Bangkok map.",
   "policy_source": "config/priorities.yaml",
   "suggestion_source": "research/thai-flood-management.md",
   "suggestion_label": "Suggestion for the demo, not repo policy. The research note says it is not a procedure for BaanSafe.",
@@ -8,17 +7,17 @@
     "P1": {
       "policy": "Immediate life-safety risk. A person may be trapped, medically dependent, or in rising water.",
       "example": "An oxygen-dependent elderly person with water rising outside the home.",
-      "suggestion": "BaanSafe does not dispatch a boat and does not replace the public lines named in the research note (1784 and 1567). DDPM coordinates; a governor can order evacuation; districts open shelters. In this picture the fictional boat leaves the jetty and stays on the drawn canal and flooded streets. Where the street is dry, the same run continues on foot along the drawn road."
+      "suggestion": "BaanSafe does not dispatch a boat and does not replace the public lines named in the research note (1784 and 1567). DDPM coordinates; a governor can order evacuation; districts open shelters. In this picture the rescue boat leaves the jetty and stays on the drawn canal and flooded streets. Where the street is dry, the same run continues on foot along the drawn road."
     },
     "P2": {
       "policy": "Urgent, measured in hours. Evacuation, a safeguarding handoff, or a worsening situation that is not confirmed as immediate life-safety.",
       "example": "A household asked to evacuate today, with a complete location and no medical dependency.",
-      "suggestion": "Districts and local officials are who knock on doors and open a temple or a school. This picture walks a convoy on the drawn roads to the fictional north hall. BaanSafe does not issue the evacuation order."
+      "suggestion": "Districts and local officials are who knock on doors and open a temple or a school. This picture walks a convoy on the drawn roads to the evacuation shelter. BaanSafe does not issue the evacuation order."
     },
     "P3": {
       "policy": "Welfare the same day. Drinking water, food, shelter information, or a power cut without danger signs.",
       "example": "A family requesting drinking water, on dry ground, with the district known.",
-      "suggestion": "Same-day water or food is a local welfare task. This picture moves a load from the fictional water desk along the drawn roads, and by boat only on the flooded streets. No payment amount is stated."
+      "suggestion": "Same-day water or food is a local welfare task. This picture moves a load from the water desk along the drawn roads, and by boat only on the flooded streets. No payment amount is stated."
     },
     "P4": {
       "policy": "Information or a non-urgent request.",
