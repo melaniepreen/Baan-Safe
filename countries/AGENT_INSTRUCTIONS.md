@@ -86,4 +86,4 @@ for path in files:
 make validate
 ```
 
-`make validate` does not parse `countries/`. It does check `docs/agents/country-packs.md`. Push straight to `main`. Do not open a pull request.
+`make validate` does not parse `countries/`. It does check `docs/agents/country-packs.md`. Open a pull request into `main`; do not push feature work straight to `main`.

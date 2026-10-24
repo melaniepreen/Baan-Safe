@@ -10,7 +10,7 @@ files:
 
 ## Purpose
 
-`make test` is pytest. `make validate` checks fixtures, decisions, stub files, and these agent docs. Both must pass before a push to `main`.
+`make test` is pytest. `make validate` checks fixtures, decisions, stub files, and these agent docs. Both must pass before a PR is merged into `main`.
 
 ## Key files
 

@@ -157,4 +157,5 @@ Submodule present; `bun` often missing → `make latte-bench` skips. Live mode n
 - Markdown moves / gitignore (`.vscode/`, `*.log`) approved, not fully done → G8.
 - PRD auto-refresh: rebase before push.
 - Multi-agent thrash happened on 24–25 Oct; prefer one writer on `ui/sim/sim.js` and `llm/client.py` at a time.
+- **Repo policy (updated):** branch → PR → merge to `main` when `make test` / `make validate` are green. Do not push feature work straight to `main`. Delete merged remote branches (e.g. leftover `origin/cursor/*`).
 - Local `.env`: `S1_IMPL=real`. Restart `make serve` after env changes.
