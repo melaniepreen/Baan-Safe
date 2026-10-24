@@ -1,7 +1,7 @@
 PYTHON ?= $(shell test -x .venv/bin/python && echo .venv/bin/python || echo python3)
 export PYTHONPATH := .
 
-.PHONY: validate test replay-stubs demo-stub demo-correction-loop demo-graduation eval-learning sim-eval extract-eval latte-bench serve ingest ingest-refresh data-report sources-refresh sources-status \
+.PHONY: validate test replay-stubs demo-stub demo-correction-loop demo-graduation rl-loop rl-loop-replay eval-learning sim-eval extract-eval latte-bench serve ingest ingest-refresh data-report sources-refresh sources-status \
 	export-training export-laya laya-train sync push modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune docker-build docker-run
 
 IMAGE ?= baansafe-api:local
@@ -25,6 +25,12 @@ demo-correction-loop:
 
 demo-graduation:
 	$(PYTHON) -m eval.graduation_demo
+
+rl-loop:
+	$(PYTHON) -m eval.rl --s2 live
+
+rl-loop-replay:
+	$(PYTHON) -m eval.rl --s2 replay
 
 eval-learning:
 	$(PYTHON) -m eval.learning

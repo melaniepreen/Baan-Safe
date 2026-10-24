@@ -7,6 +7,7 @@
    Houses, streets, flood polygons, and routes come from ./data.
 */
 import { mountCorrectForm } from "../correct.js";
+import { initRlPanel } from "./rl_panel.js";
 import { decidePath, PATTERN_KEY, withTop } from "./patterns.js";
 import { legsFromPath, nearestNode, walk } from "./route_walk.js";
 import { Application, Container, Graphics, Text } from "./vendor/pixi.min.mjs";
@@ -1256,13 +1257,23 @@ function saplingStep(decision) {
 }
 
 function flowSteps(decision, trace) {
-  const source = (decision.source_outcomes && decision.source_outcomes[0]) || {};
+  const outcomes = decision.source_outcomes || [];
+  const source = outcomes[0] || {};
+  const cascaded = outcomes.length > 1;
+  const s1source = cascaded ? outcomes[1] || {} : source;
   const system = String(source.system || "");
   const selected = (decision.policy_notes || []).find((line) => /selected/.test(String(line))) || "";
   const gatewayNote = (trace || []).find((event) => event.stage === "gateway");
   const routerNote = (trace || []).find((event) => event.stage === "router");
   const sapling = saplingStep(decision);
   const why = [source.reason, selected].filter(Boolean).join(" — ");
+  const s1why = [s1source.reason].filter(Boolean).join(" — ");
+  const s1Step = cascaded
+    ? { state: "on", detail: s1why + " — handed off to System 2 in the same turn." }
+    : { state: system === "system_1" ? "on" : "off", detail: system === "system_1" ? why : "Not this call. The precheck sent it straight to System 2." };
+  const s2Step = cascaded
+    ? { state: "on", detail: why }
+    : { state: system === "system_2" ? "on" : "off", detail: system === "system_2" ? why : "Not this call. System 1 decided without a handoff." };
   return [
     {
       title: "Mubit gateway",
@@ -1271,13 +1282,20 @@ function flowSteps(decision, trace) {
     },
     {
       title: "System 1 fast path",
-      state: system === "system_1" ? "on" : "off",
-      detail: system === "system_1" ? why : "Not this call. The stub gateway routes to one system.",
+      state: s1Step.state,
+      detail: s1Step.detail,
+    },
+    {
+      title: "System 1 → System 2 handoff",
+      state: cascaded ? "on" : "off",
+      detail: cascaded
+        ? "Cascade mode: the System 1 escalate outcome became the System 2 handoff."
+        : "No cascade on this call.",
     },
     {
       title: "System 2 reasoning",
-      state: system === "system_2" ? "on" : "off",
-      detail: system === "system_2" ? why : "Not this call. The stub gateway routes to one system.",
+      state: s2Step.state,
+      detail: s2Step.detail,
     },
     { title: "Banyan Sapling", state: sapling.state, detail: sapling.detail },
     {
@@ -2302,6 +2320,7 @@ function resetCalls() {
 }
 
 function bindChrome() {
+  initRlPanel(document);
   document.getElementById("view-fit").addEventListener("click", fitTown);
   document.getElementById("view-dispatch").addEventListener("click", () => {
     const camera = town.meta.camera;

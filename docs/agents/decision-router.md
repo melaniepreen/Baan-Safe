@@ -14,7 +14,7 @@ The Decision Router turns one system's outcome into the next action and, when di
 
 ## Key files
 
-- `router/merge.py` — `merge(case, outcome, extra_notes=(), resources=None) -> RouterDecision`. Owner: Moly.
+- `router/merge.py` — `merge(case, outcome, extra_notes=(), resources=None, prior=()) -> RouterDecision`. Owner: Moly.
 - `router/ledger.py` — in-process reservation ledger: `reserve`, `reserved_by_others`, `holds`, `release_case`, `reset`. Nothing is written to disk; reservations reset on restart.
 - `gateway/route.py` — calls `router.merge.merge` and traces `router.merge ran`.
 - `contracts/models.py` — `RouterDecision`, `NextAction`, `Dispatch` (CR-003).
@@ -27,11 +27,11 @@ The Decision Router turns one system's outcome into the next action and, when di
 - Next-action order, first match wins: `supervisor_escalation` route or `safeguarding` flag → escalate; `aid_caseworker` → escalate; `outcome.escalate` → escalate; `duplicate_merge` → finalize; `missing_evidence`, `next_question`, or no `fields.location` → ask next question; `information_only` → finalize; otherwise → `create_provisional_dispatch`.
 - Dispatch fan-out (only for `create_provisional_dispatch`): rescue→boat, medical→ambulance, water/food→welfare_point, shelter/evacuation→shelter. A unit this case already holds for that need wins (idempotent re-decision), then same-district units (district name inside `fields.location`, case-insensitive), then first with `available - reserved_by_others > 0`, else `unfilled` with `resource_id` None and a note. Every `merge` call releases the case's reservations that are no longer in its dispatches. Stock is reserved in-process only; the ledger resets on restart.
 - `requires_human` = outcome's, or `supervisor_escalation`/`aid_caseworker` route, or `safeguarding` flag, or any unfilled dispatch. `final_priority`/`final_route` echo the outcome.
-- `RouterDecision` carries `final_priority`, `final_route`, `source_outcomes` (length 1), `policy_notes`, `dispatches`.
+- `RouterDecision` carries `final_priority`, `final_route`, `source_outcomes` = [deciding outcome, *prior] (length 2 on a cascade, `[system_2, system_1]`), `policy_notes`, `dispatches`. Readers of `source_outcomes[0]` always see the deciding system.
 
 ## Invariants
 
-- One outcome in, one decision out. Do not merge System 1 and System 2 on the same turn.
+- One deciding outcome in, one decision out. Earlier-stage outcomes arrive as `prior` and change nothing but `source_outcomes` order and the selected-system note.
 - P1/P2 with missing evidence asks first — no provisional dispatch.
 - `always_requires_human` in `config/escalation.yaml` is implemented here.
 

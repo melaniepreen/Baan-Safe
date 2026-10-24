@@ -47,6 +47,7 @@ def merge(
     outcome: Outcome,
     extra_notes: Sequence[str] = (),
     resources: ResourcesSnapshot | None = None,
+    prior: Sequence[Outcome] = (),
 ) -> RouterDecision:
     snapshot = resources if resources is not None else load_resources()
     action = _next_action(case, outcome)
@@ -58,8 +59,13 @@ def merge(
         keep={(d.resource_id, d.need.value) for d in dispatches if d.resource_id},
     )
 
+    if prior:
+        ran = " then ".join([prior[-1].system.value, outcome.system.value])
+        selected = f"gateway selected {ran} (cascade)"
+    else:
+        selected = f"gateway selected {outcome.system.value} exclusively"
     notes = [
-        f"gateway selected {outcome.system.value} exclusively",
+        selected,
         f"memory items: {len(case.memory_context)}",
         *extra_notes,
     ]
@@ -89,7 +95,7 @@ def merge(
         final_priority=outcome.priority,
         final_route=outcome.route,
         requires_human=requires_human,
-        source_outcomes=[outcome],
+        source_outcomes=[outcome, *prior],
         policy_notes=notes,
         dispatches=dispatches,
     )

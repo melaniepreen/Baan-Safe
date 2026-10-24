@@ -3,8 +3,8 @@
 correction captured -> stored in memory -> SFT/LoRA JSONL -> training job stub
 -> new model version -> replay before vs after.
 
-The case is synthetic. Golden fixtures are not rewritten. graduation_threshold
-stays TODO_HUMAN, so this run does not promote a rule into System 1. No Mubit
+The case is synthetic. Golden fixtures are not rewritten. This run does not
+promote a rule into System 1 — pattern graduation lives in eval/rl/. No Mubit
 or LLM call is made.
 """
 

@@ -157,6 +157,8 @@ def execute(case: CaseState) -> RouterDecision:
         raise not_ready(owner, exc) from exc
     except DecisionRequired as exc:
         raise not_ready("Moly", exc) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
 @router.get("/health", response_model=Health)
@@ -393,6 +395,8 @@ def replay_endpoint(body: ReplayIn) -> dict:
             system2.decide(CaseState.model_validate(load_case(all_ids()[0]).model_dump()))
         except NotImplementedError as exc:
             raise not_ready("Melanie", exc) from exc
+        except RuntimeError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
     ids = body.fixture_ids or all_ids()
     for fixture_id in ids:
         if fixture_id not in all_ids():
@@ -442,6 +446,17 @@ def aid_exceptions(case: CaseState) -> dict:
     except NotImplementedError as exc:
         raise not_ready("Melanie", exc) from exc
     raise not_ready("Melanie")
+
+
+@router.get("/rl/run")
+def rl_run() -> dict:
+    path = ROOT / "eval" / "out" / "rl" / "run.json"
+    if not path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="no RL run yet; run `make rl-loop` first",
+        )
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 @router.get("/metrics")
