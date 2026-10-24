@@ -2,9 +2,10 @@
 # Humans fill these in. Do not resolve them in code.
 # scripts/validate.py allowlists only the decisions a human has already made:
 # system2.use_banyan_sapling, system2.sapling_scope, sapling.client,
-# system2.hosting, and llm.provider_route.
+# system2.hosting, llm.provider_route, gateway.route_chooser, and
+# system1.extraction_method.
 system1:
-  extraction_method: TODO_HUMAN      # rules-only | small model | hybrid
+  extraction_method: rules-only      # decided: keyword rules in system1/extract.py; extraction_model stays TODO_HUMAN
   extraction_model: TODO_HUMAN       # only if a model is used
 system2:
   orchestrator_model: TODO_HUMAN     # Nemotron variant/size
@@ -19,7 +20,7 @@ sapling:
   model_id: TODO_HUMAN               # published checkpoint is MubitLabs/banyan-sapling; unset so the Modal app refuses
   client: stub                       # stub | live. stub does not load a GPU
 gateway:
-  route_chooser: TODO_HUMAN          # how a live (non-fixture) case picks system_1 or system_2
+  route_chooser: field precheck      # decided: gateway/chooser.py reads config/escalation.yaml triggers
   auth: TODO_HUMAN                   # auth scheme in front of the Mubit gateway
 memory:
   mubit_project: TODO_HUMAN

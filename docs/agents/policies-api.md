@@ -21,7 +21,7 @@ The policy corpus is served from `policies/service.py`. Aid eligibility and exce
 - `system1/aid_eligibility.py` — `check`. Owner: Melanie. No baht amount.
 - `system2/aid_exceptions.py` — `propose`. Owner: Melanie.
 - `system1/labels.py`, `system2/sapling_policy.py` — read the service.
-- `config/escalation.yaml` — `escalate_to_system_2_if_any`, `always_requires_human`, enrichment flag numbers, `stub_next_action_order`.
+- `config/escalation.yaml` — `route_to_system_2_if_any`, `system_1_min_confidence`, `always_requires_human`, enrichment flag numbers.
 - `gateway/policy.py` — one note: safeguarding and escalation rules were not evaluated.
 
 ## Interfaces/contracts
@@ -39,9 +39,8 @@ The policy corpus is served from `policies/service.py`. Aid eligibility and exce
 - Loading a rule by id does not make it authoritative. `policies.authoritative_set` is `TODO_HUMAN`.
 - ReliefWeb and DDPM were not used as corpus sources (`policies/SOURCES.md`).
 - Neither aid endpoint approves a payment or an exception.
-- The gateway does not read the rule strings in `escalation.yaml` to pick a system. Fixture `expected.system` is the harness stand-in.
+- `gateway/chooser.py` evaluates `route_to_system_2_if_any` to pick a system for every case; `router/merge.py` implements `always_requires_human`.
 - Enrichment thresholds attach data flags. They do not change priority or route.
-- `stub_next_action_order` is plumbing for `use_stubs=True` only. It is not a merge policy.
 
 ## How to test
 
@@ -61,4 +60,3 @@ The policy corpus is served from `policies/service.py`. Aid eligibility and exce
 - `system1.extraction_method` (named by `check`)
 - `system2.orchestrator_model`, `system2.max_latency_ms` (named by `propose`; hosting is already set)
 - `policies.authoritative_set`
-- `gateway.route_chooser` (live system choice, not the aid routes)

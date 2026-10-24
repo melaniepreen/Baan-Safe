@@ -1,48 +1,54 @@
 ---
 title: System 1
-tags: [system1, triage, aid, fast-path]
+tags: [system1, triage, aid, fast-path, extraction]
 files:
   - system1/decide.py
+  - system1/extract.py
   - system1/aid_eligibility.py
+  - gateway/chooser.py
 ---
 
 ## Purpose
 
-Fast path. Deterministic triage is Moly's. The aid eligibility check is Melanie's. Neither decides a case yet.
+Fast path. Deterministic triage and keyword extraction are Moly's. The aid eligibility check is Melanie's and still raises.
 
 ## Key files
 
-- `system1/decide.py` — `decide(case) -> Outcome`. Owner: Moly.
-- `system1/aid_eligibility.py` — `check(case) -> AidEligibility`. Owner: Melanie.
-- `system1/__init__.py` — re-exports `decide`.
+- `system1/extract.py` — `extract(transcript, districts=None) -> (ExtractedFields, flags)`. English-only keyword rules.
+- `system1/decide.py` — `decide(case) -> Outcome`. Owner: Moly. Real rules.
+- `gateway/chooser.py` — `system_2_triggers(case)` shared by the gateway and `decide` (defence in depth).
+- `system1/aid_eligibility.py` — `check(case) -> AidEligibility`. Owner: Melanie. Raises.
+- `config/escalation.yaml` — `route_to_system_2_if_any`, `system_1_min_confidence`.
 - `mocks/` — S1 stub outcomes the gateway copies when `use_stubs=True`.
 
 ## Interfaces/contracts
 
-- `decide` must return `Outcome` once a human writes the rules. Today it raises `NotImplementedError` and names unset keys.
+- `extract` reads caller turns only, sentence-splits, and drops a match when a negator sits within the three words before it. It suggests `conflicting_evidence` and `safeguarding` flags; the gateway attaches them plus `keyword_extraction`.
+- When `districts` is None the extractor loads names from the SQLite `districts` table; a missing DB means an empty list. Tests pass an explicit list.
+- `decide` order: System 2 triggers → duplicate (`similar_case` memory at relevance ≥ `DUPLICATE_RELEVANCE` 0.9 → `duplicate_merge`) → needs table (`NEEDS_TABLE`; empty or unmatched needs escalate) → `location_confidence` below `system_1_min_confidence` (0.80) escalates → missing `people_count` asks "How many people are with you?" → `fast_route`.
 - `check` must return `AidEligibility`. Today it raises. It does not approve a payment and it does not read a baht amount.
 - `gateway/route.py` does not call `aid_eligibility.check`. The HTTP stub is `GET /aid/eligibility` (see `docs/agents/policies-api.md`).
-- `scripts/validate.py` `check_stubs_are_stubs` rejects an `Outcome(` constructor in `system1/decide.py`.
 
 ## Invariants
 
 - System 1 does not call Sapling.
 - The gateway never runs System 1 and then System 2 on the same turn.
-- Do not invent an extraction method. `system1.extraction_method` and `system1.extraction_model` stay `TODO_HUMAN` until a human sets them and adds them to `DECIDED`.
+- `system1.extraction_method` is `rules-only` (in `DECIDED`). `system1.extraction_model` stays `TODO_HUMAN`; the rules path does not read it.
+- Escalation rules live in `config/escalation.yaml`, evaluated in `gateway/chooser.py` — never inline in `gateway/route.py` (validate checks).
 
 ## How to test
 
-- `make test` — `tests/test_gateway_and_replay.py` (`test_real_interfaces_raise` expects `Moly`).
-- `make replay-stubs` — scores S1 stub files against fixture labels.
-- `make validate` — stub file still raises and does not construct `Outcome`.
+- `make test` — `tests/test_system1.py`, `tests/test_extract.py`, `tests/test_chooser.py`.
+- `S1_IMPL=real` replays the rules through `gateway.handle`; `make replay-stubs` still scores the stub files.
+- `make validate` — `system1/decide.py` is no longer in the stub check.
 
 ## Common pitfalls
 
-- Implementing rules by constructing `Outcome` inside `decide` before the decisions are set. Validate forbids the constructor in that file.
-- Calling Sapling from System 1. The verifier is System 2 only.
 - Auto-approving aid. `check` must not approve a payment.
+- Calling Sapling from System 1. The verifier is System 2 only.
+- Expecting `extract` to understand Thai. It is English-only; Thai handling is undecided.
+- Operator turns count as evidence. They are ignored by the extractor.
 
 ## Open TODO_HUMAN keys
 
-- `system1.extraction_method`
 - `system1.extraction_model`

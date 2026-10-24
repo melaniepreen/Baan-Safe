@@ -5,7 +5,7 @@
   "needs": [
     "water"
   ],
-  "route": "duplicate_merge",
+  "route": "welfare_distribution",
   "confidence": 0.93,
   "reason": "Pair with F09, same synthetic caller hash.",
   "reasoning": null,

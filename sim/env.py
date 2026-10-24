@@ -1,9 +1,11 @@
 """Multi-turn environment. A scripted caller, then the gateway path.
 
-The live chooser is gateway.route_chooser and is TODO_HUMAN, so a synthetic
-case id stops in the gateway. This module does not pick System 1 and System 2,
-does not call Sapling, and does not call router.merge. The operator lines are
-a stub and do not read the hidden persona or the private trace.
+Synthetic case ids route like any other case: `gateway.handle` extracts
+keywords, runs the field precheck (`gateway.route_chooser` = `field precheck`),
+and `router.merge` builds the decision. Cases carry no stub outcome, so the
+selected system falls back to a generic escalation outcome. This module does
+not pick System 1 and System 2 itself and does not call Sapling. The operator
+lines are a stub and do not read the hidden persona or the private trace.
 
 Sapling, when a human wires it, sits inside system2.decide after the
 orchestrator and before the Decision Router. The stub gateway does not enter
@@ -15,7 +17,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-from config.settings import DecisionRequired
 from contracts.models import CaseState, ExtractedFields, TranscriptTurn
 from sim.callers import N_TURNS, CallerSpec, speak
 from sim.callers.persona import CallerTurn
@@ -89,7 +90,8 @@ def run_episode(spec: CallerSpec, turns: int = N_TURNS, backend: str = "scripted
 
 
 def _case(spec: CallerSpec, transcript: list[TranscriptTurn]) -> CaseState:
-    """Case the gateway sees. Fields stay empty: hidden truth is not extracted."""
+    """Case the gateway sees. Fields start empty: the gateway's keyword
+    extractor fills them from public text only, so hidden truth stays hidden."""
     return CaseState(
         case_id=f"SIM-{spec.combo_id}",
         caller_id_hash=spec.persona.caller_id,
@@ -100,28 +102,17 @@ def _case(spec: CallerSpec, transcript: list[TranscriptTurn]) -> CaseState:
 
 
 def _drive(case: CaseState) -> dict:
-    """Call the gateway once. Record the stages that did not run."""
+    """Call the gateway once. Record what the pipeline did."""
     from gateway.route import handle
 
-    try:
-        decision = handle(case, use_stubs=True)
-    except DecisionRequired:
-        return {
-            "gateway": "called",
-            "blocked_on": "gateway.route_chooser",
-            "system": "not_selected",
-            "sapling": "not_called",
-            "decision_router": "not_called",
-            "merge": "not_called",
-        }
+    decision = handle(case, use_stubs=True)
     system = decision.source_outcomes[0].system.value
     return {
         "gateway": "called",
         "blocked_on": None,
         "system": system,
-        "sapling": "not_called_on_stub_gateway",
-        "decision_router": "stub_copy",
-        "merge": "not_called",
+        "sapling": "not_called",
+        "merge": "called",
         "next_action": decision.next_action.value,
         "priority": decision.final_priority.value,
     }

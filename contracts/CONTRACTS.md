@@ -125,9 +125,13 @@ Produced by System 1 and by System 2. One shape for both. Consumed by the router
 }
 ```
 
+## Dispatch
+
+Produced by the decision router when `next_action` is `create_provisional_dispatch` (CR-003). One entry per dispatchable need on the outcome: `need`, `resource_kind` (`boat`, `ambulance`, `shelter`, `welfare_point`), an optional `resource_id`, `status` (`provisional` or `unfilled`), `same_district`, and an optional `note`. A dispatch is provisional; no stock is decremented or reserved.
+
 ## RouterDecision
 
-Produced by the decision router (Moly). Consumed by the call agent. Points at `next_action`, the final priority and route, whether a human is required, the outcomes that were merged, and policy notes. `router/merge.py` is still a stub. The stub gateway only copies a stub outcome into this shape.
+Produced by the decision router (Moly). Consumed by the call agent. Points at `next_action`, the final priority and route, whether a human is required, the outcomes that were merged, policy notes, and any provisional `dispatches`. `router/merge.py` builds it from the single selected outcome.
 
 ## Correction
 

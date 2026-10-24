@@ -112,6 +112,17 @@ class Outcome(_Model):
     latency_ms: int | None = Field(default=None, ge=0)
 
 
+class Dispatch(_Model):
+    """One provisional resource assignment for one need (CR-003)."""
+
+    need: Need
+    resource_kind: Literal["boat", "ambulance", "shelter", "welfare_point"]
+    resource_id: str | None = None
+    status: Literal["provisional", "unfilled"]
+    same_district: bool = False
+    note: str | None = None
+
+
 class RouterDecision(_Model):
     case_id: str = Field(min_length=1)
     next_action: NextAction
@@ -120,6 +131,7 @@ class RouterDecision(_Model):
     requires_human: bool
     source_outcomes: list[Outcome]
     policy_notes: list[str] = Field(default_factory=list)
+    dispatches: list[Dispatch] = Field(default_factory=list)
 
 
 class Correction(_Model):
@@ -286,6 +298,7 @@ MODEL_TYPES: list[type[_Model] | type[Enum]] = [
     MemoryItem,
     CaseState,
     Outcome,
+    Dispatch,
     RouterDecision,
     Correction,
     MemoryRecord,

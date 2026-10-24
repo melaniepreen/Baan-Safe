@@ -101,7 +101,7 @@
   "expected": {
     "system": "system_1",
     "priority": "P3",
-    "route": "duplicate_merge",
+    "route": "welfare_distribution",
     "needs": [
       "water"
     ],
@@ -109,5 +109,5 @@
     "missing_evidence": [],
     "acceptable_next_questions": []
   },
-  "notes": "Pair with F09, same synthetic caller hash. Both are labelled duplicate_merge so the pair scores as a merge. A human may instead label only F09 as the duplicate and F08 as welfare_distribution. Flagged for sign-off."
+  "notes": "Pair with F09, same synthetic caller hash. F09 is the duplicate; relabelled by Moly 24 Oct 2026."
 }

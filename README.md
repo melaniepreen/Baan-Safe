@@ -27,7 +27,7 @@ flowchart TD
   orch -.-> llm["llm/client.py + openai_client.py"]:::unwired
 ```
 
-This tree is Phase 0 plus a Phase 1 API. **System 1 and System 2 decision logic are not implemented.** Callers, households, and transcripts are synthetic. Real district names and public flood polygons are used only to anchor scenarios.
+This tree is Phase 0 plus a Phase 1 API. **System 2 decision logic is not implemented. System 1 is rules-only: keyword extraction plus a deterministic needs table.** Callers, households, and transcripts are synthetic. Real district names and public flood polygons are used only to anchor scenarios.
 
 The architecture note is `BaanSafe_Revised_Architecture.md`. What to do in the morning is `MORNING_REPORT.md`. Who owns each folder is `OWNERSHIP.md`. Background reading for Phase 1 is `research/INDEX.md`. The training event schema is `docs/agents/training-schema.md` (listed in `docs/agents/index.json`).
 
@@ -68,14 +68,14 @@ The town simulation is static files in `ui/sim/`. `make serve` mounts them at [h
 
 | Variable | Default tonight | Owner flips to |
 |---|---|---|
-| `S1_IMPL` | `stub` | `real` when `system1/decide.py` exists |
+| `S1_IMPL` | `stub` | `real` runs the rules in `system1/decide.py` |
 | `S2_IMPL` | `stub` | `real` when `system2/decide.py` exists |
 | `MEMORY_IMPL` | `mock` | `mubit` when `memory/mubit.py` exists |
 | `ENRICH_IMPL` | `data` if `data/processed` exists, else `off` | `off` to skip lookups |
 
-`real` and `mubit` return HTTP 501 (`not implemented yet — owner: …`) until that code exists.
+`real` returns HTTP 501 (`not implemented yet — owner: …`) for System 2 and `mubit` for memory until that code exists. `S1_IMPL=real` is implemented.
 
-Stub gateway flow for `/triage` and `/cases/{id}/turns`: enrich → memory through `memory/adapter.py` → route to System 1 **or** System 2 (fixture `expected.system` until `gateway.route_chooser` is set; never both) → copy that one stub into a `RouterDecision` → trace the gateway and the system that ran, with the outcome on the system event. `router/merge.py` is not called. A case id that is not a fixture returns HTTP 501 until a human sets `gateway.route_chooser`.
+Stub gateway flow for `/triage` and `/cases/{id}/turns`: keyword-extract fields when the case has none (`system1/extract.py`) → enrich → memory through `memory/adapter.py` → route to System 1 **or** System 2 through the field precheck in `gateway/chooser.py` (`gateway.route_chooser` = `field precheck`; never both) → `router/merge.py` turns that one outcome into a `RouterDecision` with `next_action` and provisional dispatches → trace the gateway and the system that ran, with the outcome on the system event. With `use_stubs=True` the selected system's stub outcome stands in for `decide()`; a non-fixture id falls back to a generic escalation outcome.
 
 `GET /aid/eligibility` and `POST /aid/exceptions` return HTTP 501. They do not approve a payment.
 

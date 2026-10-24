@@ -69,7 +69,6 @@ def test_episode_hides_truth_from_the_gateway(monkeypatch):
     def boom(*_args, **_kwargs):
         raise AssertionError("live stage was called")
 
-    monkeypatch.setattr("router.merge.merge", boom)
     monkeypatch.setattr("system1.decide.decide", boom)
     monkeypatch.setattr("system2.decide.decide", boom)
     monkeypatch.setattr("system2.sapling_client.verify", boom)
@@ -79,10 +78,10 @@ def test_episode_hides_truth_from_the_gateway(monkeypatch):
     assert hidden["household_id"].startswith("synthetic:")
     for turn in episode.turns:
         assert turn.pipeline["gateway"] == "called"
-        assert turn.pipeline["blocked_on"] == "gateway.route_chooser"
-        assert turn.pipeline["system"] == "not_selected"
+        assert turn.pipeline["blocked_on"] is None
+        assert turn.pipeline["system"] in {"system_1", "system_2"}
         assert turn.pipeline["sapling"] == "not_called"
-        assert turn.pipeline["merge"] == "not_called"
+        assert turn.pipeline["merge"] == "called"
         blob = "\n".join(turn.agent_texts)
         assert turn.caller.private_trace not in blob
         assert episode.spec.persona.location not in blob

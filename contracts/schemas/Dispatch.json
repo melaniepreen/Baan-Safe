@@ -1,0 +1,80 @@
+{
+  "$defs": {
+    "Need": {
+      "enum": [
+        "rescue",
+        "medical",
+        "water",
+        "food",
+        "shelter",
+        "evacuation",
+        "power",
+        "information",
+        "aid_payment"
+      ],
+      "title": "Need",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One provisional resource assignment for one need (CR-003).",
+  "properties": {
+    "need": {
+      "$ref": "#/$defs/Need"
+    },
+    "resource_kind": {
+      "enum": [
+        "boat",
+        "ambulance",
+        "shelter",
+        "welfare_point"
+      ],
+      "title": "Resource Kind",
+      "type": "string"
+    },
+    "resource_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Resource Id"
+    },
+    "status": {
+      "enum": [
+        "provisional",
+        "unfilled"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "same_district": {
+      "default": false,
+      "title": "Same District",
+      "type": "boolean"
+    },
+    "note": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Note"
+    }
+  },
+  "required": [
+    "need",
+    "resource_kind",
+    "status"
+  ],
+  "title": "Dispatch",
+  "type": "object"
+}

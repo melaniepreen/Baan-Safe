@@ -60,6 +60,8 @@ DECIDED = {
     "sapling.client": "stub",
     "system2.hosting": "openrouter via mubit gateway",
     "llm.provider_route": "mubit",
+    "gateway.route_chooser": "field precheck",
+    "system1.extraction_method": "rules-only",
 }
 
 
@@ -134,7 +136,7 @@ def check_sapling_stubs() -> None:
 
 
 def check_stubs_are_stubs() -> None:
-    for rel in ("system1/decide.py", "system2/decide.py", "router/merge.py"):
+    for rel in ("system2/decide.py",):
         text = (ROOT / rel).read_text(encoding="utf-8")
         if "NotImplementedError" not in text:
             fail(f"{rel} does not raise NotImplementedError")

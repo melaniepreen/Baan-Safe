@@ -44,12 +44,18 @@ def test_s1_real_does_not_run_on_a_system_2_fixture(client, monkeypatch):
     assert systems == ["system_2"]
 
 
-def test_non_fixture_route_is_todo_human(client):
+def test_non_fixture_route_uses_the_precheck(client):
+    """Non-fixture ids route by the field precheck, not expected.system.
+
+    With F01's fields the chooser picks System 1. There is no s1 stub for a
+    non-fixture id, so the outcome is the fallback escalation."""
     case = json.loads(load_case("F01").model_dump_json())
     case["case_id"] = "case-not-a-fixture"
     response = client.post("/triage", json=case)
-    assert response.status_code == 501
-    assert "gateway.route_chooser" in response.json()["detail"]
+    assert response.status_code == 200
+    body = response.json()
+    assert [item["system"] for item in body["source_outcomes"]] == ["system_1"]
+    assert body["final_route"] == "supervisor_escalation"
 
 
 def test_llm_refuses_without_mubit_url(monkeypatch):

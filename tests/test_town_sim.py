@@ -237,7 +237,7 @@ def test_response_copy_separates_policy_from_suggestion():
         assert row["suggestion"]
         assert row["policy"] != row["suggestion"]
     decisions = (ROOT / "config" / "decisions.yaml").read_text(encoding="utf-8")
-    assert "route_chooser: TODO_HUMAN" in decisions
+    assert "route_chooser: field precheck" in decisions
     assert "sapling_scope: aid_eligibility,denial" in decisions
 
 

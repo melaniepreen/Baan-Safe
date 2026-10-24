@@ -10,7 +10,7 @@ from system2.decide import decide as decide2
 
 
 def test_stub_gateway_matches_expected_labels():
-    for fixture_id in ("F01", "F10", "C01-b", "G01"):
+    for fixture_id in ("F01", "F10", "C01-b"):
         case = load_case(fixture_id)
         decision = handle(case, use_stubs=True)
         expected = load_fixture(fixture_id)["expected"]
@@ -22,6 +22,16 @@ def test_stub_gateway_matches_expected_labels():
         assert case.memory_context == [] or decision.policy_notes
 
 
+def test_graduation_fixture_routes_to_system_2():
+    # G01 is labelled system_1 ("after graduation"), but rescue is a
+    # needs_any trigger and graduation_threshold is still TODO_HUMAN, so the
+    # field precheck sends it to System 2. There is no G01 s2 stub, so the
+    # outcome is the fallback escalation.
+    decision = handle(load_case("G01"), use_stubs=True)
+    assert len(decision.source_outcomes) == 1
+    assert decision.source_outcomes[0].system.value == "system_2"
+
+
 def test_correction_memory_is_visible_on_decision():
     case = load_case("C01-b")
     decision = handle(case, use_stubs=True)
@@ -30,14 +40,12 @@ def test_correction_memory_is_visible_on_decision():
 
 def test_real_interfaces_raise():
     case = load_case("F01")
-    with pytest.raises(NotImplementedError, match="Moly"):
-        decide1(case)
+    assert decide1(case).system.value == "system_1"
+    assert merge(case, decide1(case)).case_id == "F01"
     with pytest.raises(NotImplementedError, match="Melanie"):
         decide2(case)
-    with pytest.raises(NotImplementedError, match="Moly"):
-        merge([], [])
-    with pytest.raises(NotImplementedError, match="Moly"):
-        handle(case, use_stubs=False)
+    with pytest.raises(NotImplementedError, match="Melanie"):
+        handle(load_case("F10"), use_stubs=False)
 
 
 def test_replay_stubs_are_accurate():

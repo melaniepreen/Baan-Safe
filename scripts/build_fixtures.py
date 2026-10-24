@@ -306,8 +306,8 @@ def build() -> list[dict]:
             ("caller", "I don't think so. First time."),
         ],
         fields(location=d[7], location_confidence=0.9, people_count=3, needs=["water"]),
-        expect("system_1", "P3", "duplicate_merge", ["water"], False),
-        "Pair with F09, same synthetic caller hash. Both are labelled duplicate_merge so the pair scores as a merge. A human may instead label only F09 as the duplicate and F08 as welfare_distribution. Flagged for sign-off.",
+        expect("system_1", "P3", "welfare_distribution", ["water"], False),
+        "Pair with F09, same synthetic caller hash. F09 is the duplicate; relabelled by Moly 24 Oct 2026.",
         shared, hour=12,
     ))
     rows.append(scenario(
@@ -606,6 +606,14 @@ def memories_for(fid: str) -> list[dict]:
             "A similar water request was once treated as welfare. That outcome was later corrected.",
             0.7,
             "synthetic-prior-water",
+        )]
+    if fid == "F09":
+        return [memory(
+            "mem-F09-open-case",
+            "similar_case",
+            "Open case F08 from the same synthetic household: drinking water, Song District, Phrae. Not yet delivered.",
+            0.95,
+            "F08",
         )]
     if fid == "C01-b":
         return [memory(

@@ -28,7 +28,7 @@ Train and score against scripted flood callers. The simulator and the coach sit 
 - Each caller has a hidden persona: true needs, true urgency, district, vulnerable household tags. People are synthetic.
 - Each turn has a private trace. `CaseState.transcript` and `CaseState.fields` do not carry it.
 - Traits: `panicked_fragmented`, `omits_location`, `contradicts`, `under_reports`, `over_reports`, `code_switches`, `proxy`, `poor_line`, `distrusts_authorities`, `needs_repeating`, `elderly_hearing`.
-- `run_episode` calls `gateway.handle` once per turn. A synthetic id raises while `gateway.route_chooser` is unset. The env does not call both systems, Sapling, or `router.merge`.
+- `run_episode` calls `gateway.handle` once per turn. Synthetic ids route through the field precheck and `router.merge` runs; the selected system falls back to a generic escalation outcome. The env does not call both systems and does not call Sapling.
 - Coach rows: `source=coach`, `promoted` false. They are not `Correction` records and they are not auto-promoted.
 - Learning arms A, B, C, and shuffled are scored on combinations the correction side did not include. Report per-trait under-triage for `under_reports` and `omits_location`, plus turns until the public call states location and urgency.
 
@@ -61,5 +61,4 @@ Train and score against scripted flood callers. The simulator and the coach sit 
 ## Open TODO_HUMAN keys
 
 - `sim.caller_model`, `sim.caller_gpu`
-- `gateway.route_chooser` (synthetic ids do not route until this is set)
 - `llm.provider_route` (the model backend still has to pass the Mubit client)

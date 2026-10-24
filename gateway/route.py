@@ -1,15 +1,17 @@
-"""Mubit gateway stub. Owner: Moly.
+"""Mubit gateway. Owner: Moly.
 
-One turn retrieves memory, records a policy pre-check, and routes to System 1
-or System 2. It does not call both. Mubit does not reason: this module does
-not evaluate escalation rules and it does not choose a priority.
+One turn enriches the case, retrieves memory, records a policy pre-check, and
+routes to System 1 or System 2 — never both. Mubit does not reason: the route
+choice is the field precheck in gateway/chooser.py (the decided
+`gateway.route_chooser`), and the RouterDecision comes from router/merge.py.
 
-use_stubs=True loads the stub for the chosen system. The live chooser is
-gateway.route_chooser and stays TODO_HUMAN. For a fixture id only, the harness
-reads expected.system. That lookup is not a product rule.
+Extraction runs before enrichment when the case has no fields yet, or again on
+a later turn once `keyword_extraction` is in policy_flags. Fixture cases carry
+hand-filled fields, so they are never extracted.
 
-use_stubs=False, or S1_IMPL=real / S2_IMPL=real on the chosen system, calls
-that system's decide() and lets the NotImplementedError through.
+use_stubs=True loads the stub for the chosen system. use_stubs=False, or
+S1_IMPL=real / S2_IMPL=real on the chosen system, calls that system's decide()
+and lets NotImplementedError through.
 """
 
 from __future__ import annotations
@@ -17,10 +19,10 @@ from __future__ import annotations
 import os
 from datetime import datetime, timezone
 
-from config.settings import DecisionRequired, load_yaml, require_decision
+from config.settings import load_yaml
 from contracts.models import (
     CaseState,
-    NextAction,
+    ExtractedFields,
     Outcome,
     Priority,
     Route,
@@ -29,21 +31,24 @@ from contracts.models import (
     TraceEvent,
 )
 from enrich.context import location_context
-from fixtures.load import load_fixture
 from gateway.auth import status as auth_status
+from gateway.chooser import choose
 from gateway.policy import precheck_notes
 from memory.adapter import retrieve
 from mocks.loader import has_s1_stub, has_s2_stub, load_s1_stub, load_s2_stub
+import router.merge
 from system1 import decide as system1
+from system1.extract import extract
 from system2 import decide as system2
 from trace import emit
 
 
 def handle(case: CaseState, use_stubs: bool = True) -> RouterDecision:
     started = _now()
+    _extract(case)
     _enrich(case)
     case.memory_context = retrieve(case)
-    system = choose_system(case)
+    system, triggers = _choose(case)
     notes = [auth_status(), *precheck_notes()]
     emit(
         TraceEvent(
@@ -52,9 +57,11 @@ def handle(case: CaseState, use_stubs: bool = True) -> RouterDecision:
             started_at=started,
             latency_ms=0,
             notes=(
-                "mubit gateway stub: "
+                "mubit gateway: "
                 + "; ".join(notes)
                 + f"; memory via adapter; exclusive route {system.value}"
+                + "; triggers: "
+                + (", ".join(triggers) if triggers else "none")
             ),
         )
     )
@@ -72,14 +79,14 @@ def handle(case: CaseState, use_stubs: bool = True) -> RouterDecision:
         )
     )
     router_started = _now()
-    decision = _assemble(case, [outcome], outcome, notes)
+    decision = router.merge.merge(case, outcome, notes)
     emit(
         TraceEvent(
             case_id=case.case_id,
             stage="router",
             started_at=router_started,
             latency_ms=0,
-            notes="stub copy of the single selected outcome; router.merge was not called",
+            notes="router.merge ran on the single selected outcome",
         )
     )
     return decision
@@ -88,24 +95,22 @@ def handle(case: CaseState, use_stubs: bool = True) -> RouterDecision:
 def choose_system(case: CaseState) -> System:
     """Pick System 1 or System 2. Never both.
 
-    Fixture ids use expected.system as a harness stand-in. Any other case
-    needs gateway.route_chooser, which is TODO_HUMAN and raises.
+    The chooser is the field precheck in gateway/chooser.py, read from
+    config/escalation.yaml. Fixture ids no longer override it.
     """
+    system, _triggers = _choose(case)
+    return system
+
+
+def _choose(case: CaseState) -> tuple[System, list[str]]:
     mode = load_yaml("routing.yaml").get("mode")
     if mode != "exclusive":
         raise RuntimeError(
             f"config/routing.yaml mode is {mode!r}. "
-            "The stub gateway only implements exclusive routing "
+            "The gateway only implements exclusive routing "
             "(System 1 or System 2, not System 1 then System 2)."
         )
-    try:
-        expected = load_fixture(case.case_id)["expected"]["system"]
-    except KeyError:
-        require_decision("gateway.route_chooser")
-        raise DecisionRequired(
-            "config/decisions.yaml:gateway.route_chooser did not name a system."
-        )
-    return System(expected)
+    return choose(case)
 
 
 def _run(case: CaseState, system: System, use_stubs: bool) -> Outcome:
@@ -127,6 +132,18 @@ def _run(case: CaseState, system: System, use_stubs: bool) -> Outcome:
 
 def _impl(name: str) -> str:
     return os.environ.get(name, "stub").strip().lower() or "stub"
+
+
+def _extract(case: CaseState) -> None:
+    """Keyword-extract fields so enrichment and the chooser can see them."""
+    if not (
+        case.fields == ExtractedFields() or "keyword_extraction" in case.policy_flags
+    ):
+        return
+    fields, flags = extract(case.transcript)
+    case.fields = fields
+    for flag in ("keyword_extraction", *flags):
+        _add(case.policy_flags, flag)
 
 
 def _enrich(case: CaseState) -> None:
@@ -159,51 +176,6 @@ def _enrich(case: CaseState) -> None:
 def _add(flags: list[str], flag: str) -> None:
     if flag not in flags:
         flags.append(flag)
-
-
-def _assemble(
-    case: CaseState,
-    outcomes: list[Outcome],
-    chosen: Outcome,
-    extra_notes: list[str],
-) -> RouterDecision:
-    order = load_yaml("escalation.yaml").get("stub_next_action_order") or []
-    action = NextAction.create_provisional_dispatch
-    for rule in order:
-        when = rule.get("when")
-        if when == "requires_human" and chosen.requires_human:
-            action = NextAction(rule["action"])
-            break
-        if when == "missing_evidence_or_next_question" and (
-            chosen.missing_evidence or chosen.next_question
-        ):
-            action = NextAction(rule["action"])
-            break
-        if when == "escalate" and chosen.escalate:
-            action = NextAction(rule["action"])
-            break
-        if when == "default":
-            action = NextAction(rule["action"])
-            break
-    notes = [
-        f"stub gateway selected {chosen.system.value} exclusively",
-        f"memory items: {len(case.memory_context)}",
-        *extra_notes,
-    ]
-    for item in case.memory_context:
-        if item.kind == "correction":
-            notes.append(f"retrieved correction memory: {item.summary}")
-    for flag in case.policy_flags:
-        notes.append(f"policy flag: {flag}")
-    return RouterDecision(
-        case_id=case.case_id,
-        next_action=action,
-        final_priority=chosen.priority,
-        final_route=chosen.route,
-        requires_human=chosen.requires_human,
-        source_outcomes=outcomes,
-        policy_notes=notes,
-    )
 
 
 def _fallback_outcome(case_id: str, system: System = System.system_1) -> Outcome:

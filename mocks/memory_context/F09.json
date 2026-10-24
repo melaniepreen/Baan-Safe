@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "memory_id": "mem-F09-open-case",
+    "kind": "similar_case",
+    "summary": "Open case F08 from the same synthetic household: drinking water, Song District, Phrae. Not yet delivered.",
+    "relevance": 0.95,
+    "source_case_id": "F08"
+  }
+]

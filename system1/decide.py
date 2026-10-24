@@ -1,25 +1,158 @@
 """System 1 entry point. Owner: Moly.
 
-The body raises until a human writes the rules. It reads config/decisions.yaml
-and names every value that is still TODO_HUMAN.
+Deterministic rules over the extracted fields. Escalation triggers are the
+same field precheck the gateway reads (`config/escalation.yaml`), re-checked
+here as defence in depth. `system1.extraction_model` stays TODO_HUMAN: the
+decided `system1.extraction_method` is `rules-only`, so no model is read.
 """
 
 from __future__ import annotations
 
-from config.settings import unset_decisions
-from contracts.models import CaseState, Outcome
+from time import perf_counter
 
-_DECISIONS = [
-    "system1.extraction_method",
-    "system1.extraction_model",
-]
+from config.settings import load_yaml
+from contracts.models import CaseState, Need, Outcome, Priority, Route, System
+from gateway.chooser import system_2_triggers
+
+DUPLICATE_RELEVANCE = 0.9
+
+NEEDS_TABLE: dict[Need, tuple[Route, Priority]] = {
+    Need.water: (Route.welfare_distribution, Priority.P3),
+    Need.food: (Route.welfare_distribution, Priority.P3),
+    Need.shelter: (Route.shelter_placement, Priority.P3),
+    Need.evacuation: (Route.shelter_placement, Priority.P2),
+    Need.power: (Route.information_only, Priority.P3),
+    Need.information: (Route.information_only, Priority.P4),
+}
+
+_PRIORITY_ORDER = {
+    Priority.P1: 0,
+    Priority.P2: 1,
+    Priority.P3: 2,
+    Priority.P4: 3,
+}
+
+
+def _escalate(reason: str, confidence: float = 0.0, latency_ms: int = 0) -> Outcome:
+    return Outcome(
+        system=System.system_1,
+        outcome="escalate",
+        priority=Priority.P2,
+        needs=[],
+        route=Route.supervisor_escalation,
+        confidence=confidence,
+        reason=reason,
+        reasoning=None,
+        missing_evidence=[],
+        next_question=None,
+        requires_human=False,
+        escalate=True,
+        latency_ms=latency_ms,
+    )
 
 
 def decide(case: CaseState) -> Outcome:
-    missing = unset_decisions(_DECISIONS)
-    extra = ""
-    if missing:
-        extra = " Unset TODO_HUMAN: " + ", ".join(missing) + "."
-    raise NotImplementedError(
-        "not implemented yet — owner: Moly." + extra
+    started = perf_counter()
+    latency_ms = lambda: int((perf_counter() - started) * 1000)  # noqa: E731
+    fields = case.fields
+
+    triggers = system_2_triggers(case)
+    if triggers:
+        return _escalate(
+            "System 2 triggers fired: " + ", ".join(triggers) + ".",
+            latency_ms=latency_ms(),
+        )
+
+    for item in case.memory_context:
+        if (
+            item.kind == "similar_case"
+            and item.source_case_id
+            and item.relevance >= DUPLICATE_RELEVANCE
+        ):
+            route, priority = _needs_route(fields.needs)
+            return Outcome(
+                system=System.system_1,
+                outcome="fast_route",
+                priority=priority or Priority.P3,
+                needs=fields.needs,
+                route=Route.duplicate_merge,
+                confidence=fields.location_confidence or 0.0,
+                reason=(
+                    f"Memory lists an open similar case {item.source_case_id}; "
+                    "this call is the same household's request again."
+                ),
+                reasoning=None,
+                missing_evidence=[],
+                next_question=None,
+                requires_human=False,
+                escalate=False,
+                latency_ms=latency_ms(),
+            )
+
+    unmatched = [need.value for need in fields.needs if need not in NEEDS_TABLE]
+    if not fields.needs or unmatched:
+        reason = (
+            "No extracted needs for the fast path."
+            if not fields.needs
+            else "Needs outside the System 1 table: " + ", ".join(unmatched) + "."
+        )
+        return _escalate(reason, latency_ms=latency_ms())
+
+    route, priority = _needs_route(fields.needs)
+    confidence = fields.location_confidence
+    minimum = float(load_yaml("escalation.yaml").get("system_1_min_confidence") or 0.8)
+    if confidence is None or confidence < minimum:
+        return _escalate(
+            f"Location confidence {confidence} is below system_1_min_confidence "
+            f"{minimum}.",
+            confidence=confidence or 0.0,
+            latency_ms=latency_ms(),
+        )
+
+    if fields.people_count is None:
+        return Outcome(
+            system=System.system_1,
+            outcome="fast_route",
+            priority=priority,
+            needs=fields.needs,
+            route=route,
+            confidence=confidence,
+            reason="Needs are clear but the household size is missing.",
+            reasoning=None,
+            missing_evidence=["people_count"],
+            next_question="How many people are with you?",
+            requires_human=False,
+            escalate=False,
+            latency_ms=latency_ms(),
+        )
+
+    return Outcome(
+        system=System.system_1,
+        outcome="fast_route",
+        priority=priority,
+        needs=fields.needs,
+        route=route,
+        confidence=confidence,
+        reason="Clear fast-path request with a confident location.",
+        reasoning=None,
+        missing_evidence=[],
+        next_question=None,
+        requires_human=False,
+        escalate=False,
+        latency_ms=latency_ms(),
     )
+
+
+def _needs_route(needs: list[Need]) -> tuple[Route | None, Priority | None]:
+    """Highest priority wins; on a tie the first need in `needs` order wins."""
+    best: tuple[Route | None, Priority | None] = (None, None)
+    best_rank = len(_PRIORITY_ORDER)
+    for need in needs:
+        entry = NEEDS_TABLE.get(need)
+        if entry is None:
+            continue
+        rank = _PRIORITY_ORDER[entry[1]]
+        if rank < best_rank:
+            best = entry
+            best_rank = rank
+    return best

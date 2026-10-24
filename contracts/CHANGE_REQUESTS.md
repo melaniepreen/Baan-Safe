@@ -15,6 +15,16 @@ Agents who think a contract is wrong must add a proposal here. They do not edit
 - status: accepted
 - tag: v0.2-contracts
 
+## CR-003 (accepted)
+
+- id: CR-003
+- model: Dispatch (new); RouterDecision.dispatches
+- proposed change: Add a `Dispatch` model (`need`, `resource_kind`, optional `resource_id`, `status` `provisional|unfilled`, `same_district`, optional `note`) and a `dispatches` list on `RouterDecision`, defaulted empty.
+- why: The real `router/merge.py` fans out one provisional dispatch per dispatchable need when `next_action` is `create_provisional_dispatch`. The change is additive; existing data still validates.
+- from: Moly (repo owner), 24 Oct 2026
+- status: accepted
+- tag: pending — the Lead tags
+
 ## Template
 
 - id:

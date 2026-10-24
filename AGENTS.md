@@ -1,16 +1,16 @@
 # BaanSafe
 
-Flood and disaster call-triage scaffold. Mubit governs memory, policy, and traceability and does not reason. One turn goes to System 1 or System 2, never both. System 2's orchestrator is Nemotron, hosted as `openrouter via mubit gateway`. Banyan Sapling verifies System 2 aid-eligibility and denial claims before the Decision Router. `system1/` and `system2/` decision logic is not implemented. Fixture callers are synthetic. Owners: `OWNERSHIP.md`. Architecture note: `BaanSafe_Revised_Architecture.md`.
+Flood and disaster call-triage scaffold. Mubit governs memory, policy, and traceability and does not reason. One turn goes to System 1 or System 2, never both. System 2's orchestrator is Nemotron, hosted as `openrouter via mubit gateway`. Banyan Sapling verifies System 2 aid-eligibility and denial claims before the Decision Router. System 2 decision logic is not implemented; System 1 is rules-only. Fixture callers are synthetic. Owners: `OWNERSHIP.md`. Architecture note: `BaanSafe_Revised_Architecture.md`.
 
 ## Architecture
 
 ```
-gateway/route.py     auth note, memory/adapter.py, policy pre-check
-        | exclusive (config/routing.yaml). Fixture ids use expected.system.
-        +-- system1/decide.py                    raises NotImplementedError
+gateway/route.py     auth note, extract -> enrich -> memory -> policy pre-check
+        | exclusive (config/routing.yaml). gateway/chooser.py field precheck
+        +-- system1/extract.py + decide.py       rules-only keywords, needs table
         +-- system2/orchestrator.py              raises while model id or latency is unset
                  \-- system2/sapling.py          aid_eligibility, denial only
-router               stub copies that one Outcome. router/merge.py is not called.
+router               router/merge.py -> next_action + provisional dispatches
 training             corrections, coach, sim -> event log -> export-training
                      -> per-task fine-tune -> eval/learning (group_id, source)
 ```
@@ -55,8 +55,8 @@ Index: `docs/agents/index.json`. Read one topic file, not the whole set.
 
 | Task | Doc | Start here |
 |---|---|---|
-| Gateway, auth, memory, LLM host check | `docs/agents/gateway-and-llm-client.md` | `gateway/route.py`, `llm/client.py` |
-| Fast path | `docs/agents/system1.md` | `system1/decide.py` |
+| Gateway, auth, memory, LLM host check | `docs/agents/gateway-and-llm-client.md` | `gateway/route.py`, `gateway/chooser.py`, `llm/client.py` |
+| Fast path | `docs/agents/system1.md` | `system1/decide.py`, `system1/extract.py` |
 | Nemotron, Sapling | `docs/agents/system2-and-sapling.md` | `system2/decide.py`, `system2/sapling.py` |
 | Aid eligibility, policy corpus, escalation | `docs/agents/policies-api.md` | `policies/service.py`, `api/routes/policies.py` |
 | Router | `docs/agents/decision-router.md` | `router/merge.py` |

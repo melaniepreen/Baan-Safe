@@ -15,11 +15,11 @@ files:
 ## Key files
 
 - `Makefile` — `test`, `validate`, `replay-stubs`, `eval-learning`, `sim-eval`, `latte-bench`, `serve`, `modal-deploy-*`.
-- `scripts/validate.py` — decisions, Sapling stubs, `NotImplementedError` in the three stub entry points, schemas, personal-data scan.
+- `scripts/validate.py` — decisions, Sapling stubs, `NotImplementedError` in `system2/decide.py` (System 1 and `router/merge.py` are real now), schemas, personal-data scan.
 - `scripts/check_agents.py` — `AGENTS.md` line budget, topic template, index paths. Called from `validate`.
 - `tests/conftest.py` — deletes `MUBIT_API_KEY` for the session.
 - `pyproject.toml` — `pythonpath = ["."]`, `testpaths = ["tests"]`. Requires Python `>=3.11`.
-- `tests/test_architecture.py`, `test_gateway_and_replay.py`, `test_api.py`, `test_sapling.py`, `test_modal_infra.py`, `test_contracts.py`, `test_learning_eval.py`, `test_sim.py`, `test_latte.py`, `test_agents_docs.py`, `test_training_schema.py`.
+- `tests/test_architecture.py`, `test_gateway_and_replay.py`, `test_chooser.py`, `test_system1.py`, `test_router.py`, `test_extract.py`, `test_api.py`, `test_sapling.py`, `test_modal_infra.py`, `test_contracts.py`, `test_learning_eval.py`, `test_sim.py`, `test_latte.py`, `test_agents_docs.py`, `test_training_schema.py`.
 
 ## Interfaces/contracts
 

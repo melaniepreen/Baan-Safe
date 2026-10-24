@@ -16,7 +16,7 @@ Product choices live in `config/decisions.yaml`. Readers fail loudly while a val
 - `config/decisions.yaml` — every leaf. Comments are not values.
 - `config/settings.py` — `UNSET`, `decisions()` (cached), `require_decision`, `unset_decisions`, `DecisionRequired`.
 - `scripts/validate.py` — `DECIDED` allowlist. Any other leaf must be the string `TODO_HUMAN`.
-- `config/routing.yaml` — harness `mode: exclusive`. The live chooser is `gateway.route_chooser`.
+- `config/routing.yaml` — harness `mode: exclusive`. The live chooser is `gateway.route_chooser` (`field precheck`, implemented in `gateway/chooser.py`).
 - `config/priorities.yaml`, `config/routes.yaml`, `config/escalation.yaml`, `config/ingest.yaml`.
 - `config/envfile.py` — loads `.env`. Do not print it.
 
@@ -24,7 +24,7 @@ Product choices live in `config/decisions.yaml`. Readers fail loudly while a val
 
 - `require_decision(path)` returns the value or raises `DecisionRequired`.
 - `unset_decisions(paths)` returns the paths that are missing, `None`, `""`, or `TODO_HUMAN`.
-- Allowlisted today: `system2.use_banyan_sapling` `true`, `system2.sapling_scope` `aid_eligibility,denial`, `sapling.client` `stub`, `system2.hosting` `openrouter via mubit gateway`, `llm.provider_route` `mubit`.
+- Allowlisted today (`DECIDED`, seven leaves): `system2.use_banyan_sapling` `true`, `system2.sapling_scope` `aid_eligibility,denial`, `sapling.client` `stub`, `system2.hosting` `openrouter via mubit gateway`, `llm.provider_route` `mubit`, `gateway.route_chooser` `field precheck`, `system1.extraction_method` `rules-only`.
 - A new decided value needs the yaml leaf and a matching `DECIDED` entry. Validate fails if they differ.
 
 ## Invariants
@@ -49,4 +49,4 @@ Product choices live in `config/decisions.yaml`. Readers fail loudly while a val
 
 ## Open TODO_HUMAN keys
 
-All leaves except the five in `DECIDED`. The groups are `system1`, `system2` (model id and `max_latency_ms`), `sapling` (except `client`), `gateway`, `memory`, `llm` (`token_price_usd`), `speech_to_text`, `ui`, `data`, `policies` (`authoritative_set`), `correction_loop`, `learning_eval`, `latte_bench`, `sim` (`caller_model`, `caller_gpu`), `modal`.
+All leaves except the seven in `DECIDED`. The groups are `system1`, `system2` (model id and `max_latency_ms`), `sapling` (except `client`), `gateway`, `memory`, `llm` (`token_price_usd`), `speech_to_text`, `ui`, `data`, `policies` (`authoritative_set`), `correction_loop`, `learning_eval`, `latte_bench`, `sim` (`caller_model`, `caller_gpu`), `modal`.
