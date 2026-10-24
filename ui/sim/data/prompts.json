@@ -1,0 +1,114 @@
+{
+  "placeholder": true,
+  "note": "Saved caller lines for the phone drawer. fixture_id is the DEMO-ONLY chooser target. The stub gateway answers that fixture, not a live reading of the sentence. Thai lines are optional display text. The sent text is the English line.",
+  "groups": [
+    {
+      "id": "system_1",
+      "label": "System 1",
+      "prompts": [
+        {
+          "id": "s1-rice",
+          "fixture_id": "F02",
+          "en": "Our rice is finished. Can someone bring food today?",
+          "th": "ข้าวหมดแล้ว ช่วยส่งอาหารวันนี้ได้ไหม"
+        },
+        {
+          "id": "s1-water",
+          "fixture_id": "F01",
+          "en": "Hello, we need drinking water for the house.",
+          "th": "สวัสดีค่ะ บ้านเราต้องการน้ำดื่ม"
+        },
+        {
+          "id": "s1-shelter",
+          "fixture_id": "F03",
+          "en": "Which shelter still has space tonight?",
+          "th": ""
+        },
+        {
+          "id": "s1-evac",
+          "fixture_id": "F06",
+          "en": "They told our lane to move to a shelter today.",
+          "th": "เขาบอกให้ซอยเราย้ายไปศูนย์พักพิงวันนี้"
+        },
+        {
+          "id": "s1-news",
+          "fixture_id": "F05",
+          "en": "What time does the district post the flood news?",
+          "th": ""
+        }
+      ]
+    },
+    {
+      "id": "system_2",
+      "label": "System 2",
+      "prompts": [
+        {
+          "id": "s2-oxygen",
+          "fixture_id": "F10",
+          "en": "My mother uses oxygen at night. The water is rising in the lane.",
+          "th": "แม่ใช้ออกซิเจนตอนกลางคืน น้ำในซอยกำลังสูงขึ้น"
+        },
+        {
+          "id": "s2-bed",
+          "fixture_id": "F11",
+          "en": "I am next door. The person here cannot get out of bed.",
+          "th": ""
+        },
+        {
+          "id": "s2-lane",
+          "fixture_id": "F12",
+          "en": "Water is in the lane. I don't know the road name.",
+          "th": ""
+        },
+        {
+          "id": "s2-fine",
+          "fixture_id": "F14",
+          "en": "We're fine. Really. No need to send anyone.",
+          "th": "เราไม่เป็นไร ไม่ต้องส่งใครมา"
+        },
+        {
+          "id": "s2-child",
+          "fixture_id": "F16",
+          "en": "I am a volunteer at the shelter. A child arrived without an adult.",
+          "th": ""
+        }
+      ]
+    },
+    {
+      "id": "sapling",
+      "label": "Sapling",
+      "prompts": [
+        {
+          "id": "sap-rent",
+          "fixture_id": "F17",
+          "en": "They said we cannot get the payment because we rent.",
+          "th": "เขาบอกว่าเราได้เงินช่วยเหลือไม่ได้เพราะเช่าบ้านอยู่"
+        },
+        {
+          "id": "sap-denied",
+          "fixture_id": "F17",
+          "en": "The officer said the flood payment is denied because we rent.",
+          "th": ""
+        },
+        {
+          "id": "sap-eligible",
+          "fixture_id": "F17",
+          "en": "Can someone check whether our rented house is still eligible?",
+          "th": ""
+        },
+        {
+          "id": "sap-sister",
+          "fixture_id": "F18",
+          "en": "My sister is staying with us. She is not on the payment list.",
+          "th": "พี่สาวมาอยู่ด้วย ชื่อเธอไม่อยู่ในรายชื่อเงินช่วยเหลือ"
+        },
+        {
+          "id": "sap-list",
+          "fixture_id": "F18",
+          "en": "Please check the payment list. One person in the house was left off.",
+          "th": ""
+        }
+      ]
+    }
+  ]
+}

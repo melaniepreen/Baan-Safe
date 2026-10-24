@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 
 from contracts.models import Hazard, Household, Need, Resource, Route
 from paths import ROOT
@@ -153,12 +154,18 @@ def test_twenty_calls_link_fixtures_to_buildings():
     assert 'id="backend"' in page
     assert 'id="flow"' in page
     assert 'id="inspector"' not in page
+    assert 'id="priority-actions"' not in page
+    assert 'id="op-accept"' in page
+    assert 'id="op-reject"' in page
+    assert 'id="prompt-drawer"' in page
     assert "flood-opacity" not in page
     source = (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
     assert "DEMO-ONLY" in source
     assert "gateway.route_chooser" in source
     assert "Web Speech API" in source
     assert "/stt/transcribe" in source
+    assert "attachLiveFeed" in source
+    assert "sim_events.json" in source
 
 
 def _inside(building: dict, x: float, y: float) -> bool:
@@ -243,8 +250,42 @@ def _strings(value):
             yield from _strings(item)
 
 
+def test_activity_prompts_and_rulebook_are_draft_simulations():
+    events = _load("sim_events.json")
+    prompts = _load("prompts.json")
+    rules = _load("rulebook.json")
+    assert events["schema_version"] == "baansafe.sim_activity.v1"
+    assert events["simulated"] is True
+    assert events["confidence_threshold"] == 0.75
+    assert "attachLiveFeed" in events["stream"]["how"]
+    town = _load("town.json")
+    call_ids = {call["id"] for call in town["calls"]}
+    assert set(events["scenarios"]) == call_ids
+    for fixture_id, scenario in events["scenarios"].items():
+        assert abs(sum(scenario["scores"].values()) - 1) < 0.02
+        assert abs(sum(scenario["needs"].values()) - 1) < 0.02
+        assert scenario["steps"][0]["source"] == "simulated"
+        kinds = {step["kind"] for step in scenario["steps"]}
+        assert {"memory", "tool", "system_1", "router"} <= kinds
+    groups = {group["id"]: group["prompts"] for group in prompts["groups"]}
+    assert set(groups) == {"system_1", "system_2", "sapling"}
+    for rows in groups.values():
+        assert len(rows) >= 4
+        for prompt in rows:
+            assert prompt["fixture_id"] in call_ids
+            assert prompt["en"]
+    assert rules["draft"] is True
+    assert "not repo policy" in rules["label"].lower()
+    vehicles = {rule["vehicle"] for rule in rules["rules"]}
+    assert {"boat", "truck", "van", "pulse", "none"} <= vehicles
+    blob = json.dumps({"events": events, "prompts": prompts, "rules": rules}).lower()
+    assert "baht" not in blob
+    assert "฿" not in blob
+    subprocess.run(["node", "ui/sim/check_hospital.mjs"], cwd=ROOT, check=True)
+
+
 def test_town_files_do_not_look_like_personal_data():
-    for name in ("town.json", "streets.json", "flood.json", "responses.json"):
+    for name in ("town.json", "streets.json", "flood.json", "responses.json", "sim_events.json", "prompts.json", "rulebook.json"):
         body = _load(name)
         for text in _strings(body):
             assert PHONE.search(text) is None, text

@@ -1,0 +1,1480 @@
+{
+  "schema_version": "baansafe.sim_activity.v1",
+  "simulated": true,
+  "badge": "simulated",
+  "confidence_threshold": 0.75,
+  "stream": {
+    "status": "not connected",
+    "how": "The page plays scenarios[fixture_id].steps. To plug a real stream later, call BaanSafeSim.attachLiveFeed(source). source may be an EventSource or any object with addEventListener('step', ...). A future gateway path such as GET /cases/{case_id}/events (SSE) or a websocket can emit the same step objects with source set to gateway. Each simulated step keeps the simulated badge. A gateway step shows a gateway badge. The stub outcome is still rendered beside the sentence from POST /cases/{id}/turns."
+  },
+  "event_fields": {
+    "id": "Stable step id inside the scenario.",
+    "kind": "memory | tool | system_1 | handoff | system_2 | sapling | router",
+    "text": "Plain English. Placeholders: {memory_count} {top_need} {guess} {confidence} {verdict} {reason} {next_action} {priority} {route}.",
+    "delay_ms": "How long to wait before revealing the next step. The page shortens this while Play 20 calls is running.",
+    "source": "simulated today. Use gateway when the object came from the live stream.",
+    "when": "Optional. rejected skips the step when System 1 is at or above the threshold. aid plays only when the stub route is aid_caseworker or a need is aid_payment.",
+    "fill": "Optional. flood or shelter. The page fills the following line from flood.json / the drawn shelter path.",
+    "verdict": "Optional simulated Sapling label: supported, violation, missing, or unsure. Not a sapling_verdict from the gateway."
+  },
+  "scenarios": {
+    "F01": {
+      "fixture_id": "F01",
+      "system_hint": "system_1",
+      "top_need": "water",
+      "scores": {
+        "P1": 0.04,
+        "P2": 0.09,
+        "P3": 0.82,
+        "P4": 0.05
+      },
+      "needs": {
+        "water": 0.9,
+        "food": 0.04,
+        "medical": 0.02,
+        "shelter": 0.04
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - drinking water for the house, no danger signs Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: drinking water for the house, no danger signs Gateway reason: {reason}"
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    },
+    "F02": {
+      "fixture_id": "F02",
+      "system_hint": "system_1",
+      "top_need": "food",
+      "scores": {
+        "P1": 0.05,
+        "P2": 0.11,
+        "P3": 0.82,
+        "P4": 0.02
+      },
+      "needs": {
+        "food": 0.91,
+        "water": 0.04,
+        "medical": 0.02,
+        "shelter": 0.03
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - rice finished, child is with adults Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: rice finished, child is with adults Gateway reason: {reason}"
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    },
+    "F03": {
+      "fixture_id": "F03",
+      "system_hint": "system_1",
+      "top_need": "shelter",
+      "scores": {
+        "P1": 0.04,
+        "P2": 0.1,
+        "P3": 0.8,
+        "P4": 0.06
+      },
+      "needs": {
+        "shelter": 0.84,
+        "food": 0.06,
+        "water": 0.06,
+        "medical": 0.04
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - asking which shelter has space tonight Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: asking which shelter has space tonight Gateway reason: {reason}"
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    },
+    "F04": {
+      "fixture_id": "F04",
+      "system_hint": "system_1",
+      "top_need": "power",
+      "scores": {
+        "P1": 0.03,
+        "P2": 0.08,
+        "P3": 0.8,
+        "P4": 0.09
+      },
+      "needs": {
+        "power": 0.86,
+        "food": 0.05,
+        "water": 0.05,
+        "medical": 0.04
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - power has been out since morning, people are safe Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: power has been out since morning, people are safe Gateway reason: {reason}"
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    },
+    "F05": {
+      "fixture_id": "F05",
+      "system_hint": "system_1",
+      "top_need": "information",
+      "scores": {
+        "P1": 0.02,
+        "P2": 0.04,
+        "P3": 0.06,
+        "P4": 0.88
+      },
+      "needs": {
+        "information": 0.92,
+        "food": 0.03,
+        "water": 0.03,
+        "shelter": 0.02
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - asking what time the district posts the flood news Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: asking what time the district posts the flood news Gateway reason: {reason}"
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    },
+    "F06": {
+      "fixture_id": "F06",
+      "system_hint": "system_1",
+      "top_need": "evacuation",
+      "scores": {
+        "P1": 0.06,
+        "P2": 0.86,
+        "P3": 0.05,
+        "P4": 0.03
+      },
+      "needs": {
+        "shelter": 0.72,
+        "evacuation": 0.22,
+        "medical": 0.03,
+        "food": 0.03
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - the lane was told to move to a shelter today Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: the lane was told to move to a shelter today Gateway reason: {reason}"
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    },
+    "F07": {
+      "fixture_id": "F07",
+      "system_hint": "system_1",
+      "top_need": "information",
+      "scores": {
+        "P1": 0.02,
+        "P2": 0.05,
+        "P3": 0.08,
+        "P4": 0.85
+      },
+      "needs": {
+        "information": 0.9,
+        "shelter": 0.05,
+        "food": 0.03,
+        "water": 0.02
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - asking if the school is open tomorrow Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: asking if the school is open tomorrow Gateway reason: {reason}"
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    },
+    "F08": {
+      "fixture_id": "F08",
+      "system_hint": "system_1",
+      "top_need": "water",
+      "scores": {
+        "P1": 0.05,
+        "P2": 0.08,
+        "P3": 0.83,
+        "P4": 0.04
+      },
+      "needs": {
+        "water": 0.88,
+        "food": 0.05,
+        "medical": 0.03,
+        "shelter": 0.04
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - drinking water for the market-canal household Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: drinking water for the market-canal household Gateway reason: {reason}"
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    },
+    "F09": {
+      "fixture_id": "F09",
+      "system_hint": "system_1",
+      "top_need": "water",
+      "scores": {
+        "P1": 0.05,
+        "P2": 0.09,
+        "P3": 0.81,
+        "P4": 0.05
+      },
+      "needs": {
+        "water": 0.86,
+        "food": 0.06,
+        "medical": 0.04,
+        "shelter": 0.04
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - same household calling again about water Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: same household calling again about water Gateway reason: {reason}"
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    },
+    "F10": {
+      "fixture_id": "F10",
+      "system_hint": "system_2",
+      "top_need": "medical",
+      "scores": {
+        "P1": 0.61,
+        "P2": 0.22,
+        "P3": 0.11,
+        "P4": 0.06
+      },
+      "needs": {
+        "medical": 0.74,
+        "rescue": 0.18,
+        "shelter": 0.05,
+        "food": 0.03
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - oxygen-dependent, water rising Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: oxygen-dependent, water rising Gateway reason: {reason}"
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    },
+    "F11": {
+      "fixture_id": "F11",
+      "system_hint": "system_2",
+      "top_need": "medical",
+      "scores": {
+        "P1": 0.58,
+        "P2": 0.24,
+        "P3": 0.12,
+        "P4": 0.06
+      },
+      "needs": {
+        "medical": 0.66,
+        "rescue": 0.24,
+        "shelter": 0.06,
+        "food": 0.04
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - the person cannot get out of bed Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: the person cannot get out of bed Gateway reason: {reason}"
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    },
+    "F12": {
+      "fixture_id": "F12",
+      "system_hint": "system_2",
+      "top_need": "rescue",
+      "scores": {
+        "P1": 0.46,
+        "P2": 0.31,
+        "P3": 0.15,
+        "P4": 0.08
+      },
+      "needs": {
+        "rescue": 0.48,
+        "shelter": 0.28,
+        "water": 0.16,
+        "medical": 0.08
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - water in the lane, road name unknown Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: water in the lane, road name unknown Gateway reason: {reason}"
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    },
+    "F13": {
+      "fixture_id": "F13",
+      "system_hint": "system_2",
+      "top_need": "shelter",
+      "scores": {
+        "P1": 0.12,
+        "P2": 0.4,
+        "P3": 0.38,
+        "P4": 0.1
+      },
+      "needs": {
+        "shelter": 0.7,
+        "food": 0.12,
+        "water": 0.1,
+        "medical": 0.08
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - where to sleep if they have to leave Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: where to sleep if they have to leave Gateway reason: {reason}"
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    },
+    "F14": {
+      "fixture_id": "F14",
+      "system_hint": "system_2",
+      "top_need": "information",
+      "scores": {
+        "P1": 0.18,
+        "P2": 0.36,
+        "P3": 0.14,
+        "P4": 0.32
+      },
+      "needs": {
+        "rescue": 0.34,
+        "information": 0.4,
+        "shelter": 0.16,
+        "medical": 0.1
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - the caller says they are fine and not to send anyone Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: the caller says they are fine and not to send anyone Gateway reason: {reason}"
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    },
+    "F15": {
+      "fixture_id": "F15",
+      "system_hint": "system_2",
+      "top_need": "information",
+      "scores": {
+        "P1": 0.16,
+        "P2": 0.55,
+        "P3": 0.14,
+        "P4": 0.15
+      },
+      "needs": {
+        "information": 0.62,
+        "rescue": 0.18,
+        "shelter": 0.12,
+        "medical": 0.08
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - asking if the road is still open Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: asking if the road is still open Gateway reason: {reason}"
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    },
+    "F16": {
+      "fixture_id": "F16",
+      "system_hint": "system_2",
+      "top_need": "shelter",
+      "scores": {
+        "P1": 0.14,
+        "P2": 0.52,
+        "P3": 0.22,
+        "P4": 0.12
+      },
+      "needs": {
+        "shelter": 0.58,
+        "safeguarding": 0.28,
+        "medical": 0.08,
+        "food": 0.06
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - a child arrived at the shelter without an adult Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: a child arrived at the shelter without an adult Gateway reason: {reason}"
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    },
+    "F17": {
+      "fixture_id": "F17",
+      "system_hint": "system_2",
+      "top_need": "aid",
+      "scores": {
+        "P1": 0.08,
+        "P2": 0.16,
+        "P3": 0.48,
+        "P4": 0.28
+      },
+      "needs": {
+        "aid": 0.72,
+        "shelter": 0.12,
+        "food": 0.1,
+        "information": 0.06
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - told they cannot get the payment because they rent Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: told they cannot get the payment because they rent Gateway reason: {reason}"
+        },
+        {
+          "id": "sapling",
+          "kind": "sapling",
+          "when": "aid",
+          "delay_ms": 700,
+          "source": "simulated",
+          "verdict": "missing",
+          "text": "Sapling: aid claim checked - missing. Simulated verdict. The stub gateway did not return sapling_verdict."
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    },
+    "F18": {
+      "fixture_id": "F18",
+      "system_hint": "system_2",
+      "top_need": "aid",
+      "scores": {
+        "P1": 0.07,
+        "P2": 0.14,
+        "P3": 0.51,
+        "P4": 0.28
+      },
+      "needs": {
+        "aid": 0.7,
+        "information": 0.14,
+        "food": 0.1,
+        "shelter": 0.06
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - a sister staying in the house is not on the payment list Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: a sister staying in the house is not on the payment list Gateway reason: {reason}"
+        },
+        {
+          "id": "sapling",
+          "kind": "sapling",
+          "when": "aid",
+          "delay_ms": 700,
+          "source": "simulated",
+          "verdict": "unsure",
+          "text": "Sapling: aid claim checked - unsure. Simulated verdict. The stub gateway did not return sapling_verdict."
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    },
+    "C01-a": {
+      "fixture_id": "C01-a",
+      "system_hint": "system_2",
+      "top_need": "water",
+      "scores": {
+        "P1": 0.22,
+        "P2": 0.14,
+        "P3": 0.56,
+        "P4": 0.08
+      },
+      "needs": {
+        "water": 0.48,
+        "rescue": 0.32,
+        "medical": 0.12,
+        "food": 0.08
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - the words ask for drinking water; the case is a rescue Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: the words ask for drinking water; the case is a rescue Gateway reason: {reason}"
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    },
+    "C01-b": {
+      "fixture_id": "C01-b",
+      "system_hint": "system_2",
+      "top_need": "water",
+      "scores": {
+        "P1": 0.24,
+        "P2": 0.16,
+        "P3": 0.52,
+        "P4": 0.08
+      },
+      "needs": {
+        "water": 0.46,
+        "rescue": 0.34,
+        "medical": 0.12,
+        "food": 0.08
+      },
+      "steps": [
+        {
+          "id": "memory",
+          "kind": "memory",
+          "delay_ms": 520,
+          "source": "simulated",
+          "text": "Mubit fetched {memory_count} for this household."
+        },
+        {
+          "id": "flood",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "flood",
+          "text": "Tool called: flood depth lookup (flood.json)."
+        },
+        {
+          "id": "shelter",
+          "kind": "tool",
+          "delay_ms": 560,
+          "source": "simulated",
+          "fill": "shelter",
+          "text": "Tool called: nearest shelter."
+        },
+        {
+          "id": "s1",
+          "kind": "system_1",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 1 classified: {top_need}, {guess}, confidence {confidence}, {verdict}."
+        },
+        {
+          "id": "handoff",
+          "kind": "handoff",
+          "when": "rejected",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Escalated to System 2: Nemotron reasoning - water bottles; the case is a rescue Simulated. system2.orchestrator_model is still TODO_HUMAN."
+        },
+        {
+          "id": "s2",
+          "kind": "system_2",
+          "when": "rejected",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2: water bottles; the case is a rescue Gateway reason: {reason}"
+        },
+        {
+          "id": "router",
+          "kind": "router",
+          "delay_ms": 620,
+          "source": "simulated",
+          "text": "Decision router: {next_action}."
+        }
+      ]
+    }
+  }
+}
