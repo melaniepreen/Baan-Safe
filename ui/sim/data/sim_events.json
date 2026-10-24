@@ -14,11 +14,11 @@
   },
   "event_fields": {
     "id": "Stable step id inside the scenario.",
-    "kind": "memory | tool | system_1 | handoff | system_2 | sapling | router",
+    "kind": "memory | tool | system_1 | handoff | system_2 | sapling | router | operator_approval | dispatch",
     "text": "Plain English. Placeholders: {memory_count} {top_need} {guess} {confidence} {verdict} {reason} {next_action} {priority} {route}.",
     "delay_ms": "How long to wait before revealing the next step. The page shortens this while Play 20 calls is running.",
     "source": "simulated today. Use gateway when the object came from the live stream.",
-    "when": "Optional. rejected skips the step when System 1 is at or above the threshold. aid plays only when the stub route is aid_caseworker or a need is aid_payment.",
+    "when": "Optional. rejected skips the step when System 1 is at or above the threshold. aid plays only when the stub route is aid_caseworker or a need is aid_payment. approved plays only after the operator presses Accept. operator_approval uses rejected, so it plays when the call is with System 2. dispatch uses approved, so it follows that Accept.",
     "fill": "Optional. flood or shelter. The page fills the following line from flood.json / the drawn shelter path.",
     "verdict": "Optional simulated Sapling label: supported, violation, missing, or unsure. Not a sapling_verdict from the gateway."
   },
@@ -98,6 +98,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     },
@@ -176,6 +192,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     },
@@ -254,6 +286,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     },
@@ -332,6 +380,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     },
@@ -410,6 +474,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     },
@@ -488,6 +568,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     },
@@ -566,6 +662,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     },
@@ -644,6 +756,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     },
@@ -722,6 +850,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     },
@@ -800,6 +944,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     },
@@ -878,6 +1038,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     },
@@ -956,6 +1132,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     },
@@ -1034,6 +1226,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     },
@@ -1112,6 +1320,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     },
@@ -1190,6 +1414,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     },
@@ -1268,6 +1508,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     },
@@ -1355,6 +1611,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     },
@@ -1442,6 +1714,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     },
@@ -1520,6 +1808,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     },
@@ -1598,6 +1902,22 @@
           "delay_ms": 620,
           "source": "simulated",
           "text": "Decision router: {next_action}."
+        },
+        {
+          "id": "approval",
+          "kind": "operator_approval",
+          "when": "rejected",
+          "delay_ms": 420,
+          "source": "simulated",
+          "text": "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}."
+        },
+        {
+          "id": "dispatch",
+          "kind": "dispatch",
+          "when": "approved",
+          "delay_ms": 480,
+          "source": "simulated",
+          "text": "Dispatched after operator approval. Rulebook draft {rule_id}: {action}"
         }
       ]
     }

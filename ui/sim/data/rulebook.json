@@ -58,7 +58,7 @@
     {
       "id": "p3-welfare",
       "when": { "priority": "P3" },
-      "action": "P3 food or water: supply boat from the water desk to the house.",
+      "action": "P3 food or water: supply boat from Sun Chuai Lue Nam Thuam to the house.",
       "vehicle": "van",
       "outbound": "welfare",
       "return_to": null,

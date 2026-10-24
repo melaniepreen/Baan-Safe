@@ -37,12 +37,12 @@ SOUTH_SOIS = {
     "soi-chamlong-fai": "Soi Sukhumvit 42",
 }
 LANDMARKS = {
-    "bldg-school": "School",
+    "bldg-school": "XCL American School",
     "bldg-tower-white": "White apartment block",
-    "bldg-tower-pink": "Pink apartment block",
+    "bldg-tower-pink": "Baan Chompoo Apartment",
     "bldg-shelter": "Evacuation shelter",
     "bldg-clinic": "Clinic",
-    "bldg-welfare": "Water desk",
+    "bldg-welfare": "Sun Chuai Lue Nam Thuam",
     "bldg-jetty": "Jetty",
     "bldg-temple": "Wat That Thong",
     "bldg-sala": "Sala",
@@ -404,6 +404,27 @@ def test_activity_prompts_and_rulebook_are_draft_simulations():
     assert "฿" not in blob
     subprocess.run(["node", "ui/sim/check_hospital.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_patterns.mjs"], cwd=ROOT, check=True)
+    subprocess.run(["node", "ui/sim/check_approval.mjs"], cwd=ROOT, check=True)
+    subprocess.run(["node", "ui/sim/check_titles.mjs"], cwd=ROOT, check=True)
+    assert 'id="rl-open"' not in (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
+    assert "initRlPanel" not in (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
+    assert "No patterns yet — repeated calls will show up here" in (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
+    for scenario in events["scenarios"].values():
+        kinds = [step["kind"] for step in scenario["steps"]]
+        assert kinds.index("operator_approval") < kinds.index("dispatch")
+        approval = next(step for step in scenario["steps"] if step["kind"] == "operator_approval")
+        dispatch = next(step for step in scenario["steps"] if step["kind"] == "dispatch")
+        assert approval["when"] == "rejected"
+        assert dispatch["when"] == "approved"
+    assert "operator_approval" in events["event_fields"]["kind"]
+    source = (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
+    assert "needsOperatorApproval" in source
+    assert "An operator is reviewing your request now." in source
+    assert "Awaiting operator approval" in source
+    assert "An operator is reassigning this request. Nothing has been sent." in source
+    assert 'approval: gated ? "pending" : "dispatched"' in source
+    assert "if (gated)" in source
+    assert "if (review.approval === \"pending\")" in source
 
 
 def test_scripted_replies_stay_in_human_language():
@@ -463,7 +484,7 @@ def test_town_copy_uses_sukhumvit_names_and_logo_colours():
     assert names["boat-fictional-01"] == "Rescue boat"
     assert names["amb-fictional-01"] == "Clinic ambulance"
     assert names["shelter-fictional-01"] == "Evacuation shelter"
-    assert names["welfare-fictional-01"] == "Water desk"
+    assert names["welfare-fictional-01"] == "Sun Chuai Lue Nam Thuam"
     labels = {route["id"]: route["label"] for route in town["routes"]}
     assert labels["route-f06-evac"] == "F06 walk to the evacuation shelter"
     assert labels["route-f10-rescue"] == "F10 boat from the jetty"

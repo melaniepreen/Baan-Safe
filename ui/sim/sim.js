@@ -7,7 +7,8 @@
    Houses, streets, flood polygons, and routes come from ./data.
 */
 import { mountCorrectForm } from "../correct.js";
-import { initRlPanel } from "./rl_panel.js";
+import { needsOperatorApproval } from "./approval.js";
+import { callSummary } from "./call_title.js";
 import { decidePath, PATTERN_KEY, withTop } from "./patterns.js";
 import { legsFromPath, nearestNode, walk } from "./route_walk.js";
 import { Application, Container, Graphics, Text } from "./vendor/pixi.min.mjs";
@@ -101,6 +102,8 @@ const STEP_META = {
   system_2: { icon: "2", kicker: "System 2 · Nemotron" },
   sapling: { icon: "S", kicker: "Sapling" },
   router: { icon: "R", kicker: "Decision router" },
+  operator_approval: { icon: "A", kicker: "Operator approval" },
+  dispatch: { icon: "D", kicker: "Dispatch" },
   rule: { icon: "D", kicker: "Dispatch" },
 };
 
@@ -1133,9 +1136,10 @@ function advanceTrips(deltaMS) {
 const OUTLINE_HEX = { P1: 0xff3b30, P2: 0xff9f1a, P3: 0x3ddc84, P4: 0xc084fc };
 const CALLER_OUTLINE = 0xff3b30;
 const DEST_OUTLINE = 0x2f6bff;
+const PENDING_OUTLINE = 0xed7401;
 
 function activeDestinationId() {
-  if (!review || !review.rule) return null;
+  if (!review || !review.rule || review.approval === "pending" || review.approval === "rejected") return null;
   const rule = review.rule;
   if (rule.return_to === "clinic" || rule.id === "p1-medical" || rule.id === "hospital-flood") return "bldg-clinic";
   if (rule.return_to === "shelter" || rule.vehicle === "truck") return "bldg-shelter";
@@ -1144,7 +1148,10 @@ function activeDestinationId() {
 
 function outlineColorFor(id) {
   const call = activeCallId && town ? town.calls.find((item) => item.id === activeCallId) : null;
-  if (call && call.building_id === id) return CALLER_OUTLINE;
+  if (call && call.building_id === id) {
+    if (review && review.approval === "pending" && review.call && review.call.building_id === id) return PENDING_OUTLINE;
+    return CALLER_OUTLINE;
+  }
   if (activeDestinationId() === id) return DEST_OUTLINE;
   if (town) {
     for (const item of town.calls) {
@@ -2074,7 +2081,8 @@ function renderDecisionLog(rows) {
   list.replaceChildren();
   for (const row of rows || readLog()) {
     const when = new Date(row.at).toLocaleString("en-GB", { timeZone: "Europe/London", hour12: false });
-    list.append(el("li", null, when + " London · " + row.fixture_id + " · " + row.priority + " · " + row.rule_id + " · " + row.operator));
+    const title = row.title ? row.title + " · " : "";
+    list.append(el("li", null, when + " London · " + title + row.fixture_id + " · " + row.priority + " · " + row.rule_id + " · " + row.operator));
   }
 }
 
@@ -2130,24 +2138,51 @@ function readPatterns() {
   }
 }
 
+function patternStatus(row) {
+  if (row.lifeSafety && !row.confirmed) return "Needs approval";
+  if (row.owner === "system_1") return "Promoted";
+  return "Learning";
+}
+
+function formatSeen(iso) {
+  if (!iso) return "—";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleString("en-GB", {
+    timeZone: "Europe/London",
+    hour12: false,
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 function renderPatterns(rows) {
-  const list = document.getElementById("pattern-list");
-  if (!list) return;
+  const table = document.getElementById("pattern-list");
+  const empty = document.getElementById("pattern-empty");
+  if (!table) return;
   const data = rows || readPatterns();
-  list.replaceChildren();
-  if (!data.length) {
-    list.append(el("li", null, "No patterns yet."));
-    return;
-  }
+  const body = table.querySelector("tbody");
+  if (body) body.replaceChildren();
+  if (empty) empty.hidden = data.length > 0;
+  table.hidden = data.length === 0;
+  if (!body || !data.length) return;
   for (const row of data) {
-    const item = document.createElement("li");
-    const owner = row.owner === "system_1" ? "System 1" : "System 2";
-    let note = owner;
-    if (row.lifeSafety && !row.confirmed) note += " · needs confirm";
-    else if (row.confirmed && row.owner !== "system_1") note += " · confirmed";
-    item.append(el("span", null, row.label + " · " + row.count));
-    item.append(el("span", null, note));
-    list.append(item);
+    const tr = document.createElement("tr");
+    const path = row.owner === "system_1" ? "System 1" : "System 2";
+    const status = patternStatus(row);
+    const statusClass = status === "Needs approval" ? "approval" : status === "Promoted" ? "promoted" : "learning";
+    tr.append(el("td", null, row.label));
+    tr.append(el("td", "num", String(row.count)));
+    const pathCell = document.createElement("td");
+    pathCell.append(el("span", "pat-badge " + (row.owner === "system_1" ? "s1" : "s2"), path));
+    tr.append(pathCell);
+    const statusCell = document.createElement("td");
+    statusCell.append(el("span", "pat-status " + statusClass, status));
+    tr.append(statusCell);
+    tr.append(el("td", null, formatSeen(row.lastSeen)));
+    body.append(tr);
   }
 }
 
@@ -2168,6 +2203,7 @@ function rememberPattern(theme, decision, path, stored, consistent) {
     confirmed: !!(stored && stored.confirmed && consistent),
     lifeSafety: !!theme.life_safety,
     learns: theme.learns !== false,
+    lastSeen: new Date().toISOString(),
   });
   writePatterns(rows.slice(0, 24));
 }
@@ -2304,6 +2340,102 @@ function pathFor(call, decision, scenario) {
   return { theme, stored, consistent, scores: withTop(baseScores, baseTop.key, path.confidence), path };
 }
 
+function vehicleLabel(rule) {
+  if (!rule || rule.vehicle === "none") return "No vehicle";
+  if (rule.vehicle === "pulse") return "SMS pulse";
+  if (rule.vehicle === "boat") return "Rescue boat";
+  if (rule.vehicle === "van") return "Supply boat";
+  if (rule.vehicle === "truck") return "Evacuation boat";
+  return String(rule.vehicle);
+}
+
+function destinationLabel(rule) {
+  if (!rule || rule.vehicle === "none") return "No destination";
+  if (rule.vehicle === "pulse") return "This phone";
+  if (rule.return_to === "clinic" || rule.id === "p1-medical" || rule.id === "hospital-flood") return "Clinic";
+  if (rule.return_to === "shelter" || rule.vehicle === "truck") return "Evacuation shelter";
+  return "The caller's house";
+}
+
+function etaLabel(rule) {
+  if (rule && rule.eta_min) return String(rule.eta_min);
+  if (!rule || rule.vehicle === "none" || rule.vehicle === "pulse") return "none";
+  if (rule.vehicle === "boat") return "12";
+  if (rule.vehicle === "truck") return "15";
+  return "20";
+}
+
+function proposalText(rule) {
+  const eta = etaLabel(rule);
+  const etaBit = eta === "none" ? "No ETA." : "About " + eta + " minutes.";
+  return vehicleLabel(rule) + " to " + destinationLabel(rule) + ". " + etaBit + " Rule " + (rule.id || "none") + ": " + (rule.action || "");
+}
+
+function clearApprovalChrome() {
+  const gate = document.getElementById("approval-gate");
+  if (gate) gate.classList.remove("pending");
+  const banner = document.getElementById("approval-banner");
+  if (banner) banner.hidden = true;
+  const frame = document.getElementById("dispatch-pending");
+  if (frame) frame.hidden = true;
+}
+
+function showApproval(rule) {
+  const gate = document.getElementById("approval-gate");
+  if (gate) gate.classList.add("pending");
+  const banner = document.getElementById("approval-banner");
+  const status = document.getElementById("approval-status");
+  const proposal = document.getElementById("approval-proposal");
+  if (status) status.textContent = "Awaiting operator approval";
+  if (proposal) proposal.textContent = proposalText(rule);
+  if (banner) banner.hidden = false;
+  const frame = document.getElementById("dispatch-pending");
+  const frameText = document.getElementById("dispatch-pending-text");
+  if (frameText) frameText.textContent = "Awaiting operator approval. " + proposalText(rule);
+  if (frame) frame.hidden = false;
+  if (gate) gate.scrollIntoView({ block: "nearest" });
+}
+
+function scenarioKind(scenario, kind) {
+  return ((scenario && scenario.steps) || []).find((step) => step.kind === kind) || null;
+}
+
+function revealDispatch(review) {
+  const step = review.dispatchStep;
+  const list = document.getElementById("flow");
+  if (!step || !list) return;
+  const headline = applyTemplate(step.text, review.bag || {}).replace(/\s*Gateway reason:.*$/i, "").trim();
+  const item = renderFlowCard(step, headline, []);
+  item.classList.remove("wait");
+  item.classList.add("on");
+  list.append(item);
+  item.scrollIntoView({ block: "nearest" });
+}
+
+function logEntry(call, decision, rule, operator, action) {
+  return {
+    case_id: decision.case_id || call.id,
+    fixture_id: call.id,
+    title: activeSummary,
+    priority: decision.final_priority,
+    route: decision.final_route,
+    rule_id: rule.id,
+    action: action || rule.action,
+    operator,
+    at: new Date().toISOString(),
+  };
+}
+
+let activeSummary = "";
+
+function showCallTitle(title) {
+  activeSummary = title || "";
+  const heading = document.getElementById("call-heading");
+  if (heading) heading.textContent = title || "No call yet";
+  const frame = document.getElementById("dispatch-pending-title");
+  if (frame) frame.textContent = title || "";
+}
+
 async function playFeed(call, decision, trace, text, fast) {
   const token = ++flowToken;
   const scenario = eventsFile && eventsFile.scenarios ? eventsFile.scenarios[call.id] : null;
@@ -2313,10 +2445,13 @@ async function playFeed(call, decision, trace, text, fast) {
   const top = topScore(scores);
   const path = planned.path;
   const accepted = path.accepted;
+  const gated = needsOperatorApproval(decision, path);
   const source = (decision.source_outcomes && decision.source_outcomes[0]) || {};
   const aid = decision.final_route === "aid_caseworker" || (source.needs || []).map(String).includes("aid_payment");
+  const rule = matchRule(call, decision, text);
   renderScores(scores, needs, accepted);
   setPriorityBadge(decision.final_priority);
+  clearApprovalChrome();
   const list = document.getElementById("flow");
   list.replaceChildren();
   for (const id of ["op-accept", "op-reject"]) {
@@ -2333,8 +2468,14 @@ async function playFeed(call, decision, trace, text, fast) {
     next_action: String(decision.next_action || "").replaceAll("_", " "),
     priority: decision.final_priority,
     route: String(decision.final_route || "").replaceAll("_", " "),
+    vehicle: vehicleLabel(rule),
+    destination: destinationLabel(rule),
+    eta: etaLabel(rule),
+    rule_id: rule.id,
+    action: rule.action,
   };
   const steps = (scenario ? scenario.steps : []).filter((step) => {
+    if (step.kind === "operator_approval" || step.kind === "dispatch") return false;
     if (step.when === "rejected" && accepted) return false;
     if (step.when === "accepted" && !accepted) return false;
     if (step.when === "aid" && !aid) return false;
@@ -2351,18 +2492,52 @@ async function playFeed(call, decision, trace, text, fast) {
       text: path.explain,
     });
   }
-  const rule = matchRule(call, decision, text);
-  steps.push({
-    id: "rule",
-    kind: "rule",
-    delay_ms: 480,
-    source: "simulated",
-    text: "Rulebook draft " + rule.id + ": " + rule.action,
-  });
+  const cascaded = (decision.source_outcomes || []).length > 1;
+  if (cascaded && !steps.some((step) => step.kind === "handoff")) {
+    const patternAt = steps.findIndex((step) => step.id === "pattern");
+    const at = patternAt >= 0 ? patternAt : steps.findIndex((step) => step.kind === "system_1");
+    steps.splice(Math.max(0, at + 1), 0, {
+      id: "cascade",
+      kind: "handoff",
+      delay_ms: 640,
+      source: "gateway",
+      text: "Cascade: System 1 escalated and System 2 decided this turn.",
+    });
+  }
+  let dispatchStep = null;
+  if (gated) {
+    dispatchStep = scenarioKind(scenario, "dispatch") || {
+      id: "dispatch",
+      kind: "dispatch",
+      delay_ms: 480,
+      source: "simulated",
+      text: "Dispatched after operator approval. Rulebook draft {rule_id}: {action}",
+    };
+    steps.push(
+      scenarioKind(scenario, "operator_approval") || {
+        id: "approval",
+        kind: "operator_approval",
+        delay_ms: 420,
+        source: "simulated",
+        text: "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}.",
+      }
+    );
+  } else {
+    steps.push({
+      id: "rule",
+      kind: "rule",
+      delay_ms: 480,
+      source: "simulated",
+      text: "Rulebook draft " + rule.id + ": " + rule.action,
+    });
+  }
   if (planned.theme) rememberPattern(planned.theme, decision, path, planned.stored, planned.consistent);
   setFeedProgress(0, steps.length);
   for (const step of steps) {
     let headline = applyTemplate(step.text, bag).replace(/\s*Gateway reason:.*$/i, "").trim();
+    if (step.kind === "operator_approval") {
+      headline = "PENDING APPROVAL. " + (activeSummary ? activeSummary + ". " : "") + headline;
+    }
     if (step.kind === "memory" && path.timesBefore > 0 && planned.stored && planned.consistent) {
       const seen = path.timesBefore;
       headline =
@@ -2375,6 +2550,7 @@ async function playFeed(call, decision, trace, text, fast) {
         ".";
     }
     const item = renderFlowCard(step, headline, stepDetail(step, call, decision, source, bag));
+    if (step.kind === "operator_approval") item.classList.add("pending");
     list.append(item);
     step._item = item;
   }
@@ -2392,21 +2568,32 @@ async function playFeed(call, decision, trace, text, fast) {
   }
   if (token !== flowToken) return;
   highlightRule(rule.id);
-  const entry = pushDecisionLog({
-    case_id: decision.case_id || call.id,
-    fixture_id: call.id,
-    priority: decision.final_priority,
-    route: decision.final_route,
-    rule_id: rule.id,
-    action: rule.action,
-    operator: "pending",
-    at: new Date().toISOString(),
-  });
-  review = { call, decision, rule, entryId: entry.id, themeId: planned.theme ? planned.theme.id : null };
+  review = {
+    call,
+    decision,
+    rule,
+    entryId: null,
+    themeId: planned.theme ? planned.theme.id : null,
+    text,
+    bag,
+    dispatchStep,
+    approval: gated ? "pending" : "dispatched",
+  };
   for (const id of ["op-accept", "op-reject"]) {
     const button = document.getElementById(id);
     if (button) button.disabled = false;
   }
+  if (gated) {
+    trips = [];
+    drawTrips(0);
+    showApproval(rule);
+    setPhoneStatus("Awaiting operator approval");
+    drawCallLights();
+    drawSelection();
+    return;
+  }
+  const entry = pushDecisionLog(logEntry(call, decision, rule, "pending"));
+  review.entryId = entry.id;
   startTrip(call, rule);
 }
 
@@ -2430,7 +2617,22 @@ function attachLiveFeed(source) {
 
 function acceptReview() {
   if (!review) return;
-  updateDecisionLog(review.entryId, { operator: "accepted" });
+  if (review.approval === "pending") {
+    review.approval = "dispatched";
+    const entry = pushDecisionLog(logEntry(review.call, review.decision, review.rule, "dispatched"));
+    review.entryId = entry.id;
+    revealDispatch(review);
+    startTrip(review.call, review.rule);
+    const reply = operatorReply(review.decision, review.call, review.text || "");
+    pushPhone("operator", reply.en, reply.th);
+    pushPhone("note", "Scripted reply, not a live operator.");
+    setPhoneStatus("Dispatched");
+    clearApprovalChrome();
+    drawCallLights();
+    drawSelection();
+  } else if (review.entryId) {
+    updateDecisionLog(review.entryId, { operator: "accepted" });
+  }
   if (review.themeId) {
     const rows = readPatterns();
     const row = rows.find((item) => item.id === review.themeId);
@@ -2445,9 +2647,21 @@ function acceptReview() {
 
 function rejectReview() {
   if (!review) return;
-  updateDecisionLog(review.entryId, { operator: "rejected" });
-  trips = [];
-  drawTrips(0);
+  if (review.approval === "pending") {
+    review.approval = "rejected";
+    pushDecisionLog(logEntry(review.call, review.decision, review.rule, "rejected", "Rejected before dispatch. " + review.rule.action));
+    trips = [];
+    drawTrips(0);
+    pushPhone("operator", "An operator is reassigning this request. Nothing has been sent.");
+    setPhoneStatus("Reassigning");
+    clearApprovalChrome();
+    drawCallLights();
+    drawSelection();
+  } else {
+    updateDecisionLog(review.entryId, { operator: "rejected" });
+    trips = [];
+    drawTrips(0);
+  }
   showCorrection(review.call.id);
   document.getElementById("op-accept").disabled = true;
   document.getElementById("op-reject").disabled = true;
@@ -2587,9 +2801,18 @@ async function runPlaceCall(text, choice, options = {}) {
       node.classList.add("done");
     }
     if (speak) {
-      const reply = operatorReply(decision, call, spoken);
-      pushPhone("operator", reply.en, reply.th);
-      pushPhone("note", "Scripted reply, not a live operator.");
+      showCallTitle(callSummary({ title: call.title, text: spoken }));
+      const scenario = eventsFile && eventsFile.scenarios ? eventsFile.scenarios[call.id] : null;
+      const planned = pathFor(call, decision, scenario);
+      const gated = needsOperatorApproval(decision, planned.path);
+      if (gated) {
+        setPhoneStatus("Awaiting operator approval");
+        pushPhone("operator", "An operator is reviewing your request now.");
+      } else {
+        const reply = operatorReply(decision, call, spoken);
+        pushPhone("operator", reply.en, reply.th);
+        pushPhone("note", "Scripted reply, not a live operator.");
+      }
       await playFeed(call, decision, trace, spoken, callPlaying);
     }
   } catch (error) {
@@ -2723,7 +2946,10 @@ function drawCallLights() {
     colors.set(call.building_id, OUTLINE_HEX[decision.final_priority] || CALLER_OUTLINE);
   }
   const caller = activeCallId ? town.calls.find((item) => item.id === activeCallId) : null;
-  if (caller) colors.set(caller.building_id, CALLER_OUTLINE);
+  if (caller) {
+    const pending = review && review.approval === "pending" && review.call && review.call.id === caller.id;
+    colors.set(caller.building_id, pending ? PENDING_OUTLINE : CALLER_OUTLINE);
+  }
   const dest = activeDestinationId();
   if (dest && (!caller || dest !== caller.building_id)) colors.set(dest, DEST_OUTLINE);
   for (const [id, color] of colors) {
@@ -2818,6 +3044,7 @@ function resetCalls() {
   live.correctionNote = null;
   review = null;
   trips = [];
+  clearApprovalChrome();
   select(null, false);
   const correctHost = document.getElementById("correct-host");
   if (correctHost) correctHost.replaceChildren();
@@ -2839,6 +3066,7 @@ function resetCalls() {
   setPriorityBadge(null);
   setFeedProgress(0, 0);
   renderPatterns();
+  showCallTitle("");
   document.getElementById("phone-log").replaceChildren();
   document.querySelectorAll("[data-priority]").forEach((button) => button.classList.remove("on"));
   const node = document.getElementById("mubit-node");
@@ -2848,7 +3076,6 @@ function resetCalls() {
 }
 
 function bindChrome() {
-  initRlPanel(document);
   document.getElementById("view-fit").addEventListener("click", fitTown);
   document.getElementById("view-dispatch").addEventListener("click", () => {
     const camera = town.meta.camera;
@@ -3060,6 +3287,8 @@ window.BaanSafeSim = {
   select: (id) => select(id, true),
   getBuilding: (id) => (town ? buildingById(id) : null),
   attachLiveFeed,
+  tripCount: () => trips.length,
+  approvalPhase: () => (review ? review.approval : null),
 };
 
 main().catch((error) => {
