@@ -1,0 +1,76 @@
+{
+  "draft": true,
+  "label": "DRAFT suggestions pending Melanie's confirmation. Not repo policy. config/priorities.yaml is the priority text. These rows only choose which picture to draw.",
+  "rules": [
+    {
+      "id": "hospital-flood",
+      "when": { "text": "hospital", "flooded": true },
+      "action": "Needs a hospital and the street is flooded: send a boat to the fictional clinic.",
+      "vehicle": "boat",
+      "outbound": "rescue",
+      "return_to": "clinic",
+      "eta_min": 12
+    },
+    {
+      "id": "p1-medical",
+      "when": { "priority": "P1", "needs_any": ["medical"] },
+      "action": "P1 medical dependent (oxygen, dialysis): boat and a medical team from the jetty, then to the clinic.",
+      "vehicle": "boat",
+      "outbound": "rescue",
+      "return_to": "clinic",
+      "eta_min": 12
+    },
+    {
+      "id": "p1-rescue",
+      "when": { "priority": "P1" },
+      "action": "P1 trapped or rising water: rescue boat from the jetty, then on to the shelter.",
+      "vehicle": "boat",
+      "outbound": "rescue",
+      "return_to": "shelter",
+      "eta_min": 10
+    },
+    {
+      "id": "p2-evac",
+      "when": { "priority": "P2" },
+      "action": "P2 evacuate: truck from the shelter to the house, then back to the shelter. A flooded segment of that drawn path uses a boat.",
+      "vehicle": "truck",
+      "outbound": "evac",
+      "return_to": "shelter",
+      "eta_min": 15
+    },
+    {
+      "id": "aid-review",
+      "when": { "route": "aid_caseworker" },
+      "action": "Aid eligibility or denial: no vehicle. A human caseworker reviews. This is the check Sapling's scope names.",
+      "vehicle": "none",
+      "outbound": null,
+      "return_to": null
+    },
+    {
+      "id": "p3-shelter",
+      "when": { "priority": "P3", "needs_any": ["shelter"] },
+      "action": "P3 shelter question: truck from the shelter to the house, then back. No supply van.",
+      "vehicle": "truck",
+      "outbound": "evac",
+      "return_to": "shelter",
+      "eta_min": 15
+    },
+    {
+      "id": "p3-welfare",
+      "when": { "priority": "P3" },
+      "action": "P3 food or water: welfare van from the water desk to the house.",
+      "vehicle": "van",
+      "outbound": "welfare",
+      "return_to": null,
+      "eta_min": 20
+    },
+    {
+      "id": "p4-sms",
+      "when": { "priority": "P4" },
+      "action": "P4 information: SMS broadcast pulse at the house. No vehicle leaves a depot.",
+      "vehicle": "pulse",
+      "outbound": "notice",
+      "return_to": null
+    }
+  ]
+}
