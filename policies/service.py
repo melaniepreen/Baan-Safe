@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -187,6 +188,14 @@ def _check_scope(jurisdiction: str | None, domain: str | None) -> None:
         raise PolicyError("domain must be aid_eligibility, safeguarding, or triage.")
 
 
+def _default_pin_dir() -> Path:
+    """POLICY_PIN_DIR is the writable pin directory. Unset keeps the repo path."""
+    raw = os.environ.get("POLICY_PIN_DIR", "").strip()
+    if raw:
+        return Path(raw)
+    return ROOT / "var" / "policy-pins"
+
+
 def _terms(text: str) -> set[str]:
     found: set[str] = set()
     for token in _TOKEN.findall(text.lower()):
@@ -205,7 +214,7 @@ class PolicyService:
         pin_dir: Path | None = None,
     ) -> None:
         self.adapters = [LocalYamlAdapter()] if adapters is None else list(adapters)
-        self.pin_dir = pin_dir if pin_dir is not None else ROOT / "var" / "policy-pins"
+        self.pin_dir = pin_dir if pin_dir is not None else _default_pin_dir()
         self._memory: dict[str, Snapshot] = {}
         self._runs: dict[str, str] = {}
         self._current: Snapshot | None = None

@@ -2,12 +2,22 @@
 
 from __future__ import annotations
 
+import os
 import sqlite3
 from pathlib import Path
 
 from paths import ROOT
 
-DB_PATH = ROOT / "data" / "processed" / "baansafe.sqlite"
+
+def _default_db_path() -> Path:
+    """BAANSAFE_DB_PATH overrides the repo file. Read when this module is imported."""
+    raw = os.environ.get("BAANSAFE_DB_PATH", "").strip()
+    if raw:
+        return Path(raw)
+    return ROOT / "data" / "processed" / "baansafe.sqlite"
+
+
+DB_PATH = _default_db_path()
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS flood_extent (
