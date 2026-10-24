@@ -16,7 +16,7 @@ files:
 
 Country packs are an unloaded description of how BaanSafe would bind locale, hotlines, a triage scale, a gazetteer, data providers, and an aid corpus for one country. Thailand stays the default and the demo. `countries/th/pack.yaml` records that setup. `countries/ph/` is a worked example for the Philippines. Nothing under `countries/` is imported.
 
-The inventory below has **48** Thailand-specific assumptions. Each row is one hardcoded choice, with the line that owns it. Memory (`memory/adapter.py`) and the Mubit client (`llm/client.py`) have no country branch. The gateway chooser (`gateway/chooser.py`) only evaluates `config/escalation.yaml`. Police **191** and fire **199** are real public codes and are **not** in the runtime. They are in the Thailand pack as verified, unwired numbers.
+The inventory below has **49** Thailand-specific assumptions. Each row is one hardcoded choice, with the line that owns it. Memory (`memory/adapter.py`) and the Mubit client (`llm/client.py`) have no country branch. The gateway chooser (`gateway/chooser.py`) only evaluates `config/escalation.yaml`. Police **191** and fire **199** are real public codes and are **not** in the runtime. They are in the Thailand pack as verified, unwired numbers.
 
 ## Key files
 
@@ -68,8 +68,8 @@ The inventory below has **48** Thailand-specific assumptions. Each row is one ha
 | 32 | Flood polygons come from the GISTDA feature API and MapServer, filtered by `pv_idn`. | `ingest/gistda.py:22` |
 | 33 | A ThaiWater gauge is the 24-hour rain total. Open-Meteo is the fallback. | `ingest/thaiwater.py:21`, `enrich/context.py:67` |
 | 34 | "Today" and the weather timezone are `Asia/Bangkok`. | `ingest/open_meteo.py:26` |
-| 35 | Rain flags are millimetres per 24 hours. Wind is requested in km/h. | `config/escalation.yaml:24`, `ingest/open_meteo.py:127` |
-| 36 | District and gauge match radii are 25 km. The flood buffer flag is 500 m. | `config/ingest.yaml:24`, `config/escalation.yaml:26` |
+| 35 | Rain flags are millimetres per 24 hours. Wind is requested in km/h. | `config/escalation.yaml:32`, `ingest/open_meteo.py:127` |
+| 36 | District and gauge match radii are 25 km. The flood buffer flag is 500 m. | `config/ingest.yaml:24`, `config/escalation.yaml:34` |
 | 37 | GDACS is queried as `country=THA` for August–December 2025. | `ingest/gdacs.py:25` |
 | 38 | HDX search is the string `thailand flood`, plus three Thai dataset ids (GLIDE, IDMC, Hat Yai). | `ingest/hdx.py:86`, `ingest/hdx.py:44` |
 | 39 | Flood-cluster districts are also OSM `admin_level` 6. | `ingest/overpass.py:140` |
@@ -82,6 +82,7 @@ The inventory below has **48** Thailand-specific assumptions. Each row is one ha
 | 46 | A household has a district label and no country field. | `contracts/models.py:203` |
 | 47 | The loaded corpus is four YAML files. ReliefWeb and DDPM hosts are refused. | `policies/corpus.py:20`, `policies/corpus.py:37` |
 | 48 | Town copy sends information questions to TMD, RID, and GISTDA. | `ui/sim/data/responses.json:26` |
+| 49 | The only labels that can graduate a pattern into System 2 include the NIEMS colour and flood labels. | `config/escalation.yaml:19` |
 
 ## Interfaces/contracts
 
@@ -183,7 +184,7 @@ For after the hackathon. The list is the smallest set of code changes that would
 
 The first five are the ones to do before any other country can affect a call.
 
-1. **No country on the request path.** `config/settings.py:20` reads only `config/<name>`. `gateway/route.py:143` calls `extract` with the transcript and no country. `contracts/models.py:203` has a district label and no country. Add an optional country code with default `th`, and a loader that is not called until a later step. Effort: small for the dormant loader, medium to thread it through the gateway. Risk: medium on the hot path, high if the contract field is required. Leave the field off the contract until a human accepts a schema change.
+1. **No country on the request path.** `config/settings.py:20` reads only `config/<name>`. `gateway/route.py:150` calls `extract` with the transcript and no country. `contracts/models.py:203` has a district label and no country. Add an optional country code with default `th`, and a loader that is not called until a later step. Effort: small for the dormant loader, medium to thread it through the gateway. Risk: medium on the hot path, high if the contract field is required. Leave the field off the contract until a human accepts a schema change.
 2. **Extractor, language, and gazetteer.** `system1/extract.py:20` keeps Latin tokens, `:279` reads `admin_districts`, and `:337` builds `Name, Province`. A pack-driven phrase list has to reproduce today's English table on the current fixtures before it accepts another language. Effort: medium. Risk: high. Fixture labels move if a phrase shifts.
 3. **Ingest providers, clock, and admin level.** The Thailand clients are `ingest/open_meteo.py:26` (`Asia/Bangkok`), `ingest/gistda.py:22`, `ingest/thaiwater.py:21`, `ingest/gdacs.py:25` (`country=THA`), `ingest/hdx.py:86` (`thailand flood`), `ingest/admin_districts.py:51` (`TH-{code}` and `admin_level` 6), and `config/ingest.yaml:42` (eight province codes). A registry should call today's functions for `th` and refuse a national URL that is `unverified`. Effort: large. Risk: high. These clients write SQLite and honour robots rules.
 4. **Policy jurisdiction, languages, and the file list.** `policies/schema.py:8` allows only `TH` and `intl`. `policies/schema.py:9` allows only `en` and `th`. `policies/sources/local_yaml.py:35` maps jurisdiction by filename. `policies/corpus.py:20` lists four files. Add a country by a new adapter pointed at `countries/<iso2>/policy-pack.yaml`. Do not move the Thailand YAML. The corpus hash is the file bytes. Effort: medium. Risk: high.
@@ -194,4 +195,4 @@ Later, still after the hackathon, and only once the five above keep the Thai fix
 - Speech default. `infra/modal/stt_app.py:62` posts `language=th`. Read the pack language only when the request omitted one. Effort: small. Risk: low if the default stays `th`. `modal.stt_model_id` stays `TODO_HUMAN`.
 - Sapling language gate. `system2/sapling_client.py:199` refuses non-English. Do not send another language until `sapling.thai_handling` is decided. Effort: small. Risk: high if the gate is removed.
 - Router district match. `router/merge.py:138` uses a substring of the location string, and `:27` sends rescue to a boat. Boats are a resource kind for this flood demo, not a national rule. Effort: small. Risk: medium if the location format changes.
-- Enrichment thresholds. `config/escalation.yaml:24` flags 30 mm in 24 hours for every caller. A pack may name a different flag later. It must not change the Thai flag in the same change. Effort: small. Risk: medium.
+- Enrichment thresholds. `config/escalation.yaml:32` flags 30 mm in 24 hours for every caller. A pack may name a different flag later. It must not change the Thai flag in the same change. Effort: small. Risk: medium.
