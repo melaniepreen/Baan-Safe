@@ -1,0 +1,138 @@
+{
+  "id": "syn-niems-black-not-a-patient-05-th",
+  "group_id": "syn-niems-black-not-a-patient-05",
+  "lang": "th",
+  "primary_label": "niems_black_not_a_patient",
+  "colour": "black",
+  "labels": [
+    "niems_black_not_a_patient"
+  ],
+  "hard_negatives": [
+    "niems_red_critical",
+    "niems_not_conscious_or_breathing"
+  ],
+  "title": "niems_black_not_a_patient th 5",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "th",
+    "niems_black_not_a_patient",
+    "missing_location",
+    "hard_negative",
+    "missing_location"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "ดิฉัน สม เรือนใจ ไม่มีผู้ป่วย ประกาศน้ำท่วมจะออกเมื่อไร ไม่มีใครบาดเจ็บ"
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "ไม่ทราบอำเภอค่ะ"
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "โทรจากอำเภออะไรคะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ใกล้ศาลาน้ำเงินที่สมมติขึ้น ไม่ทราบอำเภอค่ะ"
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "มีกี่คนคะ"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสองคนค่ะ"
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-niems-black-not-a-patient-05-th",
+    "caller_id_hash": "synthetic:syn-niems-black-not-a-patient-05",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "ดิฉัน สม เรือนใจ ไม่มีผู้ป่วย ประกาศน้ำท่วมจะออกเมื่อไร ไม่มีใครบาดเจ็บ"
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "ไม่ทราบอำเภอค่ะ"
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "โทรจากอำเภออะไรคะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ใกล้ศาลาน้ำเงินที่สมมติขึ้น ไม่ทราบอำเภอค่ะ"
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "มีกี่คนคะ"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสองคนค่ะ"
+      }
+    ],
+    "fields": {
+      "location": null,
+      "location_confidence": null,
+      "people_count": 2,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "information"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T09:13:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P4",
+    "route": "information_only",
+    "needs": [
+      "information"
+    ],
+    "requires_human": false,
+    "missing_evidence": [
+      "location"
+    ],
+    "acceptable_next_questions": [
+      "Which district are you in?"
+    ],
+    "labels": [
+      "niems_black_not_a_patient"
+    ],
+    "action": "ask_next_question"
+  },
+  "notes": "Synthetic niems_black_not_a_patient. Colour black. District was not said. Route information_only on system_2."
+}

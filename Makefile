@@ -2,7 +2,7 @@ PYTHON ?= $(shell test -x .venv/bin/python && echo .venv/bin/python || echo pyth
 export PYTHONPATH := .
 
 .PHONY: validate test replay-stubs demo-stub demo-correction-loop demo-graduation eval-learning sim-eval extract-eval latte-bench serve ingest ingest-refresh data-report \
-	export-training sync push modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune docker-build docker-run
+	export-training export-laya laya-train sync push modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune docker-build docker-run
 
 IMAGE ?= baansafe-api:local
 DATASET ?= eval/out/sft.jsonl
@@ -32,6 +32,7 @@ eval-learning:
 sim-eval:
 	$(PYTHON) -m sim
 
+# EXTRACT_EVAL_SET=fixtures (default, the original 24) | synthetic | all
 extract-eval:
 	$(PYTHON) -m eval.extract_eval
 
@@ -53,8 +54,20 @@ ingest-refresh:
 data-report:
 	$(PYTHON) -m ingest.report
 
+# Event-log export. SYNTHETIC=1 also writes SetFit rows from fixtures/synthetic.
 export-training:
 	$(PYTHON) -m training.export --out "$(TRAINING_OUT)"
+	@if [ "$(SYNTHETIC)" = "1" ]; then $(PYTHON) -m training.synthetic_export --out "$(TRAINING_OUT)"; fi
+
+# Laya JSONL: state.body, one NIEMS colour choice, noul for the other labels.
+# laya-train --data training/out/laya/train.jsonl --eval training/out/laya/held.jsonl \
+#   --base convaiinnovations/laya-multilingual --out training/out/laya-ckpt
+export-laya:
+	$(PYTHON) -m training.laya_export --out "$(TRAINING_OUT)/laya"
+
+# Fine-tune only when LAYA_TRAIN=1 and a GPU or Modal task is present. Otherwise skips.
+laya-train:
+	$(PYTHON) scripts/laya_train.py
 
 # Teammate sync (download): git pull, .env, .venv + pip, Modal check, secrets.
 sync:

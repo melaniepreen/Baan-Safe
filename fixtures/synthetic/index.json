@@ -1,0 +1,3181 @@
+{
+  "seed": 20261024,
+  "call_count": 240,
+  "group_count": 80,
+  "calls": [
+    {
+      "id": "syn-niems-red-critical-01-en",
+      "path": "calls/syn-niems-red-critical-01-en.json",
+      "group_id": "syn-niems-red-critical-01",
+      "lang": "en",
+      "primary_label": "niems_red_critical",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-red-critical-01-th",
+      "path": "calls/syn-niems-red-critical-01-th.json",
+      "group_id": "syn-niems-red-critical-01",
+      "lang": "th",
+      "primary_label": "niems_red_critical",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-red-critical-01-mixed",
+      "path": "calls/syn-niems-red-critical-01-mixed.json",
+      "group_id": "syn-niems-red-critical-01",
+      "lang": "mixed",
+      "primary_label": "niems_red_critical",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-red-critical-02-en",
+      "path": "calls/syn-niems-red-critical-02-en.json",
+      "group_id": "syn-niems-red-critical-02",
+      "lang": "en",
+      "primary_label": "niems_red_critical",
+      "labels": [
+        "niems_red_critical",
+        "flood_trapped",
+        "flood_water_depth",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-red-critical-02-th",
+      "path": "calls/syn-niems-red-critical-02-th.json",
+      "group_id": "syn-niems-red-critical-02",
+      "lang": "th",
+      "primary_label": "niems_red_critical",
+      "labels": [
+        "niems_red_critical",
+        "flood_trapped",
+        "flood_water_depth",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-red-critical-02-mixed",
+      "path": "calls/syn-niems-red-critical-02-mixed.json",
+      "group_id": "syn-niems-red-critical-02",
+      "lang": "mixed",
+      "primary_label": "niems_red_critical",
+      "labels": [
+        "niems_red_critical",
+        "flood_trapped",
+        "flood_water_depth",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-red-critical-03-en",
+      "path": "calls/syn-niems-red-critical-03-en.json",
+      "group_id": "syn-niems-red-critical-03",
+      "lang": "en",
+      "primary_label": "niems_red_critical",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-red-critical-03-th",
+      "path": "calls/syn-niems-red-critical-03-th.json",
+      "group_id": "syn-niems-red-critical-03",
+      "lang": "th",
+      "primary_label": "niems_red_critical",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-red-critical-03-mixed",
+      "path": "calls/syn-niems-red-critical-03-mixed.json",
+      "group_id": "syn-niems-red-critical-03",
+      "lang": "mixed",
+      "primary_label": "niems_red_critical",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-red-critical-04-en",
+      "path": "calls/syn-niems-red-critical-04-en.json",
+      "group_id": "syn-niems-red-critical-04",
+      "lang": "en",
+      "primary_label": "niems_red_critical",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-red-critical-04-th",
+      "path": "calls/syn-niems-red-critical-04-th.json",
+      "group_id": "syn-niems-red-critical-04",
+      "lang": "th",
+      "primary_label": "niems_red_critical",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-red-critical-04-mixed",
+      "path": "calls/syn-niems-red-critical-04-mixed.json",
+      "group_id": "syn-niems-red-critical-04",
+      "lang": "mixed",
+      "primary_label": "niems_red_critical",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-red-critical-05-en",
+      "path": "calls/syn-niems-red-critical-05-en.json",
+      "group_id": "syn-niems-red-critical-05",
+      "lang": "en",
+      "primary_label": "niems_red_critical",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_older_person",
+        "safeguarding_child",
+        "flood_trapped",
+        "flood_water_depth"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-red-critical-05-th",
+      "path": "calls/syn-niems-red-critical-05-th.json",
+      "group_id": "syn-niems-red-critical-05",
+      "lang": "th",
+      "primary_label": "niems_red_critical",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_older_person",
+        "safeguarding_child",
+        "flood_trapped",
+        "flood_water_depth"
+      ],
+      "split": "held_out",
+      "demo": true
+    },
+    {
+      "id": "syn-niems-red-critical-05-mixed",
+      "path": "calls/syn-niems-red-critical-05-mixed.json",
+      "group_id": "syn-niems-red-critical-05",
+      "lang": "mixed",
+      "primary_label": "niems_red_critical",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_older_person",
+        "safeguarding_child",
+        "flood_trapped",
+        "flood_water_depth"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-yellow-urgent-01-en",
+      "path": "calls/syn-niems-yellow-urgent-01-en.json",
+      "group_id": "syn-niems-yellow-urgent-01",
+      "lang": "en",
+      "primary_label": "niems_yellow_urgent",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-yellow-urgent-01-th",
+      "path": "calls/syn-niems-yellow-urgent-01-th.json",
+      "group_id": "syn-niems-yellow-urgent-01",
+      "lang": "th",
+      "primary_label": "niems_yellow_urgent",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-yellow-urgent-01-mixed",
+      "path": "calls/syn-niems-yellow-urgent-01-mixed.json",
+      "group_id": "syn-niems-yellow-urgent-01",
+      "lang": "mixed",
+      "primary_label": "niems_yellow_urgent",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-yellow-urgent-02-en",
+      "path": "calls/syn-niems-yellow-urgent-02-en.json",
+      "group_id": "syn-niems-yellow-urgent-02",
+      "lang": "en",
+      "primary_label": "niems_yellow_urgent",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-yellow-urgent-02-th",
+      "path": "calls/syn-niems-yellow-urgent-02-th.json",
+      "group_id": "syn-niems-yellow-urgent-02",
+      "lang": "th",
+      "primary_label": "niems_yellow_urgent",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-yellow-urgent-02-mixed",
+      "path": "calls/syn-niems-yellow-urgent-02-mixed.json",
+      "group_id": "syn-niems-yellow-urgent-02",
+      "lang": "mixed",
+      "primary_label": "niems_yellow_urgent",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-yellow-urgent-03-en",
+      "path": "calls/syn-niems-yellow-urgent-03-en.json",
+      "group_id": "syn-niems-yellow-urgent-03",
+      "lang": "en",
+      "primary_label": "niems_yellow_urgent",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-yellow-urgent-03-th",
+      "path": "calls/syn-niems-yellow-urgent-03-th.json",
+      "group_id": "syn-niems-yellow-urgent-03",
+      "lang": "th",
+      "primary_label": "niems_yellow_urgent",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-yellow-urgent-03-mixed",
+      "path": "calls/syn-niems-yellow-urgent-03-mixed.json",
+      "group_id": "syn-niems-yellow-urgent-03",
+      "lang": "mixed",
+      "primary_label": "niems_yellow_urgent",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-yellow-urgent-04-en",
+      "path": "calls/syn-niems-yellow-urgent-04-en.json",
+      "group_id": "syn-niems-yellow-urgent-04",
+      "lang": "en",
+      "primary_label": "niems_yellow_urgent",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-yellow-urgent-04-th",
+      "path": "calls/syn-niems-yellow-urgent-04-th.json",
+      "group_id": "syn-niems-yellow-urgent-04",
+      "lang": "th",
+      "primary_label": "niems_yellow_urgent",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-yellow-urgent-04-mixed",
+      "path": "calls/syn-niems-yellow-urgent-04-mixed.json",
+      "group_id": "syn-niems-yellow-urgent-04",
+      "lang": "mixed",
+      "primary_label": "niems_yellow_urgent",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-yellow-urgent-05-en",
+      "path": "calls/syn-niems-yellow-urgent-05-en.json",
+      "group_id": "syn-niems-yellow-urgent-05",
+      "lang": "en",
+      "primary_label": "niems_yellow_urgent",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-yellow-urgent-05-th",
+      "path": "calls/syn-niems-yellow-urgent-05-th.json",
+      "group_id": "syn-niems-yellow-urgent-05",
+      "lang": "th",
+      "primary_label": "niems_yellow_urgent",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-yellow-urgent-05-mixed",
+      "path": "calls/syn-niems-yellow-urgent-05-mixed.json",
+      "group_id": "syn-niems-yellow-urgent-05",
+      "lang": "mixed",
+      "primary_label": "niems_yellow_urgent",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-green-not-severe-01-en",
+      "path": "calls/syn-niems-green-not-severe-01-en.json",
+      "group_id": "syn-niems-green-not-severe-01",
+      "lang": "en",
+      "primary_label": "niems_green_not_severe",
+      "labels": [
+        "niems_green_not_severe"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-green-not-severe-01-th",
+      "path": "calls/syn-niems-green-not-severe-01-th.json",
+      "group_id": "syn-niems-green-not-severe-01",
+      "lang": "th",
+      "primary_label": "niems_green_not_severe",
+      "labels": [
+        "niems_green_not_severe"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-green-not-severe-01-mixed",
+      "path": "calls/syn-niems-green-not-severe-01-mixed.json",
+      "group_id": "syn-niems-green-not-severe-01",
+      "lang": "mixed",
+      "primary_label": "niems_green_not_severe",
+      "labels": [
+        "niems_green_not_severe"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-green-not-severe-02-en",
+      "path": "calls/syn-niems-green-not-severe-02-en.json",
+      "group_id": "syn-niems-green-not-severe-02",
+      "lang": "en",
+      "primary_label": "niems_green_not_severe",
+      "labels": [
+        "niems_green_not_severe"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-green-not-severe-02-th",
+      "path": "calls/syn-niems-green-not-severe-02-th.json",
+      "group_id": "syn-niems-green-not-severe-02",
+      "lang": "th",
+      "primary_label": "niems_green_not_severe",
+      "labels": [
+        "niems_green_not_severe"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-green-not-severe-02-mixed",
+      "path": "calls/syn-niems-green-not-severe-02-mixed.json",
+      "group_id": "syn-niems-green-not-severe-02",
+      "lang": "mixed",
+      "primary_label": "niems_green_not_severe",
+      "labels": [
+        "niems_green_not_severe"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-green-not-severe-03-en",
+      "path": "calls/syn-niems-green-not-severe-03-en.json",
+      "group_id": "syn-niems-green-not-severe-03",
+      "lang": "en",
+      "primary_label": "niems_green_not_severe",
+      "labels": [
+        "niems_green_not_severe"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-green-not-severe-03-th",
+      "path": "calls/syn-niems-green-not-severe-03-th.json",
+      "group_id": "syn-niems-green-not-severe-03",
+      "lang": "th",
+      "primary_label": "niems_green_not_severe",
+      "labels": [
+        "niems_green_not_severe"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-green-not-severe-03-mixed",
+      "path": "calls/syn-niems-green-not-severe-03-mixed.json",
+      "group_id": "syn-niems-green-not-severe-03",
+      "lang": "mixed",
+      "primary_label": "niems_green_not_severe",
+      "labels": [
+        "niems_green_not_severe"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-green-not-severe-04-en",
+      "path": "calls/syn-niems-green-not-severe-04-en.json",
+      "group_id": "syn-niems-green-not-severe-04",
+      "lang": "en",
+      "primary_label": "niems_green_not_severe",
+      "labels": [
+        "niems_green_not_severe"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-green-not-severe-04-th",
+      "path": "calls/syn-niems-green-not-severe-04-th.json",
+      "group_id": "syn-niems-green-not-severe-04",
+      "lang": "th",
+      "primary_label": "niems_green_not_severe",
+      "labels": [
+        "niems_green_not_severe"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-green-not-severe-04-mixed",
+      "path": "calls/syn-niems-green-not-severe-04-mixed.json",
+      "group_id": "syn-niems-green-not-severe-04",
+      "lang": "mixed",
+      "primary_label": "niems_green_not_severe",
+      "labels": [
+        "niems_green_not_severe"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-green-not-severe-05-en",
+      "path": "calls/syn-niems-green-not-severe-05-en.json",
+      "group_id": "syn-niems-green-not-severe-05",
+      "lang": "en",
+      "primary_label": "niems_green_not_severe",
+      "labels": [
+        "niems_green_not_severe"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-green-not-severe-05-th",
+      "path": "calls/syn-niems-green-not-severe-05-th.json",
+      "group_id": "syn-niems-green-not-severe-05",
+      "lang": "th",
+      "primary_label": "niems_green_not_severe",
+      "labels": [
+        "niems_green_not_severe"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-green-not-severe-05-mixed",
+      "path": "calls/syn-niems-green-not-severe-05-mixed.json",
+      "group_id": "syn-niems-green-not-severe-05",
+      "lang": "mixed",
+      "primary_label": "niems_green_not_severe",
+      "labels": [
+        "niems_green_not_severe"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-white-general-01-en",
+      "path": "calls/syn-niems-white-general-01-en.json",
+      "group_id": "syn-niems-white-general-01",
+      "lang": "en",
+      "primary_label": "niems_white_general",
+      "labels": [
+        "niems_white_general"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-white-general-01-th",
+      "path": "calls/syn-niems-white-general-01-th.json",
+      "group_id": "syn-niems-white-general-01",
+      "lang": "th",
+      "primary_label": "niems_white_general",
+      "labels": [
+        "niems_white_general"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-white-general-01-mixed",
+      "path": "calls/syn-niems-white-general-01-mixed.json",
+      "group_id": "syn-niems-white-general-01",
+      "lang": "mixed",
+      "primary_label": "niems_white_general",
+      "labels": [
+        "niems_white_general"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-white-general-02-en",
+      "path": "calls/syn-niems-white-general-02-en.json",
+      "group_id": "syn-niems-white-general-02",
+      "lang": "en",
+      "primary_label": "niems_white_general",
+      "labels": [
+        "niems_white_general"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-white-general-02-th",
+      "path": "calls/syn-niems-white-general-02-th.json",
+      "group_id": "syn-niems-white-general-02",
+      "lang": "th",
+      "primary_label": "niems_white_general",
+      "labels": [
+        "niems_white_general"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-white-general-02-mixed",
+      "path": "calls/syn-niems-white-general-02-mixed.json",
+      "group_id": "syn-niems-white-general-02",
+      "lang": "mixed",
+      "primary_label": "niems_white_general",
+      "labels": [
+        "niems_white_general"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-white-general-03-en",
+      "path": "calls/syn-niems-white-general-03-en.json",
+      "group_id": "syn-niems-white-general-03",
+      "lang": "en",
+      "primary_label": "niems_white_general",
+      "labels": [
+        "niems_white_general"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-white-general-03-th",
+      "path": "calls/syn-niems-white-general-03-th.json",
+      "group_id": "syn-niems-white-general-03",
+      "lang": "th",
+      "primary_label": "niems_white_general",
+      "labels": [
+        "niems_white_general"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-white-general-03-mixed",
+      "path": "calls/syn-niems-white-general-03-mixed.json",
+      "group_id": "syn-niems-white-general-03",
+      "lang": "mixed",
+      "primary_label": "niems_white_general",
+      "labels": [
+        "niems_white_general"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-white-general-04-en",
+      "path": "calls/syn-niems-white-general-04-en.json",
+      "group_id": "syn-niems-white-general-04",
+      "lang": "en",
+      "primary_label": "niems_white_general",
+      "labels": [
+        "niems_white_general"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-white-general-04-th",
+      "path": "calls/syn-niems-white-general-04-th.json",
+      "group_id": "syn-niems-white-general-04",
+      "lang": "th",
+      "primary_label": "niems_white_general",
+      "labels": [
+        "niems_white_general"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-white-general-04-mixed",
+      "path": "calls/syn-niems-white-general-04-mixed.json",
+      "group_id": "syn-niems-white-general-04",
+      "lang": "mixed",
+      "primary_label": "niems_white_general",
+      "labels": [
+        "niems_white_general"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-white-general-05-en",
+      "path": "calls/syn-niems-white-general-05-en.json",
+      "group_id": "syn-niems-white-general-05",
+      "lang": "en",
+      "primary_label": "niems_white_general",
+      "labels": [
+        "niems_white_general",
+        "safeguarding_child"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-white-general-05-th",
+      "path": "calls/syn-niems-white-general-05-th.json",
+      "group_id": "syn-niems-white-general-05",
+      "lang": "th",
+      "primary_label": "niems_white_general",
+      "labels": [
+        "niems_white_general",
+        "safeguarding_child"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-white-general-05-mixed",
+      "path": "calls/syn-niems-white-general-05-mixed.json",
+      "group_id": "syn-niems-white-general-05",
+      "lang": "mixed",
+      "primary_label": "niems_white_general",
+      "labels": [
+        "niems_white_general",
+        "safeguarding_child"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-black-not-a-patient-01-en",
+      "path": "calls/syn-niems-black-not-a-patient-01-en.json",
+      "group_id": "syn-niems-black-not-a-patient-01",
+      "lang": "en",
+      "primary_label": "niems_black_not_a_patient",
+      "labels": [
+        "niems_black_not_a_patient"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-black-not-a-patient-01-th",
+      "path": "calls/syn-niems-black-not-a-patient-01-th.json",
+      "group_id": "syn-niems-black-not-a-patient-01",
+      "lang": "th",
+      "primary_label": "niems_black_not_a_patient",
+      "labels": [
+        "niems_black_not_a_patient"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-black-not-a-patient-01-mixed",
+      "path": "calls/syn-niems-black-not-a-patient-01-mixed.json",
+      "group_id": "syn-niems-black-not-a-patient-01",
+      "lang": "mixed",
+      "primary_label": "niems_black_not_a_patient",
+      "labels": [
+        "niems_black_not_a_patient"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-black-not-a-patient-02-en",
+      "path": "calls/syn-niems-black-not-a-patient-02-en.json",
+      "group_id": "syn-niems-black-not-a-patient-02",
+      "lang": "en",
+      "primary_label": "niems_black_not_a_patient",
+      "labels": [
+        "niems_black_not_a_patient"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-black-not-a-patient-02-th",
+      "path": "calls/syn-niems-black-not-a-patient-02-th.json",
+      "group_id": "syn-niems-black-not-a-patient-02",
+      "lang": "th",
+      "primary_label": "niems_black_not_a_patient",
+      "labels": [
+        "niems_black_not_a_patient"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-black-not-a-patient-02-mixed",
+      "path": "calls/syn-niems-black-not-a-patient-02-mixed.json",
+      "group_id": "syn-niems-black-not-a-patient-02",
+      "lang": "mixed",
+      "primary_label": "niems_black_not_a_patient",
+      "labels": [
+        "niems_black_not_a_patient"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-black-not-a-patient-03-en",
+      "path": "calls/syn-niems-black-not-a-patient-03-en.json",
+      "group_id": "syn-niems-black-not-a-patient-03",
+      "lang": "en",
+      "primary_label": "niems_black_not_a_patient",
+      "labels": [
+        "niems_black_not_a_patient"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-black-not-a-patient-03-th",
+      "path": "calls/syn-niems-black-not-a-patient-03-th.json",
+      "group_id": "syn-niems-black-not-a-patient-03",
+      "lang": "th",
+      "primary_label": "niems_black_not_a_patient",
+      "labels": [
+        "niems_black_not_a_patient"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-black-not-a-patient-03-mixed",
+      "path": "calls/syn-niems-black-not-a-patient-03-mixed.json",
+      "group_id": "syn-niems-black-not-a-patient-03",
+      "lang": "mixed",
+      "primary_label": "niems_black_not_a_patient",
+      "labels": [
+        "niems_black_not_a_patient"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-black-not-a-patient-04-en",
+      "path": "calls/syn-niems-black-not-a-patient-04-en.json",
+      "group_id": "syn-niems-black-not-a-patient-04",
+      "lang": "en",
+      "primary_label": "niems_black_not_a_patient",
+      "labels": [
+        "niems_black_not_a_patient"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-black-not-a-patient-04-th",
+      "path": "calls/syn-niems-black-not-a-patient-04-th.json",
+      "group_id": "syn-niems-black-not-a-patient-04",
+      "lang": "th",
+      "primary_label": "niems_black_not_a_patient",
+      "labels": [
+        "niems_black_not_a_patient"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-black-not-a-patient-04-mixed",
+      "path": "calls/syn-niems-black-not-a-patient-04-mixed.json",
+      "group_id": "syn-niems-black-not-a-patient-04",
+      "lang": "mixed",
+      "primary_label": "niems_black_not_a_patient",
+      "labels": [
+        "niems_black_not_a_patient"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-black-not-a-patient-05-en",
+      "path": "calls/syn-niems-black-not-a-patient-05-en.json",
+      "group_id": "syn-niems-black-not-a-patient-05",
+      "lang": "en",
+      "primary_label": "niems_black_not_a_patient",
+      "labels": [
+        "niems_black_not_a_patient"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-black-not-a-patient-05-th",
+      "path": "calls/syn-niems-black-not-a-patient-05-th.json",
+      "group_id": "syn-niems-black-not-a-patient-05",
+      "lang": "th",
+      "primary_label": "niems_black_not_a_patient",
+      "labels": [
+        "niems_black_not_a_patient"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-black-not-a-patient-05-mixed",
+      "path": "calls/syn-niems-black-not-a-patient-05-mixed.json",
+      "group_id": "syn-niems-black-not-a-patient-05",
+      "lang": "mixed",
+      "primary_label": "niems_black_not_a_patient",
+      "labels": [
+        "niems_black_not_a_patient"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-not-conscious-or-breathing-01-en",
+      "path": "calls/syn-niems-not-conscious-or-breathing-01-en.json",
+      "group_id": "syn-niems-not-conscious-or-breathing-01",
+      "lang": "en",
+      "primary_label": "niems_not_conscious_or_breathing",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-not-conscious-or-breathing-01-th",
+      "path": "calls/syn-niems-not-conscious-or-breathing-01-th.json",
+      "group_id": "syn-niems-not-conscious-or-breathing-01",
+      "lang": "th",
+      "primary_label": "niems_not_conscious_or_breathing",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-not-conscious-or-breathing-01-mixed",
+      "path": "calls/syn-niems-not-conscious-or-breathing-01-mixed.json",
+      "group_id": "syn-niems-not-conscious-or-breathing-01",
+      "lang": "mixed",
+      "primary_label": "niems_not_conscious_or_breathing",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-not-conscious-or-breathing-02-en",
+      "path": "calls/syn-niems-not-conscious-or-breathing-02-en.json",
+      "group_id": "syn-niems-not-conscious-or-breathing-02",
+      "lang": "en",
+      "primary_label": "niems_not_conscious_or_breathing",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-not-conscious-or-breathing-02-th",
+      "path": "calls/syn-niems-not-conscious-or-breathing-02-th.json",
+      "group_id": "syn-niems-not-conscious-or-breathing-02",
+      "lang": "th",
+      "primary_label": "niems_not_conscious_or_breathing",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-not-conscious-or-breathing-02-mixed",
+      "path": "calls/syn-niems-not-conscious-or-breathing-02-mixed.json",
+      "group_id": "syn-niems-not-conscious-or-breathing-02",
+      "lang": "mixed",
+      "primary_label": "niems_not_conscious_or_breathing",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-not-conscious-or-breathing-03-en",
+      "path": "calls/syn-niems-not-conscious-or-breathing-03-en.json",
+      "group_id": "syn-niems-not-conscious-or-breathing-03",
+      "lang": "en",
+      "primary_label": "niems_not_conscious_or_breathing",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-not-conscious-or-breathing-03-th",
+      "path": "calls/syn-niems-not-conscious-or-breathing-03-th.json",
+      "group_id": "syn-niems-not-conscious-or-breathing-03",
+      "lang": "th",
+      "primary_label": "niems_not_conscious_or_breathing",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-not-conscious-or-breathing-03-mixed",
+      "path": "calls/syn-niems-not-conscious-or-breathing-03-mixed.json",
+      "group_id": "syn-niems-not-conscious-or-breathing-03",
+      "lang": "mixed",
+      "primary_label": "niems_not_conscious_or_breathing",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-not-conscious-or-breathing-04-en",
+      "path": "calls/syn-niems-not-conscious-or-breathing-04-en.json",
+      "group_id": "syn-niems-not-conscious-or-breathing-04",
+      "lang": "en",
+      "primary_label": "niems_not_conscious_or_breathing",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-not-conscious-or-breathing-04-th",
+      "path": "calls/syn-niems-not-conscious-or-breathing-04-th.json",
+      "group_id": "syn-niems-not-conscious-or-breathing-04",
+      "lang": "th",
+      "primary_label": "niems_not_conscious_or_breathing",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-not-conscious-or-breathing-04-mixed",
+      "path": "calls/syn-niems-not-conscious-or-breathing-04-mixed.json",
+      "group_id": "syn-niems-not-conscious-or-breathing-04",
+      "lang": "mixed",
+      "primary_label": "niems_not_conscious_or_breathing",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-not-conscious-or-breathing-05-en",
+      "path": "calls/syn-niems-not-conscious-or-breathing-05-en.json",
+      "group_id": "syn-niems-not-conscious-or-breathing-05",
+      "lang": "en",
+      "primary_label": "niems_not_conscious_or_breathing",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-not-conscious-or-breathing-05-th",
+      "path": "calls/syn-niems-not-conscious-or-breathing-05-th.json",
+      "group_id": "syn-niems-not-conscious-or-breathing-05",
+      "lang": "th",
+      "primary_label": "niems_not_conscious_or_breathing",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-niems-not-conscious-or-breathing-05-mixed",
+      "path": "calls/syn-niems-not-conscious-or-breathing-05-mixed.json",
+      "group_id": "syn-niems-not-conscious-or-breathing-05",
+      "lang": "mixed",
+      "primary_label": "niems_not_conscious_or_breathing",
+      "labels": [
+        "niems_red_critical",
+        "niems_not_conscious_or_breathing",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": true
+    },
+    {
+      "id": "syn-sphere-water-short-01-en",
+      "path": "calls/syn-sphere-water-short-01-en.json",
+      "group_id": "syn-sphere-water-short-01",
+      "lang": "en",
+      "primary_label": "sphere_water_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_water_short"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-water-short-01-th",
+      "path": "calls/syn-sphere-water-short-01-th.json",
+      "group_id": "syn-sphere-water-short-01",
+      "lang": "th",
+      "primary_label": "sphere_water_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_water_short"
+      ],
+      "split": "held_out",
+      "demo": true
+    },
+    {
+      "id": "syn-sphere-water-short-01-mixed",
+      "path": "calls/syn-sphere-water-short-01-mixed.json",
+      "group_id": "syn-sphere-water-short-01",
+      "lang": "mixed",
+      "primary_label": "sphere_water_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_water_short"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-water-short-02-en",
+      "path": "calls/syn-sphere-water-short-02-en.json",
+      "group_id": "syn-sphere-water-short-02",
+      "lang": "en",
+      "primary_label": "sphere_water_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_water_short"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-water-short-02-th",
+      "path": "calls/syn-sphere-water-short-02-th.json",
+      "group_id": "syn-sphere-water-short-02",
+      "lang": "th",
+      "primary_label": "sphere_water_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_water_short"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-water-short-02-mixed",
+      "path": "calls/syn-sphere-water-short-02-mixed.json",
+      "group_id": "syn-sphere-water-short-02",
+      "lang": "mixed",
+      "primary_label": "sphere_water_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_water_short"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-water-short-03-en",
+      "path": "calls/syn-sphere-water-short-03-en.json",
+      "group_id": "syn-sphere-water-short-03",
+      "lang": "en",
+      "primary_label": "sphere_water_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_water_short",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-water-short-03-th",
+      "path": "calls/syn-sphere-water-short-03-th.json",
+      "group_id": "syn-sphere-water-short-03",
+      "lang": "th",
+      "primary_label": "sphere_water_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_water_short",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-water-short-03-mixed",
+      "path": "calls/syn-sphere-water-short-03-mixed.json",
+      "group_id": "syn-sphere-water-short-03",
+      "lang": "mixed",
+      "primary_label": "sphere_water_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_water_short",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-water-short-04-en",
+      "path": "calls/syn-sphere-water-short-04-en.json",
+      "group_id": "syn-sphere-water-short-04",
+      "lang": "en",
+      "primary_label": "sphere_water_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_water_short"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-water-short-04-th",
+      "path": "calls/syn-sphere-water-short-04-th.json",
+      "group_id": "syn-sphere-water-short-04",
+      "lang": "th",
+      "primary_label": "sphere_water_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_water_short"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-water-short-04-mixed",
+      "path": "calls/syn-sphere-water-short-04-mixed.json",
+      "group_id": "syn-sphere-water-short-04",
+      "lang": "mixed",
+      "primary_label": "sphere_water_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_water_short"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-water-short-05-en",
+      "path": "calls/syn-sphere-water-short-05-en.json",
+      "group_id": "syn-sphere-water-short-05",
+      "lang": "en",
+      "primary_label": "sphere_water_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_water_short"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-water-short-05-th",
+      "path": "calls/syn-sphere-water-short-05-th.json",
+      "group_id": "syn-sphere-water-short-05",
+      "lang": "th",
+      "primary_label": "sphere_water_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_water_short"
+      ],
+      "split": "train",
+      "demo": true
+    },
+    {
+      "id": "syn-sphere-water-short-05-mixed",
+      "path": "calls/syn-sphere-water-short-05-mixed.json",
+      "group_id": "syn-sphere-water-short-05",
+      "lang": "mixed",
+      "primary_label": "sphere_water_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_water_short"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-food-short-01-en",
+      "path": "calls/syn-sphere-food-short-01-en.json",
+      "group_id": "syn-sphere-food-short-01",
+      "lang": "en",
+      "primary_label": "sphere_food_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_food_short"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-food-short-01-th",
+      "path": "calls/syn-sphere-food-short-01-th.json",
+      "group_id": "syn-sphere-food-short-01",
+      "lang": "th",
+      "primary_label": "sphere_food_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_food_short"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-food-short-01-mixed",
+      "path": "calls/syn-sphere-food-short-01-mixed.json",
+      "group_id": "syn-sphere-food-short-01",
+      "lang": "mixed",
+      "primary_label": "sphere_food_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_food_short"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-food-short-02-en",
+      "path": "calls/syn-sphere-food-short-02-en.json",
+      "group_id": "syn-sphere-food-short-02",
+      "lang": "en",
+      "primary_label": "sphere_food_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_food_short"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-food-short-02-th",
+      "path": "calls/syn-sphere-food-short-02-th.json",
+      "group_id": "syn-sphere-food-short-02",
+      "lang": "th",
+      "primary_label": "sphere_food_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_food_short"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-food-short-02-mixed",
+      "path": "calls/syn-sphere-food-short-02-mixed.json",
+      "group_id": "syn-sphere-food-short-02",
+      "lang": "mixed",
+      "primary_label": "sphere_food_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_food_short"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-food-short-03-en",
+      "path": "calls/syn-sphere-food-short-03-en.json",
+      "group_id": "syn-sphere-food-short-03",
+      "lang": "en",
+      "primary_label": "sphere_food_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_food_short"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-food-short-03-th",
+      "path": "calls/syn-sphere-food-short-03-th.json",
+      "group_id": "syn-sphere-food-short-03",
+      "lang": "th",
+      "primary_label": "sphere_food_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_food_short"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-food-short-03-mixed",
+      "path": "calls/syn-sphere-food-short-03-mixed.json",
+      "group_id": "syn-sphere-food-short-03",
+      "lang": "mixed",
+      "primary_label": "sphere_food_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_food_short"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-food-short-04-en",
+      "path": "calls/syn-sphere-food-short-04-en.json",
+      "group_id": "syn-sphere-food-short-04",
+      "lang": "en",
+      "primary_label": "sphere_food_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_food_short"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-food-short-04-th",
+      "path": "calls/syn-sphere-food-short-04-th.json",
+      "group_id": "syn-sphere-food-short-04",
+      "lang": "th",
+      "primary_label": "sphere_food_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_food_short"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-food-short-04-mixed",
+      "path": "calls/syn-sphere-food-short-04-mixed.json",
+      "group_id": "syn-sphere-food-short-04",
+      "lang": "mixed",
+      "primary_label": "sphere_food_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_food_short"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-food-short-05-en",
+      "path": "calls/syn-sphere-food-short-05-en.json",
+      "group_id": "syn-sphere-food-short-05",
+      "lang": "en",
+      "primary_label": "sphere_food_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_food_short"
+      ],
+      "split": "held_out",
+      "demo": true
+    },
+    {
+      "id": "syn-sphere-food-short-05-th",
+      "path": "calls/syn-sphere-food-short-05-th.json",
+      "group_id": "syn-sphere-food-short-05",
+      "lang": "th",
+      "primary_label": "sphere_food_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_food_short"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-food-short-05-mixed",
+      "path": "calls/syn-sphere-food-short-05-mixed.json",
+      "group_id": "syn-sphere-food-short-05",
+      "lang": "mixed",
+      "primary_label": "sphere_food_short",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_food_short"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-shelter-crowded-01-en",
+      "path": "calls/syn-sphere-shelter-crowded-01-en.json",
+      "group_id": "syn-sphere-shelter-crowded-01",
+      "lang": "en",
+      "primary_label": "sphere_shelter_crowded",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_shelter_crowded"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-shelter-crowded-01-th",
+      "path": "calls/syn-sphere-shelter-crowded-01-th.json",
+      "group_id": "syn-sphere-shelter-crowded-01",
+      "lang": "th",
+      "primary_label": "sphere_shelter_crowded",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_shelter_crowded"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-shelter-crowded-01-mixed",
+      "path": "calls/syn-sphere-shelter-crowded-01-mixed.json",
+      "group_id": "syn-sphere-shelter-crowded-01",
+      "lang": "mixed",
+      "primary_label": "sphere_shelter_crowded",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_shelter_crowded"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-shelter-crowded-02-en",
+      "path": "calls/syn-sphere-shelter-crowded-02-en.json",
+      "group_id": "syn-sphere-shelter-crowded-02",
+      "lang": "en",
+      "primary_label": "sphere_shelter_crowded",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_shelter_crowded"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-shelter-crowded-02-th",
+      "path": "calls/syn-sphere-shelter-crowded-02-th.json",
+      "group_id": "syn-sphere-shelter-crowded-02",
+      "lang": "th",
+      "primary_label": "sphere_shelter_crowded",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_shelter_crowded"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-shelter-crowded-02-mixed",
+      "path": "calls/syn-sphere-shelter-crowded-02-mixed.json",
+      "group_id": "syn-sphere-shelter-crowded-02",
+      "lang": "mixed",
+      "primary_label": "sphere_shelter_crowded",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_shelter_crowded"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-shelter-crowded-03-en",
+      "path": "calls/syn-sphere-shelter-crowded-03-en.json",
+      "group_id": "syn-sphere-shelter-crowded-03",
+      "lang": "en",
+      "primary_label": "sphere_shelter_crowded",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_shelter_crowded"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-shelter-crowded-03-th",
+      "path": "calls/syn-sphere-shelter-crowded-03-th.json",
+      "group_id": "syn-sphere-shelter-crowded-03",
+      "lang": "th",
+      "primary_label": "sphere_shelter_crowded",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_shelter_crowded"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-shelter-crowded-03-mixed",
+      "path": "calls/syn-sphere-shelter-crowded-03-mixed.json",
+      "group_id": "syn-sphere-shelter-crowded-03",
+      "lang": "mixed",
+      "primary_label": "sphere_shelter_crowded",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_shelter_crowded"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-shelter-crowded-04-en",
+      "path": "calls/syn-sphere-shelter-crowded-04-en.json",
+      "group_id": "syn-sphere-shelter-crowded-04",
+      "lang": "en",
+      "primary_label": "sphere_shelter_crowded",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_shelter_crowded"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-shelter-crowded-04-th",
+      "path": "calls/syn-sphere-shelter-crowded-04-th.json",
+      "group_id": "syn-sphere-shelter-crowded-04",
+      "lang": "th",
+      "primary_label": "sphere_shelter_crowded",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_shelter_crowded"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-shelter-crowded-04-mixed",
+      "path": "calls/syn-sphere-shelter-crowded-04-mixed.json",
+      "group_id": "syn-sphere-shelter-crowded-04",
+      "lang": "mixed",
+      "primary_label": "sphere_shelter_crowded",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_shelter_crowded"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-shelter-crowded-05-en",
+      "path": "calls/syn-sphere-shelter-crowded-05-en.json",
+      "group_id": "syn-sphere-shelter-crowded-05",
+      "lang": "en",
+      "primary_label": "sphere_shelter_crowded",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_shelter_crowded"
+      ],
+      "split": "train",
+      "demo": true
+    },
+    {
+      "id": "syn-sphere-shelter-crowded-05-th",
+      "path": "calls/syn-sphere-shelter-crowded-05-th.json",
+      "group_id": "syn-sphere-shelter-crowded-05",
+      "lang": "th",
+      "primary_label": "sphere_shelter_crowded",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_shelter_crowded"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-sphere-shelter-crowded-05-mixed",
+      "path": "calls/syn-sphere-shelter-crowded-05-mixed.json",
+      "group_id": "syn-sphere-shelter-crowded-05",
+      "lang": "mixed",
+      "primary_label": "sphere_shelter_crowded",
+      "labels": [
+        "niems_black_not_a_patient",
+        "sphere_shelter_crowded"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-child-01-en",
+      "path": "calls/syn-safeguarding-child-01-en.json",
+      "group_id": "syn-safeguarding-child-01",
+      "lang": "en",
+      "primary_label": "safeguarding_child",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_child",
+        "safeguarding_protection_referral"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-child-01-th",
+      "path": "calls/syn-safeguarding-child-01-th.json",
+      "group_id": "syn-safeguarding-child-01",
+      "lang": "th",
+      "primary_label": "safeguarding_child",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_child",
+        "safeguarding_protection_referral"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-child-01-mixed",
+      "path": "calls/syn-safeguarding-child-01-mixed.json",
+      "group_id": "syn-safeguarding-child-01",
+      "lang": "mixed",
+      "primary_label": "safeguarding_child",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_child",
+        "safeguarding_protection_referral"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-child-02-en",
+      "path": "calls/syn-safeguarding-child-02-en.json",
+      "group_id": "syn-safeguarding-child-02",
+      "lang": "en",
+      "primary_label": "safeguarding_child",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_child",
+        "safeguarding_protection_referral"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-child-02-th",
+      "path": "calls/syn-safeguarding-child-02-th.json",
+      "group_id": "syn-safeguarding-child-02",
+      "lang": "th",
+      "primary_label": "safeguarding_child",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_child",
+        "safeguarding_protection_referral"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-child-02-mixed",
+      "path": "calls/syn-safeguarding-child-02-mixed.json",
+      "group_id": "syn-safeguarding-child-02",
+      "lang": "mixed",
+      "primary_label": "safeguarding_child",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_child",
+        "safeguarding_protection_referral"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-child-03-en",
+      "path": "calls/syn-safeguarding-child-03-en.json",
+      "group_id": "syn-safeguarding-child-03",
+      "lang": "en",
+      "primary_label": "safeguarding_child",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_child",
+        "safeguarding_protection_referral"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-child-03-th",
+      "path": "calls/syn-safeguarding-child-03-th.json",
+      "group_id": "syn-safeguarding-child-03",
+      "lang": "th",
+      "primary_label": "safeguarding_child",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_child",
+        "safeguarding_protection_referral"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-child-03-mixed",
+      "path": "calls/syn-safeguarding-child-03-mixed.json",
+      "group_id": "syn-safeguarding-child-03",
+      "lang": "mixed",
+      "primary_label": "safeguarding_child",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_child",
+        "safeguarding_protection_referral"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-child-04-en",
+      "path": "calls/syn-safeguarding-child-04-en.json",
+      "group_id": "syn-safeguarding-child-04",
+      "lang": "en",
+      "primary_label": "safeguarding_child",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_child",
+        "safeguarding_protection_referral"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-child-04-th",
+      "path": "calls/syn-safeguarding-child-04-th.json",
+      "group_id": "syn-safeguarding-child-04",
+      "lang": "th",
+      "primary_label": "safeguarding_child",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_child",
+        "safeguarding_protection_referral"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-child-04-mixed",
+      "path": "calls/syn-safeguarding-child-04-mixed.json",
+      "group_id": "syn-safeguarding-child-04",
+      "lang": "mixed",
+      "primary_label": "safeguarding_child",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_child",
+        "safeguarding_protection_referral"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-child-05-en",
+      "path": "calls/syn-safeguarding-child-05-en.json",
+      "group_id": "syn-safeguarding-child-05",
+      "lang": "en",
+      "primary_label": "safeguarding_child",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_child",
+        "safeguarding_protection_referral"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-child-05-th",
+      "path": "calls/syn-safeguarding-child-05-th.json",
+      "group_id": "syn-safeguarding-child-05",
+      "lang": "th",
+      "primary_label": "safeguarding_child",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_child",
+        "safeguarding_protection_referral"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-child-05-mixed",
+      "path": "calls/syn-safeguarding-child-05-mixed.json",
+      "group_id": "syn-safeguarding-child-05",
+      "lang": "mixed",
+      "primary_label": "safeguarding_child",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_child",
+        "safeguarding_protection_referral"
+      ],
+      "split": "train",
+      "demo": true
+    },
+    {
+      "id": "syn-safeguarding-older-person-01-en",
+      "path": "calls/syn-safeguarding-older-person-01-en.json",
+      "group_id": "syn-safeguarding-older-person-01",
+      "lang": "en",
+      "primary_label": "safeguarding_older_person",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-older-person-01-th",
+      "path": "calls/syn-safeguarding-older-person-01-th.json",
+      "group_id": "syn-safeguarding-older-person-01",
+      "lang": "th",
+      "primary_label": "safeguarding_older_person",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-older-person-01-mixed",
+      "path": "calls/syn-safeguarding-older-person-01-mixed.json",
+      "group_id": "syn-safeguarding-older-person-01",
+      "lang": "mixed",
+      "primary_label": "safeguarding_older_person",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-older-person-02-en",
+      "path": "calls/syn-safeguarding-older-person-02-en.json",
+      "group_id": "syn-safeguarding-older-person-02",
+      "lang": "en",
+      "primary_label": "safeguarding_older_person",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-older-person-02-th",
+      "path": "calls/syn-safeguarding-older-person-02-th.json",
+      "group_id": "syn-safeguarding-older-person-02",
+      "lang": "th",
+      "primary_label": "safeguarding_older_person",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-older-person-02-mixed",
+      "path": "calls/syn-safeguarding-older-person-02-mixed.json",
+      "group_id": "syn-safeguarding-older-person-02",
+      "lang": "mixed",
+      "primary_label": "safeguarding_older_person",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-older-person-03-en",
+      "path": "calls/syn-safeguarding-older-person-03-en.json",
+      "group_id": "syn-safeguarding-older-person-03",
+      "lang": "en",
+      "primary_label": "safeguarding_older_person",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-older-person-03-th",
+      "path": "calls/syn-safeguarding-older-person-03-th.json",
+      "group_id": "syn-safeguarding-older-person-03",
+      "lang": "th",
+      "primary_label": "safeguarding_older_person",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-older-person-03-mixed",
+      "path": "calls/syn-safeguarding-older-person-03-mixed.json",
+      "group_id": "syn-safeguarding-older-person-03",
+      "lang": "mixed",
+      "primary_label": "safeguarding_older_person",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-older-person-04-en",
+      "path": "calls/syn-safeguarding-older-person-04-en.json",
+      "group_id": "syn-safeguarding-older-person-04",
+      "lang": "en",
+      "primary_label": "safeguarding_older_person",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_older_person"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-older-person-04-th",
+      "path": "calls/syn-safeguarding-older-person-04-th.json",
+      "group_id": "syn-safeguarding-older-person-04",
+      "lang": "th",
+      "primary_label": "safeguarding_older_person",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_older_person"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-older-person-04-mixed",
+      "path": "calls/syn-safeguarding-older-person-04-mixed.json",
+      "group_id": "syn-safeguarding-older-person-04",
+      "lang": "mixed",
+      "primary_label": "safeguarding_older_person",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_older_person"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-older-person-05-en",
+      "path": "calls/syn-safeguarding-older-person-05-en.json",
+      "group_id": "syn-safeguarding-older-person-05",
+      "lang": "en",
+      "primary_label": "safeguarding_older_person",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-older-person-05-th",
+      "path": "calls/syn-safeguarding-older-person-05-th.json",
+      "group_id": "syn-safeguarding-older-person-05",
+      "lang": "th",
+      "primary_label": "safeguarding_older_person",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-older-person-05-mixed",
+      "path": "calls/syn-safeguarding-older-person-05-mixed.json",
+      "group_id": "syn-safeguarding-older-person-05",
+      "lang": "mixed",
+      "primary_label": "safeguarding_older_person",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-disability-01-en",
+      "path": "calls/syn-safeguarding-disability-01-en.json",
+      "group_id": "syn-safeguarding-disability-01",
+      "lang": "en",
+      "primary_label": "safeguarding_disability",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_disability"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-disability-01-th",
+      "path": "calls/syn-safeguarding-disability-01-th.json",
+      "group_id": "syn-safeguarding-disability-01",
+      "lang": "th",
+      "primary_label": "safeguarding_disability",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_disability"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-disability-01-mixed",
+      "path": "calls/syn-safeguarding-disability-01-mixed.json",
+      "group_id": "syn-safeguarding-disability-01",
+      "lang": "mixed",
+      "primary_label": "safeguarding_disability",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_disability"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-disability-02-en",
+      "path": "calls/syn-safeguarding-disability-02-en.json",
+      "group_id": "syn-safeguarding-disability-02",
+      "lang": "en",
+      "primary_label": "safeguarding_disability",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_disability"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-disability-02-th",
+      "path": "calls/syn-safeguarding-disability-02-th.json",
+      "group_id": "syn-safeguarding-disability-02",
+      "lang": "th",
+      "primary_label": "safeguarding_disability",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_disability"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-disability-02-mixed",
+      "path": "calls/syn-safeguarding-disability-02-mixed.json",
+      "group_id": "syn-safeguarding-disability-02",
+      "lang": "mixed",
+      "primary_label": "safeguarding_disability",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_disability"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-disability-03-en",
+      "path": "calls/syn-safeguarding-disability-03-en.json",
+      "group_id": "syn-safeguarding-disability-03",
+      "lang": "en",
+      "primary_label": "safeguarding_disability",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_disability"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-disability-03-th",
+      "path": "calls/syn-safeguarding-disability-03-th.json",
+      "group_id": "syn-safeguarding-disability-03",
+      "lang": "th",
+      "primary_label": "safeguarding_disability",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_disability"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-disability-03-mixed",
+      "path": "calls/syn-safeguarding-disability-03-mixed.json",
+      "group_id": "syn-safeguarding-disability-03",
+      "lang": "mixed",
+      "primary_label": "safeguarding_disability",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_disability"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-disability-04-en",
+      "path": "calls/syn-safeguarding-disability-04-en.json",
+      "group_id": "syn-safeguarding-disability-04",
+      "lang": "en",
+      "primary_label": "safeguarding_disability",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_disability"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-disability-04-th",
+      "path": "calls/syn-safeguarding-disability-04-th.json",
+      "group_id": "syn-safeguarding-disability-04",
+      "lang": "th",
+      "primary_label": "safeguarding_disability",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_disability"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-disability-04-mixed",
+      "path": "calls/syn-safeguarding-disability-04-mixed.json",
+      "group_id": "syn-safeguarding-disability-04",
+      "lang": "mixed",
+      "primary_label": "safeguarding_disability",
+      "labels": [
+        "niems_black_not_a_patient",
+        "safeguarding_disability"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-disability-05-en",
+      "path": "calls/syn-safeguarding-disability-05-en.json",
+      "group_id": "syn-safeguarding-disability-05",
+      "lang": "en",
+      "primary_label": "safeguarding_disability",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_disability"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-disability-05-th",
+      "path": "calls/syn-safeguarding-disability-05-th.json",
+      "group_id": "syn-safeguarding-disability-05",
+      "lang": "th",
+      "primary_label": "safeguarding_disability",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_disability"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-disability-05-mixed",
+      "path": "calls/syn-safeguarding-disability-05-mixed.json",
+      "group_id": "syn-safeguarding-disability-05",
+      "lang": "mixed",
+      "primary_label": "safeguarding_disability",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_disability"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-serious-health-01-en",
+      "path": "calls/syn-safeguarding-serious-health-01-en.json",
+      "group_id": "syn-safeguarding-serious-health-01",
+      "lang": "en",
+      "primary_label": "safeguarding_serious_health",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-serious-health-01-th",
+      "path": "calls/syn-safeguarding-serious-health-01-th.json",
+      "group_id": "syn-safeguarding-serious-health-01",
+      "lang": "th",
+      "primary_label": "safeguarding_serious_health",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-serious-health-01-mixed",
+      "path": "calls/syn-safeguarding-serious-health-01-mixed.json",
+      "group_id": "syn-safeguarding-serious-health-01",
+      "lang": "mixed",
+      "primary_label": "safeguarding_serious_health",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-serious-health-02-en",
+      "path": "calls/syn-safeguarding-serious-health-02-en.json",
+      "group_id": "syn-safeguarding-serious-health-02",
+      "lang": "en",
+      "primary_label": "safeguarding_serious_health",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-serious-health-02-th",
+      "path": "calls/syn-safeguarding-serious-health-02-th.json",
+      "group_id": "syn-safeguarding-serious-health-02",
+      "lang": "th",
+      "primary_label": "safeguarding_serious_health",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-serious-health-02-mixed",
+      "path": "calls/syn-safeguarding-serious-health-02-mixed.json",
+      "group_id": "syn-safeguarding-serious-health-02",
+      "lang": "mixed",
+      "primary_label": "safeguarding_serious_health",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-serious-health-03-en",
+      "path": "calls/syn-safeguarding-serious-health-03-en.json",
+      "group_id": "syn-safeguarding-serious-health-03",
+      "lang": "en",
+      "primary_label": "safeguarding_serious_health",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-serious-health-03-th",
+      "path": "calls/syn-safeguarding-serious-health-03-th.json",
+      "group_id": "syn-safeguarding-serious-health-03",
+      "lang": "th",
+      "primary_label": "safeguarding_serious_health",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-serious-health-03-mixed",
+      "path": "calls/syn-safeguarding-serious-health-03-mixed.json",
+      "group_id": "syn-safeguarding-serious-health-03",
+      "lang": "mixed",
+      "primary_label": "safeguarding_serious_health",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-serious-health-04-en",
+      "path": "calls/syn-safeguarding-serious-health-04-en.json",
+      "group_id": "syn-safeguarding-serious-health-04",
+      "lang": "en",
+      "primary_label": "safeguarding_serious_health",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-serious-health-04-th",
+      "path": "calls/syn-safeguarding-serious-health-04-th.json",
+      "group_id": "syn-safeguarding-serious-health-04",
+      "lang": "th",
+      "primary_label": "safeguarding_serious_health",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-serious-health-04-mixed",
+      "path": "calls/syn-safeguarding-serious-health-04-mixed.json",
+      "group_id": "syn-safeguarding-serious-health-04",
+      "lang": "mixed",
+      "primary_label": "safeguarding_serious_health",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-serious-health-05-en",
+      "path": "calls/syn-safeguarding-serious-health-05-en.json",
+      "group_id": "syn-safeguarding-serious-health-05",
+      "lang": "en",
+      "primary_label": "safeguarding_serious_health",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-serious-health-05-th",
+      "path": "calls/syn-safeguarding-serious-health-05-th.json",
+      "group_id": "syn-safeguarding-serious-health-05",
+      "lang": "th",
+      "primary_label": "safeguarding_serious_health",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-serious-health-05-mixed",
+      "path": "calls/syn-safeguarding-serious-health-05-mixed.json",
+      "group_id": "syn-safeguarding-serious-health-05",
+      "lang": "mixed",
+      "primary_label": "safeguarding_serious_health",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_serious_health"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-protection-referral-01-en",
+      "path": "calls/syn-safeguarding-protection-referral-01-en.json",
+      "group_id": "syn-safeguarding-protection-referral-01",
+      "lang": "en",
+      "primary_label": "safeguarding_protection_referral",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_protection_referral",
+        "safeguarding_child"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-protection-referral-01-th",
+      "path": "calls/syn-safeguarding-protection-referral-01-th.json",
+      "group_id": "syn-safeguarding-protection-referral-01",
+      "lang": "th",
+      "primary_label": "safeguarding_protection_referral",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_protection_referral",
+        "safeguarding_child"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-protection-referral-01-mixed",
+      "path": "calls/syn-safeguarding-protection-referral-01-mixed.json",
+      "group_id": "syn-safeguarding-protection-referral-01",
+      "lang": "mixed",
+      "primary_label": "safeguarding_protection_referral",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_protection_referral",
+        "safeguarding_child"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-protection-referral-02-en",
+      "path": "calls/syn-safeguarding-protection-referral-02-en.json",
+      "group_id": "syn-safeguarding-protection-referral-02",
+      "lang": "en",
+      "primary_label": "safeguarding_protection_referral",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_protection_referral",
+        "safeguarding_child"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-protection-referral-02-th",
+      "path": "calls/syn-safeguarding-protection-referral-02-th.json",
+      "group_id": "syn-safeguarding-protection-referral-02",
+      "lang": "th",
+      "primary_label": "safeguarding_protection_referral",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_protection_referral",
+        "safeguarding_child"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-protection-referral-02-mixed",
+      "path": "calls/syn-safeguarding-protection-referral-02-mixed.json",
+      "group_id": "syn-safeguarding-protection-referral-02",
+      "lang": "mixed",
+      "primary_label": "safeguarding_protection_referral",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_protection_referral",
+        "safeguarding_child"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-protection-referral-03-en",
+      "path": "calls/syn-safeguarding-protection-referral-03-en.json",
+      "group_id": "syn-safeguarding-protection-referral-03",
+      "lang": "en",
+      "primary_label": "safeguarding_protection_referral",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_protection_referral",
+        "safeguarding_child"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-protection-referral-03-th",
+      "path": "calls/syn-safeguarding-protection-referral-03-th.json",
+      "group_id": "syn-safeguarding-protection-referral-03",
+      "lang": "th",
+      "primary_label": "safeguarding_protection_referral",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_protection_referral",
+        "safeguarding_child"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-protection-referral-03-mixed",
+      "path": "calls/syn-safeguarding-protection-referral-03-mixed.json",
+      "group_id": "syn-safeguarding-protection-referral-03",
+      "lang": "mixed",
+      "primary_label": "safeguarding_protection_referral",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_protection_referral",
+        "safeguarding_child"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-protection-referral-04-en",
+      "path": "calls/syn-safeguarding-protection-referral-04-en.json",
+      "group_id": "syn-safeguarding-protection-referral-04",
+      "lang": "en",
+      "primary_label": "safeguarding_protection_referral",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_protection_referral",
+        "safeguarding_child"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-protection-referral-04-th",
+      "path": "calls/syn-safeguarding-protection-referral-04-th.json",
+      "group_id": "syn-safeguarding-protection-referral-04",
+      "lang": "th",
+      "primary_label": "safeguarding_protection_referral",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_protection_referral",
+        "safeguarding_child"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-protection-referral-04-mixed",
+      "path": "calls/syn-safeguarding-protection-referral-04-mixed.json",
+      "group_id": "syn-safeguarding-protection-referral-04",
+      "lang": "mixed",
+      "primary_label": "safeguarding_protection_referral",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_protection_referral",
+        "safeguarding_child"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-protection-referral-05-en",
+      "path": "calls/syn-safeguarding-protection-referral-05-en.json",
+      "group_id": "syn-safeguarding-protection-referral-05",
+      "lang": "en",
+      "primary_label": "safeguarding_protection_referral",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_protection_referral",
+        "safeguarding_child",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-protection-referral-05-th",
+      "path": "calls/syn-safeguarding-protection-referral-05-th.json",
+      "group_id": "syn-safeguarding-protection-referral-05",
+      "lang": "th",
+      "primary_label": "safeguarding_protection_referral",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_protection_referral",
+        "safeguarding_child",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-safeguarding-protection-referral-05-mixed",
+      "path": "calls/syn-safeguarding-protection-referral-05-mixed.json",
+      "group_id": "syn-safeguarding-protection-referral-05",
+      "lang": "mixed",
+      "primary_label": "safeguarding_protection_referral",
+      "labels": [
+        "niems_yellow_urgent",
+        "safeguarding_protection_referral",
+        "safeguarding_child",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-water-depth-01-en",
+      "path": "calls/syn-flood-water-depth-01-en.json",
+      "group_id": "syn-flood-water-depth-01",
+      "lang": "en",
+      "primary_label": "flood_water_depth",
+      "labels": [
+        "niems_yellow_urgent",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-water-depth-01-th",
+      "path": "calls/syn-flood-water-depth-01-th.json",
+      "group_id": "syn-flood-water-depth-01",
+      "lang": "th",
+      "primary_label": "flood_water_depth",
+      "labels": [
+        "niems_yellow_urgent",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-water-depth-01-mixed",
+      "path": "calls/syn-flood-water-depth-01-mixed.json",
+      "group_id": "syn-flood-water-depth-01",
+      "lang": "mixed",
+      "primary_label": "flood_water_depth",
+      "labels": [
+        "niems_yellow_urgent",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-water-depth-02-en",
+      "path": "calls/syn-flood-water-depth-02-en.json",
+      "group_id": "syn-flood-water-depth-02",
+      "lang": "en",
+      "primary_label": "flood_water_depth",
+      "labels": [
+        "niems_yellow_urgent",
+        "flood_water_depth"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-water-depth-02-th",
+      "path": "calls/syn-flood-water-depth-02-th.json",
+      "group_id": "syn-flood-water-depth-02",
+      "lang": "th",
+      "primary_label": "flood_water_depth",
+      "labels": [
+        "niems_yellow_urgent",
+        "flood_water_depth"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-water-depth-02-mixed",
+      "path": "calls/syn-flood-water-depth-02-mixed.json",
+      "group_id": "syn-flood-water-depth-02",
+      "lang": "mixed",
+      "primary_label": "flood_water_depth",
+      "labels": [
+        "niems_yellow_urgent",
+        "flood_water_depth"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-water-depth-03-en",
+      "path": "calls/syn-flood-water-depth-03-en.json",
+      "group_id": "syn-flood-water-depth-03",
+      "lang": "en",
+      "primary_label": "flood_water_depth",
+      "labels": [
+        "niems_yellow_urgent",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-water-depth-03-th",
+      "path": "calls/syn-flood-water-depth-03-th.json",
+      "group_id": "syn-flood-water-depth-03",
+      "lang": "th",
+      "primary_label": "flood_water_depth",
+      "labels": [
+        "niems_yellow_urgent",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-water-depth-03-mixed",
+      "path": "calls/syn-flood-water-depth-03-mixed.json",
+      "group_id": "syn-flood-water-depth-03",
+      "lang": "mixed",
+      "primary_label": "flood_water_depth",
+      "labels": [
+        "niems_yellow_urgent",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-water-depth-04-en",
+      "path": "calls/syn-flood-water-depth-04-en.json",
+      "group_id": "syn-flood-water-depth-04",
+      "lang": "en",
+      "primary_label": "flood_water_depth",
+      "labels": [
+        "niems_yellow_urgent",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-water-depth-04-th",
+      "path": "calls/syn-flood-water-depth-04-th.json",
+      "group_id": "syn-flood-water-depth-04",
+      "lang": "th",
+      "primary_label": "flood_water_depth",
+      "labels": [
+        "niems_yellow_urgent",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-water-depth-04-mixed",
+      "path": "calls/syn-flood-water-depth-04-mixed.json",
+      "group_id": "syn-flood-water-depth-04",
+      "lang": "mixed",
+      "primary_label": "flood_water_depth",
+      "labels": [
+        "niems_yellow_urgent",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-water-depth-05-en",
+      "path": "calls/syn-flood-water-depth-05-en.json",
+      "group_id": "syn-flood-water-depth-05",
+      "lang": "en",
+      "primary_label": "flood_water_depth",
+      "labels": [
+        "niems_yellow_urgent",
+        "flood_water_depth",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-water-depth-05-th",
+      "path": "calls/syn-flood-water-depth-05-th.json",
+      "group_id": "syn-flood-water-depth-05",
+      "lang": "th",
+      "primary_label": "flood_water_depth",
+      "labels": [
+        "niems_yellow_urgent",
+        "flood_water_depth",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-water-depth-05-mixed",
+      "path": "calls/syn-flood-water-depth-05-mixed.json",
+      "group_id": "syn-flood-water-depth-05",
+      "lang": "mixed",
+      "primary_label": "flood_water_depth",
+      "labels": [
+        "niems_yellow_urgent",
+        "flood_water_depth",
+        "safeguarding_older_person"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-trapped-01-en",
+      "path": "calls/syn-flood-trapped-01-en.json",
+      "group_id": "syn-flood-trapped-01",
+      "lang": "en",
+      "primary_label": "flood_trapped",
+      "labels": [
+        "niems_red_critical",
+        "flood_trapped",
+        "flood_water_depth"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-trapped-01-th",
+      "path": "calls/syn-flood-trapped-01-th.json",
+      "group_id": "syn-flood-trapped-01",
+      "lang": "th",
+      "primary_label": "flood_trapped",
+      "labels": [
+        "niems_red_critical",
+        "flood_trapped",
+        "flood_water_depth"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-trapped-01-mixed",
+      "path": "calls/syn-flood-trapped-01-mixed.json",
+      "group_id": "syn-flood-trapped-01",
+      "lang": "mixed",
+      "primary_label": "flood_trapped",
+      "labels": [
+        "niems_red_critical",
+        "flood_trapped",
+        "flood_water_depth"
+      ],
+      "split": "held_out",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-trapped-02-en",
+      "path": "calls/syn-flood-trapped-02-en.json",
+      "group_id": "syn-flood-trapped-02",
+      "lang": "en",
+      "primary_label": "flood_trapped",
+      "labels": [
+        "niems_red_critical",
+        "flood_trapped",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-trapped-02-th",
+      "path": "calls/syn-flood-trapped-02-th.json",
+      "group_id": "syn-flood-trapped-02",
+      "lang": "th",
+      "primary_label": "flood_trapped",
+      "labels": [
+        "niems_red_critical",
+        "flood_trapped",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-trapped-02-mixed",
+      "path": "calls/syn-flood-trapped-02-mixed.json",
+      "group_id": "syn-flood-trapped-02",
+      "lang": "mixed",
+      "primary_label": "flood_trapped",
+      "labels": [
+        "niems_red_critical",
+        "flood_trapped",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-trapped-03-en",
+      "path": "calls/syn-flood-trapped-03-en.json",
+      "group_id": "syn-flood-trapped-03",
+      "lang": "en",
+      "primary_label": "flood_trapped",
+      "labels": [
+        "niems_red_critical",
+        "flood_trapped",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-trapped-03-th",
+      "path": "calls/syn-flood-trapped-03-th.json",
+      "group_id": "syn-flood-trapped-03",
+      "lang": "th",
+      "primary_label": "flood_trapped",
+      "labels": [
+        "niems_red_critical",
+        "flood_trapped",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-trapped-03-mixed",
+      "path": "calls/syn-flood-trapped-03-mixed.json",
+      "group_id": "syn-flood-trapped-03",
+      "lang": "mixed",
+      "primary_label": "flood_trapped",
+      "labels": [
+        "niems_red_critical",
+        "flood_trapped",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-trapped-04-en",
+      "path": "calls/syn-flood-trapped-04-en.json",
+      "group_id": "syn-flood-trapped-04",
+      "lang": "en",
+      "primary_label": "flood_trapped",
+      "labels": [
+        "niems_red_critical",
+        "flood_trapped",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-trapped-04-th",
+      "path": "calls/syn-flood-trapped-04-th.json",
+      "group_id": "syn-flood-trapped-04",
+      "lang": "th",
+      "primary_label": "flood_trapped",
+      "labels": [
+        "niems_red_critical",
+        "flood_trapped",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-trapped-04-mixed",
+      "path": "calls/syn-flood-trapped-04-mixed.json",
+      "group_id": "syn-flood-trapped-04",
+      "lang": "mixed",
+      "primary_label": "flood_trapped",
+      "labels": [
+        "niems_red_critical",
+        "flood_trapped",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-trapped-05-en",
+      "path": "calls/syn-flood-trapped-05-en.json",
+      "group_id": "syn-flood-trapped-05",
+      "lang": "en",
+      "primary_label": "flood_trapped",
+      "labels": [
+        "niems_red_critical",
+        "flood_trapped",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": true
+    },
+    {
+      "id": "syn-flood-trapped-05-th",
+      "path": "calls/syn-flood-trapped-05-th.json",
+      "group_id": "syn-flood-trapped-05",
+      "lang": "th",
+      "primary_label": "flood_trapped",
+      "labels": [
+        "niems_red_critical",
+        "flood_trapped",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    },
+    {
+      "id": "syn-flood-trapped-05-mixed",
+      "path": "calls/syn-flood-trapped-05-mixed.json",
+      "group_id": "syn-flood-trapped-05",
+      "lang": "mixed",
+      "primary_label": "flood_trapped",
+      "labels": [
+        "niems_red_critical",
+        "flood_trapped",
+        "flood_water_depth"
+      ],
+      "split": "train",
+      "demo": false
+    }
+  ]
+}

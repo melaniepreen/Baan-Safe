@@ -7,19 +7,39 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import os
+
 from eval.learning.arms import ARMS, feedback_rows, score_variant, write_feedback
-from eval.learning.cases import GROUPS, group_by_id, variants
+from eval.learning.cases import GROUPS, variants
 from eval.learning.loop import SeedScore, close_loop, freeze_gate
 from eval.learning.metrics import score_arm
 from eval.latte.section import external_section
 from eval.learning.report import render
 from eval.learning.simulators import render_trait_section
-from eval.learning.split import SEEDS, split_groups
+from eval.learning.split import SEEDS, Split, split_groups
 from paths import ROOT
 
 CANDIDATE_VERSION = "stub-candidate"
 CANDIDATE_ARM = "C"
 CURRENT_ARM = "A"
+
+
+def _corpus() -> tuple[list, Split | None]:
+    """Stub groups, or the synthetic set on its committed group split.
+
+    ``EVAL_LEARNING_SET=synthetic`` reads ``fixtures/synthetic``. The default
+    ``stub`` set is the original eight groups. Thai, English, and mixed of
+    one group stay together because the split key is ``group_id``.
+    """
+
+    which = os.environ.get("EVAL_LEARNING_SET", "stub").strip() or "stub"
+    if which == "stub":
+        return list(GROUPS), None
+    if which == "synthetic":
+        from eval.learning.synthetic_cases import load_groups
+
+        return load_groups()
+    raise SystemExit(f"unknown EVAL_LEARNING_SET {which!r}")
 
 
 def run(out_dir: Path | None = None, version_id: str = CANDIDATE_VERSION) -> dict:
@@ -31,16 +51,18 @@ def run(out_dir: Path | None = None, version_id: str = CANDIDATE_VERSION) -> dic
     freeze_note = freeze_gate()
     out = out_dir or (ROOT / "eval" / "out")
     out.mkdir(parents=True, exist_ok=True)
-    by_id = group_by_id()
-    group_ids = [group.group_id for group in GROUPS]
-    calls = variants()
+    groups, fixed = _corpus()
+    by_id = {group.group_id: group for group in groups}
+    group_ids = [group.group_id for group in groups]
+    calls = variants(tuple(groups))
     rendered: list = []
     seed_payloads: list[dict] = []
     current_scores: list[SeedScore] = []
     candidate_scores: list[SeedScore] = []
+    seeds = (fixed.seed,) if fixed is not None else SEEDS
 
-    for seed in SEEDS:
-        split = split_groups(group_ids, seed)
+    for seed in seeds:
+        split = fixed if fixed is not None else split_groups(group_ids, seed)
         correction = [by_id[group_id] for group_id in split.correction]
         held_out = [call for call in calls if call.group_id in split.held_out]
         rows_by_arm = {}

@@ -40,3 +40,29 @@ def load_case(fixture_id: str) -> CaseState:
 
 def all_ids() -> list[str]:
     return [item["id"] for item in list_entries()]
+
+
+SYNTHETIC = FIXTURES / "synthetic"
+
+
+def synthetic_index() -> dict:
+    return json.loads((SYNTHETIC / "index.json").read_text(encoding="utf-8"))
+
+
+def synthetic_split() -> dict:
+    return json.loads((SYNTHETIC / "split.json").read_text(encoding="utf-8"))
+
+
+def synthetic_ids() -> list[str]:
+    return [item["id"] for item in synthetic_index()["calls"]]
+
+
+def load_synthetic(case_id: str) -> dict:
+    path = SYNTHETIC / "calls" / f"{case_id}.json"
+    if not path.is_file():
+        raise KeyError(case_id)
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def iter_synthetic() -> list[dict]:
+    return [load_synthetic(case_id) for case_id in synthetic_ids()]

@@ -1,0 +1,131 @@
+{
+  "id": "syn-niems-black-not-a-patient-02-mixed",
+  "group_id": "syn-niems-black-not-a-patient-02",
+  "lang": "mixed",
+  "primary_label": "niems_black_not_a_patient",
+  "colour": "black",
+  "labels": [
+    "niems_black_not_a_patient"
+  ],
+  "hard_negatives": [
+    "niems_red_critical"
+  ],
+  "title": "niems_black_not_a_patient mixed 2",
+  "tags": [
+    "synthetic",
+    "system_1",
+    "mixed",
+    "niems_black_not_a_patient",
+    "hard_negative"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Dao Saengthong. No patient. ประกาศน้ำท่วมออกเมื่อไร"
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "No patient. ไม่มีใครบาดเจ็บ"
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district คะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอเมืองแพร่, Mueang Phrae District, Phrae, near Placeholder Soi 8."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people, มีกี่คน?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสามคน, three of us."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-niems-black-not-a-patient-02-mixed",
+    "caller_id_hash": "synthetic:syn-niems-black-not-a-patient-02",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Dao Saengthong. No patient. ประกาศน้ำท่วมออกเมื่อไร"
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "No patient. ไม่มีใครบาดเจ็บ"
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district คะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอเมืองแพร่, Mueang Phrae District, Phrae, near Placeholder Soi 8."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people, มีกี่คน?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสามคน, three of us."
+      }
+    ],
+    "fields": {
+      "location": "Mueang Phrae District, Phrae",
+      "location_confidence": 0.92,
+      "people_count": 3,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "information"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T09:05:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_1",
+    "priority": "P4",
+    "route": "information_only",
+    "needs": [
+      "information"
+    ],
+    "requires_human": false,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_black_not_a_patient"
+    ],
+    "action": "finalize_case"
+  },
+  "notes": "Synthetic niems_black_not_a_patient. Colour black. Route information_only on system_1."
+}

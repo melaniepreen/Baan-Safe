@@ -95,7 +95,9 @@
       "files": [
         "eval/correction_loop.py",
         "eval/learning/harness.py",
-        "eval/LATTE.md"
+        "eval/learning/synthetic_cases.py",
+        "eval/LATTE.md",
+        "scripts/gen_synthetic_calls.py"
       ]
     },
     {
@@ -112,7 +114,9 @@
       "files": [
         "contracts/training.py",
         "training/log.py",
-        "training/export.py"
+        "training/export.py",
+        "training/laya_export.py",
+        "training/synthetic_export.py"
       ]
     },
     {

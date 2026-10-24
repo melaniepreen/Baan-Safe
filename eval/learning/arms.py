@@ -191,7 +191,10 @@ def feedback_rows(
         random.Random(seed).shuffle(labels)
     rows: list[dict] = []
     for group, (priority, route, pattern) in zip(chosen, labels):
-        for language, text in (("en", group.en), ("th", group.th)):
+        languages = [("en", group.en), ("th", group.th)]
+        if group.mixed:
+            languages.append(("mixed", group.mixed))
+        for language, text in languages:
             rows.append(
                 {
                     "arm": arm.name,

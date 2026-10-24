@@ -1,0 +1,136 @@
+{
+  "id": "syn-flood-trapped-05-th",
+  "group_id": "syn-flood-trapped-05",
+  "lang": "th",
+  "primary_label": "flood_trapped",
+  "colour": "red",
+  "labels": [
+    "niems_red_critical",
+    "flood_trapped",
+    "flood_water_depth"
+  ],
+  "hard_negatives": [],
+  "title": "flood_trapped th 5",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "th",
+    "flood_trapped",
+    "calm_critical",
+    "multi_label"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "ดิฉัน ต้น ใหม่ พูดช้าๆ เราอยู่บนหลังคา ออกไปไม่ได้ น้ำท่วมเข้ามาในบ้าน"
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "ไม่มีเสียงตะโกน เราติดอยู่"
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "โทรจากอำเภออะไรคะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอเมืองพะเยา จังหวัดพะเยา ใกล้ซอยตัวอย่าง 4 ค่ะ"
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "มีกี่คนคะ"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีห้าคนค่ะ"
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-flood-trapped-05-th",
+    "caller_id_hash": "synthetic:syn-flood-trapped-05",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "ดิฉัน ต้น ใหม่ พูดช้าๆ เราอยู่บนหลังคา ออกไปไม่ได้ น้ำท่วมเข้ามาในบ้าน"
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "ไม่มีเสียงตะโกน เราติดอยู่"
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "โทรจากอำเภออะไรคะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอเมืองพะเยา จังหวัดพะเยา ใกล้ซอยตัวอย่าง 4 ค่ะ"
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "มีกี่คนคะ"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีห้าคนค่ะ"
+      }
+    ],
+    "fields": {
+      "location": "Mueang Phayao District, Phayao",
+      "location_confidence": 0.92,
+      "people_count": 5,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [
+        "rising_water"
+      ],
+      "needs": [
+        "rescue"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T11:58:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P1",
+    "route": "rescue_coordination",
+    "needs": [
+      "rescue"
+    ],
+    "requires_human": true,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_red_critical",
+      "flood_trapped",
+      "flood_water_depth"
+    ],
+    "action": "create_provisional_dispatch"
+  },
+  "notes": "Synthetic flood_trapped. Colour red. Calm delivery with a critical fact. Rescue is system_2 rescue_coordination. Route rescue_coordination on system_2."
+}

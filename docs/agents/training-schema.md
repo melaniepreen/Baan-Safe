@@ -5,6 +5,9 @@ files:
   - contracts/training.py
   - contracts/models.py
   - training/log.py
+  - training/export.py
+  - training/laya_export.py
+  - training/synthetic_export.py
   - api/routes/endpoints.py
   - eval/correction_loop.py
 ---
@@ -70,7 +73,11 @@ Closed enums live in `contracts/training.py`:
 
 The correction loop's event for `CORR-LOOP-1` is `s1_triage`, `output_model` null, `output_correct` `sphere_water_short`, `source` `human`, `model_version` `s1@stub-0`. The route names stay on the memory row and in `sft.jsonl`.
 
-Export shapes, when they land, are s1 `{text, label, group_id, weight}`, s2 chat to an action plus a short reason, sapling `{policy, evidence, claim, verdict}`, and prefs `{prompt, chosen, rejected}` where `output_model` differs from `output_correct`. Each export writes a manifest (`schema_version`, event count, `policy_version`, hash). Exporters dedup on `content_hash` and do not edit the log.
+Export shapes from the event log are s1 `{text, label, group_id, weight}`, s2 chat to an action plus a short reason, sapling `{policy, evidence, claim, verdict}`, and prefs `{prompt, chosen, rejected}` where `output_model` differs from `output_correct`. Each export writes a manifest (`schema_version`, event count, `policy_version`, hash). Exporters dedup on `content_hash` and do not edit the log.
+
+`make export-training` reads that log. `SYNTHETIC=1` also writes SetFit rows from `fixtures/synthetic`: `training/out/s1_synthetic.jsonl` (train groups) and `s1_synthetic_heldout.jsonl`. The row is `{text, label, group_id, weight}`. `label` is the call's primary label. The original 24 fixtures stay on the log export.
+
+`make export-laya` writes `training/out/laya/train.jsonl` and `held.jsonl` from the same group split. This is the laya 0.4.14 JSONL schema, not a TrainingEvent. Each line is `{state, questions, expected}`. `state` is `{"body": "<speaker>: <text>"}` because every question names the field ``body``. `priority` is a `choice` over `red`, `yellow`, `green`, `white`, `black`. Each other label in `policies/system1_labels.yaml` is a `noul` question whose `expected` value is `true` or `false`. `language` and `tags` are optional slice fields the trainer ignores. The command that consumes the files is `laya-train --data training/out/laya/train.jsonl --eval training/out/laya/held.jsonl --base convaiinnovations/laya-multilingual --out training/out/laya-ckpt`. `make laya-train` runs that only when `LAYA_TRAIN=1` and a GPU or a Modal task is present. Otherwise it prints `skipped`.
 
 ## Invariants
 
@@ -89,6 +96,8 @@ Export shapes, when they land, are s1 `{text, label, group_id, weight}`, s2 chat
 - `tests/test_architecture.py` — `test_correction_loop_exports_jsonl_and_comparison` still checks `sft.jsonl` and checks the one logged event.
 - `make test`
 - `make validate`
+- `make export-laya`
+- `SYNTHETIC=1 make export-training`
 - `make demo-correction-loop` writes the event log. Tests point `TRAINING_EVENTS_PATH` at a temp file.
 
 ## Common pitfalls

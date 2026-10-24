@@ -1,0 +1,139 @@
+{
+  "id": "syn-sphere-shelter-crowded-04-en",
+  "group_id": "syn-sphere-shelter-crowded-04",
+  "lang": "en",
+  "primary_label": "sphere_shelter_crowded",
+  "colour": "black",
+  "labels": [
+    "niems_black_not_a_patient",
+    "sphere_shelter_crowded"
+  ],
+  "hard_negatives": [
+    "flood_trapped"
+  ],
+  "title": "sphere_shelter_crowded en 4",
+  "tags": [
+    "synthetic",
+    "system_1",
+    "en",
+    "sphere_shelter_crowded",
+    "multi_label",
+    "hard_negative",
+    "missing_people"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Wila Khlong. Crowded shelter. We need a shelter bed. Home is dry."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, or is water inside the rooms?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "No one is hurt. We only need shelter."
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district are you calling from?"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "We are in Mueang Lampang District, Lampang, near Placeholder Soi 5."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people are with you?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "I have not counted the household yet."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-sphere-shelter-crowded-04-en",
+    "caller_id_hash": "synthetic:syn-sphere-shelter-crowded-04",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Wila Khlong. Crowded shelter. We need a shelter bed. Home is dry."
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, or is water inside the rooms?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "No one is hurt. We only need shelter."
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district are you calling from?"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "We are in Mueang Lampang District, Lampang, near Placeholder Soi 5."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people are with you?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "I have not counted the household yet."
+      }
+    ],
+    "fields": {
+      "location": "Mueang Lampang District, Lampang",
+      "location_confidence": 0.92,
+      "people_count": null,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "shelter"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T10:09:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_1",
+    "priority": "P3",
+    "route": "shelter_placement",
+    "needs": [
+      "shelter"
+    ],
+    "requires_human": false,
+    "missing_evidence": [
+      "people_count"
+    ],
+    "acceptable_next_questions": [
+      "How many people are with you?"
+    ],
+    "labels": [
+      "niems_black_not_a_patient",
+      "sphere_shelter_crowded"
+    ],
+    "action": "ask_next_question"
+  },
+  "notes": "Synthetic sphere_shelter_crowded. Colour black. Household size was not said. Route shelter_placement on system_1."
+}

@@ -16,8 +16,11 @@ Writes eval/out/extract.md.
 
 from __future__ import annotations
 
+import argparse
+import os
+
 from contracts.models import CaseState, ExtractedFields, Need, System, TranscriptTurn
-from fixtures.load import all_ids, load_case
+from fixtures.load import all_ids, iter_synthetic, load_case
 from gateway.chooser import choose
 from memory.adapter import retrieve
 from paths import ROOT
@@ -70,8 +73,7 @@ def _outcome(truth: CaseState, got: CaseState) -> dict:
     }
 
 
-def score_fixture(fixture_id: str) -> dict:
-    case = load_case(fixture_id)
+def score_case(case: CaseState, fixture_id: str) -> dict:
     hand = case.fields
     got, got_flags = extract(case.transcript)
     checks = {
@@ -85,6 +87,10 @@ def score_fixture(fixture_id: str) -> dict:
     }
     extracted = _with(case, got, [*got_flags, "keyword_extraction"])
     return {"id": fixture_id, "checks": checks, **_outcome(case, extracted)}
+
+
+def score_fixture(fixture_id: str) -> dict:
+    return score_case(load_case(fixture_id), fixture_id)
 
 
 def score_sim(spec) -> dict:
@@ -189,10 +195,76 @@ def report(fixture_rows: list[dict], sim_rows: list[dict]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def main() -> int:
-    fixture_rows = [score_fixture(fixture_id) for fixture_id in all_ids()]
-    sim_rows = [score_sim(spec) for spec in CATALOG]
-    text = report(fixture_rows, sim_rows)
+def _field_table(rows: list[dict]) -> list[str]:
+    n = len(rows)
+    lines = [
+        "| Field | Agree | Rate |",
+        "|---|---|---|",
+    ]
+    for name in rows[0]["checks"]:
+        agree = sum(row["checks"][name] for row in rows)
+        lines.append(f"| {name} | {agree}/{n} | {agree / n:.2f} |")
+    all_fields = sum(all(row["checks"].values()) for row in rows)
+    lines.append(f"| all fields | {all_fields}/{n} | {all_fields / n:.2f} |")
+    return lines
+
+
+def synthetic_report(rows: list[dict]) -> str:
+    """Agreement of the English-only extractor on fixtures/synthetic."""
+
+    n = len(rows)
+    lines = [
+        "# Keyword extractor on synthetic calls",
+        "",
+        "Extraction reads caller turns only. English keyword rules only.",
+        "Thai and code-switched calls are scored with the same rules.",
+        "",
+        f"## Synthetic set: {n} calls vs hand-filled fields",
+        "",
+    ]
+    lines += _field_table(rows)
+    lines += [""]
+    lines += _summary(rows, "Synthetic:")
+    lines += ["", "## By language", ""]
+    for lang in ("en", "th", "mixed"):
+        subset = [row for row in rows if row.get("lang") == lang]
+        if not subset:
+            continue
+        lines += [f"### {lang} ({len(subset)})", ""]
+        lines += _field_table(subset)
+        lines += [""]
+        lines += _summary(subset, f"{lang}:")
+        lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def score_synthetic() -> list[dict]:
+    rows = []
+    for payload in iter_synthetic():
+        case = CaseState.model_validate(payload["case_state"])
+        row = score_case(case, payload["id"])
+        row["lang"] = payload.get("lang", "en")
+        rows.append(row)
+    return rows
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Score the System 1 keyword extractor.")
+    parser.add_argument(
+        "--set",
+        default=os.environ.get("EXTRACT_EVAL_SET", "fixtures"),
+        choices=("fixtures", "synthetic", "all"),
+        help="fixtures is the original 24. synthetic is fixtures/synthetic. all scores both.",
+    )
+    args = parser.parse_args(argv)
+    parts: list[str] = []
+    if args.set in ("fixtures", "all"):
+        fixture_rows = [score_fixture(fixture_id) for fixture_id in all_ids()]
+        sim_rows = [score_sim(spec) for spec in CATALOG]
+        parts.append(report(fixture_rows, sim_rows).rstrip())
+    if args.set in ("synthetic", "all"):
+        parts.append(synthetic_report(score_synthetic()).rstrip())
+    text = "\n\n".join(parts) + "\n"
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(text, encoding="utf-8")
     print(text)

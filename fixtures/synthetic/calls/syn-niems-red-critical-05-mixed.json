@@ -1,0 +1,149 @@
+{
+  "id": "syn-niems-red-critical-05-mixed",
+  "group_id": "syn-niems-red-critical-05",
+  "lang": "mixed",
+  "primary_label": "niems_red_critical",
+  "colour": "red",
+  "labels": [
+    "niems_red_critical",
+    "niems_not_conscious_or_breathing",
+    "safeguarding_older_person",
+    "safeguarding_child",
+    "flood_trapped",
+    "flood_water_depth"
+  ],
+  "hard_negatives": [],
+  "title": "niems_red_critical mixed 5",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "mixed",
+    "niems_red_critical",
+    "calm_critical",
+    "multi_label"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Natee Thongtin. ยายหายใจไม่ออก. My grandmother can't breathe."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "หลานอยู่บนหลังคา and cannot get out. She is unconscious. The water is inside the house."
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district คะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอสูงเม่น, Sung Men District, Phrae, near Placeholder Soi 7."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people, มีกี่คน?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสี่คน, four of us. หลานสองคน"
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-niems-red-critical-05-mixed",
+    "caller_id_hash": "synthetic:syn-niems-red-critical-05",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Natee Thongtin. ยายหายใจไม่ออก. My grandmother can't breathe."
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "หลานอยู่บนหลังคา and cannot get out. She is unconscious. The water is inside the house."
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district คะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอสูงเม่น, Sung Men District, Phrae, near Placeholder Soi 7."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people, มีกี่คน?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสี่คน, four of us. หลานสองคน"
+      }
+    ],
+    "fields": {
+      "location": "Sung Men District, Phrae",
+      "location_confidence": 0.92,
+      "people_count": 4,
+      "vulnerable": [
+        "elderly",
+        "child"
+      ],
+      "medical": true,
+      "danger": [
+        "rising_water"
+      ],
+      "needs": [
+        "rescue",
+        "medical"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [
+      "safeguarding"
+    ],
+    "resources": {},
+    "received_at": "2026-10-24T08:14:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P1",
+    "route": "rescue_coordination",
+    "needs": [
+      "rescue",
+      "medical"
+    ],
+    "requires_human": true,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_red_critical",
+      "niems_not_conscious_or_breathing",
+      "safeguarding_older_person",
+      "safeguarding_child",
+      "flood_trapped",
+      "flood_water_depth"
+    ],
+    "action": "escalate_to_supervisor"
+  },
+  "notes": "Synthetic niems_red_critical. Colour red. Calm delivery with a critical fact. Rescue is system_2 rescue_coordination. Route rescue_coordination on system_2."
+}

@@ -1,0 +1,134 @@
+{
+  "id": "syn-sphere-shelter-crowded-03-en",
+  "group_id": "syn-sphere-shelter-crowded-03",
+  "lang": "en",
+  "primary_label": "sphere_shelter_crowded",
+  "colour": "black",
+  "labels": [
+    "niems_black_not_a_patient",
+    "sphere_shelter_crowded"
+  ],
+  "hard_negatives": [
+    "flood_trapped"
+  ],
+  "title": "sphere_shelter_crowded en 3",
+  "tags": [
+    "synthetic",
+    "system_1",
+    "en",
+    "sphere_shelter_crowded",
+    "multi_label",
+    "hard_negative"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Som Ruenjai. The shelter has no space. We need shelter tonight."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, or is water inside the rooms?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "No one is hurt. We only need shelter."
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district are you calling from?"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "We are in Mae Mo District, Lampang, near Placeholder Soi 4."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people are with you?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "Four of us."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-sphere-shelter-crowded-03-en",
+    "caller_id_hash": "synthetic:syn-sphere-shelter-crowded-03",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Som Ruenjai. The shelter has no space. We need shelter tonight."
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, or is water inside the rooms?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "No one is hurt. We only need shelter."
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district are you calling from?"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "We are in Mae Mo District, Lampang, near Placeholder Soi 4."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people are with you?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "Four of us."
+      }
+    ],
+    "fields": {
+      "location": "Mae Mo District, Lampang",
+      "location_confidence": 0.92,
+      "people_count": 4,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "shelter"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T10:06:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_1",
+    "priority": "P3",
+    "route": "shelter_placement",
+    "needs": [
+      "shelter"
+    ],
+    "requires_human": false,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_black_not_a_patient",
+      "sphere_shelter_crowded"
+    ],
+    "action": "create_provisional_dispatch"
+  },
+  "notes": "Synthetic sphere_shelter_crowded. Colour black. Route shelter_placement on system_1."
+}

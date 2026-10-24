@@ -1,0 +1,137 @@
+{
+  "id": "syn-safeguarding-serious-health-05-th",
+  "group_id": "syn-safeguarding-serious-health-05",
+  "lang": "th",
+  "primary_label": "safeguarding_serious_health",
+  "colour": "yellow",
+  "labels": [
+    "niems_yellow_urgent",
+    "safeguarding_serious_health"
+  ],
+  "hard_negatives": [
+    "flood_trapped"
+  ],
+  "title": "safeguarding_serious_health th 5",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "th",
+    "safeguarding_serious_health",
+    "calm_critical",
+    "multi_label",
+    "hard_negative"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "ดิฉัน อรุณ ใจดี พูดช้าๆ แม่ใช้ออกซิเจนและหอบ ยังรู้สึกตัว"
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "สุขภาพรุนแรง ต้องให้คนตัดสินใจ"
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "โทรจากอำเภออะไรคะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอหนองม่วงไข่ จังหวัดแพร่ ใกล้ซอยตัวอย่าง 10 ค่ะ"
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "มีกี่คนคะ"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสองคนค่ะ"
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-safeguarding-serious-health-05-th",
+    "caller_id_hash": "synthetic:syn-safeguarding-serious-health-05",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "ดิฉัน อรุณ ใจดี พูดช้าๆ แม่ใช้ออกซิเจนและหอบ ยังรู้สึกตัว"
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "สุขภาพรุนแรง ต้องให้คนตัดสินใจ"
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "โทรจากอำเภออะไรคะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอหนองม่วงไข่ จังหวัดแพร่ ใกล้ซอยตัวอย่าง 10 ค่ะ"
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "มีกี่คนคะ"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสองคนค่ะ"
+      }
+    ],
+    "fields": {
+      "location": "Nong Muang Khai District, Phrae",
+      "location_confidence": 0.92,
+      "people_count": 2,
+      "vulnerable": [
+        "oxygen_dependent"
+      ],
+      "medical": true,
+      "danger": [],
+      "needs": [
+        "medical"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T11:13:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P2",
+    "route": "medical_response",
+    "needs": [
+      "medical"
+    ],
+    "requires_human": true,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_yellow_urgent",
+      "safeguarding_serious_health"
+    ],
+    "action": "create_provisional_dispatch"
+  },
+  "notes": "Synthetic safeguarding_serious_health. Colour yellow. Calm delivery with a critical fact. Route medical_response on system_2."
+}
