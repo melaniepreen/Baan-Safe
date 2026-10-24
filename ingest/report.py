@@ -5,14 +5,13 @@ from __future__ import annotations
 from ingest.db import DB_PATH, connect
 
 LATER = [
-    "DDPM reports",
     "aid-payment aggregates",
-    "TMD",
-    "RID/NWCC",
+    "TMD registered warning API",
+    "RID reservoir API",
     "WorldPop",
-    "HDX",
+    "HDX admin boundaries",
     "EM-DAT",
-    "World Bank 2011",
+    "World Bank 2011 loss tables",
     "policy corpus",
 ]
 
@@ -35,7 +34,11 @@ def write_sources() -> str:
         "",
         "SQLite path: `data/processed/baansafe.sqlite`. Production database is `TODO_HUMAN` in `config/decisions.yaml`. Raw responses are cached under `data/raw/` (gitignored).",
         "",
-        "Article bodies are not stored. ReliefWeb rows, when a human supplies an approved `appname`, keep a short summary only (headline, truncated to 280 characters).",
+        "Article bodies are not stored. GLIDE comments and IDMC notes are clipped to 280 characters.",
+        "",
+        "ReliefWeb is not an active source: `api.reliefweb.int` robots.txt disallows `/v2/`, and the API requires a pre-approved appname. No ReliefWeb request is sent.",
+        "",
+        "DDPM situation reports were not added. The repo owner took DDPM out of this run.",
         "",
         "## Do not collect",
         "",
@@ -64,11 +67,24 @@ def write_sources() -> str:
         for name, count in counts.items():
             lines.append(f"| {name} | {count} |")
         lines.extend(["", "| source | status | rows | fetched_at | detail |", "|---|---|---|---|---|"])
+        candidates = []
         for row in status_rows:
+            if row["status"] == "candidate":
+                candidates.append(row)
+                continue
             detail = " ".join(str(row["detail"] or "").split())
             lines.append(
                 f"| {row['source']} | {row['status']} | {row['row_count']} | {row['fetched_at']} | {detail} |"
             )
+        lines.extend(["", "## HDX candidates not fetched", ""])
+        if not candidates:
+            lines.append("None recorded.")
+        else:
+            lines.append("| dataset | detail |")
+            lines.append("|---|---|")
+            for row in candidates:
+                detail = " ".join(str(row["detail"] or "").split())
+                lines.append(f"| {row['source']} | {detail} |")
         lines.append("")
     lines.extend(["## Later — human to approve", ""])
     for name in LATER:

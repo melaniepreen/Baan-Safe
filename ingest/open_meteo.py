@@ -43,6 +43,15 @@ def ingest(refresh: bool) -> str:
             "SELECT location_id, name_en, lat, lon FROM districts ORDER BY location_id"
         ).fetchall()
     districts = list(districts)[:50]
+    with connect() as conn:
+        if districts:
+            placeholders = ",".join("?" for _ in districts)
+            conn.execute(
+                f"DELETE FROM weather_observation WHERE location_id NOT IN ({placeholders})",
+                tuple(district["location_id"] for district in districts),
+            )
+        else:
+            conn.execute("DELETE FROM weather_observation")
     if not districts:
         detail = "SKIPPED: no district centroids to query. GISTDA polygons or the admin lookup produced none."
         set_status("open_meteo", fetched_at=_now(), row_count=0, status="skipped", detail=detail)
@@ -151,6 +160,10 @@ def _one(
     wind = daily.get("wind_speed_10m_max") or []
     rows = 0
     with connect() as conn:
+        conn.execute(
+            "DELETE FROM weather_observation WHERE location_id = ? AND source = ?",
+            (location_id, source),
+        )
         for index, day in enumerate(days):
             conn.execute(
                 """

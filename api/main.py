@@ -7,7 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from api.routes.endpoints import router
+from config.envfile import load_env_file
 from paths import ROOT
+
+load_env_file()
 
 app = FastAPI(
     title="BaanSafe",

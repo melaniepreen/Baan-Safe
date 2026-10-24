@@ -52,76 +52,30 @@ def _flood_geoms():
 
 
 def ingest_admin(refresh: bool) -> str:
-    geoms = _flood_geoms()
-    if not geoms:
-        detail = "SKIPPED: no flood polygons, so no district bbox."
-        set_status("overpass_admin", fetched_at=_now(), row_count=0, status="skipped", detail=detail)
-        return detail
-    shapes = [geom for _, geom in geoms]
-    min_lat, min_lon, max_lat, max_lon = bounds_of(shapes)
-    if (max_lat - min_lat) > 4 or (max_lon - min_lon) > 4:
+    from ingest.areas import select_areas
+
+    areas, skipped = select_areas()
+    if not areas:
         detail = (
-            "BLOCKED: flood bbox is wider than 4 degrees, so the admin query would "
-            "be too close to a country-wide pull. Human should narrow demo_event."
+            "BLOCKED: no flood cluster fits the Overpass bbox cap. "
+            + " ".join(skipped)
         )
         set_status("overpass_admin", fetched_at=_now(), row_count=0, status="blocked", detail=detail)
         return detail
-    pad = 0.05
-    south, west, north, east = min_lat - pad, min_lon - pad, max_lat + pad, max_lon + pad
-    query = (
-        f"[out:json][timeout:80];"
-        f'relation["boundary"="administrative"]["admin_level"="6"]'
-        f"({south},{west},{north},{east});"
-        f"out tags center;"
-    )
-    try:
-        url, host = _interpreter()
-        client = PoliteClient("overpass", refresh=refresh, timeout=100)
-        result = client.post(
-            url,
-            allowed_hosts={host},
-            data={"data": query},
-        )
-    except (RobotsDisallowed, OffHostError) as exc:
-        set_status("overpass_admin", fetched_at=_now(), row_count=0, status="blocked", detail=str(exc))
-        return str(exc)
-    if result.status_code != 200:
-        detail = f"BLOCKED: Overpass admin HTTP {result.status_code}."
-        set_status("overpass_admin", fetched_at=result.fetched_at, row_count=0, status="blocked", detail=detail)
-        return detail
-    payload = json.loads(result.body)
     cfg = load_yaml("ingest.yaml")
     max_km = float(cfg.get("district_match_km", 25))
-    centroids = [centroid_latlon(geom) for geom in shapes]
     chosen: dict[str, dict] = {}
-    for element in payload.get("elements") or []:
-        center = element.get("center") or {}
-        lat, lon = center.get("lat"), center.get("lon")
-        if lat is None or lon is None:
-            continue
-        tags = element.get("tags") or {}
-        name_en = tags.get("name:en") or tags.get("name") or ""
-        name_th = tags.get("name") or ""
-        if not name_en:
-            continue
-        nearest = min(haversine_km(lat, lon, clat, clon) for clat, clon in centroids)
-        if nearest > max_km:
-            continue
-        location_id = _slug(name_en)
-        province = tags.get("addr:province") or _province_hint(name_en)
-        current = chosen.get(location_id)
-        if current is None or nearest < current["km"]:
-            chosen[location_id] = {
-                "location_id": location_id,
-                "name_en": name_en,
-                "name_th": name_th,
-                "lat": lat,
-                "lon": lon,
-                "province": province,
-                "km": nearest,
-            }
-    # Cap 50, closest first.
-    ordered = sorted(chosen.values(), key=lambda row: row["km"])[:50]
+    notes = list(skipped)
+    fetched_at = _now()
+    for area in areas:
+        batch, note, fetched_at = _admin_one(area, refresh, max_km)
+        notes.append(note)
+        for row in batch:
+            current = chosen.get(row["location_id"])
+            rank = (row["priority"], row["km"])
+            if current is None or rank < (current["priority"], current["km"]):
+                chosen[row["location_id"]] = row
+    ordered = sorted(chosen.values(), key=lambda row: (row["priority"], row["km"]))[:50]
     with connect() as conn:
         conn.execute("DELETE FROM districts")
         for row in ordered:
@@ -141,27 +95,95 @@ def ingest_admin(refresh: bool) -> str:
                 ),
             )
     if not ordered:
+        centroids = []
+        for area in areas:
+            centroids.extend(centroid_latlon(geom) for geom in area.shapes[:20])
         _fallback_grid(centroids)
         detail = (
             "Overpass returned no admin centre within the match distance. "
-            "Stored DISTRICT_TBD grid centroids from flood polygons instead."
+            "Stored DISTRICT_TBD grid centroids from flood polygons instead. "
+            + " ".join(notes)
         )
         with connect() as conn:
             count = conn.execute("SELECT COUNT(*) AS n FROM districts").fetchone()["n"]
-        set_status("overpass_admin", fetched_at=result.fetched_at, row_count=count, status="fallback", detail=detail)
+        set_status(
+            "overpass_admin",
+            fetched_at=fetched_at,
+            row_count=count,
+            status="fallback",
+            detail=detail,
+        )
         return detail
     detail = (
-        f"Stored {len(ordered)} districts whose centres are within {max_km} km of a "
-        "flood polygon centroid. Assignment is nearest centre, not a boundary intersection."
+        f"Stored {len(ordered)} districts across {len(areas)} flood clusters (cap 50). "
+        f"Centres within {max_km} km. Nearest centre, not a boundary intersection. "
+        "The risk-layer cluster is kept so fixture districts still resolve; "
+        "observed-event clusters are added when they fit. "
+        + " ".join(notes)
     )
     set_status(
         "overpass_admin",
-        fetched_at=result.fetched_at,
+        fetched_at=fetched_at,
         row_count=len(ordered),
         status="ok",
         detail=detail,
     )
     return detail
+
+
+def _admin_one(area, refresh: bool, max_km: float) -> tuple[list[dict], str, str]:
+    min_lat, min_lon, max_lat, max_lon = bounds_of(area.shapes)
+    pad = 0.05
+    south, west, north, east = min_lat - pad, min_lon - pad, max_lat + pad, max_lon + pad
+    query = (
+        f"[out:json][timeout:80];"
+        f'relation["boundary"="administrative"]["admin_level"="6"]'
+        f"({south},{west},{north},{east});"
+        f"out tags center;"
+    )
+    try:
+        url, host = _interpreter()
+        client = PoliteClient("overpass", refresh=refresh, timeout=100)
+        result = client.post(url, allowed_hosts={host}, data={"data": query})
+    except (RobotsDisallowed, OffHostError, RuntimeError) as exc:
+        return [], f"{area.label}: {exc}", _now()
+    if result.status_code != 200:
+        return [], f"{area.label}: HTTP {result.status_code}", result.fetched_at
+    payload = json.loads(result.body)
+    centroids = [centroid_latlon(geom) for geom in area.shapes]
+    found: dict[str, dict] = {}
+    for element in payload.get("elements") or []:
+        center = element.get("center") or {}
+        lat, lon = center.get("lat"), center.get("lon")
+        if lat is None or lon is None:
+            continue
+        tags = element.get("tags") or {}
+        name_en = tags.get("name:en") or tags.get("name") or ""
+        name_th = tags.get("name") or ""
+        if not name_en:
+            continue
+        nearest = min(haversine_km(lat, lon, clat, clon) for clat, clon in centroids)
+        if nearest > max_km:
+            continue
+        location_id = _slug(name_en)
+        province = tags.get("addr:province") or _province_hint(name_en)
+        current = found.get(location_id)
+        if current is None or nearest < current["km"]:
+            found[location_id] = {
+                "location_id": location_id,
+                "name_en": name_en,
+                "name_th": name_th,
+                "lat": lat,
+                "lon": lon,
+                "province": province,
+                "km": nearest,
+                "priority": area.priority,
+            }
+    return (
+        list(found.values()),
+        f"{area.label}: {len(found)} districts",
+        result.fetched_at,
+    )
 
 
 def _fallback_grid(centroids: list[tuple[float, float]]) -> None:
@@ -189,23 +211,84 @@ def _fallback_grid(centroids: list[tuple[float, float]]) -> None:
 
 
 def ingest_facilities(refresh: bool) -> str:
-    geoms = _flood_geoms()
-    if not geoms:
-        detail = "SKIPPED: no flood polygons, so no facility bbox."
+    from ingest.areas import select_areas
+
+    areas, skipped = select_areas()
+    if not areas:
+        detail = "SKIPPED: no flood cluster fits a facility bbox. " + " ".join(skipped)
         set_status("overpass_facilities", fetched_at=_now(), row_count=0, status="skipped", detail=detail)
         return detail
-    shapes = [geom for _, geom in geoms]
-    min_lat, min_lon, max_lat, max_lon = bounds_of(shapes)
-    if (max_lat - min_lat) > 4 or (max_lon - min_lon) > 4:
-        detail = "BLOCKED: facility bbox would be wider than 4 degrees."
-        set_status(
-            "overpass_facilities",
-            fetched_at=_now(),
-            row_count=0,
-            status="blocked",
-            detail=detail,
-        )
-        return detail
+    elements: list[dict] = []
+    seen: set[tuple] = set()
+    notes = list(skipped)
+    fetched_at = _now()
+    for area in areas:
+        batch, note, fetched_at = _facilities_one(area, refresh)
+        notes.append(note)
+        for element in batch:
+            key = (element.get("type"), element.get("id"))
+            if key in seen:
+                continue
+            seen.add(key)
+            elements.append(element)
+    live, observed = _flag_geometries()
+    buffer_m = float(load_yaml("escalation.yaml")["enrichment_flags"]["near_flood_buffer_m"])
+    stored = 0
+    counts = {
+        "inside_flood_extent": 0,
+        "near_flood_extent": 0,
+        "inside_observed_event": 0,
+        "near_observed_event": 0,
+        "clear": 0,
+    }
+    with connect() as conn:
+        conn.execute("DELETE FROM infrastructure")
+        prepared = []
+        for element in elements:
+            lat, lon = _element_latlon(element)
+            if lat is None or lon is None:
+                continue
+            kind = _element_type(element)
+            if kind not in FACILITY_TYPES:
+                continue
+            tags = element.get("tags") or {}
+            name = tags.get("name:en") or tags.get("name") or "unnamed"
+            osm_id = f"{element.get('type')}/{element.get('id')}"
+            point = json.dumps({"type": "Point", "coordinates": [lon, lat]})
+            prepared.append((osm_id, kind, point, name, lat, lon))
+        flags = _flags([row[4:6] for row in prepared], live, observed, buffer_m)
+        for row, flag in zip(prepared, flags):
+            counts[flag] = counts.get(flag, 0) + 1
+            conn.execute(
+                """
+                INSERT INTO infrastructure
+                    (osm_id, type, geometry, name, accessibility_flag, lat, lon)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (*row[:4], flag, row[4], row[5]),
+            )
+            stored += 1
+    detail = (
+        f"Stored {stored} facilities across {len(areas)} flood clusters. "
+        "Live 1/3/7/30-day windows set inside_flood_extent or near_flood_extent. "
+        "Observed satellite polygons set inside_observed_event or near_observed_event. "
+        "The flood-risk layer does not set either flag. "
+        + " ".join(f"{name}={count}" for name, count in counts.items())
+        + ". "
+        + " ".join(notes)
+    )
+    set_status(
+        "overpass_facilities",
+        fetched_at=fetched_at,
+        row_count=stored,
+        status="ok" if stored else "empty",
+        detail=detail,
+    )
+    return detail
+
+
+def _facilities_one(area, refresh: bool) -> tuple[list[dict], str, str]:
+    min_lat, min_lon, max_lat, max_lon = bounds_of(area.shapes)
     pad = 0.02
     south, west, north, east = min_lat - pad, min_lon - pad, max_lat + pad, max_lon + pad
     bbox = f"({south},{west},{north},{east})"
@@ -222,28 +305,12 @@ def ingest_facilities(refresh: bool) -> str:
         url, host = _interpreter()
         client = PoliteClient("overpass", refresh=refresh, timeout=120)
         result = client.post(url, allowed_hosts={host}, data={"data": query})
-    except (RobotsDisallowed, OffHostError) as exc:
-        set_status(
-            "overpass_facilities",
-            fetched_at=_now(),
-            row_count=0,
-            status="blocked",
-            detail=str(exc),
-        )
-        return str(exc)
+    except (RobotsDisallowed, OffHostError, RuntimeError) as exc:
+        return [], f"{area.label}: {exc}", _now()
     if result.status_code != 200:
-        detail = f"BLOCKED: Overpass facilities HTTP {result.status_code}."
-        set_status(
-            "overpass_facilities",
-            fetched_at=result.fetched_at,
-            row_count=0,
-            status="blocked",
-            detail=detail,
-        )
-        return detail
+        return [], f"{area.label}: HTTP {result.status_code}", result.fetched_at
     payload = json.loads(result.body)
     elements = list(payload.get("elements") or [])
-    # OSM tags bridges as bridge=yes on the highway way. man_made=bridge is rare.
     bridge_query = (
         "[out:json][timeout:60];("
         f'way["bridge"="yes"]{bbox};'
@@ -253,55 +320,64 @@ def ingest_facilities(refresh: bool) -> str:
     try:
         bridge_result = client.post(url, allowed_hosts={host}, data={"data": bridge_query})
         if bridge_result.status_code == 200:
-            bridge_payload = json.loads(bridge_result.body)
             seen = {(el.get("type"), el.get("id")) for el in elements}
-            for el in bridge_payload.get("elements") or []:
+            for el in json.loads(bridge_result.body).get("elements") or []:
                 key = (el.get("type"), el.get("id"))
                 if key not in seen:
                     elements.append(el)
                     seen.add(key)
-    except (RobotsDisallowed, OffHostError):
+    except (RobotsDisallowed, OffHostError, RuntimeError):
         pass
-    extent_shapes = [geom for window, geom in geoms if _is_extent_window(window)]
-    buffer_m = float(load_yaml("escalation.yaml")["enrichment_flags"]["near_flood_buffer_m"])
-    stored = 0
-    with connect() as conn:
-        conn.execute("DELETE FROM infrastructure")
-        for element in elements:
-            lat, lon = _element_latlon(element)
-            if lat is None or lon is None:
-                continue
-            kind = _element_type(element)
-            if kind not in FACILITY_TYPES:
-                continue
-            tags = element.get("tags") or {}
-            name = tags.get("name:en") or tags.get("name") or "unnamed"
-            flag = _accessibility(lat, lon, extent_shapes, buffer_m)
-            osm_id = f"{element.get('type')}/{element.get('id')}"
-            point = json.dumps({"type": "Point", "coordinates": [lon, lat]})
-            conn.execute(
-                """
-                INSERT INTO infrastructure
-                    (osm_id, type, geometry, name, accessibility_flag, lat, lon)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                """,
-                (osm_id, kind, point, name, flag, lat, lon),
+    return elements, f"{area.label}: {len(elements)} elements", result.fetched_at
+
+
+def _flag_geometries() -> tuple[list, list]:
+    live = []
+    observed = []
+    for window, geom in _flood_geoms():
+        if _is_extent_window(window):
+            live.append(geom)
+        elif (window or "") != "flood_risk_layer":
+            observed.append(geom)
+    return live, observed
+
+
+def _flags(points: list[tuple[float, float]], live, observed, buffer_m: float) -> list[str]:
+    from shapely.geometry import Point
+    from shapely.strtree import STRtree
+
+    live_tree = STRtree(live) if live else None
+    observed_tree = STRtree(observed) if observed else None
+
+    def label(tree, geoms, point, inside: str, near: str) -> str | None:
+        if tree is None:
+            return None
+        window = point.buffer(buffer_m / 100_000.0)
+        nearest = None
+        for index in tree.query(window):
+            geom = geoms[int(index)]
+            if geom.covers(point):
+                return inside
+            metres = geom.distance(point) * 111_320
+            nearest = metres if nearest is None else min(nearest, metres)
+        if nearest is not None and nearest <= buffer_m:
+            return near
+        return None
+
+    flags = []
+    for lat, lon in points:
+        point = Point(lon, lat)
+        flag = label(live_tree, live, point, "inside_flood_extent", "near_flood_extent")
+        if flag is None:
+            flag = label(
+                observed_tree,
+                observed,
+                point,
+                "inside_observed_event",
+                "near_observed_event",
             )
-            stored += 1
-    detail = (
-        f"Stored {stored} facilities inside the flood-polygon bbox "
-        f"({south:.3f},{west:.3f},{north:.3f},{east:.3f}). "
-        "accessibility_flag uses flood-extent windows only, not the flood-risk layer. "
-        "Waterways are centre points, not full lines, to keep the pull bounded."
-    )
-    set_status(
-        "overpass_facilities",
-        fetched_at=result.fetched_at,
-        row_count=stored,
-        status="ok" if stored else "empty",
-        detail=detail,
-    )
-    return detail
+        flags.append(flag or "clear")
+    return flags
 
 
 def _is_extent_window(window: str | None) -> bool:

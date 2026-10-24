@@ -7,7 +7,8 @@ import sys
 
 from ingest.db import connect, init_db, reset_data
 from ingest.geo import loads
-from ingest import gistda, open_meteo, overpass, reliefweb
+from config.envfile import load_env_file
+from ingest import gdacs, gistda, hdx, open_meteo, overpass, reliefweb, thaiwater
 from ingest.report import write_sources
 from paths import ROOT
 
@@ -84,16 +85,25 @@ def export_geojson() -> None:
 def main(argv: list[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
     refresh = "--refresh" in args
+    start = "all"
+    if "--from" in args:
+        start = args[args.index("--from") + 1]
+    load_env_file()
     init_db()
-    reset_data()
-    print("gistda:", gistda.ingest(refresh)[:500])
-    print("overpass admin:", overpass.ingest_admin(refresh)[:500])
-    print("open-meteo:", open_meteo.ingest(refresh)[:500])
-    print("overpass facilities:", overpass.ingest_facilities(refresh)[:500])
-    print("reliefweb:", reliefweb.ingest(refresh)[:500])
-    export_geojson()
-    write_sources()
-    print("wrote data/SOURCES.md and data/processed/")
+    if start == "all":
+        reset_data()
+        print("gistda:", gistda.ingest(refresh)[:1200])
+        print("hdx:", hdx.ingest(refresh)[:1200])
+    if start in {"all", "gdacs"}:
+        print("gdacs:", gdacs.ingest(refresh)[:1200])
+        print("overpass admin:", overpass.ingest_admin(refresh)[:1200])
+        print("open-meteo:", open_meteo.ingest(refresh)[:800])
+        print("overpass facilities:", overpass.ingest_facilities(refresh)[:1200])
+        print("thaiwater:", thaiwater.ingest(refresh)[:800])
+        print("reliefweb:", reliefweb.ingest(refresh)[:400])
+        export_geojson()
+        write_sources()
+        print("wrote data/SOURCES.md and data/processed/")
     return 0
 
 

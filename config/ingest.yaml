@@ -22,3 +22,33 @@ weather_granularity: daily
 # distance. This is not a polygon-intersection against a district boundary set.
 # HDX district boundaries are listed as later — human to approve.
 district_match_km: 25
+
+# Overpass is queried per flood cluster, not once for the whole country.
+# The public risk layer (fixture districts) is kept, then observed-event
+# clusters (EOS-RS, GDACS, UNOSAT) and any live GISTDA window that still
+# fits in the box. A cluster wider than max_bbox_degrees is skipped.
+max_overpass_clusters: 4
+max_bbox_degrees: 4
+
+# GISTDA feature API. Caps stop a national download (7-day and 30-day
+# matches are tens or hundreds of thousands of polygons; repeat-flood is
+# millions). The key is read from GISTDA_API_KEY / .env and is never stored.
+gistda:
+  page_limit: 100
+  max_extent_features_per_window: 800
+  max_repeat_features: 400
+  # Lampang, Phrae, Nan, Phayao (fixtures), Chiang Mai, Lamphun, Chiang Rai
+  # (2024 UNOSAT scenes), Songkhla (Hat Yai).
+  province_codes: [50, 51, 52, 54, 55, 56, 57, 90]
+
+# UNOSAT shapefiles are fetched only when the HDX licence is an open
+# Creative Commons licence and the shapefile is under this size.
+# Larger open products are listed in data/SOURCES.md and not downloaded.
+unosat_max_shp_bytes: 20000000
+
+# A GDACS or satellite polygon wider than this is kept out of flood_extent.
+# A country-sized ring would mark half of Thailand as flooded.
+max_stored_span_degrees: 4
+
+# ThaiWater gauge rain is attached to a district only inside this radius.
+thaiwater_match_km: 25

@@ -37,11 +37,20 @@ def user_agent() -> str:
     return "BaanSafe-hackathon/0.1 (contact: set in .env)"
 
 
+_SECRET_MARKERS = ("key", "token", "signature", "credential", "secret", "password")
+
+
+def _secret_param(name: str) -> bool:
+    lowered = name.lower().replace("-", "_")
+    return any(marker in lowered for marker in _SECRET_MARKERS)
+
+
 def _looks_like_robots(text: str) -> bool:
     head = text.lstrip()[:200].lower()
     if head.startswith("<!doctype") or head.startswith("<html"):
         return False
-    return "user-agent" in text.lower() or "disallow" in text.lower()
+    lowered = text.lower()
+    return "user-agent" in lowered or "disallow" in lowered
 
 
 def robots_allows(robots_text: str | None, path: str) -> bool:
@@ -91,6 +100,123 @@ def robots_allows(robots_text: str | None, path: str) -> bool:
     return best_allow
 
 
+def _star_directives(robots_text: str | None) -> dict[str, list[str]]:
+    """Return directive values for the `*` group. Non-robots bodies yield nothing."""
+    found: dict[str, list[str]] = {}
+    if not robots_text or not _looks_like_robots(robots_text):
+        return found
+    agents: list[str] = []
+    saw_directive = False
+    in_star = False
+    for raw in robots_text.splitlines():
+        line = raw.split("#", 1)[0].strip()
+        if not line or ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        key = key.strip().lower()
+        value = value.strip()
+        if key == "user-agent":
+            if saw_directive:
+                agents = []
+                saw_directive = False
+            agents.append(value.lower())
+            in_star = "*" in agents
+            continue
+        saw_directive = True
+        if in_star:
+            found.setdefault(key, []).append(value)
+    return found
+
+
+def request_interval_seconds(robots_text: str | None) -> float | None:
+    """Parse `Request-rate: requests/seconds` for the `*` group.
+
+    `1/60` means one request every 60 seconds. The longest interval wins.
+    """
+    best: float | None = None
+    for raw in _star_directives(robots_text).get("request-rate", []):
+        if "/" not in raw:
+            continue
+        count_text, seconds_text = raw.split("/", 1)
+        try:
+            count = float(count_text.strip())
+            seconds = float(seconds_text.strip())
+        except ValueError:
+            continue
+        if count <= 0 or seconds < 0:
+            continue
+        interval = seconds / count
+        best = interval if best is None else max(best, interval)
+    return best
+
+
+def visit_windows_minutes(robots_text: str | None) -> list[tuple[int, int]]:
+    """Parse `Visit-time: HHMM-HHMM` ranges as minutes from midnight, UTC."""
+    windows: list[tuple[int, int]] = []
+    for raw in _star_directives(robots_text).get("visit-time", []):
+        if "-" not in raw:
+            continue
+        start_text, end_text = raw.split("-", 1)
+        try:
+            start = _hhmm_minutes(start_text)
+            end = _hhmm_minutes(end_text)
+        except ValueError:
+            continue
+        windows.append((start, end))
+    return windows
+
+
+def _hhmm_minutes(token: str) -> int:
+    text = token.strip()
+    if len(text) != 4 or not text.isdigit():
+        raise ValueError(text)
+    hours = int(text[:2])
+    minutes = int(text[2:])
+    if hours > 23 or minutes > 59:
+        raise ValueError(text)
+    return hours * 60 + minutes
+
+
+def visit_open(robots_text: str | None, moment: datetime) -> bool:
+    """Return True if `moment` (UTC) is inside a Visit-time range.
+
+    No Visit-time directive means the site did not restrict the clock.
+    A range is inclusive of both endpoint minutes. Ranges that pass
+    midnight are honoured.
+    """
+    windows = visit_windows_minutes(robots_text)
+    if not windows:
+        return True
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    minute = moment.astimezone(timezone.utc).hour * 60 + moment.astimezone(timezone.utc).minute
+    for start, end in windows:
+        if start <= end and start <= minute <= end:
+            return True
+        if start > end and (minute >= start or minute <= end):
+            return True
+    return False
+
+
+def robots_readable(text: str | None) -> bool:
+    """True only when the body is a robots.txt file, not an error page."""
+    return bool(text) and _looks_like_robots(text)
+
+
+def scrub(text: str, secret: str | None = None) -> str:
+    """Remove query secrets and, when provided, a known secret value."""
+    import re
+
+    cleaned = re.sub(
+        r"(?i)([?&][^=&\s\"']*(?:key|token|signature|credential|secret|password)[^=&\s\"']*=)[^&\s\"']+",
+        r"\1REDACTED",
+        text,
+    )
+    if secret and len(secret) >= 8 and secret in cleaned:
+        cleaned = cleaned.replace(secret, "REDACTED")
+    return cleaned
+
+
 def _redact(url: str) -> str:
     # Never persist an API key that arrived in a query string.
     parts = url.split("?")
@@ -99,11 +225,21 @@ def _redact(url: str) -> str:
     kept = []
     for pair in parts[1].split("&"):
         name = pair.split("=", 1)[0].lower()
-        if name in {"api_key", "apikey", "key", "token", "access_token"}:
+        if _secret_param(name):
             kept.append(f"{name}=REDACTED")
         else:
             kept.append(pair)
     return parts[0] + "?" + "&".join(kept)
+
+
+def _public_query(items: dict) -> str:
+    pairs: list[tuple[str, str]] = []
+    for key, value in items.items():
+        if _secret_param(str(key)):
+            pairs.append((str(key), "REDACTED"))
+        else:
+            pairs.append((str(key), "" if value is None else str(value)))
+    return urlencode(sorted(pairs))
 
 
 @dataclass
@@ -116,12 +252,24 @@ class FetchResult:
 
 
 class PoliteClient:
-    def __init__(self, source: str, refresh: bool = False, timeout: float = 45.0) -> None:
+    def __init__(
+        self,
+        source: str,
+        refresh: bool = False,
+        timeout: float = 45.0,
+        attempts: int = 4,
+        require_robots: bool = False,
+    ) -> None:
         self.source = source
         self.refresh = refresh
         self.timeout = timeout
+        self.attempts = attempts
+        # GDACS sets this. An unreadable robots.txt then refuses the request
+        # instead of treating the site as unrestricted.
+        self.require_robots = require_robots
         self._last: dict[str, float] = {}
         self._robots: dict[str, str | None] = {}
+        self._interval: dict[str, float] = {}
         self.user_agent = user_agent()
 
     def get_json(
@@ -131,6 +279,7 @@ class PoliteClient:
         allowed_hosts: set[str],
         params: dict | None = None,
         ignore_robots: bool = False,
+        accept: str = "application/json",
     ) -> FetchResult:
         return self._request(
             "GET",
@@ -138,6 +287,7 @@ class PoliteClient:
             allowed_hosts=allowed_hosts,
             params=params,
             ignore_robots=ignore_robots,
+            accept=accept,
         )
 
     def post(
@@ -164,10 +314,11 @@ class PoliteClient:
         return folder / f"{digest}.bin", folder / f"{digest}.meta.json"
 
     def _wait(self, host: str) -> None:
+        needed = self._interval.get(host, 1.0)
         last = self._last.get(host, 0.0)
         gap = time.monotonic() - last
-        if gap < 1.0:
-            time.sleep(1.0 - gap)
+        if gap < needed:
+            time.sleep(needed - gap)
         self._last[host] = time.monotonic()
 
     def _robots_text(self, client: httpx.Client, origin: str, host: str) -> str | None:
@@ -175,7 +326,12 @@ class PoliteClient:
             return self._robots[host]
         self._wait(host)
         try:
-            response = client.get(urljoin(origin, "/robots.txt"))
+            # application/json makes www.gdacs.org answer 406 with an HTML
+            # page, which hides Request-rate and Visit-time. Ask for text.
+            response = client.get(
+                urljoin(origin, "/robots.txt"),
+                headers={"Accept": "text/plain, */*;q=0.1"},
+            )
         except httpx.HTTPError:
             self._robots[host] = None
             return None
@@ -195,32 +351,55 @@ class PoliteClient:
         params: dict | None = None,
         data: dict[str, str] | None = None,
         ignore_robots: bool = False,
+        accept: str = "application/json",
     ) -> FetchResult:
         parsed = urlparse(url)
         host = parsed.hostname or ""
         if host not in allowed_hosts:
             raise OffHostError(f"refusing off-list host {host}")
-        extra = urlencode(sorted((params or data or {}).items()))
+        extra = _public_query(params or data or {})
         body_path, meta_path = self._cache_paths(method, url, extra)
         if body_path.exists() and not self.refresh:
             meta = json.loads(meta_path.read_text(encoding="utf-8"))
-            return FetchResult(
-                body=body_path.read_bytes(),
-                status_code=int(meta.get("status_code", 200)),
-                url=url,
-                from_cache=True,
-                fetched_at=str(meta.get("fetched_at")),
-            )
+            # A cache written before the visit window was enforced must not
+            # be replayed. Ordinary sources do not set this flag.
+            if not self.require_robots or meta.get("visit_open") is True:
+                return FetchResult(
+                    body=body_path.read_bytes(),
+                    status_code=int(meta.get("status_code", 200)),
+                    url=_redact(url),
+                    from_cache=True,
+                    fetched_at=str(meta.get("fetched_at")),
+                )
 
-        headers = {"User-Agent": self.user_agent, "Accept": "application/json"}
-        attempts = 4  # initial try + 3 retries
+        headers = {"User-Agent": self.user_agent, "Accept": accept}
+        attempts = self.attempts  # initial try + retries
         with httpx.Client(timeout=self.timeout, follow_redirects=False, headers=headers) as client:
             origin = f"{parsed.scheme}://{host}"
             if not ignore_robots:
                 robots = self._robots_text(client, origin, host)
+                if self.require_robots and not robots_readable(robots):
+                    raise RobotsDisallowed(
+                        f"robots.txt on {host} could not be read; request was not sent"
+                    )
                 if not robots_allows(robots, parsed.path or "/"):
                     raise RobotsDisallowed(
                         f"robots.txt disallows {parsed.path} on {host}"
+                    )
+                interval = request_interval_seconds(robots)
+                if interval is not None:
+                    self._interval[host] = max(self._interval.get(host, 1.0), interval)
+                if (parsed.path or "/") != "/robots.txt" and not visit_open(
+                    robots, datetime.now(timezone.utc)
+                ):
+                    windows = visit_windows_minutes(robots)
+                    pretty = ", ".join(
+                        f"{start // 60:02d}{start % 60:02d}-{end // 60:02d}{end % 60:02d} UTC"
+                        for start, end in windows
+                    )
+                    raise RobotsDisallowed(
+                        f"robots.txt Visit-time on {host} allows {pretty}; "
+                        "this request was not sent"
                     )
             response: httpx.Response | None = None
             current_url = url
@@ -236,9 +415,9 @@ class PoliteClient:
                         params=params if current_url == url else None,
                         data=data if current_url == url else None,
                     )
-                except httpx.HTTPError:
+                except httpx.HTTPError as exc:
                     if attempt == attempts - 1:
-                        raise
+                        raise RuntimeError(scrub(str(exc))) from None
                     time.sleep(2**attempt)
                     continue
                 if response.status_code in {301, 302, 303, 307, 308}:
@@ -270,6 +449,7 @@ class PoliteClient:
                         "status_code": response.status_code,
                         "fetched_at": fetched_at,
                         "source": self.source,
+                        **({"visit_open": True} if self.require_robots else {}),
                     },
                     indent=2,
                 )
@@ -279,7 +459,7 @@ class PoliteClient:
         return FetchResult(
             body=response.content,
             status_code=response.status_code,
-            url=str(response.url),
+            url=_redact(str(response.url)),
             from_cache=False,
             fetched_at=fetched_at,
         )

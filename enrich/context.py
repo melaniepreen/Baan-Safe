@@ -32,6 +32,7 @@ def location_context(
         "candidate_shelters": [],
         "data_freshness": {},
         "in_flood_risk_layer": False,
+        "in_observed_event_extent": False,
         "matched_district": None,
         "point": None,
     }
@@ -52,7 +53,8 @@ def location_context(
         if lat is None or lon is None:
             return result
         result["point"] = {"lat": lat, "lon": lon}
-        windows = _windows_containing(conn, lat, lon)
+        windows, observed = _windows_containing(conn, lat, lon)
+        result["in_observed_event_extent"] = observed
         result["in_flood_extent_1d"] = bool(windows & EXTENT_1D)
         result["in_flood_extent_7d"] = bool(windows & (EXTENT_1D | EXTENT_3D | EXTENT_7D))
         result["in_flood_extent_30d"] = bool(
@@ -62,8 +64,13 @@ def location_context(
         result["repeat_flood_area"] = _repeat_contains(conn, lat, lon)
         location_id = matched["location_id"] if matched is not None else None
         if location_id:
-            result["rainfall_last_24h_mm"] = _latest_rain(
-                conn, location_id, "open-meteo-archive"
+            # A ThaiWater gauge is a measured 24-hour total. The Open-Meteo
+            # archive is the fallback when no gauge was matched to this district.
+            gauge = _latest_rain(conn, location_id, "thaiwater-rain-24h")
+            result["rainfall_last_24h_mm"] = (
+                gauge
+                if gauge is not None
+                else _latest_rain(conn, location_id, "open-meteo-archive")
             )
             result["rainfall_forecast_24h_mm"] = _latest_rain(
                 conn, location_id, "open-meteo-forecast", newest=False
@@ -93,14 +100,24 @@ def _match_district(conn, text: str | None):
     return max(matches, key=lambda row: len(row["name_en"] or ""))
 
 
-def _windows_containing(conn, lat: float, lon: float) -> set[str]:
+def _windows_containing(conn, lat: float, lon: float) -> tuple[set[str], bool]:
     point = Point(lon, lat)
     found: set[str] = set()
+    observed = False
+    live = EXTENT_1D | EXTENT_3D | EXTENT_7D | EXTENT_30D
     for row in conn.execute("SELECT duration_window, geometry FROM flood_extent"):
-        geom = loads(row["geometry"])
-        if geom.contains(point):
-            found.add(str(row["duration_window"] or ""))
-    return found
+        window = str(row["duration_window"] or "")
+        try:
+            geom = loads(row["geometry"])
+        except Exception:
+            continue
+        if not geom.contains(point):
+            continue
+        if window == "flood_risk_layer" or window.lower() in live:
+            found.add(window)
+        else:
+            observed = True
+    return found, observed
 
 
 def _repeat_contains(conn, lat: float, lon: float) -> bool:

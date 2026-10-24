@@ -4,7 +4,7 @@ Flood and disaster call-triage scaffold. Mubit governs memory, policy, and trace
 
 This tree is Phase 0 plus a Phase 1 API. **System 1 and System 2 decision logic are not implemented.** Callers, households, and transcripts are synthetic. Real district names and public flood polygons are used only to anchor scenarios.
 
-The architecture note is `BaanSafe_Revised_Architecture.md`. What to do in the morning is `MORNING_REPORT.md`. Who owns each folder is `OWNERSHIP.md`.
+The architecture note is `BaanSafe_Revised_Architecture.md`. What to do in the morning is `MORNING_REPORT.md`. Who owns each folder is `OWNERSHIP.md`. Background reading for Phase 1 is `research/INDEX.md`.
 
 ## Setup
 
@@ -26,7 +26,7 @@ make test           # pytest
 make replay-stubs   # accuracy of s1/s2 stub files against expected labels
 make demo-stub      # gateway.handle(..., use_stubs=True) for every fixture
 make serve          # API on :8000, docs at /docs
-make ingest         # four sources, using the cache
+make ingest         # public sources, using the cache
 make ingest-refresh # ignore the cache
 make data-report    # rewrite data/SOURCES.md
 ```

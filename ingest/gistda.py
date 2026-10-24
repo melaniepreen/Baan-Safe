@@ -1,16 +1,20 @@
 """GISTDA flood polygons.
 
-The documented open API needs an API key. Without one this module records the
-sign-up steps and falls back to the public ArcGIS MapServer only.
+The feature API needs GISTDA_API_KEY (environment or gitignored .env). The key
+is never written to SQLite, cache URLs, or the status text. Without a key this
+module records that fact and still loads the public ArcGIS risk layer.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 from datetime import datetime, timezone
 
-from ingest.common import OffHostError, PoliteClient, RobotsDisallowed
+from config.envfile import load_env_file
+from config.settings import load_yaml
+from ingest.common import OffHostError, PoliteClient, RobotsDisallowed, scrub
 from ingest.db import connect, set_status
 
 PORTAL = "gistdaportal.gistda.or.th"
@@ -18,20 +22,17 @@ MAPSERVER = (
     "https://gistdaportal.gistda.or.th/arcgis/rest/services/app/GISTDA_flood/MapServer"
 )
 GATEWAY = "api-gateway.gistda.or.th"
+FEATURES = "https://api-gateway.gistda.or.th/api/2.0/resources/features/flood"
+FREQ = "https://api-gateway.gistda.or.th/api/2.0/resources/features/flood-freq"
+WINDOWS = {"1d": "1day", "3d": "3days", "7d": "7days", "30d": "30days"}
 SIGNUP = (
-    "GISTDA open API requires an API key. Sign-up steps: "
-    "1) Open https://api-gateway.gistda.or.th (registration is also described at "
-    "https://api-gateway.gistda.or.th/v2). "
-    "2) Create an API key. "
-    "3) Export it as GISTDA_API_KEY in the environment (do not commit it). "
-    "4) Re-run `make ingest-refresh`. "
-    "Documented extent URL pattern: "
-    "https://api-gateway.gistda.or.th/api/2.0/resources/gi-service/v1.0/disasters/"
-    "flood-extent-1day?lat={latitude}&lon={longitude}&api_key=REDACTED "
-    "(same family for 3, 7 and 30 day windows, plus repeated-flood areas). "
-    "Catalogue: https://opendata.gistda.or.th/dataset/flood-disaster-data "
-    "and https://disaster.gistda.or.th/services/open-api. "
-    "Contact published on the catalogue: disaster@gistda.or.th."
+    "GISTDA open API requires an API key. Put GISTDA_API_KEY in the environment "
+    "or in the gitignored .env file. Do not commit it. Registration: "
+    "https://api-gateway.gistda.or.th and https://api-gateway.gistda.or.th/v2. "
+    "Feature paths: /api/2.0/resources/features/flood/{1day,3days,7days,30days} "
+    "and /api/2.0/resources/features/flood-freq with api_key, limit, offset, pv_idn. "
+    "Catalogue: https://opendata.gistda.or.th/dataset/flood-disaster-data. "
+    "Contact: disaster@gistda.or.th."
 )
 
 
@@ -40,95 +41,255 @@ def _now() -> str:
 
 
 def ingest(refresh: bool) -> str:
-    """Ingest public flood polygons. Returns a status detail string."""
+    """Ingest GISTDA polygons. Returns a status detail string. Never prints the key."""
+    load_env_file()
+    _clear_own_rows()
     key = os.environ.get("GISTDA_API_KEY", "").strip()
     if not key:
-        detail = (
-            "BLOCKED: " + SIGNUP + " "
-            "The open API was not called. Falling back to the public ArcGIS MapServer."
+        detail = "BLOCKED: " + SIGNUP + " The open API was not called."
+        set_status(
+            "gistda_open_api",
+            fetched_at=_now(),
+            row_count=0,
+            status="blocked",
+            detail=detail,
         )
     else:
         detail = _try_keyed_api(refresh, key)
-
     fallback = _arcgis(refresh)
-    combined = detail + " " + fallback
-    return combined
+    return detail + " " + fallback
+
+
+def _clear_own_rows() -> None:
+    with connect() as conn:
+        conn.execute(
+            """
+            DELETE FROM flood_extent
+            WHERE source = 'gistda-open-api'
+               OR source LIKE '%GISTDA_flood/MapServer%'
+            """
+        )
+        conn.execute("DELETE FROM repeat_flood WHERE source LIKE 'gistda%'")
 
 
 def _try_keyed_api(refresh: bool, key: str) -> str:
-    """Call the documented extent endpoints. The key is never written to disk."""
-    client = PoliteClient("gistda", refresh=refresh, timeout=40)
-    windows = {
-        "1d": "flood-extent-1day",
-        "3d": "flood-extent-3day",
-        "7d": "flood-extent-7day",
-        "30d": "flood-extent-30day",
-    }
-    notes = []
-    # A single public probe point is not a chosen demo event. The keyed API,
-    # per its published URL, is a point query. Without a human demo anchor we
-    # still ask the API at the centroid of the public MapServer extent only
-    # when a key exists. That centroid is data, not a household.
-    lat, lon = 18.3, 100.0
-    for window, slug in windows.items():
-        url = (
-            "https://api-gateway.gistda.or.th/api/2.0/resources/gi-service/v1.0/"
-            f"disasters/{slug}"
-        )
-        try:
-            result = client.get_json(
-                url,
-                allowed_hosts={GATEWAY},
-                params={"lat": lat, "lon": lon, "api_key": key},
-            )
-        except (RobotsDisallowed, OffHostError) as exc:
-            notes.append(f"{window}: {exc}")
+    cfg = load_yaml("ingest.yaml").get("gistda") or {}
+    page = int(cfg.get("page_limit", 100))
+    extent_cap = int(cfg.get("max_extent_features_per_window", 800))
+    repeat_cap = int(cfg.get("max_repeat_features", 400))
+    provinces = [int(code) for code in cfg.get("province_codes") or []]
+    client = PoliteClient("gistda", refresh=refresh, timeout=50, attempts=2)
+    notes = [
+        "GISTDA_API_KEY was read from the environment and was not written to "
+        "the database, the cache URL, or this note."
+    ]
+    stored_extents = 0
+    for window, slug in WINDOWS.items():
+        url = f"{FEATURES}/{slug}"
+        payload, error = _fetch(client, url, key, {"limit": 1, "offset": 0})
+        if error:
+            notes.append(f"{window} national: {error}")
+            if error.startswith("HTTP 401") or error.startswith("HTTP 403"):
+                break
             continue
-        if result.status_code != 200:
-            notes.append(f"{window}: HTTP {result.status_code}")
+        matched = _matched(payload)
+        notes.append(f"{window} national numberMatched={matched}")
+        if not matched:
             continue
-        stored = _store_keyed_payload(result.body, window)
-        notes.append(f"{window}: stored {stored}")
+        kept = _spread(client, key, url, window, provinces, extent_cap, page, "extent")
+        stored_extents += kept
+        notes.append(f"{window} stored={kept} cap={extent_cap} provinces={provinces}")
+    active = _province_hits(client, key, f"{FEATURES}/7days")
+    notes.append("7d numberMatched by province (nonzero only): " + (", ".join(active) or "none"))
+    freq_payload, freq_error = _fetch(client, FREQ, key, {"limit": 1, "offset": 0})
+    if freq_error:
+        notes.append(f"flood-freq national: {freq_error}")
+    else:
+        notes.append(f"flood-freq national numberMatched={_matched(freq_payload)}")
+    repeat_kept = _spread(client, key, FREQ, "repeat", provinces, repeat_cap, page, "repeat")
+    notes.append(f"repeat stored={repeat_kept} cap={repeat_cap}")
+    detail = " ".join(notes)
     set_status(
         "gistda_open_api",
         fetched_at=_now(),
-        row_count=0,
-        status="keyed",
-        detail="; ".join(notes) or "keyed API returned no features",
+        row_count=stored_extents,
+        status="ok" if stored_extents or repeat_kept else "empty",
+        detail=scrub(detail, key),
     )
-    return "Keyed API attempted. " + "; ".join(notes)
+    return scrub(detail, key)
 
 
-def _store_keyed_payload(body: bytes, window: str) -> int:
-    try:
-        payload = json.loads(body)
-    except json.JSONDecodeError:
+def _spread(client, key, url, window, provinces, cap, page, kind) -> int:
+    """Store up to `cap` features.
+
+    Extents walk the province list and skip empties, so a window that only
+    has water in the last configured province still stores that water.
+    Repeat-flood rows are split evenly: every configured province has
+    frequency polygons, and one province must not take the whole cap.
+    """
+    if not provinces or cap <= 0:
         return 0
-    features = []
-    if isinstance(payload, dict):
-        features = payload.get("features") or payload.get("results") or []
+    if kind == "repeat":
+        return _spread_even(client, key, url, window, provinces, cap, page, kind)
+    stored = 0
+    for province in provinces:
+        if stored >= cap:
+            break
+        offset = 0
+        got = 0
+        while stored < cap:
+            limit = min(page, cap - stored)
+            payload, error = _fetch(
+                client,
+                url,
+                key,
+                {"limit": limit, "offset": offset, "pv_idn": province},
+            )
+            if error:
+                print(f"gistda {window} pv_idn={province} {error}", flush=True)
+                break
+            features = payload.get("features") or []
+            if not features:
+                break
+            kept = _store_features(features, window, kind, limit)
+            got += kept
+            stored += kept
+            offset += len(features)
+            print(
+                f"gistda {window} pv_idn={province} page_stored={kept} running={got}",
+                flush=True,
+            )
+            if len(features) < limit or kept == 0:
+                break
+    return stored
+
+
+def _spread_even(client, key, url, window, provinces, cap, page, kind) -> int:
+    quota = cap // len(provinces)
+    extra = cap % len(provinces)
+    stored = 0
+    for index, province in enumerate(provinces):
+        limit_for = quota + (1 if index < extra else 0)
+        if limit_for <= 0:
+            continue
+        offset = 0
+        got = 0
+        while got < limit_for:
+            limit = min(page, limit_for - got)
+            payload, error = _fetch(
+                client,
+                url,
+                key,
+                {"limit": limit, "offset": offset, "pv_idn": province},
+            )
+            if error or not payload:
+                break
+            features = payload.get("features") or []
+            if not features:
+                break
+            kept = _store_features(features, window, kind, limit)
+            got += kept
+            stored += kept
+            offset += len(features)
+            if len(features) < limit or kept == 0:
+                break
+    return stored
+
+
+def _fetch(client, url, key, params: dict) -> tuple[dict | None, str | None]:
+    try:
+        result = client.get_json(
+            url,
+            allowed_hosts={GATEWAY},
+            params={**params, "api_key": key},
+        )
+    except (RobotsDisallowed, OffHostError, RuntimeError) as exc:
+        return None, scrub(str(exc), key)
+    if result.status_code != 200:
+        return None, f"HTTP {result.status_code}"
+    try:
+        payload = json.loads(result.body)
+    except json.JSONDecodeError:
+        return None, "response was not JSON"
+    if not isinstance(payload, dict):
+        return None, "unexpected payload"
+    return payload, None
+
+
+def _province_hits(client, key: str, url: str) -> list[str]:
+    """Count-only probe. Stores nothing. One feature page per province code."""
+    hits = []
+    for code in range(10, 97):
+        payload, error = _fetch(client, url, key, {"limit": 1, "offset": 0, "pv_idn": code})
+        if error or not payload:
+            continue
+        matched = _matched(payload) or 0
+        if matched:
+            hits.append(f"{code}:{matched}")
+            print(f"gistda 7d scan pv_idn={code} numberMatched={matched}", flush=True)
+    return hits
+
+
+def _matched(payload: dict | None) -> int | None:
+    if not payload:
+        return None
+    for name in ("numberMatched", "number_matched", "totalFeatures"):
+        if payload.get(name) is not None:
+            try:
+                return int(payload[name])
+            except (TypeError, ValueError):
+                return None
+    return None
+
+
+def _store_features(features: list, window: str, kind: str, limit: int) -> int:
     stored = 0
     with connect() as conn:
         for feature in features:
-            geom = feature.get("geometry") if isinstance(feature, dict) else None
-            if not geom:
+            if stored >= limit:
+                break
+            if not isinstance(feature, dict):
                 continue
-            props = feature.get("properties") or {}
-            conn.execute(
-                """
-                INSERT INTO flood_extent
-                    (event_id, date, geometry, source, duration_window, confidence)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    str(props.get("event_id") or props.get("id") or f"gistda-{window}"),
-                    props.get("date") or props.get("datetime"),
-                    json.dumps(geom),
-                    "gistda-open-api",
-                    window,
-                    props.get("confidence"),
-                ),
-            )
+            geom = feature.get("geometry")
+            if not isinstance(geom, dict):
+                continue
+            props = {
+                str(name).lower(): value
+                for name, value in (feature.get("properties") or {}).items()
+                if not str(name).startswith("_") and str(name).lower() not in {"mongo_id"}
+            }
+            object_id = props.get("objectid") or props.get("h3_address")
+            if object_id in (None, ""):
+                object_id = hashlib.sha256(
+                    json.dumps(geom, sort_keys=True).encode()
+                ).hexdigest()[:16]
+            if kind == "repeat":
+                freq = props.get("freq")
+                try:
+                    frequency = float(freq) if freq is not None and freq != "" else None
+                except (TypeError, ValueError):
+                    frequency = None
+                conn.execute(
+                    """
+                    INSERT INTO repeat_flood (area_id, geometry, frequency, source)
+                    VALUES (?, ?, ?, 'gistda-open-api')
+                    """,
+                    (f"{props.get('pv_idn')}-{object_id}", json.dumps(geom), frequency),
+                )
+            else:
+                conn.execute(
+                    """
+                    INSERT INTO flood_extent
+                        (event_id, date, geometry, source, duration_window, confidence)
+                    VALUES (?, ?, ?, 'gistda-open-api', ?, NULL)
+                    """,
+                    (
+                        f"gistda-{window}-{props.get('pv_idn')}-{object_id}",
+                        None,
+                        json.dumps(geom),
+                        window,
+                    ),
+                )
             stored += 1
     return stored
 
@@ -207,8 +368,7 @@ def _arcgis(refresh: bool) -> str:
         f"ArcGIS MapServer public fallback. Layer 0 (flood-affected extent) count="
         f"{layer0_count}. Layer 1 (flood-risk polygons) stored={stored} with "
         "duration_window=flood_risk_layer. These are not 1/3/7/30-day extents and "
-        "they are not repeated-flood frequencies. repeat_flood was not filled "
-        "because the frequency API needs the GISTDA key."
+        "they are not repeated-flood frequencies."
     )
     status = "ok" if stored else "empty"
     set_status(
@@ -217,12 +377,5 @@ def _arcgis(refresh: bool) -> str:
         row_count=stored,
         status=status,
         detail=detail,
-    )
-    set_status(
-        "gistda_open_api",
-        fetched_at=_now(),
-        row_count=0,
-        status="blocked",
-        detail=SIGNUP,
     )
     return detail
