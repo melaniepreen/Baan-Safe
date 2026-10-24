@@ -15,7 +15,7 @@ Key corrections:
 
 Target flow: Caller → live speech-to-text → Call Agent → Mubit Gateway (memory retrieval, policy pre-check, route) → System 1 (simple, clear, low-risk) or System 2 (ambiguous or high-risk, Nemotron, then Sapling when the claim is aid eligibility or a denial) → Decision Router → Call Agent (next question, update case, or provisional dispatch).
 
-The diagram is `gateway/route.py` on the default request (`use_stubs=True`). Solid edges run. A dashed node is not called on that request. After mock memory, `gateway/graduation.py` may tag `complex_situation` and add a `graduated-*` recommendation. That sets no priority and does not move a pattern into System 1. The field precheck in `gateway/chooser.py` picks the system. `router/merge.py` builds the `RouterDecision` and `router/ledger.py` reserves stock in this process only. `load_dispatch_resources` reads `data/snapshots/places.json` on that request and lists public shelters, hospitals, and boat points ahead of the fictional units. Extract reads `data/snapshots/gazetteer.json` only when it runs. Enrichment reads the Open-Meteo and RID snapshots only when SQLite is present, and those flags do not change `final_priority`. GISTDA, TMD, and geoBoundaries stay in `data/snapshots` and are not read on the turn. `countries/` is not imported. `system1/decide.py` runs only when `S1_IMPL=real` or `use_stubs=False`, and then it replaces the stub file. `system2.decide` runs only when `S2_IMPL=real` or `use_stubs=False`. The model id is `nvidia/nemotron-3-nano-30b-a3b`. The default request and `infra/modal/gateway_app.py` keep `S2_IMPL=stub`, so Nemotron is not called. `llm/client.py` and `llm/openai_client.py` accept only a Mubit host (`llm.provider_route` is `mubit`, including the compat OpenRouter prefix). `GET /policies` serves the local corpus on its own. Aid routes return 501. Modal model apps refuse to start while their model and GPU values are `TODO_HUMAN`. The gateway app does not. After that response, the page holds a System 2 or cascade vehicle until the operator presses Accept or Reject. The wait is in the browser. The ledger has already reserved stock.
+The diagram is `gateway/route.py` on the default request (`use_stubs=True`). Solid edges run. A dashed node is not called on that request. After mock memory, `gateway/graduation.py` may tag `complex_situation` and add a `graduated-*` recommendation. That sets no priority and does not move a pattern into System 1. The field precheck in `gateway/chooser.py` picks the system. `router/merge.py` builds the `RouterDecision` and `router/ledger.py` reserves stock in this process only. `load_dispatch_resources` reads `data/snapshots/places.json` on that request and lists public shelters, hospitals, and boat points ahead of the fictional units. Extract, when it runs, reads `data/processed/admin_districts.json` and `districts.json`, then `data/snapshots/gazetteer.json`. Enrichment reads `data/processed` through `ingest/store.py` when `districts.json` is present. Open-Meteo and RID snapshots are the rain and reservoir fallbacks on that path. `districts.json` stores `province` null, so a name match does not fill `regional_reservoirs`. Those flags do not change `final_priority`. SQLite is the gitignored `make ingest` cache at `data/raw/ingest.sqlite`. `BAANSAFE_DB_PATH` overrides that cache and is not set on the Modal gateway. GISTDA, TMD, and geoBoundaries stay in `data/snapshots` and are not read on the turn. `countries/` is not imported. `system1/decide.py` runs only when `S1_IMPL=real` or `use_stubs=False`, and then it replaces the stub file. `system2.decide` runs only when `S2_IMPL=real` or `use_stubs=False`. The model id is `nvidia/nemotron-3-nano-30b-a3b`. The default request and `infra/modal/gateway_app.py` keep `S2_IMPL=stub`, so Nemotron is not called. `llm/client.py` and `llm/openai_client.py` accept only a Mubit host (`llm.provider_route` is `mubit`, including the compat OpenRouter prefix). `GET /policies` serves the local corpus on its own. Aid routes return 501. Modal model apps refuse to start while their model and GPU values are `TODO_HUMAN`. The gateway app does not. After that response, the page holds a System 2 or cascade vehicle until the operator presses Accept or Reject. The wait is in the browser. The ledger has already reserved stock.
 
 ```mermaid
 flowchart TD
@@ -23,7 +23,7 @@ flowchart TD
   phone["ui/sim phone"] --> turns["POST /cases/{id}/turns"]
   turns --> gw["gateway.handle, stubs on"]
   gw --> extract["extract if fields empty"]
-  gw --> enrich["enrich: sqlite or off"]
+  gw --> enrich["enrich: processed JSON or off"]
   gw --> mem["memory mock files"]
   mem -.-> mm["memory.mubit raises"]:::unwired
   mem --> grad["graduation to System 2"]
@@ -34,10 +34,12 @@ flowchart TD
   ov["eval/rl overlay if RL_OVERLAY"] -.-> pick
   s1 --> merge["router.merge + process ledger"]
   s2 --> merge
-  snap["committed snapshots"] --> places["places → dispatch units"]
+  snap["snapshots: places, gazetteer"] --> places["places → dispatch units"]
   places --> merge
+  proc["data/processed JSON"] --> enrich
+  proc -.-> extract
   snap -.-> extract
-  snap -.-> enrich
+  snap --> enrich
   merge --> out["RouterDecision + dispatches"]
   out -.-> hold["town holds S2 or cascade"]
   s1 -.-> rules["system1.decide if S1_IMPL=real"]
@@ -86,7 +88,7 @@ Checked against `main` on 24 October 2026. This section says where each step run
 | Mubit (`api.mubit.ai/compat/openrouter/v1`) | The LLM hop for System 2. `llm/client.py` refuses any other host | Mubit-side traces. The repo does not read them |
 | OpenRouter, behind Mubit | `nvidia/nemotron-3-nano-30b-a3b` (`system2.orchestrator_model`). Its provider key is in the Mubit console, not in the repo or Modal | Account credit and the free-tier counter |
 | Modal | Six apps in `infra/modal/`. None is deployed (`modal app list` is empty) | Secrets `baansafe-hf` (`HF_TOKEN`) and `baansafe-mubit` (`MUBIT_API_KEY`, `MUBIT_BASE_URL`), plus volumes once an app runs |
-| Local disk | `traces.jsonl` (`TRACE_PATH`), `training/events/events.jsonl` (`TRAINING_EVENTS_PATH`), the mock corrections JSONL, `data/processed` SQLite, `data/snapshots/`, `eval/out/` | Everything that survives a restart |
+| Local disk | `traces.jsonl` (`TRACE_PATH`), `training/events/events.jsonl` (`TRAINING_EVENTS_PATH`), the mock corrections JSONL, committed `data/processed` JSON and GeoJSON, `data/snapshots/`, `eval/out/` | Everything that survives a restart. `data/raw/ingest.sqlite` is the gitignored ingest cache |
 
 The API process is the same code in three hosts: `make serve` on a laptop, `docker/Dockerfile` (`make docker-build`), or `infra/modal/gateway_app.py` on Modal. All three default to `S1_IMPL=stub`, `S2_IMPL=stub`, and `MEMORY_IMPL=mock`. The local `.env` sets `S1_IMPL=real`.
 
@@ -109,7 +111,7 @@ flowchart LR
   subgraph disk["Local disk"]
     events[("training/events/events.jsonl")]
     traces[("traces.jsonl")]
-    snaps[("data/snapshots, SQLite")]
+    snaps[("data/processed JSON, snapshots")]
     overlay[("eval/out/rl/overlay.json")]
   end
   subgraph mubit["Mubit"]
@@ -154,8 +156,8 @@ Each step names its file and where it runs. Everything runs in the API process u
 
 1. **Phone (browser).** `ui/sim/sim.js` `runPlaceCall` sends `POST /cases` with a `fixture_id`, then `POST /cases/{id}/turns` with the caller's line. It sends the fixture id, so extract does not see the spoken sentence. That is PRD open item 7. A case created with a `transcript` and no `fields` does get extracted.
 2. **Append the turn.** `api/routes/endpoints.py` `add_turn` appends the line to the stored `CaseState` and calls `execute`, which calls `gateway.route.handle(case, use_stubs=True)`.
-3. **Extract.** `gateway/route.py` `_extract` runs `system1/extract.py` `extract` when the case has no fields, and again on every later turn once `keyword_extraction` is in `policy_flags`. Fixture cases carry hand-filled fields and are never extracted. The district match reads SQLite when present, then `data/snapshots/gazetteer.json`.
-4. **Enrich.** `enrich/context.py` `location_context` adds data flags from SQLite (Open-Meteo, RID) when `ENRICH_IMPL=data`. The flags never change priority.
+3. **Extract.** `gateway/route.py` `_extract` runs `system1/extract.py` `extract` when the case has no fields, and again on every later turn once `keyword_extraction` is in `policy_flags`. Fixture cases carry hand-filled fields and are never extracted. The district match reads `data/processed/admin_districts.json` and `districts.json`, then `data/snapshots/gazetteer.json`.
+4. **Enrich.** `enrich/context.py` `location_context` reads `data/processed` through `ingest/store.py` when `ENRICH_IMPL=data`. That is the default once `districts.json` exists. The flags never change priority. `disaster_report.json` has no reader on this turn.
 5. **Memory.** `memory/adapter.py` `retrieve`. `MEMORY_IMPL=mock` reads `mocks/memory_context/`. `MEMORY_IMPL=mubit` calls `memory/mubit.py`, which raises.
 6. **Human-correction escalation.** `gateway/graduation.py` `apply` reads the training event log. The result is cached per log version. When at least `correction_loop.escalation_threshold` (2) distinct cases carry a human `s1_triage` correction with a `graduation_labels` label on this `(needs, vulnerable, danger)` pattern, it adds `complex_situation` and a `graduated-*` correction MemoryItem. It sets no priority.
 7. **Choose the entry system.** `gateway/chooser.py` `choose`. Any `route_to_system_2_if_any` trigger in `config/escalation.yaml` sends the case to System 2: medical, oxygen_dependent or immobile, location confidence below 0.7 or missing, a safeguarding, conflicting_evidence, aid_exception, or complex_situation flag, or a rescue, medical, or aid_payment need. With `RL_OVERLAY` set, a demoted coarse signature adds `learned:demoted`. No trigger sends the case to System 1. The gateway trace event records the mode, the system, and the triggers.
