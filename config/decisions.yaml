@@ -36,6 +36,9 @@ data:
   production_db: TODO_HUMAN          # SQLite is used tonight
 correction_loop:
   graduation_threshold: TODO_HUMAN   # corrections before an S2 pattern becomes an S1 rule
+learning_eval:
+  promotion: TODO_HUMAN              # do not promote a version from eval/learning
+  freeze_mubit_auto_adapters: TODO_HUMAN  # freeze auto-adapters before a live eval run
 # Modal hosting. These do not replace system1.* or system2.*.
 # Apps read the environment variable first and refuse while the value is TODO_HUMAN.
 # Leave this block as TODO_HUMAN in git. scripts/validate.py rejects any other value here.

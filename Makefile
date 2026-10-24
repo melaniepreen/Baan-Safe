@@ -1,7 +1,7 @@
 PYTHON ?= python3
 export PYTHONPATH := .
 
-.PHONY: validate test replay-stubs demo-stub demo-correction-loop serve ingest ingest-refresh data-report \
+.PHONY: validate test replay-stubs demo-stub demo-correction-loop eval-learning serve ingest ingest-refresh data-report \
 	modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune docker-build docker-run
 
 IMAGE ?= baansafe-api:local
@@ -21,6 +21,9 @@ demo-stub:
 
 demo-correction-loop:
 	$(PYTHON) -m eval.correction_loop
+
+eval-learning:
+	$(PYTHON) -m eval.learning
 
 serve:
 	$(PYTHON) -m uvicorn api.main:app --host 0.0.0.0 --port 8000

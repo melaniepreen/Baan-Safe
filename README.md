@@ -44,6 +44,7 @@ make test           # pytest
 make replay-stubs   # accuracy of s1/s2 stub files against expected labels
 make demo-stub      # gateway.handle(..., use_stubs=True) for every fixture
 make demo-correction-loop  # stub: correction -> JSONL -> model version -> before/after
+make eval-learning  # stub: held-out correction eval, writes eval/out/learning.md
 make serve          # API on :8000, docs at /docs
 make ingest         # public sources, using the cache
 make ingest-refresh # ignore the cache

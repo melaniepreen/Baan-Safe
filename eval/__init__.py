@@ -2,5 +2,6 @@
 
 replay.py scores a callable. sapling_replay.py scores the Sapling stub
 triples. correction_loop.py is the demo that turns a synthetic correction
-into a registered stub model version.
+into a registered stub model version. learning/ is the held-out correction
+scoreboard (`make eval-learning`).
 """
