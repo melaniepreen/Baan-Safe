@@ -1,10 +1,11 @@
 """Keyword extraction for the fast path. Owner: Moly.
 
 This is the decided `system1.extraction_method` (`rules-only`). English only:
-caller turns are sentence-split, matched against fixed phrase lists, and a
-match is dropped when a negator sits within the three words before it. The
-returned flags are suggestions for `CaseState.policy_flags`; the gateway
-decides whether to attach them.
+caller turns are sentence-split, matched against phrase and regex families,
+and a match is dropped when a negator sits within the three words before it.
+Aid phrases and minimising phrases are exempt from negation — "we cannot get
+the payment" and "not eligible" are exactly the signal. The returned flags
+are suggestions for `CaseState.policy_flags`; the gateway attaches them.
 """
 
 from __future__ import annotations
@@ -19,22 +20,72 @@ _SENTENCE_END = re.compile(r"[.!?]+")
 _WORD = re.compile(r"[a-z']+")
 
 NEED_PHRASES: list[tuple[Need, tuple[str, ...]]] = [
-    (Need.water, ("drinking water", "bottles", "water to drink", "need water", "only need water")),
+    (Need.water, ("drinking water", "bottles", "water bottles", "water to drink", "need water", "only need water")),
     (Need.food, ("rice", "food", "eat")),
     (Need.shelter, ("shelter",)),
-    (Need.evacuation, ("evacuate", "evacuation", "leave the house")),
+    (
+        Need.evacuation,
+        (
+            "evacuate",
+            "evacuation",
+            "leave the house",
+            "move to a shelter",
+            "should leave",
+            "time to leave",
+            "need to leave",
+            "told to leave",
+        ),
+    ),
     (Need.power, ("power", "electricity", "blackout")),
-    (Need.rescue, ("trapped", "can't get out", "on the roof", "help us get out")),
-    (Need.medical, ("oxygen", "medicine", "dialysis", "hurt", "injured", "bleeding")),
-    (Need.aid_payment, ("compensation", "aid payment", "eligible", "relief money")),
+    (Need.rescue, ("trapped", "can't get out", "cannot get out", "on the roof", "help us get out")),
+    (
+        Need.medical,
+        (
+            "oxygen",
+            "medicine",
+            "dialysis",
+            "hurt",
+            "injured",
+            "bleeding",
+            "sick",
+            "breathing",
+            "unconscious",
+            "injury",
+        ),
+    ),
 ]
 
+# A word directly before "shelter" that makes it a landmark, not a need.
+SHELTER_SKIP_BEFORE = {"bus"}
+
 INFORMATION_PATTERNS = (
-    r"\bwhen\b",
+    r"\bwhen\s+(will|does|do|is|are|can|should|would)\b",
     r"\bwhat time\b",
     r"\bis the\b[^.!?]*\bopen\b",
     r"\bupdate\b",
 )
+
+# Aid phrases are exempt from negation: "we cannot get the payment" and
+# "not eligible" are the aid signal itself.
+AID_PHRASES = (
+    "payment",
+    "compensation",
+    "relief money",
+    "aid",
+    "eligible",
+    "exception",
+)
+AID_PATTERNS = (r"\bhousehold list\b", r"\bthe list\b")
+AID_EXCEPTION_PHRASES = (
+    "cannot get",
+    "can't get",
+    "not eligible",
+    "refused",
+    "denied",
+    "rejected",
+    "exception",
+)
+AID_EXCEPTION_PATTERNS = (re.compile(r"\bnot on (?:the\s+)?\w*\s*list\b"),)
 
 DANGER_PHRASES: dict[str, tuple[str, ...]] = {
     "rising_water": (
@@ -51,12 +102,47 @@ DANGER_PHRASES: dict[str, tuple[str, ...]] = {
     ),
 }
 
+_WATER_AT_BUILDING = re.compile(
+    r"\b(?:water|it)\s+(?:is\s+|was\s+)?"
+    r"(?:at|near|over|up to|past|reaching|reached|against)\s+the\s+"
+    r"(?:door|doorway|step|steps|stairs|floor)\b"
+)
+_WATER_INSIDE_HOUSE = re.compile(
+    r"\b(?:water|it)\s+(?:is\s+|was\s+)?"
+    r"(?:in|inside|entering|coming into|coming in)\s+the\s+"
+    r"(?:house|home|room|rooms|flat)\b"
+)
+_WATER_IN_STREET = re.compile(
+    r"\b(?:water|it)\s+(?:is\s+|was\s+)?"
+    r"(?:in|inside|entering|coming into|coming in|near|along|at|past)\s+the\s+"
+    r"(?:lane|road|street|soi)\b"
+)
+_WATER_AT_STREET_END = re.compile(
+    r"\b(?:water|it)\s+(?:is\s+|was\s+)?at the end of the\s+"
+    r"(?:lane|road|street|soi)\b"
+)
+
 VULNERABLE_PHRASES: dict[str, tuple[str, ...]] = {
     "elderly": ("grandmother", "grandfather", "elderly", "old"),
     "child": ("child", "baby", "kid", "son", "daughter", "infant"),
     "oxygen_dependent": ("oxygen",),
-    "immobile": ("can't walk", "cannot walk", "wheelchair", "bedridden", "can't climb"),
+    "immobile": (
+        "can't walk",
+        "cannot walk",
+        "wheelchair",
+        "bedridden",
+        "bed-bound",
+        "immobile",
+        "can't climb",
+    ),
 }
+
+IMMOBILE_PATTERNS = (
+    re.compile(
+        r"\b(?:cannot|can't|unable to)\s+"
+        r"(?:get out of bed|stand|walk|climb|move)\b"
+    ),
+)
 
 MINIMISING_PHRASES = (
     "we are fine",
@@ -64,27 +150,46 @@ MINIMISING_PHRASES = (
     "we're ok",
     "it's fine",
     "nothing serious",
+    "no need to send",
+    "do not make a fuss",
+    "don't make a fuss",
+    "only a little water",
+    "it's nothing",
 )
 
 ALONE_PHRASES = (
     "alone",
     "by myself",
     "no parent",
+    "without an adult",
+    "without a parent",
+    "unaccompanied",
+    "on their own",
     "can't find my mum",
     "can't find my dad",
     "can't find my parents",
+    "lost my mum",
+    "lost my dad",
+    "lost my parents",
 )
+
+MINIMISING_VULNERABLE = {"child", "elderly", "immobile"}
 
 NUMBER_WORDS = {
     "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
     "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
 }
+_NUMBER = r"(one|two|three|four|five|six|seven|eight|nine|ten|\d+)"
 
-_PEOPLE_COUNT = re.compile(
-    r"\b(one|two|three|four|five|six|seven|eight|nine|ten|\d+)\s+"
-    r"(people|persons|adults|of us)\b"
+_PEOPLE_COUNT = re.compile(_NUMBER + r"\s+(people|persons|adults|of us)\b")
+_COUNT_PATTERNS = (
+    re.compile(r"\bthere are " + _NUMBER + r"\b"),
+    re.compile(r"\bwe are " + _NUMBER + r"\b"),
+    re.compile(r"\ba family of " + _NUMBER + r"\b"),
 )
+_ME_AND_MY = re.compile(r"\bme and my [a-z]+\b")
 _JUST_ME = re.compile(r"\b(just me|only me)\b")
+_BARE_NUMBER = re.compile(r"^" + _NUMBER + r"\s*$")
 
 
 def _sentences(transcript: list[TranscriptTurn]) -> list[str]:
@@ -104,6 +209,25 @@ def _match_any(sentence: str, phrases: tuple[str, ...]) -> bool:
             if not _negated(sentence, match.start()):
                 return True
     return False
+
+
+def _match_need(sentence: str, need: Need, phrases: tuple[str, ...]) -> bool:
+    for phrase in phrases:
+        for match in re.finditer(r"\b" + re.escape(phrase) + r"\b", sentence):
+            if _negated(sentence, match.start()):
+                continue
+            if need is Need.shelter:
+                before = _WORD.findall(sentence[: match.start()])
+                if before and before[-1] in SHELTER_SKIP_BEFORE:
+                    continue
+            return True
+    return False
+
+
+def _match_regex(sentence: str, pattern: re.Pattern) -> bool:
+    return any(
+        not _negated(sentence, match.start()) for match in pattern.finditer(sentence)
+    )
 
 
 def _district_names(districts: list[str] | None) -> list[str]:
@@ -136,14 +260,24 @@ def _location(sentences: list[str], districts: list[str] | None) -> tuple[str | 
     return None, None
 
 
+def _number(token: str) -> int:
+    return int(token) if token.isdigit() else NUMBER_WORDS[token]
+
+
 def _people_count(sentences: list[str]) -> int | None:
     count = None
     for sentence in sentences:
-        if _JUST_ME.search(sentence):
+        stripped = sentence.strip()
+        bare = _BARE_NUMBER.match(stripped)
+        if bare:
+            count = _number(bare.group(1))
+        if _JUST_ME.search(stripped):
             count = 1
-        for match in _PEOPLE_COUNT.finditer(sentence):
-            token = match.group(1)
-            count = int(token) if token.isdigit() else NUMBER_WORDS[token]
+        if _ME_AND_MY.search(stripped):
+            count = 2
+        for pattern in (_PEOPLE_COUNT, *_COUNT_PATTERNS):
+            for match in pattern.finditer(stripped):
+                count = _number(match.group(1))
     return count
 
 
@@ -155,20 +289,53 @@ def extract(
     sentences = _sentences(transcript)
     needs: list[Need] = []
     for need, phrases in NEED_PHRASES:
-        if any(_match_any(sentence, phrases) for sentence in sentences):
+        if any(_match_need(sentence, need, phrases) for sentence in sentences):
             needs.append(need)
     if any(re.search(pattern, sentence) for pattern in INFORMATION_PATTERNS for sentence in sentences):
         needs.append(Need.information)
-    danger = [
-        tag
-        for tag, phrases in DANGER_PHRASES.items()
-        if any(_match_any(sentence, phrases) for sentence in sentences)
-    ]
+    aid = any(
+        re.search(r"\b" + re.escape(phrase) + r"\b", sentence)
+        for sentence in sentences
+        for phrase in AID_PHRASES
+    ) or any(
+        re.search(pattern, sentence)
+        for sentence in sentences
+        for pattern in AID_PATTERNS
+    )
+    if aid:
+        needs.append(Need.aid_payment)
+
+    water_at_door_or_house = False
+    rising_water = False
+    for sentence in sentences:
+        if _match_any(sentence, DANGER_PHRASES["rising_water"]):
+            rising_water = True
+        if _match_regex(sentence, _WATER_AT_BUILDING) or _match_regex(sentence, _WATER_INSIDE_HOUSE):
+            rising_water = True
+            water_at_door_or_house = True
+        if _match_regex(sentence, _WATER_IN_STREET) or _match_regex(sentence, _WATER_AT_STREET_END):
+            rising_water = True
+    danger = ["rising_water"] if rising_water else []
+
     vulnerable = [
         tag
         for tag, phrases in VULNERABLE_PHRASES.items()
         if any(_match_any(sentence, phrases) for sentence in sentences)
     ]
+    if "immobile" not in vulnerable and any(
+        _match_regex(sentence, pattern)
+        for sentence in sentences
+        for pattern in IMMOBILE_PATTERNS
+    ):
+        vulnerable.append("immobile")
+
+    vulnerable_hit = any(
+        tag in vulnerable for tag in ("elderly", "immobile", "oxygen_dependent", "child")
+    )
+    if rising_water and (vulnerable_hit or water_at_door_or_house):
+        if not (Need.evacuation in needs and not vulnerable_hit):
+            needs.append(Need.rescue)
+
     medical = "oxygen_dependent" in vulnerable or Need.medical in needs
     location, confidence = _location(sentences, districts)
     fields = ExtractedFields(
@@ -183,8 +350,19 @@ def extract(
     flags: list[str] = []
     text = " ".join(sentences)
     minimising = any(phrase in text for phrase in MINIMISING_PHRASES)
-    if minimising and (danger or Need.rescue in needs or Need.medical in needs or medical):
+    if minimising and (
+        danger
+        or Need.rescue in needs
+        or Need.medical in needs
+        or medical
+        or any(tag in vulnerable for tag in MINIMISING_VULNERABLE)
+    ):
         flags.append("conflicting_evidence")
     if "child" in vulnerable and any(phrase in text for phrase in ALONE_PHRASES):
         flags.append("safeguarding")
+    if aid and (
+        any(phrase in text for phrase in AID_EXCEPTION_PHRASES)
+        or any(pattern.search(text) for pattern in AID_EXCEPTION_PATTERNS)
+    ):
+        flags.append("aid_exception")
     return fields, flags
