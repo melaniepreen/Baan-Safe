@@ -1,8 +1,10 @@
 /* Learning loop panel for the town demo.
 
    Reads GET /rl/run — the report written by `make rl-loop` or
-   `python -m eval.rl`. On a 404 it shows "No run yet — run `make rl-loop`".
+   `python -m eval.rl` — and optionally GET /metrics mubit_chat.
+   On a 404 it shows "No run yet — run `make rl-loop`".
    This is a read-only viewer; the loop itself is off the live path.
+   The browser never calls Mubit.
 */
 
 const THEME_NAMES = {
@@ -27,7 +29,7 @@ const SHORT_KEYS = [
   ["|text=", " · text "],
 ];
 
-let state = { run: null, epoch: null, status: "idle", error: null };
+let state = { run: null, metrics: null, epoch: null, status: "idle", error: null };
 
 function el(tag, cls, text) {
   const node = document.createElement(tag);
@@ -137,6 +139,25 @@ function s2SourceLine(run) {
     const text = String(note);
     if (!/api[_-]?key|bearer|mbt_/i.test(text)) parts.push(text);
   }
+  return parts.join(" · ");
+}
+
+/** Session GET /metrics mubit_chat — process traces, not a browser Mubit call. */
+function mubitMetricsLine(metrics) {
+  const mubit = metrics && metrics.mubit_chat;
+  if (!mubit || typeof mubit !== "object") return null;
+  const parts = ["GET /metrics mubit_chat"];
+  if (mubit.call_count != null) parts.push(`${mubit.call_count} call(s)`);
+  if (mubit.ok_count != null) parts.push(`ok ${mubit.ok_count}`);
+  if (mubit.cache_hit_count != null) parts.push(`cache ${mubit.cache_hit_count}`);
+  if (mubit.error_count != null) parts.push(`err ${mubit.error_count}`);
+  const avg =
+    mubit.avg_latency_ms != null
+      ? mubit.avg_latency_ms
+      : metrics.avg_latency_ms && metrics.avg_latency_ms.mubit_chat;
+  if (avg != null) parts.push(`${Math.round(Number(avg))} ms avg`);
+  const models = mubit.models && typeof mubit.models === "object" ? Object.keys(mubit.models) : [];
+  if (models.length) parts.push(`models ${models.join(", ")}`);
   return parts.join(" · ");
 }
 
@@ -273,6 +294,8 @@ function render(root) {
   head.append(title, badge);
   panel.append(head);
   panel.append(el("p", "muted", s2SourceLine(run)));
+  const metricsLine = mubitMetricsLine(state.metrics);
+  if (metricsLine) panel.append(el("p", "muted", metricsLine));
   panel.append(
     el(
       "p",
@@ -331,16 +354,42 @@ async function loadRun(root) {
   state.status = "loading";
   render(root);
   try {
-    const response = await fetch("/rl/run");
-    if (response.status === 404) {
-      state = { ...state, status: "missing", run: null };
-    } else if (!response.ok) {
-      state = { ...state, status: "error", error: `HTTP ${response.status}` };
+    const [runResponse, metricsResponse] = await Promise.all([
+      fetch("/rl/run"),
+      fetch("/metrics"),
+    ]);
+    let metrics = null;
+    if (metricsResponse.ok) {
+      try {
+        metrics = await metricsResponse.json();
+      } catch (_err) {
+        metrics = null;
+      }
+    }
+    if (runResponse.status === 404) {
+      state = { ...state, status: "missing", run: null, metrics };
+    } else if (!runResponse.ok) {
+      state = {
+        ...state,
+        status: "error",
+        error: `HTTP ${runResponse.status}`,
+        metrics,
+      };
     } else {
-      state = { ...state, status: "ok", run: await response.json(), epoch: null };
+      state = {
+        ...state,
+        status: "ok",
+        run: await runResponse.json(),
+        metrics,
+        epoch: null,
+      };
     }
   } catch (err) {
-    state = { ...state, status: "error", error: String(err && err.message ? err.message : err) };
+    state = {
+      ...state,
+      status: "error",
+      error: String(err && err.message ? err.message : err),
+    };
   }
   render(root);
 }

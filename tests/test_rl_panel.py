@@ -15,8 +15,13 @@ def test_rl_panel_mubit_source_copy():
     assert "fake S2 (authored truth, no Mubit)" in source
     assert "s2SourceLine" in source
     assert "s2SourceBadge" in source
+    assert "mubitMetricsLine" in source
     assert 'fetch("/rl/run")' in source
+    assert 'fetch("/metrics")' in source
+    assert "mubit_chat" in source
+    assert "cache_hit_count" in source
     assert "api.mubit.ai" not in source
     assert "MUBIT_" not in source
     assert "OPENROUTER" not in source
     assert "Bearer" not in source
+    assert "httpx" not in source

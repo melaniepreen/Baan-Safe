@@ -571,17 +571,36 @@ def rl_run() -> dict:
 def metrics() -> dict:
     events = read_traces()
     by_case: dict[str, set[str]] = {}
-    latency: dict[str, list[int]] = {"system_1": [], "system_2": []}
+    latency: dict[str, list[int]] = {
+        "system_1": [],
+        "system_2": [],
+        "mubit_chat": [],
+    }
+    mubit_ok = 0
+    mubit_cache = 0
+    mubit_error = 0
+    mubit_models: dict[str, int] = {}
     for event in events:
         by_case.setdefault(event.case_id, set()).add(event.stage)
         if event.stage in latency:
             latency[event.stage].append(event.latency_ms)
+        if event.stage == "mubit_chat":
+            note = event.notes or ""
+            if "status=ok" in note:
+                mubit_ok += 1
+            elif "status=cache_hit" in note:
+                mubit_cache += 1
+            else:
+                mubit_error += 1
+            if event.model:
+                mubit_models[event.model] = mubit_models.get(event.model, 0) + 1
     handled_s2 = sum(1 for stages in by_case.values() if "system_2" in stages)
     handled_s1 = sum(
         1 for stages in by_case.values() if "system_1" in stages and "system_2" not in stages
     )
     total = handled_s1 + handled_s2
     correction_count = len(read_corrections())
+    mubit_count = len(latency["mubit_chat"])
     return {
         "cases_traced": len(by_case),
         "pct_handled_by_system_1": (handled_s1 / total) if total else 0.0,
@@ -589,6 +608,16 @@ def metrics() -> dict:
         "avg_latency_ms": {
             "system_1": _avg(latency["system_1"]),
             "system_2": _avg(latency["system_2"]),
+            "mubit_chat": _avg(latency["mubit_chat"]),
+        },
+        "mubit_chat": {
+            "call_count": mubit_count,
+            "ok_count": mubit_ok,
+            "cache_hit_count": mubit_cache,
+            "error_count": mubit_error,
+            "avg_latency_ms": _avg(latency["mubit_chat"]),
+            "models": mubit_models,
+            "via": "api.mubit.ai",
         },
         "correction_count": correction_count,
         "enrich": enrich_impl(),
