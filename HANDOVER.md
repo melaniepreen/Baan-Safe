@@ -53,6 +53,68 @@ Owners stay as in `OWNERSHIP.md`. Contracts are `v0.3-contracts`.
 14. **The map and the data are different places.** The town draws Sukhumvit, Watthana. Fixtures and `data/snapshots/places.json` are Lampang, Phrae, Nan, and Phayao. `data.demo_event` is `TODO_HUMAN`.
 15. **Ownership.** `9da21c7` changed Melanie's `system2/orchestrator.py` and `system2/decide.py`. Melanie should review them.
 
+### Conflicting decision logic
+
+16. **`config/routes.yaml` contradicts the code.** It maps `evacuation` to `rescue_coordination`. `NEEDS_TABLE` in `system1/decide.py` and the F06 label use `shelter_placement`. No code reads `routes.yaml`.
+17. **The town decides on its own.**
+    - `ui/sim/sim.js` has a demo-only keyword chooser that maps typed text to a fixture.
+    - `ui/sim/data/rulebook.json` picks the vehicle from the priority and ignores `RouterDecision.dispatches`.
+    - `ui/sim/data/sim_events.json` scripts a System 1 score against 0.8, a handoff to System 2, and "promote after 3".
+
+    What the town shows is not what the backend decided.
+18. **Three learning stories.** `gateway/graduation.py` sends a pattern to System 2. `eval/rl/` with `RL_OVERLAY` writes System 1 rules. `make demo-correction-loop` registers stub model versions. Pick one for the demo.
+19. **`always_requires_human` in `config/escalation.yaml` is text.** Nothing executes it. `router/merge.py` hard-codes its own copy.
+
+### Duplicated data
+
+20. **Three district lists.**
+    - `districts`: 50 rows, about 30 of them Bangkok, `province` empty.
+    - `admin_districts`: 108 rows for the 8 configured provinces.
+    - `data/snapshots/gazetteer.json`: 224 KB.
+
+    `system1/extract.py` reads all three plus `DISTRICT_ALIASES`. `enrich/context.py` reads only `districts`.
+21. **Four resource lists.**
+    - `mocks/resources.json`: 4 fictional units.
+    - `ui/sim/data/town.json` `resources`: the same 4 ids under new names.
+    - `data/snapshots/places.json`: OpenStreetMap units that dispatch uses. `ui/sim/data/places.json` is a label copy.
+    - The `infrastructure` table: 4,218 OpenStreetMap facilities that only enrichment reads.
+
+### Scraped and unused
+
+22. **`disaster_report` has no runtime reader.** 126 rows (GLIDE 109, IDMC 14, GDACS 3). Only `scripts/validate.py` scans it.
+23. **The map exports have no consumer.** `data/processed/flood.geojson` (10 MB, 698 features) and `facilities.geojson` (1 MB, 4,218 features) are served by `/map/flood` and `/map/facilities`. No UI page calls them.
+24. **Snapshots nothing reads at runtime:** `geoboundaries.json`, `gistda.json`, and `tmd.json` (the TMD fetch failed).
+25. **Weather ages without a warning.** Open-Meteo was fetched at 04:08 UTC on 24 October: archive 24 September to 23 October, forecast 7 days. Nothing flags its age at the point of use.
+26. **Loaded but unused.** Nothing imports `countries/`. `policies/mof_relief.yaml` loads, but the aid endpoints return 501.
+
+### Dead code
+
+27. **Never called:** `memory/adapter.store_record`, `ingest/overpass._accessibility`, `infra/modal/common.require_secret_present`, `infra/modal/finetune_job.write_registry`, `ui/sim/build_town._incident_modes`.
+28. **Called only by tests:** `gateway/route.choose_system`, `enrich/context.sample_districts`, `policies/corpus.corpus_counts`, `policies/corpus.load_labels`, `eval/learning/arms.arm_by_name`, `eval/learning/cases.group_by_id`. The Sapling live parser (`system2/sapling_client.verdict_from_model_output`) waits for `SAPLING_IMPL=live`.
+
+### Geo and UI: what can be leveraged
+
+29. **Every call already carries named facilities.** `enrich/context.location_context` runs on each turn and is stored in `case.resources.location_context`, which the UI receives with the case.
+    - It gives the nearest hospitals with distances (F10: Sung Men Hospital, 3.8 km) and candidate shelters (real schools and temples) for all 22 fixtures with a usable district.
+    - It also gives 24-hour rain, the forecast, reservoirs for Lampang, Phrae, Nan, and Phayao, and source freshness.
+    - The UI shows none of it. The router does not use it: a dispatch could name the nearest real hospital or shelter.
+30. **The live water is where no call happens.** All 228 GISTDA 7-day and 30-day polygons are in Songkhla.
+    - The nearest is 1,237 km from any fixture.
+    - All 22 resolvable fixtures have no flood flag and at most 0.5 mm of rain, so enrichment does nothing in the demo.
+    - The Hat Yai flood of November 2025 (EOS-RS polygon) is in the database with no calls. Songkhla fixtures, or `data.demo_event` = Hat Yai, would light it up.
+31. **The flood flag tests one point per district.** Thepha has 120 live polygons whose centres are within 5 km of its own. It still reads as dry: its centre is 2.4 km from water, and the buffer is 500 m. Test the district area or a wider radius.
+32. **Enrichment knows 50 districts.** `enrich/context._match_district` reads `districts` only. Hat Yai, Mueang Songkhla, and most of the 8 provinces get no point, no flags, and no facilities. Fall back to `admin_districts`.
+33. **Flood history is unused.** `disaster_report` names Nan in 9 events, Lampang in 7, Phrae in 6, and Songkhla in 3. That is a "past floods here" line, or System 2 evidence.
+34. **Rain trend is unused.** `weather_observation` has 1,900 rows: 50 districts, 30-day archive plus 7-day forecast.
+35. **There is no real map.** The town is a local-metre drawing of Sukhumvit. A small WGS84 panel could show call pins (`admin_districts` centres), flood polygons, and nearby facilities, filtered by province to stay light. If the picture stays in Bangkok, Vadhana already resolves: 20 mm of rain in the last 24 hours and named hospitals and shelters.
+36. **Endpoints no UI calls:**
+    - `/context` and `/resources`.
+    - `/cases/{id}`: decision history per turn.
+    - `/metrics`: latency per stage, the latency column for the quality, cost, and latency track.
+    - `/policies/match` and `/policies/{rule_id}`: cite the rule behind a decision.
+    - `/replay`: score every fixture.
+37. **Thai names are unused.** `admin_districts.name_th` and the Thai facility names could label the UI in Thai.
+
 ## Live System 2
 
 System 2 runs `nvidia/nemotron-3-nano-30b-a3b`, the paid tier, through Mubit. It replaced `nvidia/nemotron-3.5-lightning:free`. OpenRouter's 50-a-day free cap covers every `:free` model on the account, and today's cap was spent. On 24 Oct 2026, nano answered 6 fixture prompts in 1.1–1.7 s. 3 of the 6 matched the fixture priority and route. C01-a came back P2 welfare where P1 rescue was expected. A call costs about $0.0003 (the OpenRouter list price is $0.06 per million input tokens and $0.24 per million output tokens).
@@ -61,13 +123,62 @@ The RL replay cache (`eval/out/rl/s2_cache.jsonl`) is keyed by model. Until `mak
 
 The full routing walk-through, the loops, and the Modal status are in `BaanSafe_Revised_Architecture.md` under "Routing in detail".
 
-## Housekeeping
+## Laya Model Training Pipeline (Verified 24 Oct 2026)
 
-- **Markdown cleanup is approved but not done.**
-  - Untrack and gitignore `MORNING_REPORT.md`, `research/DEMO_PLAN.md`, and `docs/agents/INDEX.md`.
-  - Move `BaanSafe_Revised_Architecture.md` to `docs/architecture.md`, `OWNERSHIP.md` to `docs/OWNERSHIP.md`, and `research/` to `docs/research/`, then update every reference.
-  - Add `.vscode/` and `*.log` to `.gitignore`.
-  - Point the Cursor refresh agent at `docs/architecture.md` afterwards.
+The Laya fine-tuning path is now fully functional end-to-end.
+
+### Export (`make export-laya`)
+- **Train**: 168 calls (56 en, 56 th, 56 mixed)
+- **Held-out**: 72 calls (24 en, 24 th, 24 mixed)
+- **Questions**: 12 total — 1 `choice` (priority: red/yellow/green/white/black) + 11 `noul` (boolean System 1 labels)
+- **Split**: 70/30 by `group_id` (80 groups, seeded) — same split as SetFit export
+
+### Tests & Validation
+```
+make test       → 232 passed, 1 skipped (needs laya package)
+make validate   → validate ok: 24 fixtures (no PII, no TODO_HUMAN in allowlist)
+```
+
+### Schema (Laya 0.4.14 JSONL)
+```json
+{
+  "state": {"body": "caller: ...\noperator: ..."},
+  "questions": {
+    "priority": {"type": "choice", "criteria": {...}},
+    "niems_not_conscious_or_breathing": {"type": "noul", ...},
+    ... (11 noul total)
+  },
+  "expected": {"priority": "red", "flood_trapped": true, ...},
+  "language": "en|th|mixed",
+  "tags": ["group:syn-...", "primary_label"]
+}
+```
+
+### SetFit Export (same group split)
+```bash
+SYNTHETIC=1 make export-training
+# → s1_synthetic train 168 held_out 72
+```
+```json
+{"text": "...", "label": "flood_trapped", "group_id": "syn-...", "weight": 1.0}
+```
+
+### Next Steps (When Ready)
+| Action | Command |
+|--------|---------|
+| Fine-tune locally (GPU) | `LAYA_TRAIN=1 make laya-train` |
+| Fine-tune on Modal | `make modal-finetune` |
+| Deploy S1 with Laya to Modal | `export S1_MODEL_ID=convaiinnovations/laya-multilingual && make modal-deploy-s1` |
+| Deploy fine-tuned checkpoint | `export S1_MODEL_ID=/path/to/laya-ckpt && make modal-deploy-s1` |
+
+### Open Decisions (from `config/decisions.yaml`)
+- `modal.s1_model_id: TODO_HUMAN` — set at deploy via env
+- `modal.s1_gpu: TODO_HUMAN` — cpu \| T4 \| L4
+- `modal.finetune_base_model: TODO_HUMAN` — LoRA base checkpoint
+
+---
+
+## Housekeeping
 - The Cursor Agent refreshes `docs/PRD.md` after pushes, at most every 30 minutes. Rebase before a push.
 - Several agents have worked in this folder at once. Check `git status` and `git stash list` before starting.
 - The local `.env` has `S1_IMPL=real`. Restart `make serve` after changing it.
