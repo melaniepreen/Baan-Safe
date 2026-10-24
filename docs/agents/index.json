@@ -38,21 +38,21 @@
     {
       "path": "docs/agents/correction-loop-and-evals.md",
       "title": "Correction loop and evals",
-      "summary": "Stub correction loop, held-out learning scoreboard, and latte-bench by reference.",
+      "summary": "Held-out eval splits on group_id. Arm C reads human rows. C_coach also reads coach.",
       "keywords": ["eval", "correction", "learning", "latte"],
       "files": ["eval/correction_loop.py", "eval/learning/harness.py", "eval/LATTE.md"]
     },
     {
       "path": "docs/agents/training-schema.md",
       "title": "Training schema",
-      "summary": "TrainingEvent schema v1 and the append-only log. Old Correction rows still load.",
+      "summary": "TrainingEvent v1. Corrections, coach, and sim append to one log. export-training reads it.",
       "keywords": ["training", "schema", "correction", "event-log", "sapling"],
-      "files": ["contracts/training.py", "training/log.py", "eval/correction_loop.py"]
+      "files": ["contracts/training.py", "training/log.py", "training/export.py"]
     },
     {
       "path": "docs/agents/caller-simulation.md",
       "title": "Caller simulation",
-      "summary": "Scripted flood callers and a coach, off the live path, for training and held-out trait evals.",
+      "summary": "Scripted callers. Coach and the simulator append TrainingEvents with source coach and sim.",
       "keywords": ["sim", "caller", "coach", "mimesis", "traits"],
       "files": ["sim/env.py", "sim/coach.py", "sim/callers/scripted.py"]
     },
@@ -66,9 +66,9 @@
     {
       "path": "docs/agents/modal-infra.md",
       "title": "Modal infra",
-      "summary": "Modal apps refuse while GPU and model ids are TODO_HUMAN. No secrets in git.",
+      "summary": "Fine-tune takes one dataset per task. s1_triage uses SetFit. Other tasks use LoRA.",
       "keywords": ["modal", "gpu", "deploy", "sapling"],
-      "files": ["infra/modal/common.py", "infra/HARDWARE.md"]
+      "files": ["infra/modal/finetune_job.py", "infra/HARDWARE.md"]
     },
     {
       "path": "docs/agents/config-and-decisions.md",
@@ -87,9 +87,9 @@
     {
       "path": "docs/agents/frontend.md",
       "title": "Frontend",
-      "summary": "ui/transcript_player.py plays fixtures. frontend-prototype/ is static and left alone.",
-      "keywords": ["ui", "frontend-prototype", "transcript"],
-      "files": ["ui/transcript_player.py", "frontend-prototype/README.md"]
+      "summary": "Correct this fills task and input_ref. The operator picks the closed label and a reason.",
+      "keywords": ["ui", "frontend-prototype", "transcript", "correction"],
+      "files": ["ui/player.html", "ui/correct.js", "ui/transcript_player.py"]
     }
   ]
 }

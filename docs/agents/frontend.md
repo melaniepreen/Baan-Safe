@@ -1,45 +1,53 @@
 ---
 title: Frontend
-tags: [ui, frontend-prototype, transcript]
+tags: [ui, frontend-prototype, transcript, correction]
 files:
+  - ui/player.html
+  - ui/correct.js
   - ui/transcript_player.py
   - frontend-prototype/README.md
 ---
 
 ## Purpose
 
-The product UI in this repo is a transcript player. `frontend-prototype/` is a static HTML gallery. Agents do not edit the prototype unless the task says so.
+The operator UI is the transcript player and the town desk. `Correct this` sends a v1 correction. `frontend-prototype/` is a static HTML gallery. Agents do not edit the prototype unless the task says so.
 
 ## Key files
 
-- `ui/transcript_player.py` — `python -m ui.transcript_player F01 --pace 0`. Plays a fixture stream. Owner: Moly.
+- `ui/player.html` — plays `GET /fixtures/{id}/stream`, then shows Correct this.
+- `ui/correct.js` — fills `task` and `input_ref`. The operator picks `output_correct` and types `reason`.
+- `ui/sim/index.html` — same form after gateway triage on a household.
+- `ui/transcript_player.py` — `python -m ui.transcript_player F01 --pace 0`. Fixture text only. Owner: Moly.
 - `frontend-prototype/README.md` — gallery `index.html`, variants `v0-dark/` through `v5/`.
-- `frontend-prototype/v1/`, `v2/`, `v3/` — static diagrams. They do not call the API or Sapling.
-- `contracts/schemas/` — JSON Schemas exported for a future TypeScript UI. Shapes only.
+- `contracts/training.py` — closed labels. The form does not define a second enum.
 
 ## Interfaces/contracts
 
-- The player reads `fixtures` via `fixtures.load.load_fixture`. It does not call `/triage`.
+- Task is `s1_triage` for System 1, `sapling_verdict` for a System 2 aid or denial case, and `s2_action` otherwise.
+- `input_ref` is `case_id`, turn ids, `lang` (`th`, `en`, or `mixed`), policy ids, and `memory_ref`.
+- The post is `POST /cases/{case_id}/corrections` with `source` `human` and `corrected_by` `operator`.
 - `ui.framework` is `TODO_HUMAN`. There is no React or Vue app in `ui/`.
-- Prototype pages are simulated: budgets, callers, and costs on those pages are not repo data. Do not copy a baht figure from them into `system1/` or `config/`.
+- Prototype pages are simulated. Do not copy a baht figure from them into `system1/` or `config/`.
 
 ## Invariants
 
 - Do not edit `frontend-prototype/` unless the task names it.
-- The prototype does not call a model. Do not wire `fetch` to OpenRouter or Mubit from those HTML files as a drive-by.
-- Speech-to-text is not implemented. `speech_to_text.provider` is `TODO_HUMAN`. The player prints scripted fixture text.
+- The prototype does not call a model. Do not wire `fetch` to OpenRouter or Mubit from those HTML files.
+- The form does not ask the operator for `task` or `input_ref`.
+- The label lists in `ui/correct.js` match `S1Label`, `S2Action`, and `SaplingVerdict`.
+- Speech-to-text is not implemented. `speech_to_text.provider` is `TODO_HUMAN`.
 - Melanie's caseworker view is not built (`OWNERSHIP.md`).
 
 ## How to test
 
 - `python -m ui.transcript_player F01 --pace 0` prints the fixture turns.
-- `make test` does not render the prototype. There is no browser check in pytest for `frontend-prototype/`.
-- If a task does change the prototype, say so in the commit. Do not treat a screenshot as a test of the API.
+- `tests/test_correct_ui.py` checks the enums, the v1 body, and that the pages only name the label and the reason.
+- `make test` does not render the prototype.
 
 ## Common pitfalls
 
-- "Fixing" the prototype SVG while changing the gateway. The gallery is a separate static tree.
-- Treating the prototype's DDPM reserve line as an ingest source. DDPM is not a client. See `docs/agents/data-ingest.md`.
+- Sending a priority or a route as an s1 label. Those are not closed labels.
+- Editing `frontend-prototype/` while changing the player. The gallery is a separate static tree.
 - Adding a framework to `ui/` while `ui.framework` is unset.
 
 ## Open TODO_HUMAN keys

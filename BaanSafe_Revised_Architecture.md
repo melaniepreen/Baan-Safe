@@ -31,6 +31,20 @@ flowchart TD
   router --> agent
 ```
 
+Training is a separate path from that call. Operator corrections, coach notes, and simulator outcomes append one `TrainingEvent` each. `make export-training` reads the log. The fine-tune job takes one dataset per task. Held-out eval splits on `group_id` and filters `source`.
+
+```mermaid
+flowchart LR
+  corrections[Corrections] --> log[Event log]
+  coach[Coach] --> log
+  sim[Simulator] --> log
+  log --> export[export-training]
+  export --> finetune[Per-task fine-tune]
+  finetune --> eval[Eval]
+```
+
+`ui/correct.js` posts a human correction with `task` and `input_ref` already filled. `sim/coach.py` appends `source=coach` and `source=sim`. The log is `training/events` via `training/log.py`. `training/export.py` writes `s1`, `s2`, `sapling`, and `prefs`, each with a manifest. `infra/modal/finetune_job.py` trains `s1_triage` with SetFit and the other tasks with LoRA. `eval/learning` scores held-out groups: arm C keeps `source=human`, and `C_coach` also keeps `source=coach`. Nothing in this path promotes a weight into System 1.
+
 Parallel workstreams during a call feed Mubit: evidence extraction (location, people, danger, medical), policy and safety, Mubit memory retrieval, and resource status (boats, ambulances, shelters).
 
 ## Responsibility map

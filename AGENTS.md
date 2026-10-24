@@ -11,9 +11,8 @@ gateway/route.py     auth note, memory/adapter.py, policy pre-check
         +-- system2/orchestrator.py              raises while model id or latency is unset
                  \-- system2/sapling.py          aid_eligibility, denial only
 router               stub copies that one Outcome. router/merge.py is not called.
-correction           memory write -> eval/correction_loop.py -> stub version
-held-out eval        eval/learning/ ; eval/latte/ reads third_party/latte-bench
-sim (off path)       sim/callers, sim/env.py, sim/coach.py. Training and eval only.
+training             corrections, coach, sim -> event log -> export-training
+                     -> per-task fine-tune -> eval/learning (group_id, source)
 ```
 
 ## Invariants
@@ -41,6 +40,7 @@ make modal-deploy-s1
 make modal-deploy-s2
 make modal-deploy-sapling
 make modal-deploy-stt
+make export-training
 make modal-finetune
 ```
 
@@ -58,13 +58,13 @@ Index: `docs/agents/index.json`. Read one topic file, not the whole set.
 | Aid eligibility, policy corpus, escalation | `docs/agents/policies-api.md` | `policies/service.py`, `api/routes/policies.py` |
 | Router | `docs/agents/decision-router.md` | `router/merge.py` |
 | Corrections, learning eval, latte-bench | `docs/agents/correction-loop-and-evals.md` | `eval/correction_loop.py`, `eval/learning/` |
-| Training event schema | `docs/agents/training-schema.md` | `contracts/training.py`, `training/log.py` |
+| Training log, export, per-task fine-tune | `docs/agents/training-schema.md` | `training/log.py`, `training/export.py`, `infra/modal/finetune_job.py` |
 | Caller simulation, coach | `docs/agents/caller-simulation.md` | `sim/env.py`, `sim/coach.py` |
 | Ingest, SQLite, banned sources | `docs/agents/data-ingest.md` | `ingest/__main__.py`, `data/SOURCES.md` |
 | Modal, GPU, deploy | `docs/agents/modal-infra.md` | `infra/modal/`, `infra/HARDWARE.md` |
 | YAML decisions | `docs/agents/config-and-decisions.md` | `config/decisions.yaml`, `config/settings.py` |
 | Tests and validate | `docs/agents/testing.md` | `tests/`, `scripts/validate.py` |
-| UI | `docs/agents/frontend.md` | `ui/transcript_player.py` |
+| UI, correct this | `docs/agents/frontend.md` | `ui/player.html`, `ui/correct.js` |
 
 ## Done
 
