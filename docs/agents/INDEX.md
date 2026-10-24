@@ -10,6 +10,7 @@ Machine-readable list: `docs/agents/index.json`. `AGENTS.md` is the always-loade
 | `docs/agents/policies-api.md` | Policy corpus is GET/POST `/policies`. Aid eligibility and exceptions still return 501. |
 | `docs/agents/decision-router.md` | `merge()` raises. The stub gateway copies one outcome and does not call it. |
 | `docs/agents/correction-loop-and-evals.md` | Stub correction loop, held-out learning scoreboard, and latte-bench by reference. |
+| `docs/agents/training-schema.md` | TrainingEvent schema v1 and the append-only log. Old Correction rows still load. |
 | `docs/agents/caller-simulation.md` | Scripted flood callers and a coach, off the live path, for training and held-out trait evals. |
 | `docs/agents/data-ingest.md` | Public sources into SQLite. ReliefWeb sends no request. DDPM was not added. |
 | `docs/agents/modal-infra.md` | Modal apps refuse while GPU and model ids are `TODO_HUMAN`. No secrets in git. |

@@ -58,6 +58,7 @@ Index: `docs/agents/index.json`. Read one topic file, not the whole set.
 | Aid eligibility, policy corpus, escalation | `docs/agents/policies-api.md` | `policies/service.py`, `api/routes/policies.py` |
 | Router | `docs/agents/decision-router.md` | `router/merge.py` |
 | Corrections, learning eval, latte-bench | `docs/agents/correction-loop-and-evals.md` | `eval/correction_loop.py`, `eval/learning/` |
+| Training event schema | `docs/agents/training-schema.md` | `contracts/training.py`, `training/log.py` |
 | Caller simulation, coach | `docs/agents/caller-simulation.md` | `sim/env.py`, `sim/coach.py` |
 | Ingest, SQLite, banned sources | `docs/agents/data-ingest.md` | `ingest/__main__.py`, `data/SOURCES.md` |
 | Modal, GPU, deploy | `docs/agents/modal-infra.md` | `infra/modal/`, `infra/HARDWARE.md` |

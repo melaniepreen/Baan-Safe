@@ -43,6 +43,13 @@
       "files": ["eval/correction_loop.py", "eval/learning/harness.py", "eval/LATTE.md"]
     },
     {
+      "path": "docs/agents/training-schema.md",
+      "title": "Training schema",
+      "summary": "TrainingEvent schema v1 and the append-only log. Old Correction rows still load.",
+      "keywords": ["training", "schema", "correction", "event-log", "sapling"],
+      "files": ["contracts/training.py", "training/log.py", "eval/correction_loop.py"]
+    },
+    {
       "path": "docs/agents/caller-simulation.md",
       "title": "Caller simulation",
       "summary": "Scripted flood callers and a coach, off the live path, for training and held-out trait evals.",

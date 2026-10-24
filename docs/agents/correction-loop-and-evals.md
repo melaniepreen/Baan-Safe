@@ -24,7 +24,7 @@ Score stub labels, run a synthetic correction through a stub model version, and 
 
 ## Interfaces/contracts
 
-- Correction loop: store a `Correction` via `memory/adapter.py`, write one SFT row to `eval/out/sft.jsonl`, register `stub-0` and `stub-1`. Job status `stub`. No weights.
+- Correction loop: store a `Correction` via `memory/adapter.py`, write one SFT row to `eval/out/sft.jsonl`, register `stub-0` and `stub-1`. Job status `stub`. No weights. It also appends one `TrainingEvent` through `contracts.training.adapt_correction` and `training.log.append_event`. The event shape is `docs/agents/training-schema.md`.
 - Learning arms: A base, B memory, C correction JSONL with empty memory, shuffled control. Held-out rows only. Thai and English of one call stay on the same side.
 - Promotion recommendation does not promote. `promoted` stays false while `learning_eval.promotion` is `TODO_HUMAN`.
 - Coach notes from `sim/coach.py` are `eval/out/coach.jsonl` with `source=coach`. They are not `Correction` rows and they are not promoted. See `docs/agents/caller-simulation.md`.
