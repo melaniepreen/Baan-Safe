@@ -21,6 +21,7 @@ from contracts.models import (
     RouterDecision,
 )
 from mocks.loader import ResourcesSnapshot, ResourceUnit, load_resources
+from router import ledger
 
 NEED_RESOURCE_KIND: dict[Need, Literal["boat", "ambulance", "shelter", "welfare_point"]] = {
     Need.rescue: "boat",
@@ -52,6 +53,10 @@ def merge(
     dispatches: list[Dispatch] = []
     if action is NextAction.create_provisional_dispatch:
         dispatches = _fan_out(case, outcome, snapshot)
+    ledger.release_case(
+        case.case_id,
+        keep={(d.resource_id, d.need.value) for d in dispatches if d.resource_id},
+    )
 
     notes = [
         f"gateway selected {outcome.system.value} exclusively",
@@ -65,7 +70,8 @@ def merge(
         notes.append(f"policy flag: {flag}")
     if dispatches:
         notes.append(
-            "dispatches are provisional; stock was not decremented or reserved"
+            "dispatches are provisional; stock is reserved in this process "
+            "and resets on restart"
         )
     for dispatch in dispatches:
         if dispatch.note:
@@ -111,6 +117,7 @@ def _fan_out(
 ) -> list[Dispatch]:
     dispatches: list[Dispatch] = []
     location = (case.fields.location or "").lower()
+    held = ledger.holds(case.case_id)
     for need in outcome.needs:
         kind = NEED_RESOURCE_KIND.get(need)
         if kind is None:
@@ -118,31 +125,28 @@ def _fan_out(
         units = [
             unit
             for unit in getattr(snapshot, _KIND_ATTR[kind])
-            if _usable(unit)
+            if _usable(unit, case.case_id)
+        ]
+        current = [
+            unit
+            for unit in units
+            if (unit.id, need.value) in held
         ]
         same_district = [
             unit
             for unit in units
             if unit.district and unit.district.lower() in location
         ]
-        if same_district:
+        chosen = (current or same_district or units or [None])[0]
+        if chosen is not None:
+            ledger.reserve(case.case_id, chosen.id, need.value)
             dispatches.append(
                 Dispatch(
                     need=need,
                     resource_kind=kind,
-                    resource_id=same_district[0].id,
+                    resource_id=chosen.id,
                     status="provisional",
-                    same_district=True,
-                )
-            )
-        elif units:
-            dispatches.append(
-                Dispatch(
-                    need=need,
-                    resource_kind=kind,
-                    resource_id=units[0].id,
-                    status="provisional",
-                    same_district=False,
+                    same_district=chosen in same_district,
                 )
             )
         else:
@@ -159,5 +163,6 @@ def _fan_out(
     return dispatches
 
 
-def _usable(unit: ResourceUnit) -> bool:
-    return (unit.available or 0) > 0 and unit.status in {"available", "open"}
+def _usable(unit: ResourceUnit, case_id: str) -> bool:
+    free = (unit.available or 0) - ledger.reserved_by_others(unit.id, case_id)
+    return free > 0 and unit.status in {"available", "open"}

@@ -23,10 +23,10 @@ Mubit governs memory, policy, and traceability. System 1 acts fast. System 2 rea
 | `llm/` | Shared rule, Melanie wires the call | Refuses unless `MUBIT_BASE_URL` is a Mubit host. Does not print the key |
 | `memory/` | Melanie | Adapter switches `MEMORY_IMPL=mock` and `MEMORY_IMPL=mubit`. The mubit client raises |
 | `eval/` | Melanie | Scores stubs. `make demo-correction-loop` runs the stub model-update loop |
-| `contracts/` | Shared | v0.2 plus CR-003 (`Dispatch`, `RouterDecision.dispatches`; tag pending). Further changes go through `contracts/CHANGE_REQUESTS.md` |
+| `contracts/` | Shared | v0.3 (CR-003 adds `Dispatch` and `RouterDecision.dispatches`). Tag `v0.3-contracts`. Further changes go through `contracts/CHANGE_REQUESTS.md` |
 | `config/` | Shared | Humans sign off. Big decisions stay `TODO_HUMAN`. `config/routing.yaml` is `exclusive` and is a harness setting |
 | `fixtures/`, `mocks/` | Shared | Synthetic callers only |
 | `ingest/`, `enrich/`, `data/` | Shared | Public data. Production database is `TODO_HUMAN` |
 | `api/` | Shared | Stubs until each owner flips their env switch |
 
-Integration point: Saturday 19:00 Europe/London, with `S1_IMPL=real`, `S2_IMPL=real`, and `MEMORY_IMPL=mubit` together. Contracts stay frozen at `v0.2-contracts` until then.
+Integration point: Saturday 19:00 Europe/London, with `S1_IMPL=real`, `S2_IMPL=real`, and `MEMORY_IMPL=mubit` together. Contracts stay frozen at `v0.3-contracts` until then.

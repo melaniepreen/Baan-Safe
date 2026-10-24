@@ -111,7 +111,7 @@ def test_gateway_reextracts_on_a_later_turn():
     )
     handle(case, use_stubs=True)
     assert case.fields.people_count == 4
-    assert case.fields.location == "Song District"
+    assert case.fields.location == "Song District, Phrae Province"
     assert case.fields.location_confidence == 0.85
 
 

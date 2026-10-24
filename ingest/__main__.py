@@ -8,7 +8,7 @@ import sys
 from ingest.db import connect, init_db, reset_data
 from ingest.geo import loads
 from config.envfile import load_env_file
-from ingest import gdacs, gistda, hdx, open_meteo, overpass, reliefweb, thaiwater
+from ingest import admin_districts, gdacs, gistda, hdx, open_meteo, overpass, reliefweb, thaiwater
 from ingest.report import write_sources
 from paths import ROOT
 
@@ -101,6 +101,7 @@ def main(argv: list[str] | None = None) -> int:
         print("overpass facilities:", overpass.ingest_facilities(refresh)[:1200])
         print("thaiwater:", thaiwater.ingest(refresh)[:800])
         print("reliefweb:", reliefweb.ingest(refresh)[:400])
+        print("overpass gazetteer:", admin_districts.ingest(refresh)[:1200])
         export_geojson()
         write_sources()
         print("wrote data/SOURCES.md and data/processed/")

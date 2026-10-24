@@ -269,7 +269,7 @@ def test_activity_prompts_and_rulebook_are_draft_simulations():
     rules = _load("rulebook.json")
     assert events["schema_version"] == "baansafe.sim_activity.v1"
     assert events["simulated"] is True
-    assert events["confidence_threshold"] == 0.75
+    assert events["confidence_threshold"] == 0.8
     assert "attachLiveFeed" in events["stream"]["how"]
     town = _load("town.json")
     call_ids = {call["id"] for call in town["calls"]}
@@ -350,3 +350,11 @@ def test_town_files_do_not_look_like_personal_data():
             assert PHONE.search(text) is None, text
             assert NATIONAL_ID.search(text) is None, text
             assert "promptpay" not in text.lower()
+
+
+def test_sim_threshold_matches_system1_min_confidence():
+    import yaml
+
+    events = _load("sim_events.json")
+    escalation = yaml.safe_load((ROOT / "config" / "escalation.yaml").read_text())
+    assert events["confidence_threshold"] == escalation["system_1_min_confidence"]

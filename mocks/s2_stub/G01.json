@@ -1,0 +1,19 @@
+{
+  "system": "system_2",
+  "outcome": "reasoned_recommendation",
+  "priority": "P1",
+  "needs": [
+    "rescue"
+  ],
+  "route": "rescue_coordination",
+  "confidence": 0.84,
+  "reason": "P1 rescue_coordination — stub mirroring the C01 pattern (elderly, rising water, rescue), pending correction_loop.graduation_threshold.",
+  "reasoning": "Stub outcome mirroring the C01 pattern: an elderly person with water at the door of a ground-floor flat is P1 rescue, not welfare. The fixture label says system_1 for after graduation; until correction_loop.graduation_threshold is set, the field pre-check sends it to System 2 and this stub stands in.",
+  "missing_evidence": [
+    "water_depth"
+  ],
+  "next_question": "Is the water still only at the door?",
+  "requires_human": true,
+  "escalate": false,
+  "latency_ms": 88
+}

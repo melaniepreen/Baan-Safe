@@ -68,6 +68,16 @@ CREATE TABLE IF NOT EXISTS districts (
     province TEXT,
     source TEXT
 );
+CREATE TABLE IF NOT EXISTS admin_districts (
+    location_id TEXT PRIMARY KEY,
+    name_en TEXT,
+    name_th TEXT,
+    province TEXT,
+    province_code TEXT,
+    lat REAL,
+    lon REAL,
+    source TEXT
+);
 CREATE TABLE IF NOT EXISTS source_status (
     source TEXT PRIMARY KEY,
     fetched_at TEXT,
@@ -84,6 +94,7 @@ DATA_TABLES = [
     "weather_observation",
     "infrastructure",
     "districts",
+    "admin_districts",
     "source_status",
 ]
 

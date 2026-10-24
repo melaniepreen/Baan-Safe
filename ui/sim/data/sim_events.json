@@ -2,7 +2,7 @@
   "schema_version": "baansafe.sim_activity.v1",
   "simulated": true,
   "badge": "simulated",
-  "confidence_threshold": 0.75,
+  "confidence_threshold": 0.8,
   "learning": {
     "promote_after": 3,
     "simulated": true,

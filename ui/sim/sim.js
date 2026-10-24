@@ -1301,7 +1301,7 @@ function applyTemplate(text, bag) {
 
 function thresholdValue() {
   const node = document.getElementById("threshold");
-  const fallback = (eventsFile && eventsFile.confidence_threshold) || 0.75;
+  const fallback = (eventsFile && eventsFile.confidence_threshold) || 0.8;
   const value = node ? Number(node.value) : fallback;
   if (!Number.isFinite(value)) return fallback;
   return Math.min(1, Math.max(0, value));

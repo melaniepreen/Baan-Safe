@@ -155,6 +155,8 @@ MINIMISING_PHRASES = (
     "don't make a fuss",
     "only a little water",
     "it's nothing",
+    "we only need",
+    "just tell me",
 )
 
 ALONE_PHRASES = (
@@ -190,11 +192,55 @@ _COUNT_PATTERNS = (
 _ME_AND_MY = re.compile(r"\bme and my [a-z]+\b")
 _JUST_ME = re.compile(r"\b(just me|only me)\b")
 _BARE_NUMBER = re.compile(r"^" + _NUMBER + r"\s*$")
+_BREAKDOWN = re.compile(
+    _NUMBER + r"\s+adults?\s+and\s+" + _NUMBER + r"\s+(?:child|children|kids?|infants?|babies)\b"
+)
+
+
+def _split(text: str) -> list[str]:
+    return [part.lower() for part in _SENTENCE_END.split(text) if part.strip()]
+
+
+_AFFIRMATIVE = re.compile(r"^\s*(yes|yeah|correct|that's right)\b")
+
+
+def _confirmed_facts(transcript: list[TranscriptTurn]) -> list[str]:
+    """Operator texts the caller confirmed with an affirmative first sentence.
+
+    An operator question ("?") answered by "yes/yeah/correct/that's right"
+    confirms the facts the operator stated. An answer that starts "No…"
+    confirms nothing.
+    """
+    confirmed: list[str] = []
+    for index, turn in enumerate(transcript[:-1]):
+        if turn.speaker != "operator" or "?" not in turn.text:
+            continue
+        reply = transcript[index + 1]
+        if reply.speaker != "caller":
+            continue
+        first = _split(reply.text)
+        if first and _AFFIRMATIVE.match(first[0]):
+            confirmed.append(turn.text)
+    return confirmed
+
+
+def _fact_sentences(transcript: list[TranscriptTurn]) -> list[str]:
+    """Caller text plus operator-confirmed facts, in transcript order.
+
+    Confirmed operator text counts for vulnerable, people_count, and danger
+    only — never for needs or flags.
+    """
+    confirmed = set(_confirmed_facts(transcript))
+    sentences: list[str] = []
+    for turn in transcript:
+        if turn.speaker == "caller" or turn.text in confirmed:
+            sentences.extend(_split(turn.text))
+    return sentences
 
 
 def _sentences(transcript: list[TranscriptTurn]) -> list[str]:
     text = " ".join(turn.text for turn in transcript if turn.speaker == "caller")
-    return [part.lower() for part in _SENTENCE_END.split(text) if part.strip()]
+    return _split(text)
 
 
 def _negated(sentence: str, start: int) -> bool:
@@ -230,34 +276,70 @@ def _match_regex(sentence: str, pattern: re.Pattern) -> bool:
     )
 
 
-def _district_names(districts: list[str] | None) -> list[str]:
+def _district_entries(
+    districts: list[str] | None,
+) -> list[tuple[str, str | None]]:
+    """(district name, province or None) pairs, gazetteer first."""
     if districts is not None:
-        return districts
+        entries = []
+        for entry in districts:
+            name, _, province = entry.partition(",")
+            entries.append((name.strip(), province.strip() or None))
+        return entries
     from ingest.db import DB_PATH, connect
 
     if not DB_PATH.exists():
         return []
+    entries: list[tuple[str, str | None]] = []
+    seen: set[str] = set()
     with connect() as conn:
         try:
-            rows = conn.execute("SELECT name_en, province FROM districts").fetchall()
-        except Exception:  # noqa: BLE001 — a missing table means no district list
-            return []
-    names = []
-    for row in rows:
-        name = row["name_en"]
-        if not name:
-            continue
-        names.append(f"{name}, {row['province']}" if row["province"] else name)
-    return names
+            rows = conn.execute(
+                "SELECT name_en, province FROM admin_districts"
+            ).fetchall()
+        except Exception:  # noqa: BLE001 — a missing table means no gazetteer
+            rows = []
+        for row in rows:
+            name = row["name_en"]
+            if name:
+                seen.add(name)
+                entries.append((name, row["province"]))
+        try:
+            rows = conn.execute(
+                "SELECT name_en, province FROM districts"
+            ).fetchall()
+        except Exception:  # noqa: BLE001
+            rows = []
+        for row in rows:
+            name = row["name_en"]
+            if name and name not in seen:
+                seen.add(name)
+                entries.append((name, row["province"]))
+    return entries
 
 
 def _location(sentences: list[str], districts: list[str] | None) -> tuple[str | None, float | None]:
     text = " ".join(sentences)
-    for entry in _district_names(districts):
-        name = entry.split(",", 1)[0].strip()
+    matched: list[tuple[str, str | None]] = []
+    for name, province in _district_entries(districts):
         if name and re.search(r"\b" + re.escape(name.lower()) + r"\b", text):
-            return entry, 0.85
-    return None, None
+            matched.append((name, province))
+            break
+    if not matched:
+        return None, None
+    name, province = matched[0]
+    if province is None:
+        return name, 0.85
+    provinces = [
+        prov for n, prov in _district_entries(districts) if n == name and prov
+    ]
+    if len(set(provinces)) <= 1:
+        return f"{name}, {province}", 0.85
+    for prov in provinces:
+        short = prov.replace(" Province", "").lower()
+        if re.search(r"\b" + re.escape(short) + r"\b", text):
+            return f"{name}, {prov}", 0.85
+    return f"{name}, {provinces[0]}", 0.6
 
 
 def _number(token: str) -> int:
@@ -278,6 +360,9 @@ def _people_count(sentences: list[str]) -> int | None:
         for pattern in (_PEOPLE_COUNT, *_COUNT_PATTERNS):
             for match in pattern.finditer(stripped):
                 count = _number(match.group(1))
+        breakdown = _BREAKDOWN.search(stripped)
+        if breakdown:
+            count = _number(breakdown.group(1)) + _number(breakdown.group(2))
     return count
 
 
@@ -287,6 +372,7 @@ def extract(
 ) -> tuple[ExtractedFields, list[str]]:
     """Extract fields from caller turns and suggest policy flags."""
     sentences = _sentences(transcript)
+    fact_sentences = _fact_sentences(transcript)
     needs: list[Need] = []
     for need, phrases in NEED_PHRASES:
         if any(_match_need(sentence, need, phrases) for sentence in sentences):
@@ -307,7 +393,7 @@ def extract(
 
     water_at_door_or_house = False
     rising_water = False
-    for sentence in sentences:
+    for sentence in fact_sentences:
         if _match_any(sentence, DANGER_PHRASES["rising_water"]):
             rising_water = True
         if _match_regex(sentence, _WATER_AT_BUILDING) or _match_regex(sentence, _WATER_INSIDE_HOUSE):
@@ -320,11 +406,11 @@ def extract(
     vulnerable = [
         tag
         for tag, phrases in VULNERABLE_PHRASES.items()
-        if any(_match_any(sentence, phrases) for sentence in sentences)
+        if any(_match_any(sentence, phrases) for sentence in fact_sentences)
     ]
     if "immobile" not in vulnerable and any(
         _match_regex(sentence, pattern)
-        for sentence in sentences
+        for sentence in fact_sentences
         for pattern in IMMOBILE_PATTERNS
     ):
         vulnerable.append("immobile")
@@ -341,7 +427,7 @@ def extract(
     fields = ExtractedFields(
         location=location,
         location_confidence=confidence,
-        people_count=_people_count(sentences),
+        people_count=_people_count(fact_sentences),
         vulnerable=vulnerable,
         medical=medical,
         danger=danger,

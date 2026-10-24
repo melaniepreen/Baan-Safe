@@ -3,6 +3,7 @@ title: Data ingest
 tags: [ingest, sqlite, reliefweb, ddpm, sources]
 files:
   - ingest/__main__.py
+  - ingest/admin_districts.py
   - ingest/reliefweb.py
   - ingest/db.py
   - data/SOURCES.md
@@ -15,6 +16,7 @@ Pull public flood context into SQLite and write `data/SOURCES.md`. ReliefWeb is 
 ## Key files
 
 - `ingest/__main__.py` — `make ingest`, `make ingest-refresh`.
+- `ingest/admin_districts.py` — fills `admin_districts`, the full admin_level=6 gazetteer for the 8 `gistda.province_codes` provinces (one province boundary `out geom` plus one districts bbox query per province; district centre inside the province polygon decides attribution). `districts` is untouched: enrichment, weather, and facilities key to it.
 - `ingest/report.py` — `make data-report`.
 - `ingest/db.py` — `data/processed/baansafe.sqlite`.
 - `ingest/gdacs.py`, `ingest/gistda.py`, `ingest/hdx.py`, `ingest/open_meteo.py`, `ingest/overpass.py`, `ingest/thaiwater.py` — active clients.
