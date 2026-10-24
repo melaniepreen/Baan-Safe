@@ -1,5 +1,4 @@
 {
-  "placeholder": true,
   "note": "Saved caller lines for the phone drawer. fixture_id is the DEMO-ONLY chooser target. The stub gateway answers that fixture, not a live reading of the sentence. Thai lines are optional display text. The sent text is the English line.",
   "groups": [
     {
