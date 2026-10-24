@@ -1,6 +1,6 @@
 # Handover
 
-24 October 2026, evening. `main` is at `7004cee`. `make test` is 232 passed, 1 skipped (`tests/test_synthetic_calls.py` needs the `laya` module). `make validate` is ok. Every number below was measured on that commit.
+25 October 2026, early morning. `main` is at `61663d0`. `make test` is 271 passed, 1 skipped (`tests/test_synthetic_calls.py` needs the `laya` module). `make validate` is ok.
 
 ## Main parts
 
@@ -8,243 +8,153 @@ One call goes through these parts in order. `gateway/route.py` `handle` is the e
 
 | Part | Where | State |
 |---|---|---|
-| Extraction | `system1/extract.py` | Runs only when a case arrives with empty fields. English keyword rules, the 108-district gazetteer (`admin_districts`), caller-confirmed operator facts. Thai matches district names only. |
-| Enrichment | `enrich/context.py`, `data/snapshots/` | Adds flood, rain, and reservoir flags from data/processed and the public snapshots. Flags never change priority or route. |
-| Memory | `memory/adapter.py` | `MEMORY_IMPL=mock` reads `mocks/memory_context/`. `memory/mubit.py` raises. |
-| Graduation to System 2 | `gateway/graduation.py` | `correction_loop.escalation_threshold` 2. Two human `s1_triage` corrections with a high-risk label on one field pattern tag it `complex_situation` and send it to System 2 with a recommendation. Never sets a priority. `make demo-graduation`. |
-| Route chooser | `gateway/chooser.py`, `config/escalation.yaml` | `field precheck`. `routing.yaml` is `mode: cascade`: a System 1 escalate hands the same turn to System 2. |
-| System 1 | `system1/decide.py` | Rules-only needs table, duplicate check, confidence floor 0.80. Learned rules from the RL overlay apply only when `RL_OVERLAY` names a file. |
-| System 2 | `system2/decide.py`, `system2/orchestrator.py` | Live Nemotron (`nvidia/nemotron-3-nano-30b-a3b`) through the Mubit compat route when `S2_IMPL=real`. Stub outcomes otherwise. Outages become a safe `system2_unavailable` escalation. |
-| Sapling | `system2/sapling.py` | Aid eligibility and denial only. Stub client (`mocks/sapling_stub/`). |
-| Router | `router/merge.py`, `router/ledger.py` | Next action, one provisional dispatch per need, in-process stock holds. |
-| RL loop | `eval/rl/`, `gateway/overlay.py`, `ui/sim/rl_panel.js` | `correction_loop.graduation_threshold` 2. Graduates repeated System 2 decisions into System 1 rules, demotes coarse ones. `make rl-loop` (spends quota), `make rl-loop-replay` (cached). |
-| Training export | `training/`, `infra/modal/finetune_job.py` | Event log to per-task datasets, SetFit for `s1_triage`, Laya export. No trained checkpoint is used at inference. |
-| UI | `ui/sim/`, `ui/player.html`, `ui/correct.js` | Town, phone, RL panel, Correct this. |
-| Hosting | `make serve`, `infra/modal/gateway_app.py` | Local API on port 8000. `make deploy-modal` serves one public URL with stub settings. |
-| Evals | `eval/extract_eval.py` | `make extract-eval`: fixtures 24/24 routes, 0 unsafe. Held-out sim callers 4/7 routes, 0 unsafe. `EXTRACT_EVAL_SET=synthetic make extract-eval` scores the 240 synthetic calls. |
+| Extraction | `system1/extract.py` | Runs when fields are empty. English keyword rules (incl. kids/children/unaccompanied → safeguarding). Thai matches **district names only** (need/danger keywords were added then reverted). Gazetteer: `admin_districts` + `districts` + snapshot. |
+| Enrichment | `enrich/context.py`, `data/processed/`, snapshots | JSON/GeoJSON via `ingest.store` (SQLite is ingest cache only). Matches `districts` then `admin_districts`. Flags never change priority. |
+| Memory | `memory/adapter.py` | `MEMORY_IMPL=mock`. `memory/mubit.py` raises. |
+| Graduation to System 2 | `gateway/graduation.py` | Escalation threshold 2. Tags `complex_situation`; does not write System 1 rules. |
+| Route chooser | `gateway/chooser.py` | `field precheck`. `routing.yaml` `mode: cascade`. |
+| System 1 | `system1/decide.py` | Rules-only. Overlay only if `RL_OVERLAY` set. |
+| System 2 | `system2/orchestrator.py` | Nemotron via Mubit when `S2_IMPL=real`. Stub otherwise. |
+| Sapling | `system2/sapling.py` | Aid eligibility / denial. Stub client. |
+| Router / ledger | `router/merge.py`, `router/ledger.py` | Provisional dispatches; confirm/cancel API; `/resources` ledger-aware. |
+| Traces / metrics | `llm/client.py`, `trace.py`, `GET /metrics` | Every Mubit chat emits `mubit_chat`. RL live/cache hits too. |
+| RL loop | `eval/rl/`, `ui/sim/rl_panel.js` | Live = Mubit; replay = cache; panel labels honestly. |
+| UI | `ui/sim/`, `ui/correct.js` | Transcript create, dispatches, `location_context`, Mubit hop, confirm/cancel. |
+| Hosting | `make serve`, `infra/modal/gateway_app.py` | Local 8000. Modal: S1 real + enrich auto; `baansafe-mubit` attached; S2 real only when creds present. **Redeploy required** for live URL. |
+| Training | `training/`, Modal finetune / Laya export | Exports exist. No checkpoint at inference. |
 
-Owners stay as in `OWNERSHIP.md`. Contracts are `v0.3-contracts`.
+Owners: `OWNERSHIP.md`. Contracts: `v0.3-contracts`. Detail plan: `docs/wire-frontend.md` (mostly landed).
 
-## Gaps, in priority order
+---
 
-"Unsafe" means the true fields send the call to System 2, but System 1 answered with no human.
+## Done recently (do not re-open)
 
-### Safety
+| Item | Notes |
+|---|---|
+| Safeguarding plurals / bare unaccompanied | `0fdc34e` |
+| Thai need keywords | Explicitly **reverted** — leave off unless product reopens |
+| PR 9 town landmarks / pace / session | Merged |
+| Town wire P0 | Transcript `POST /cases`, `ruleFromDispatches`, `location_context`, stale TODO copy fixed (`f65ab55`) |
+| Dispatch confirm/cancel + ledger stock | API + town Accept/Reject wired |
+| Mubit `mubit_chat` traces + enrich/memory stages + `/metrics` | `96bef6e`, `7d1eddc` |
+| RL Mubit/cache traces + RL panel | `c996c35` / related; panel `f243e2b` |
+| Modal S1 real + enrich auto + mubit secret / S2 gate | `b2275c6`, `c996c35` |
+| `data.demo_event` = Hat Yai / Songkhla; G01–G04 → system_2 | `110e370` |
+| Correct this Mubit→Nemotron line | `61663d0` |
+| Enrich `admin_districts` fallback | Hat Yai resolves |
 
-1. **Plural children are missed.** "My two kids are alone at a shelter. They are unaccompanied." extracts no vulnerable person, because `VULNERABLE_PHRASES` in `system1/extract.py` matches `kid` and `child` but not `kids` or `children`. Without `child`, the safeguarding flag never fires. 6 synthetic safeguarding calls are unsafe: they get a P3 shelter dispatch from System 1 with no human (`syn-safeguarding-child-01/02/04/05-en`, `-01/05-mixed`). Fix: add the plurals, and treat "unaccompanied" alone as a child alone.
-2. **The hosted write endpoints have no auth.** `gateway.auth` is `TODO_HUMAN`. On the public Modal URL, `POST /cases/{id}/corrections` writes human training events, so two posts graduate a pattern. This is accepted for the hackathon. Share the URL only with judges.
+---
 
-### Unused potential
+## Plan of action
 
-3. **Thai callers get no fast path.** The extractor has no Thai keywords. On the 80 Thai synthetic calls: needs 0/80, routes 38/80. None are unsafe, only because empty needs escalate to a supervisor, so every Thai caller reaches a human. `research/glossary-and-risk-areas.md` already lists about 40 Thai flood words and caller phrases, and `admin_districts.name_th` already gives Thai location (72/80).
-4. **The demo never runs the extractor.** `ui/sim/sim.js` posts `{ fixture_id: call.id }` to `POST /cases`, so spoken text never reaches extraction, the gazetteer, or caller-confirmed facts. `POST /cases` already accepts a transcript with empty fields.
-5. **The hosted demo shows stubs.** `infra/modal/gateway_app.py` `STUB_ENV` sets `S1_IMPL=stub` and `ENRICH_IMPL=off`. The real System 1 needs no secret.
-6. **Dispatches are invisible.** `sim.js` never reads `RouterDecision.dispatches`. With no district match, `mocks/loader.load_dispatch_resources` lists OpenStreetMap units first, so the router reserves a unit such as `shelter-way-{osm_id}` that the town cannot draw. `GET /resources` ignores the ledger and shows full stock.
-7. **A human can confirm or cancel a dispatch (API done; UI wiring open).** `POST /cases/{case_id}/dispatches/confirm` and `.../cancel` wrap `router/ledger.py` without changing `Dispatch` / `RouterDecision`. Cancel releases holds; confirm marks them. `GET /resources` subtracts ledger holds from `available`. Town/UI still needs to call these endpoints.
-8. **Mubit memory is not wired.** Mubit is used only as the LLM hop. `research/MUBIT.md` lists the `/v2/control/` ingest and query endpoints. Blocked on `memory.mubit_project`, `memory.retrieval_top_k`, and `memory.token_budget` (Melanie).
-9. **Trained models are never used.** SetFit and Laya exports and the Modal System 1 classifier (`infra/modal/s1_app.py`) exist, but System 1 is rules-only and nothing loads a checkpoint. A classifier second opinion would help Thai most.
+Ordered for demo truth → hosted live → product depth. Each row is one work package.
 
-### Consistency
+### P0 — Make the public demo match git (ops)
 
-10. **Two graduation paths disagree.** Correction graduation (`gateway/graduation.py`) never moves a pattern into System 1. The RL loop (`eval/rl/learner.py` with `RL_OVERLAY`) writes System 1 rules. A person should confirm which story the demo tells. An agent also set `routing.yaml` `mode: cascade` and `system2.max_latency_ms`, and AGENTS.md invariant 2 says humans set decisions. Moly chose `system2.orchestrator_model` `nvidia/nemotron-3-nano-30b-a3b` on 24 Oct 2026.
-11. **The town shows outdated text.** `sim.js` (and `index.html` / `sim_events.json` under `ui/sim/`) still say `gateway.route_chooser` and `system2.orchestrator_model` are `TODO_HUMAN`. Decided values are `field precheck` and `nvidia/nemotron-3-nano-30b-a3b`. Left for the wire-frontend agent after PR9 — do not large-edit `sim.js` here. `ui/sim/data/sim_events.json` `learning.promote_after` is 3 and tells a promote-into-System-1 story.
-12. **`G01`–`G04` labels (done).** `expected.system` is `system_2` to match the rescue precheck; s2 stub copy no longer says graduation_threshold is pending.
-13. **Modal limits.** `GET /rl/run` is 404 there because `.dockerignore` excludes `eval/out`. Stock holds live in one container's memory.
-14. **Geography story (decided).** `data.demo_event` is `Hat Yai / Songkhla` (allowlisted in `DECIDED`) so GISTDA/enrichment can light up. The local-metre town may still draw Sukhumvit; fixture households may stay Lampang/Phrae/Nan/Phayao until a follow-up moves basemap or call locations.
-15. **Ownership.** `9da21c7` changed Melanie's `system2/orchestrator.py` and `system2/decide.py`. Melanie should review them.
+| # | Action | Owner hint | How |
+|---|---|---|---|
+| A1 | **Redeploy Modal gateway** | shared | `make modal-secrets` (if keys changed) then `make deploy-modal`. Confirm `GET /hosting`: `backends` `s1-real` or `live`, `secrets` true when Mubit present, note starts with LLM via Mubit. |
+| A2 | **Smoke Mubit on hosted URL** | shared | One S2 fixture turn; `GET /cases/{id}/trace` shows `mubit_chat`; `GET /metrics` `mubit_chat.call_count` > 0. Never log keys. |
+| A3 | **Share URL only with judges** | shared | `gateway.auth` still unset — corrections can graduate patterns. |
 
-### Conflicting decision logic
+### P1 — Align place and story (product + small code)
 
-16. **`config/routes.yaml` contradicts the code.** It maps `evacuation` to `rescue_coordination`. `NEEDS_TABLE` in `system1/decide.py` and the F06 label use `shelter_placement`. No code reads `routes.yaml`.
-17. **The town decides on its own.**
-    - `ui/sim/sim.js` has a demo-only keyword chooser that maps typed text to a fixture.
-    - `ui/sim/data/rulebook.json` picks the vehicle from the priority and ignores `RouterDecision.dispatches`.
-    - `ui/sim/data/sim_events.json` scripts a System 1 score against 0.8, a handoff to System 2, and "promote after 3".
+| # | Action | Why | How |
+|---|---|---|---|
+| B1 | **Pick one learning story and freeze copy** | Three paths still exist (correction→S2, RL→S1 rules, stub model versions) | Choose: (1) demo = correction escalation to S2 only, or (2) RL_OVERLAY graduation. Update `sim_events` / README / architecture note so they do not contradict. Human confirms cascade / latency already in yaml if needed. |
+| B2 | **Move calls or town to Songkhla / Hat Yai** | `demo_event` is Hat Yai but fixtures/town often still north/Sukhumvit → enrich stays dry | Either relocate a demo fixture set + town pins to Songkhla, or change basemap; then flood polygons / facilities show in desk. |
+| B3 | **Widen flood match or use district area** | Thepha-style false dry | Buffer / polygon-in-district in `enrich/context.py`; add a fixture that lights `near_flood_extent`. |
+| B4 | **Weather for admin-only districts** | Gauges keyed to 50 `districts` ids | Map admin match → nearest `districts` location_id, or extend weather rows. |
 
-    What the town shows is not what the backend decided.
-18. **Three learning stories.** `gateway/graduation.py` sends a pattern to System 2. `eval/rl/` with `RL_OVERLAY` writes System 1 rules. `make demo-correction-loop` registers stub model versions. Pick one for the demo.
-19. **`always_requires_human` in `config/escalation.yaml` is text.** Nothing executes it. `router/merge.py` hard-codes its own copy.
+### P2 — Hosted hardening
 
-### Duplicated data
+| # | Action | Why | How |
+|---|---|---|---|
+| C1 | **Decide `gateway.auth`** | Open write on public URL | Hackathon: keep open + judge-only URL. After: reject unauthenticated corrections. |
+| C2 | **Persist ledger / cases across replicas** | In-process holds; Modal multi-container | Single container or volume/DB for ledger + case store (PRD open item). |
+| C3 | **RL artifacts on Modal (optional)** | `GET /rl/run` 404 — `.dockerignore` drops `eval/out` | Bake a small `run.json` into image or serve from volume after `make rl-loop`. |
 
-20. **Three district lists.**
-    - `districts`: 50 rows, about 30 of them Bangkok, `province` empty.
-    - `admin_districts`: 108 rows for the 8 configured provinces.
-    - `data/snapshots/gazetteer.json`: 224 KB.
+### P3 — Mubit depth (beyond chat hop)
 
-    `system1/extract.py` reads all three plus `DISTRICT_ALIASES`. `enrich/context.py` matches `districts` first (weather `location_id`), then falls back to `admin_districts`.
-21. **Four resource lists.**
-    - `mocks/resources.json`: 4 fictional units.
-    - `ui/sim/data/town.json` `resources`: the same 4 ids under new names.
-    - `data/snapshots/places.json`: OpenStreetMap units that dispatch uses. `ui/sim/data/places.json` is a label copy.
-    - The `facilities.geojson` file: 4,218 OpenStreetMap facilities that only enrichment reads.
+| # | Action | Blocked on | How |
+|---|---|---|---|
+| D1 | **Wire Mubit memory** | `memory.mubit_project`, `retrieval_top_k`, `token_budget` (Melanie) | Implement `memory/mubit.py` against `/v2/control/`; `MEMORY_IMPL=mubit` on demo when ready. |
+| D2 | **Live Sapling** | `sapling.*` decisions + GPU app | `make modal-deploy-sapling`; `SAPLING_IMPL=live`; keep scope aid/denial only. |
+| D3 | **STT live** | `modal.stt_*` | `make modal-deploy-stt`; set `STT_UPSTREAM` at gateway deploy. |
 
-### Scraped and unused
+### P4 — Learning / models (not required for triage demo)
 
-22. **`disaster_report` has no runtime reader.** 126 rows (GLIDE 109, IDMC 14, GDACS 3). Only `scripts/validate.py` scans it.
-23. **The map exports have no consumer.** `data/processed/flood.geojson` (10 MB, 698 features) and `facilities.geojson` (1 MB, 4,218 features) are served by `/map/flood` and `/map/facilities`. No UI page calls them.
-24. **Snapshots nothing reads at runtime:** `geoboundaries.json`, `gistda.json`, and `tmd.json` (the TMD fetch failed).
-25. **Weather ages without a warning.** Open-Meteo was fetched at 04:08 UTC on 24 October: archive 24 September to 23 October, forecast 7 days. Nothing flags its age at the point of use.
-26. **Loaded but unused.** Nothing imports `countries/`. `policies/mof_relief.yaml` loads, but the aid endpoints return 501.
+| # | Action | Notes |
+|---|---|---|
+| E1 | `make export-laya` / `LAYA_TRAIN=1 make laya-train` | GPU or Modal task; does not change rules-only S1 by itself |
+| E2 | Decide classifier second opinion | Product: load Laya/SetFit into cascade or keep rules-only |
+| E3 | `make modal-finetune` | Event-log SetFit/LoRA — **not** Laya; needs `modal.finetune_base_model` |
+| E4 | Refresh RL cache for nano | `make rl-loop` live once so `rl-loop-replay` hits |
 
-### Dead code
+### P5 — Thai (only if product reopens)
 
-27. **Never called:** `memory/adapter.store_record`, `ingest/overpass._accessibility`, `infra/modal/common.require_secret_present`, `infra/modal/finetune_job.write_registry`, `ui/sim/build_town._incident_modes`.
-28. **Called only by tests:** `gateway/route.choose_system`, `enrich/context.sample_districts`, `policies/corpus.corpus_counts`, `policies/corpus.load_labels`, `eval/learning/arms.arm_by_name`, `eval/learning/cases.group_by_id`. The Sapling live parser (`system2/sapling_client.verdict_from_model_output`) waits for `SAPLING_IMPL=live`.
+| # | Action | Notes |
+|---|---|---|
+| F1 | Re-add Thai need/danger/vulnerable keywords | Was reverted on purpose; use glossary + synthetic eval; watch false friends (`ยา`) |
+| F2 | Thai UI labels | `name_th` / facility names when `lang` is th/mixed |
 
-### Geo and UI: what can be leveraged
+### P6 — Data / cleanup (backlog)
 
-29. **Every call already carries named facilities.** `enrich/context.location_context` runs on each turn and is stored in `case.resources.location_context`, which the UI receives with the case.
-    - It gives the nearest hospitals with distances (F10: Sung Men Hospital, 3.8 km) and candidate shelters (real schools and temples) for all 22 fixtures with a usable district.
-    - It also gives 24-hour rain, the forecast, reservoirs for Lampang, Phrae, Nan, and Phayao, and source freshness.
-    - The UI shows none of it. The router does not use it: a dispatch could name the nearest real hospital or shelter.
-30. **The live water is where no call happens (partially decided).** All 228 GISTDA 7-day and 30-day polygons are in Songkhla. `data.demo_event` is now `Hat Yai / Songkhla`. Fixture call locations are still northern (~1,237 km away), so enrichment on current fixtures stays dry until calls or the town move to Songkhla / Hat Yai. The Hat Yai flood of November 2025 (EOS-RS polygon) is in the database ready for that move.
-31. **The flood flag tests one point per district.** Thepha has 120 live polygons whose centres are within 5 km of its own. It still reads as dry: its centre is 2.4 km from water, and the buffer is 500 m. Test the district area or a wider radius.
-32. **Enrichment gazetteer fallback (done).** `_match_district` prefers `districts`, then `admin_districts`, so Hat Yai / Mueang Songkhla resolve a point and facilities. Weather gauge rows still only cover the 50 `districts` `location_id`s; admin-only names use snapshot rain / null rain.
-33. **Flood history is unused.** `disaster_report` names Nan in 9 events, Lampang in 7, Phrae in 6, and Songkhla in 3. That is a "past floods here" line, or System 2 evidence.
-34. **Rain trend is unused.** `weather_observation` has 1,900 rows: 50 districts, 30-day archive plus 7-day forecast.
-35. **There is no real map.** The town is a local-metre drawing of Sukhumvit. A small WGS84 panel could show call pins (`admin_districts` centres), flood polygons, and nearby facilities, filtered by province to stay light. If the picture stays in Bangkok, Vadhana already resolves: 20 mm of rain in the last 24 hours and named hospitals and shelters.
-36. **Endpoints no UI calls:**
-    - `/context` and `/resources`.
-    - `/cases/{id}`: decision history per turn.
-    - `/metrics`: latency per stage, the latency column for the quality, cost, and latency track.
-    - `/policies/match` and `/policies/{rule_id}`: cite the rule behind a decision.
-    - `/replay`: score every fixture.
-37. **Thai names are unused.** `admin_districts.name_th` and the Thai facility names could label the UI in Thai.
+| # | Action |
+|---|---|
+| G1 | UI or S2 consumer for `/map/flood` + `/map/facilities` (province-filtered) |
+| G2 | Runtime reader for `disaster_report` (“past floods here”) |
+| G3 | Flag stale Open-Meteo / snapshot age at point of use |
+| G4 | Resolve `routes.yaml` vs `NEEDS_TABLE` (delete or generate from code) |
+| G5 | Single district list story (document or merge `districts` / `admin_districts` / gazetteer) |
+| G6 | Aid endpoints still 501 — implement or hide from demo |
+| G7 | `countries/` loader or drop from demo narrative |
+| G8 | Housekeeping: gitignore `.vscode/` `*.log`; move architecture/OWNERSHIP/research under `docs/`; untrack approved junk markdown |
+
+### P7 — Doc sync
+
+| # | Action |
+|---|---|
+| H1 | Keep this file’s tip SHA and “Done recently” updated after each push |
+| H2 | PRD / architecture refresh agents: rebase before push (docs-only commits collide) |
+
+---
+
+## Remaining gaps (short index)
+
+Maps to the plan above. Struck items are done.
+
+~~1. Plural children~~ · **2. Hosted auth** → C1 · **3. Thai keywords** → F1 (opt-in) · ~~4. Demo skips extract~~ · ~~5. Hosted S1 stub~~ (redeploy A1) · ~~6–7. Dispatches / confirm API~~ · **8. Mubit memory** → D1 · **9. Trained models unused** → E* · **10. Two graduation paths** → B1 · ~~11. Stale TODO town copy~~ · ~~12. G01–G04~~ · **13. Modal RL / stock** → C2–C3 · ~~14. demo_event~~ (calls still north → B2) · **15. Melanie review orchestrator** · **16. routes.yaml** → G4 · ~~17. Town ignores backend~~ (mostly fixed; chooser still demo-only for pins) · **18. Three learning stories** → B1 · **19. always_requires_human text** · **20–21. Duplicated lists** → G5 · **22–26. Unused scrape** → G1–G7 · **27–28. Dead code** (opportunistic) · ~~29. location_context UI~~ · **30–31. Flood geography** → B2–B3 · ~~32. admin_districts enrich~~ · **33–37. Unused history/map/Thai UI** → G1–G2, F2
+
+---
 
 ## Live System 2
 
-System 2 runs `nvidia/nemotron-3-nano-30b-a3b`, the paid tier, through Mubit. It replaced `nvidia/nemotron-3.5-lightning:free`. OpenRouter's 50-a-day free cap covers every `:free` model on the account, and today's cap was spent. On 24 Oct 2026, nano answered 6 fixture prompts in 1.1–1.7 s. 3 of the 6 matched the fixture priority and route. C01-a came back P2 welfare where P1 rescue was expected. A call costs about $0.0003 (the OpenRouter list price is $0.06 per million input tokens and $0.24 per million output tokens).
+Model: `nvidia/nemotron-3-nano-30b-a3b` via Mubit (`system2.hosting` = openrouter via mubit gateway). Local: `S2_IMPL=real` + `.env` keys. Hosted: real only when Modal secret injects `MUBIT_API_KEY` + `MUBIT_BASE_URL`. Traces: stage `mubit_chat` on `TRACE_PATH` / case trace / `GET /metrics`.
 
-The RL replay cache (`eval/out/rl/s2_cache.jsonl`) is keyed by model. Until `make rl-loop` runs live with nano, `make rl-loop-replay` misses every entry and scores them as fallbacks. `run.json` now records `model`.
+RL: `make rl-loop` (live, spends quota) · `make rl-loop-replay` (cache; misses = fallbacks until cache rebuilt for current model).
 
-The full routing walk-through, the loops, and the Modal status are in `BaanSafe_Revised_Architecture.md` under "Routing in detail".
+Architecture walk-through: `BaanSafe_Revised_Architecture.md`.
 
-## Laya Model Training Pipeline (Verified 24 Oct 2026)
+## Laya Model Training Pipeline
 
-Export + skip-safe train wrapper are ready. A live GPU train is optional and not required for green CI. System 1 stays rules-only: no checkpoint is loaded at inference.
+Export + skip-safe train wrapper ready. System 1 stays **rules-only** until a product decision wires a checkpoint.
 
-### Export (`make export-laya`)
-- **Train**: 168 calls (56 en, 56 th, 56 mixed)
-- **Held-out**: 72 calls (24 en, 24 th, 24 mixed)
-- **Questions**: 12 total — 1 `choice` (priority: red/yellow/green/white/black) + 11 `noul` (boolean System 1 labels)
-- **Split**: 70/30 by `group_id` (80 groups, seeded) — same split as SetFit export
-- **Out**: `training/out/laya/train.jsonl`, `held.jsonl`
-
-### Train readiness (no paid GPU required to verify)
-`LAYA_TRAIN=1 make laya-train` runs only when all of these are true; otherwise it prints `skipped` and exits 0:
-1. `LAYA_TRAIN=1`
-2. CUDA GPU **or** Modal task env (`MODAL_TASK_ID` / `MODAL_ENVIRONMENT`)
-3. `laya-train` on `PATH` (from the `laya` package, ≥0.4.14)
-4. Export present (`make export-laya` already done)
-
-Exact train command (what the Makefile invokes when ready):
-```bash
-laya-train --data training/out/laya/train.jsonl \
-  --eval training/out/laya/held.jsonl \
-  --base convaiinnovations/laya-multilingual \
-  --out training/out/laya-ckpt
-```
-
-### Not Laya
-`make modal-finetune` is **SetFit/LoRA from the event log** (`infra/modal/finetune_job.py`). It does **not** train Laya and does not read `training/out/laya/`.
-
-### Tests & Validation
-```
-make test       → 232 passed, 1 skipped (needs laya package)
-make validate   → validate ok: 24 fixtures (no PII, no TODO_HUMAN in allowlist)
-```
-
-### Schema (Laya 0.4.14 JSONL)
-```json
-{
-  "state": {"body": "caller: ...\noperator: ..."},
-  "questions": {
-    "priority": {"type": "choice", "criteria": {...}},
-    "niems_not_conscious_or_breathing": {"type": "noul", ...},
-    ... (11 noul total)
-  },
-  "expected": {"priority": "red", "flood_trapped": true, ...},
-  "language": "en|th|mixed",
-  "tags": ["group:syn-...", "primary_label"]
-}
-```
-
-### SetFit Export (same group split)
-```bash
-SYNTHETIC=1 make export-training
-# → s1_synthetic train 168 held_out 72
-```
-```json
-{"text": "...", "label": "flood_trapped", "group_id": "syn-...", "weight": 1.0}
-```
-
-### Next Steps (When Ready)
 | Action | Command |
-|--------|---------|
-| Export Laya JSONL | `make export-laya` |
-| Fine-tune Laya (local GPU or Modal task) | `LAYA_TRAIN=1 make laya-train` |
-| Event-log SetFit/LoRA (not Laya) | `make modal-finetune` — needs `modal.finetune_base_model` / `FINETUNE_BASE_MODEL` |
-| Deploy Modal S1 classifier (optional side path) | `export S1_MODEL_ID=convaiinnovations/laya-multilingual S1_GPU=cpu && make modal-deploy-s1` |
-| Deploy fine-tuned Laya ckpt on Modal S1 | `export S1_MODEL_ID=/path/to/laya-ckpt S1_GPU=... && make modal-deploy-s1` |
+|---|---|
+| Export | `make export-laya` → ~168 train / 72 held |
+| Train | `LAYA_TRAIN=1 make laya-train` (GPU or Modal task + `laya-train` on PATH) |
+| Not Laya | `make modal-finetune` = event-log SetFit/LoRA (`modal.finetune_base_model`) |
 
-### Still blocks loading a checkpoint into System 1
-- `system1.extraction_method` is **rules-only**; `system1/decide.py` never reads a model.
-- Gateway triage does not call Modal `s1_app` `/classify`.
-- `modal.s1_model_id` / `modal.s1_gpu` stay `TODO_HUMAN` in git (set via env only at deploy).
-- A trained `training/out/laya-ckpt` does not exist until a GPU/`laya-train` run succeeds.
-- Wiring a classifier second opinion into the cascade is an open product decision, not an export bug.
+Open: `modal.s1_model_id`, `modal.s1_gpu`, `modal.finetune_base_model`.
 
-### Open Decisions (from `config/decisions.yaml`)
-- `modal.s1_model_id: TODO_HUMAN` — set at deploy via `S1_MODEL_ID`
-- `modal.s1_gpu: TODO_HUMAN` — cpu \| T4 \| L4 via `S1_GPU`
-- `modal.finetune_base_model: TODO_HUMAN` — SetFit/LoRA base only (not Laya)
+## latte-bench
 
----
-
-## latte-bench (Third-Party Reference Benchmark)
-
-**Status**: Submodule checked out at `third_party/latte-bench` (pinned to `3828bd8`), but `bun` not installed → `make latte-bench` skips.
-
-### What it is
-- [MubitLabs/latte-bench](https://github.com/MubitLabs/latte-bench) — third-party benchmark, **no license published**
-- BaanSafe does **not** vendor source; uses git submodule at pinned commit
-- `latte_bench.license_confirmation: TODO_HUMAN` in `config/decisions.yaml` — must confirm terms with Mubit before any use beyond reference
-
-### Commands
-```bash
-git submodule update --init third_party/latte-bench   # fetch pinned commit
-make latte-bench                                     # calibrated reference (no API call)
-make latte-bench LATTE_SERVE=1                       # free UI at http://127.0.0.1:3000
-make latte-bench LATTE_LIVE=1                        # live run through Mubit gateway (needs keys)
-```
-
-### Modes
-| Mode | Command | API Call | Purpose |
-|------|---------|----------|---------|
-| **Calibrated reference** | `make latte-bench` | ❌ No | Replays "heart witness" on "default milk", writes `eval/out/latte-reference.json` (gitignored) |
-| **Free UI** | `make latte-bench LATTE_SERVE=1` | ❌ No | Bun dev server, strips `MUBIT_API_KEY` |
-| **Live** | `make latte-bench LATTE_LIVE=1` | ✅ Yes | Runs through Mubit gateway (`api.mubit.ai` or compat prefix), needs `MUBIT_BASE_URL`, `MUBIT_API_KEY`, `MUBIT_MODEL`, `FRONTIER_MODEL` |
-
-### Integration
-- `make eval-learning` appends **External sanity check: does the model learn from feedback** section
-- Reads local reference result (`eval/out/latte-reference.json`) when it exists
-- Reads `docs/model-study/summary.json` from pinned checkout (notes vs no notes)
-- **Benchmark's own write-up says figures do not establish learning** — they do not change BaanSafe promotion rule
-
-### Prerequisites (Not Currently Met)
-- `bun` (JavaScript runtime) — not installed
-- Submodule checked out — ✅ done (pinned to `3828bd8c201c272c8eb021608631f2217316ec33`)
-
----
+Submodule present; `bun` often missing → `make latte-bench` skips. Live mode needs Mubit keys. License confirmation still `TODO_HUMAN`.
 
 ## Housekeeping
 
-- **Markdown cleanup is approved but not done.**
-  - Untrack and gitignore `MORNING_REPORT.md`, `research/DEMO_PLAN.md`, and `docs/agents/INDEX.md`.
-  - Move `BaanSafe_Revised_Architecture.md` to `docs/architecture.md`, `OWNERSHIP.md` to `docs/OWNERSHIP.md`, and `research/` to `docs/research/`, then update every reference.
-  - Add `.vscode/` and `*.log` to `.gitignore`.
-  - Point the Cursor refresh agent at `docs/architecture.md` afterwards.
-- The Cursor Agent refreshes `docs/PRD.md` after pushes, at most every 30 minutes. Rebase before a push.
-- Several agents have worked in this folder at once. Check `git status` and `git stash list` before starting.
-- The local `.env` has `S1_IMPL=real`. Restart `make serve` after changing it.
+- Markdown moves / gitignore (`.vscode/`, `*.log`) approved, not fully done → G8.
+- PRD auto-refresh: rebase before push.
+- Multi-agent thrash happened on 24–25 Oct; prefer one writer on `ui/sim/sim.js` and `llm/client.py` at a time.
+- Local `.env`: `S1_IMPL=real`. Restart `make serve` after env changes.
