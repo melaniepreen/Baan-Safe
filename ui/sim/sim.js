@@ -34,8 +34,15 @@ let flood = null;
 let streetById = {};
 let nodeById = {};
 let selected = null;
-let floodAlpha = 0.82;
-let activeRoutes = new Set();
+let floodLevel = 0;
+let floodMax = 1;
+let movers = [];
+let moverClock = 0;
+let responses = null;
+let focusPriority = null;
+let flowToken = 0;
+let phoneCases = new Map();
+let caseStates = new Map();
 let live = {
   health: null,
   resources: null,
@@ -50,6 +57,7 @@ let app;
 let world;
 let floodG;
 let routeG;
+let routeGroundG;
 let selectG;
 let records;
 let markerG;
@@ -449,6 +457,7 @@ function buildFlood(g) {
   const features = flood.features.slice().sort((a, b) => a.properties.depth_m - b.properties.depth_m);
   for (const feature of features) {
     const depth = feature.properties.depth_m;
+    if (depth > floodLevel + 0.001) continue;
     const color = depth >= 1.2 ? 0x4a3424 : depth >= 0.7 ? 0x6a4a30 : 0x7d5a3a;
     const alpha = depth >= 1.2 ? 0.78 : depth >= 0.7 ? 0.62 : 0.5;
     const rings = feature.geometry.coordinates;
@@ -531,27 +540,87 @@ function buildLabels() {
   }
 }
 
-function routePoints(route) {
-  return route.node_ids.map((id) => {
-    const node = nodeById[id];
-    return project(node.x, node.y, 0.85);
-  });
+function buildLanes(g) {
+  for (const edge of town.graph.edges) {
+    if (!edge.lane) continue;
+    const a = nodeById[edge.from];
+    const b = nodeById[edge.to];
+    if (!a || !b) continue;
+    const from = project(a.x, a.y, 0.16);
+    const to = project(b.x, b.y, 0.16);
+    const boat = edge.modes.includes("boat") && !edge.modes.includes("foot");
+    g.moveTo(from[0], from[1]).lineTo(to[0], to[1]).stroke({
+      color: boat ? 0xff5d3a : YELLOW,
+      width: 1.7,
+      cap: "round",
+    });
+  }
 }
 
-function drawRoutes(offset) {
-  routeG.clear();
-  for (const route of town.routes) {
-    if (!activeRoutes.has(route.id)) continue;
-    const pts = routePoints(route);
-    const color = route.mode === "boat" ? 0xff5d3a : YELLOW;
-    solidPath(routeG, pts, 0x07090f, 7);
-    dashPath(routeG, pts, color, 3, route.mode === "boat" ? 3 : 12, route.mode === "boat" ? 8 : 8, offset);
-    const length = pathLength(pts);
-    if (length < 1) continue;
-    const marker = pointAlong(pts, reduce ? length * 0.45 : offset % length);
-    routeG.circle(marker[0], marker[1], route.mode === "boat" ? 5.5 : 4.2).fill({ color });
-    routeG.circle(marker[0], marker[1], route.mode === "boat" ? 5.5 : 4.2).stroke({ color: INK, width: 1.2 });
+function worldSpans(route) {
+  const spans = [];
+  let total = 0;
+  for (const leg of route.legs) {
+    const pts = leg.node_ids.map((id) => nodeById[id]).filter(Boolean);
+    let len = 0;
+    for (let i = 1; i < pts.length; i++) len += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+    spans.push({ leg, pts, len, at: total });
+    total += len;
   }
+  return { spans, total };
+}
+
+function pointAlongWorld(pts, distance) {
+  let left = distance;
+  for (let i = 1; i < pts.length; i++) {
+    const seg = Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+    if (left <= seg || i === pts.length - 1) {
+      const t = seg === 0 ? 0 : Math.min(1, left / seg);
+      return { x: pts[i - 1].x + (pts[i].x - pts[i - 1].x) * t, y: pts[i - 1].y + (pts[i].y - pts[i - 1].y) * t };
+    }
+    left -= seg;
+  }
+  const last = pts[pts.length - 1];
+  return { x: last.x, y: last.y };
+}
+
+function drawMovers(offset) {
+  if (!routeG || !routeGroundG) return;
+  routeG.clear();
+  routeGroundG.clear();
+  movers.forEach((route, index) => {
+    const { spans, total } = worldSpans(route);
+    for (const span of spans) {
+      const projected = span.pts.map((point) => project(point.x, point.y, 0.2));
+      const color = span.leg.mode === "boat" ? 0xff5d3a : YELLOW;
+      if (projected.length >= 2) {
+        solidPath(routeGroundG, projected, 0x07090f, 5);
+        dashPath(routeGroundG, projected, color, 2.6, span.leg.mode === "boat" ? 5 : 11, 7, offset);
+      }
+    }
+    if (!spans.length) return;
+    const travel = total < 0.4 ? 0 : reduce ? total * 0.5 : (offset * 0.04 + index * 18) % (total + 14);
+    if (travel > total) return;
+    let span = spans[0];
+    let remain = travel;
+    for (const candidate of spans) {
+      if (remain <= candidate.len || candidate === spans[spans.length - 1]) {
+        span = candidate;
+        break;
+      }
+      remain -= candidate.len;
+    }
+    const here = pointAlongWorld(span.pts, Math.min(remain, Math.max(span.len, 0)));
+    const screen = project(here.x, here.y, 1.15);
+    const color = span.leg.mode === "boat" ? 0xff5d3a : YELLOW;
+    if (span.leg.mode === "boat") {
+      routeG.ellipse(screen[0], screen[1], 8, 3.4).fill({ color });
+      routeG.ellipse(screen[0], screen[1], 8, 3.4).stroke({ color: INK, width: 1 });
+    } else {
+      routeG.rect(screen[0] - 3.2, screen[1] - 3.2, 6.4, 6.4).fill({ color });
+      routeG.rect(screen[0] - 3.2, screen[1] - 3.2, 6.4, 6.4).stroke({ color: INK, width: 1 });
+    }
+  });
 }
 
 function drawSelection() {
@@ -604,7 +673,6 @@ function buildScene() {
   floodG = new Graphics();
   floodG.eventMode = "none";
   buildFlood(floodG);
-  floodG.alpha = floodAlpha;
   world.addChild(floodG);
 
   const courtyards = new Graphics();
@@ -616,6 +684,15 @@ function buildScene() {
   roadMarks.eventMode = "none";
   buildRoadMarks(roadMarks);
   world.addChild(roadMarks);
+
+  const lanes = new Graphics();
+  lanes.eventMode = "none";
+  buildLanes(lanes);
+  world.addChild(lanes);
+
+  routeGroundG = new Graphics();
+  routeGroundG.eventMode = "none";
+  world.addChild(routeGroundG);
 
   const objects = [];
   for (const building of town.buildings) {
@@ -661,7 +738,7 @@ function buildScene() {
   callLightG = new Graphics();
   callLightG.eventMode = "none";
   world.addChild(callLightG);
-  drawRoutes(0);
+  drawMovers(0);
   drawSelection();
   drawCallLights();
 }
@@ -733,12 +810,50 @@ function updateMinimap() {
 
 function viewInsets() {
   const narrow = window.innerWidth <= 860;
-  return { left: narrow ? 12 : 330, right: narrow ? 16 : 360, top: 72 };
+  return { left: narrow ? 12 : 332, right: narrow ? 16 : 390, top: 72 };
 }
 
 function viewCenter() {
   const inset = viewInsets();
   return [(inset.left + app.screen.width - inset.right) / 2, app.screen.height / 2];
+}
+
+function frameRoutes(routes) {
+  const xs = [];
+  const ys = [];
+  for (const route of routes) {
+    const building = buildingById(route.building_id);
+    const base = buildingById(route.base_id);
+    for (const box of [building, base]) {
+      if (!box) continue;
+      xs.push(box.x, box.x + box.w);
+      ys.push(box.y, box.y + box.d);
+    }
+    for (const leg of route.legs) {
+      for (const id of leg.node_ids) {
+        const node = nodeById[id];
+        if (!node) continue;
+        xs.push(node.x);
+        ys.push(node.y);
+      }
+    }
+  }
+  if (!xs.length || !app) return;
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+  const minY = Math.min(...ys);
+  const maxY = Math.max(...ys);
+  const corners = [
+    [minX, minY],
+    [maxX, minY],
+    [maxX, maxY],
+    [minX, maxY],
+  ].map(([x, y]) => project(x, y, 0));
+  const spanX = Math.max(40, Math.max(...corners.map((point) => point[0])) - Math.min(...corners.map((point) => point[0])));
+  const spanY = Math.max(40, Math.max(...corners.map((point) => point[1])) - Math.min(...corners.map((point) => point[1])));
+  const inset = viewInsets();
+  const zoom = Math.min(6.4, Math.max(0.7, Math.min((app.screen.width - inset.left - inset.right - 24) / spanX, (app.screen.height - 110) / spanY)));
+  lookAt((minX + maxX) / 2, (minY + maxY) / 2, zoom);
 }
 
 function lookAt(x, y, zoom) {
@@ -810,10 +925,6 @@ function select(id, center) {
   const building = id ? buildingById(id) : null;
   if (center && building) lookAt(building.x + building.w / 2, building.y + building.d / 2, Math.min(8, Math.max(world.scale.x, 7.2)));
   drawSelection();
-  renderPanel();
-  if (building && building.household && building.household.location_label && building.household.location_label.includes("District")) {
-    loadContext(building.household.location_label.split(",")[0]);
-  }
 }
 
 function setStatus(householdId, status) {
@@ -834,167 +945,35 @@ function el(tag, className, text) {
   return node;
 }
 
-function renderPanel() {
-  const panel = document.getElementById("panel");
-  panel.replaceChildren();
-  const api = el("p");
-  api.append(el("span", live.health ? "chip live" : "chip off", live.health ? "API connected" : "Local data only"));
-  if (live.health && live.health.impl) {
-    api.append(el("span", "chip", "S1 " + live.health.impl.S1_IMPL));
-    api.append(el("span", "chip", "S2 " + live.health.impl.S2_IMPL));
-  }
-  panel.append(api);
-
-  const jumps = el("div", "jump-row");
-  for (const route of town.routes) {
-    const button = el("button", null, route.fixture_id + " " + route.mode);
-    button.type = "button";
-    button.addEventListener("click", () => {
-      activeRoutes.add(route.id);
-      syncRouteChecks();
-      drawRoutes(0);
-      const target = town.buildings.find((candidate) => candidate.fixture_id === route.fixture_id);
-      select(target ? target.id : route.to_building, true);
-    });
-    jumps.append(button);
-  }
-  panel.append(jumps);
-
-  const building = selected ? buildingById(selected) : null;
-  if (!building) {
-    panel.append(el("h2", null, "Select a block"));
-    panel.append(el("p", "muted", "Each house is an object with an id. Street names are placeholders. Household location_label stays a district, not an address."));
-    panel.append(resourceList());
-    panel.append(contextBlock());
-    return;
-  }
-
-  panel.append(el("h2", null, building.name_en || building.name_th || building.id));
-  panel.append(el("p", "muted", building.id + " · " + building.kind + " · " + building.floors + (building.floors > 1 ? " storeys" : " storey")));
-  const street = streetById[building.street_id];
-  if (street) panel.append(el("p", null, "Beside " + street.name_en + ". Not a stored address."));
-  const chips = el("p");
-  chips.append(el("span", "chip", building.sim_status.replaceAll("_", " ")));
-  chips.append(el("span", "chip", "water " + building.water_m + " m"));
-  if (building.fixture_id) chips.append(el("span", "chip", building.fixture_id));
-  panel.append(chips);
-
-  if (building.household) {
-    panel.append(el("h3", null, "Mark household"));
-    const row = el("div", "status-row");
-    for (const status of STATUSES) {
-      const button = el("button", null, status.replaceAll("_", " "));
-      button.type = "button";
-      button.setAttribute("aria-pressed", String(building.sim_status === status));
-      button.addEventListener("click", () => setStatus(building.household.household_id, status));
-      row.append(button);
-    }
-    panel.append(row);
-    panel.append(el("h3", null, "Household contract"));
-    const list = document.createElement("dl");
-    for (const [key, value] of Object.entries(building.household)) {
-      list.append(el("dt", null, key));
-      list.append(el("dd", null, value == null ? "—" : Array.isArray(value) ? value.join(", ") : String(value)));
-    }
-    panel.append(list);
-    const details = document.createElement("details");
-    details.append(el("summary", null, "Household JSON"));
-    const pre = el("pre");
-    pre.textContent = JSON.stringify(building.household, null, 2);
-    details.append(pre);
-    panel.append(details);
-  }
-
-  if (building.fixture) {
-    panel.append(el("h3", null, "Fixture " + building.fixture.fixture_id));
-    panel.append(el("p", null, building.fixture.title));
-    const expected = el("p");
-    expected.append(el("span", "chip", building.fixture.expected_system.replaceAll("_", " ")));
-    expected.append(el("span", "chip " + building.fixture.expected_priority.toLowerCase(), building.fixture.expected_priority));
-    expected.append(el("span", "chip", building.fixture.expected_route));
-    panel.append(expected);
-    if (building.also_fixture_ids) panel.append(el("p", "muted", "Same household as " + building.also_fixture_ids.join(", ") + "."));
-    const run = el("button", null, "Run gateway triage");
-    run.type = "button";
-    run.addEventListener("click", () => runTriage(building.fixture_id));
-    panel.append(run);
-    const callOnBuilding = town.calls.find((call) => call.building_id === building.id && live.triage && live.triage.forId === call.id);
-    const triageId = callOnBuilding ? callOnBuilding.id : building.fixture_id;
-    if (live.triage && live.triage.forId === triageId && live.triage.caseState) {
-      const decision = live.triage.decision;
-      panel.append(el("p", null, "Router: " + decision.next_action + " · " + decision.final_priority + " · " + decision.final_route));
-      const source = decision.source_outcomes && decision.source_outcomes[0];
-      if (source) panel.append(el("p", "muted", source.reason));
-      mountCorrection(panel, triageId);
-    } else if (live.triageError && live.triageError.forId === building.fixture_id) {
-      panel.append(el("p", "error", live.triageError.message));
-    }
-  }
-
-  if (building.resource_id) {
-    const resource = (town.resources || []).find((row) => row.resource_id === building.resource_id);
-    if (resource) {
-      panel.append(el("h3", null, "Resource"));
-      panel.append(el("p", null, resource.name + " · " + resource.kind + " · " + (resource.district || "")));
-    }
-  }
-  panel.append(contextBlock());
-}
-
-function resourceList() {
-  const wrap = el("div");
-  wrap.append(el("h3", null, "Resources"));
-  const list = el("ul", "plain");
-  const rows = live.resources
-    ? [].concat(live.resources.boats, live.resources.ambulances, live.resources.shelters, live.resources.welfare_points)
-    : town.resources.map((row) => ({ id: row.resource_id, name: row.name, district: row.district }));
-  for (const row of rows) {
-    const item = el("li");
-    const button = el("button", null, row.name + " · " + row.district);
-    button.type = "button";
-    button.addEventListener("click", () => {
-      const building = town.buildings.find((candidate) => candidate.resource_id === (row.id || row.resource_id));
-      if (building) select(building.id, true);
-    });
-    item.append(button);
-    list.append(item);
-  }
-  wrap.append(list, el("p", "muted", live.resources ? "From GET /resources." : "Copy of mocks/resources.json baked into the town file."));
-  return wrap;
-}
-
-function contextBlock() {
-  const wrap = el("div");
-  wrap.append(el("h3", null, "Flood context"));
-  if (!live.context) {
-    wrap.append(el("p", "muted", "GET /context is the live district lookup. The sheet on the block is flood.json. /map/flood stays in WGS84 and is not drawn on these plots."));
-    return wrap;
-  }
-  wrap.append(el("p", null, live.context.matched_district || "No district match"));
-  const chips = el("p");
-  for (const key of ["in_flood_extent_1d", "in_flood_extent_7d", "in_flood_extent_30d", "repeat_flood_area", "in_flood_risk_layer", "in_observed_event_extent"]) {
-    if (live.context[key]) chips.append(el("span", "chip", key.replaceAll("_", " ")));
-  }
-  if (!chips.childNodes.length) chips.append(el("span", "chip", "no extent flag"));
-  wrap.append(chips);
-  if (live.context.rainfall_last_24h_mm != null) {
-    wrap.append(el("p", "muted", "Rain last 24h " + live.context.rainfall_last_24h_mm + " mm. Forecast " + live.context.rainfall_forecast_24h_mm + " mm."));
-  }
-  return wrap;
-}
-
 async function getJson(url, options) {
   const response = await fetch(url, options);
   if (!response.ok) throw new Error(url + " returned " + response.status);
   return response.json();
 }
 
-async function loadContext(district) {
+async function loadLive() {
   try {
-    live.context = await getJson("/context?district=" + encodeURIComponent(district));
-    renderPanel();
+    live.health = await getJson("/health");
   } catch (error) {
-    live.context = null;
+    live.health = null;
+  }
+  const log = document.getElementById("backend-log");
+  if (!log) return;
+  if (live.health && live.health.impl) {
+    log.append(
+      el(
+        "p",
+        "muted",
+        "API connected. S1 " + live.health.impl.S1_IMPL + ", S2 " + live.health.impl.S2_IMPL + ". Stub gateway, not a live model."
+      )
+    );
+  } else {
+    log.append(el("p", "muted", "API not connected. The block still draws. A call needs POST /cases on this host."));
+  }
+  try {
+    live.labels = await getJson("/policies/labels");
+  } catch (error) {
+    live.labels = null;
   }
 }
 
@@ -1006,70 +985,537 @@ function labelNames() {
   return names;
 }
 
-function mountCorrection(panel, fixtureId) {
-  if (!live.triage || live.triage.forId !== fixtureId || !live.triage.caseState) return;
-  const host = el("div");
-  panel.append(host);
+function showCorrection(fixtureId) {
+  const host = document.getElementById("correct-host");
+  if (!host) return;
+  host.replaceChildren();
+  const caseState = caseStates.get(fixtureId);
+  const decision = callResults.get(fixtureId);
+  if (!caseState || !decision) return;
   const note = live.correctionNote && live.correctionNote.forId === fixtureId ? live.correctionNote : null;
   mountCorrectForm(host, {
-    caseState: live.triage.caseState,
-    decision: live.triage.decision,
+    caseState,
+    decision,
     fixtureId,
     policyVersion: (live.labels && live.labels.version) || "",
     labelNames: labelNames(),
     note,
     onResult: (result) => {
       live.correctionNote = { forId: fixtureId, ok: result.ok, text: result.text };
-      if (result.decision && live.triage && live.triage.forId === fixtureId) {
-        live.triage = { ...live.triage, decision: result.decision };
+      if (result.decision) {
+        callResults.set(fixtureId, result.decision);
+        if (live.triage && live.triage.forId === fixtureId) {
+          live.triage = { ...live.triage, decision: result.decision };
+        }
       }
-      if (result.ok) renderPanel();
+      if (result.ok) showCorrection(fixtureId);
     },
   });
 }
 
-async function runTriage(fixtureId) {
-  live.triageError = null;
-  live.correctionNote = null;
-  try {
-    const fixture = await getJson("/fixtures/" + fixtureId);
-    const decision = await getJson("/triage", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(fixture.case_state),
-    });
-    live.triage = { forId: fixtureId, decision, caseState: fixture.case_state };
-  } catch (error) {
-    live.triage = null;
-    live.triageError = { forId: fixtureId, message: error.message };
-  }
-  renderPanel();
+const KEYWORD_RULES = [
+  { id: "C01-a", label: "keyword: water at the door or ground floor", test: /water at the door|ground floor/ },
+  { id: "F17", label: "keyword: rent or not eligible", test: /rent|not eligible|eligib/ },
+  { id: "F18", label: "keyword: payment list", test: /payment list|sister/ },
+  { id: "F10", label: "keyword: oxygen or rising water", test: /oxygen|rising/ },
+  { id: "F11", label: "keyword: immobile", test: /immobile|cannot walk|can't walk/ },
+  { id: "F02", label: "keyword: food or rice", test: /\brice\b|\bfood\b|hungry/ },
+  { id: "F01", label: "keyword: drinking water", test: /drinking water/ },
+  { id: "F06", label: "keyword: evacuate", test: /evacuat/ },
+  { id: "F07", label: "keyword: school", test: /\bschool\b/ },
+  { id: "F05", label: "keyword: flood update", test: /flood update|what time|published/ },
+  { id: "F16", label: "keyword: unaccompanied child", test: /unaccompanied/ },
+  { id: "F03", label: "keyword: which shelter", test: /which shelter|shelter has space/ },
+];
+
+const PRESETS = [
+  { id: "F02", label: "System 1" },
+  { id: "F10", label: "System 2" },
+  { id: "F17", label: "Sapling check" },
+];
+
+function setPhoneStatus(text) {
+  const node = document.getElementById("phone-status");
+  if (node) node.textContent = text;
 }
 
-async function loadLive() {
-  try {
-    live.health = await getJson("/health");
-  } catch (error) {
-    live.health = null;
-  }
-  try {
-    live.resources = await getJson("/resources");
-  } catch (error) {
-    live.resources = null;
-  }
-  try {
-    live.labels = await getJson("/policies/labels");
-  } catch (error) {
-    live.labels = null;
-  }
-  await loadContext("Mueang Phrae District");
-  renderPanel();
+function pushPhone(kind, text) {
+  const log = document.getElementById("phone-log");
+  log.append(el("div", "bubble " + kind, text));
+  log.scrollTop = log.scrollHeight;
 }
 
-function syncRouteChecks() {
-  document.querySelectorAll("[data-route]").forEach((input) => {
-    input.checked = activeRoutes.has(input.dataset.route);
+function greet() {
+  const framing = responses && responses.framing
+    ? responses.framing
+    : "Placeholder block for a Bangkok flood demo. data.demo_event is still TODO_HUMAN.";
+  pushPhone("note", framing + " Flood rises from flood.json. This phone posts the turn to /cases/{id}/turns. Replies are the stub gateway, not a live model.");
+  document.getElementById("chooser-note").textContent =
+    "DEMO-ONLY chooser. It lives in this page. gateway.route_chooser is still TODO_HUMAN.";
+}
+
+function demoChoose(text) {
+  const q = text.toLowerCase();
+  for (const rule of KEYWORD_RULES) {
+    if (rule.test.test(q)) return { fixtureId: rule.id, how: rule.label };
+  }
+  const tokens = q.split(/[^a-z0-9]+/).filter((word) => word.length > 2);
+  let best = town.calls[0];
+  let score = 0;
+  for (const call of town.calls) {
+    const hay = (call.opening + " " + call.title).toLowerCase();
+    let next = 0;
+    for (const token of tokens) if (hay.includes(token)) next += 1;
+    if (call.opening.toLowerCase() === q) next += 10;
+    if (next > score) {
+      score = next;
+      best = call;
+    }
+  }
+  return {
+    fixtureId: best.id,
+    how: score
+      ? "nearest scripted opening (" + score + " shared words)"
+      : "no keyword hit; fell back to " + best.id,
+  };
+}
+
+function chooserSentence(call, how) {
+  return (
+    "DEMO-ONLY chooser in this page, not backend policy. gateway.route_chooser is TODO_HUMAN, so a free-text case is not routed by the gateway. Matched fixture " +
+    call.id +
+    " by " +
+    how +
+    ". The stub gateway answers that fixture id. It does not read this sentence with a live model."
+  );
+}
+
+async function postJson(url, body) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
   });
+  if (!response.ok) {
+    let detail = "";
+    try {
+      detail = JSON.stringify(await response.json());
+    } catch (error) {
+      detail = "";
+    }
+    throw new Error(url + " returned " + response.status + (detail ? " " + detail : ""));
+  }
+  return response.json();
+}
+
+function rolesFor(priority) {
+  if (priority === "P1") return ["rescue", "welfare", "evac"];
+  if (priority === "P2") return ["evac"];
+  if (priority === "P3") return ["welfare"];
+  return ["notice"];
+}
+
+function routesFor(callId, priority) {
+  return rolesFor(priority)
+    .map((role) => town.response_routes.find((route) => route.call_id === callId && route.role === role))
+    .filter(Boolean);
+}
+
+function operatorLine(decision, call) {
+  const source = (decision.source_outcomes && decision.source_outcomes[0]) || {};
+  const parts = [];
+  if (source.next_question) parts.push(source.next_question);
+  parts.push(
+    "Stub gateway, not a live operator. " +
+      decision.final_priority +
+      " · " +
+      String(decision.final_route).replaceAll("_", " ") +
+      " · " +
+      String(decision.next_action).replaceAll("_", " ") +
+      "."
+  );
+  if (source.reason) parts.push(String(source.reason));
+  if (decision.requires_human) parts.push("A human is required.");
+  const notes = decision.policy_notes || [];
+  const correction = notes.find((line) => String(line).toLowerCase().includes("correction"));
+  if (correction) parts.push(String(correction));
+  const memory = call.memory || [];
+  if (memory.length) {
+    parts.push(
+      "Stub memory file, separate from the gateway note: " +
+        memory.map((row) => row.kind + " — " + row.summary).join(" ")
+    );
+  } else {
+    parts.push("No stub memory line is stored for this fixture.");
+  }
+  return parts.join(" ");
+}
+
+function saplingStep(decision) {
+  const source = (decision.source_outcomes && decision.source_outcomes[0]) || {};
+  const needs = (source.needs || []).map(String);
+  const blob = JSON.stringify(decision);
+  const verdict = /sapling_verdict=([a-z_]+)/.exec(blob);
+  const aid = decision.final_route === "aid_caseworker" || needs.includes("aid_payment");
+  if (verdict) return { state: "on", detail: "This payload includes " + verdict[0] + "." };
+  if (aid) {
+    return {
+      state: "stub",
+      detail:
+        "Aid eligibility or denial is in Sapling's scope (config/decisions.yaml sapling_scope). This stub result has no sapling_verdict. The stub gateway does not call system2/sapling.py. The Sapling client is stub. mocks/sapling_stub is not this household's verdict.",
+    };
+  }
+  return { state: "off", detail: "Not an aid-eligibility or denial check. Sapling stays out." };
+}
+
+function flowSteps(decision, trace) {
+  const source = (decision.source_outcomes && decision.source_outcomes[0]) || {};
+  const system = String(source.system || "");
+  const selected = (decision.policy_notes || []).find((line) => /selected/.test(String(line))) || "";
+  const gatewayNote = (trace || []).find((event) => event.stage === "gateway");
+  const routerNote = (trace || []).find((event) => event.stage === "router");
+  const sapling = saplingStep(decision);
+  const why = [source.reason, selected].filter(Boolean).join(" — ");
+  return [
+    {
+      title: "Mubit gateway",
+      state: "on",
+      detail: gatewayNote && gatewayNote.notes ? gatewayNote.notes : "POST /cases/{id}/turns reached the stub gateway.",
+    },
+    {
+      title: "System 1 fast path",
+      state: system === "system_1" ? "on" : "off",
+      detail: system === "system_1" ? why : "Not this call. The stub gateway routes to one system.",
+    },
+    {
+      title: "System 2 reasoning",
+      state: system === "system_2" ? "on" : "off",
+      detail: system === "system_2" ? why : "Not this call. The stub gateway routes to one system.",
+    },
+    { title: "Banyan Sapling", state: sapling.state, detail: sapling.detail },
+    {
+      title: "Decision router",
+      state: "on",
+      detail: routerNote && routerNote.notes
+        ? routerNote.notes
+        : decision.final_priority + " · " + decision.final_route,
+    },
+    {
+      title: "Next action",
+      state: "on",
+      detail: String(decision.next_action).replaceAll("_", " "),
+    },
+  ];
+}
+
+async function showBackend(call, decision, trace, text) {
+  const steps = flowSteps(decision, trace);
+  const token = ++flowToken;
+  const list = document.getElementById("flow");
+  list.replaceChildren();
+  const rows = steps.map((step) => {
+    const item = el("li", "flow-step wait");
+    item.append(el("strong", null, step.title));
+    item.append(document.createTextNode(step.detail));
+    list.append(item);
+    return item;
+  });
+  const source = (decision.source_outcomes && decision.source_outcomes[0]) || {};
+  const log = document.getElementById("backend-log");
+  const pre = el("pre");
+  pre.textContent = JSON.stringify(
+    {
+      case_id: decision.case_id,
+      caller: text,
+      priority: decision.final_priority,
+      route: decision.final_route,
+      needs: source.needs || [],
+      next_question: source.next_question || null,
+      next_action: decision.next_action,
+      requires_human: decision.requires_human,
+      reason: source.reason || null,
+      trace: (trace || []).map((event) => ({
+        case_id: event.case_id,
+        stage: event.stage,
+        notes: event.notes,
+      })),
+    },
+    null,
+    2
+  );
+  const head = el("p", null, call.id + " · stub payload");
+  log.prepend(pre);
+  log.prepend(head);
+  for (let index = 0; index < rows.length; index++) {
+    if (token !== flowToken) return;
+    rows[index].className = "flow-step " + steps[index].state;
+    if (!reduce) await new Promise((resolve) => setTimeout(resolve, 220));
+  }
+}
+
+async function placeCall(text, choice, options = {}) {
+  const speak = options.speak !== false;
+  const spoken = String(text || "").trim();
+  if (!spoken) return;
+  const match = choice || demoChoose(spoken);
+  const call = town.calls.find((item) => item.id === match.fixtureId);
+  if (!call) throw new Error("No fixture for " + match.fixtureId);
+  const sentence = chooserSentence(call, match.how);
+  document.getElementById("chooser-note").textContent = sentence;
+  activeCallId = call.id;
+  const node = document.getElementById("mubit-node");
+  node.classList.add("busy");
+  node.classList.remove("done");
+  setPhoneStatus(call.id);
+  if (speak) {
+    if (options.via) pushPhone("note", "Transcript via " + options.via + ".");
+    pushPhone("note", sentence);
+    pushPhone("caller", spoken);
+    renderCallList();
+    const row = document.querySelector("#call-list li.active");
+    if (row) row.scrollIntoView({ block: "nearest" });
+    updateCallLink();
+    select(call.building_id, false);
+  }
+  try {
+    const created = await postJson("/cases", { fixture_id: call.id });
+    const caseId = created.case.case_id;
+    phoneCases.set(call.id, caseId);
+    const transcript = created.case.transcript || [];
+    const last = transcript.length ? transcript[transcript.length - 1].t_ms : 0;
+    const turned = await postJson("/cases/" + encodeURIComponent(caseId) + "/turns", {
+      t_ms: last + 1000,
+      speaker: "caller",
+      text: spoken,
+    });
+    const decision = turned.decision;
+    callResults.set(call.id, decision);
+    caseStates.set(call.id, turned.case);
+    live.triage = { forId: call.id, decision, caseState: turned.case };
+    let trace = [];
+    try {
+      trace = await getJson("/cases/" + encodeURIComponent(caseId) + "/trace");
+    } catch (error) {
+      trace = [];
+    }
+    node.classList.remove("busy");
+    node.classList.add("done");
+    if (speak) {
+      pushPhone("operator", operatorLine(decision, call));
+      await showBackend(call, decision, trace, spoken);
+      showCorrection(call.id);
+      focusPriority = null;
+      movers = routesFor(call.id, decision.final_priority);
+      frameRoutes(movers);
+      drawMovers(moverClock);
+    }
+  } catch (error) {
+    node.classList.remove("busy");
+    if (speak) pushPhone("note", "The gateway did not answer. " + error.message);
+    else throw error;
+  }
+  drawCallLights();
+  renderCallList();
+  updateCallLink();
+}
+
+async function runPriority(priority) {
+  focusPriority = priority;
+  document.querySelectorAll("[data-priority]").forEach((button) => {
+    button.classList.toggle("on", button.dataset.priority === priority);
+  });
+  pushPhone(
+    "note",
+    priority + " uses final_priority from the stub gateway. The fixture label is not the light."
+  );
+  const missing = town.calls.filter((call) => !callResults.has(call.id));
+  for (const call of missing) {
+    try {
+      await placeCall(call.opening, { fixtureId: call.id, how: "scripted fixture queued for " + priority }, { speak: false });
+    } catch (error) {
+      pushPhone("note", call.id + " did not return a decision. " + error.message);
+    }
+  }
+  const matched = town.calls.filter((call) => {
+    const decision = callResults.get(call.id);
+    return decision && decision.final_priority === priority;
+  });
+  movers = matched.flatMap((call) => routesFor(call.id, priority));
+  frameRoutes(movers);
+  drawMovers(moverClock);
+  drawCallLights();
+  updateCallLink();
+  renderCallLegend();
+  const pack = responses && responses.priorities ? responses.priorities[priority] : null;
+  if (pack) {
+    const log = document.getElementById("backend-log");
+    log.prepend(el("p", null, responses.suggestion_label + " " + pack.suggestion));
+    log.prepend(el("p", null, "Repo policy (" + responses.policy_source + "): " + pack.policy));
+  }
+  pushPhone(
+    "operator",
+    matched.length +
+      " houses came back " +
+      priority +
+      " from the stub gateway. Each run stays on a drawn road or on navigable water."
+  );
+  const sample = matched[0];
+  if (sample) {
+    const decision = callResults.get(sample.id);
+    let trace = [];
+    const caseId = phoneCases.get(sample.id);
+    if (caseId) {
+      try {
+        trace = await getJson("/cases/" + encodeURIComponent(caseId) + "/trace");
+      } catch (error) {
+        trace = [];
+      }
+    }
+    await showBackend(sample, decision, trace, sample.opening);
+    const caseState = caseStates.get(sample.id);
+    if (caseState) {
+      live.triage = { forId: sample.id, decision, caseState };
+      showCorrection(sample.id);
+    }
+  }
+}
+
+let recorder = null;
+let recordChunks = [];
+let recognition = null;
+let heard = "";
+let recording = false;
+
+async function transcribeClip(blob) {
+  try {
+    const body = new FormData();
+    body.append("file", blob, "clip.webm");
+    body.append("language", "en");
+    const response = await fetch("/stt/transcribe", { method: "POST", body });
+    if (!response.ok) return null;
+    const data = await response.json();
+    if (data && data.text) return { text: data.text, via: "POST /stt/transcribe" };
+  } catch (error) {
+    return null;
+  }
+  return null;
+}
+
+async function toggleRecord() {
+  if (recording) {
+    await stopRecord();
+    return;
+  }
+  heard = "";
+  recording = true;
+  const button = document.getElementById("phone-record");
+  button.textContent = "Stop";
+  button.classList.add("on");
+  setPhoneStatus("Recording");
+  const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (Speech) {
+    recognition = new Speech();
+    recognition.lang = "en-GB";
+    recognition.interimResults = false;
+    recognition.onresult = (event) => {
+      heard = event.results[0][0].transcript || "";
+    };
+    try {
+      recognition.start();
+    } catch (error) {
+      recognition = null;
+    }
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recorder = new MediaRecorder(stream);
+    recordChunks = [];
+    recorder.ondataavailable = (event) => {
+      if (event.data && event.data.size) recordChunks.push(event.data);
+    };
+    recorder.start();
+  } catch (error) {
+    recorder = null;
+  }
+}
+
+async function stopRecord() {
+  recording = false;
+  const button = document.getElementById("phone-record");
+  button.textContent = "Call";
+  button.classList.remove("on");
+  const liveSpeech = recognition;
+  recognition = null;
+  if (liveSpeech) {
+    try {
+      liveSpeech.stop();
+    } catch (error) {
+      /* already stopped */
+    }
+  }
+  await new Promise((resolve) => setTimeout(resolve, 350));
+  const speechText = heard.trim();
+  let blob = null;
+  if (recorder && recorder.state !== "inactive") {
+    const active = recorder;
+    blob = await new Promise((resolve) => {
+      active.onstop = () => resolve(new Blob(recordChunks, { type: active.mimeType || "audio/webm" }));
+      try {
+        active.stop();
+      } catch (error) {
+        resolve(null);
+      }
+    });
+    if (active.stream) active.stream.getTracks().forEach((track) => track.stop());
+  }
+  recorder = null;
+  if (speechText) {
+    setPhoneStatus("Web Speech API");
+    await placeCall(speechText, null, { via: "browser Web Speech API" });
+    return;
+  }
+  if (blob && blob.size) {
+    const stt = await transcribeClip(blob);
+    if (stt && stt.text) {
+      setPhoneStatus(stt.via);
+      await placeCall(stt.text, null, { via: stt.via });
+      return;
+    }
+  }
+  setPhoneStatus("No transcript");
+  pushPhone(
+    "note",
+    "Stub transcript: speech-to-text is not live. speech_to_text.provider is TODO_HUMAN. infra/modal/stt_app is not mounted on this API, and POST /stt/transcribe did not return text. The browser speech API returned nothing. No words were invented from the recording."
+  );
+}
+
+function renderPresets() {
+  const box = document.getElementById("presets");
+  box.replaceChildren();
+  for (const preset of PRESETS) {
+    const call = town.calls.find((item) => item.id === preset.id);
+    const button = el("button", null, preset.label);
+    button.type = "button";
+    button.title = call ? call.opening : preset.id;
+    button.addEventListener("click", () => {
+      callPlaying = false;
+      syncPlayButton();
+      placeCall(call.opening, { fixtureId: preset.id, how: "preset " + preset.label + " button" });
+    });
+    box.append(button);
+  }
+}
+
+function renderPriorityButtons() {
+  const box = document.getElementById("priority-actions");
+  box.replaceChildren();
+  for (const priority of ["P1", "P2", "P3", "P4"]) {
+    const button = el("button", null, priority);
+    button.type = "button";
+    button.dataset.priority = priority;
+    button.addEventListener("click", () => runPriority(priority));
+    box.append(button);
+  }
 }
 
 function houseScreen(building) {
@@ -1087,7 +1533,9 @@ function drawCallLights() {
   const lit = new Map();
   for (const call of town.calls) {
     const decision = callResults.get(call.id);
-    if (decision) lit.set(call.building_id, decision.final_priority);
+    if (!decision) continue;
+    if (focusPriority && decision.final_priority !== focusPriority) continue;
+    lit.set(call.building_id, decision.final_priority);
   }
   for (const [id, priority] of lit) {
     const building = buildingById(id);
@@ -1133,7 +1581,9 @@ function updateCallLink() {
   const lit = new Map();
   for (const item of town.calls) {
     const answer = callResults.get(item.id);
-    if (answer) lit.set(item.building_id, answer.final_priority);
+    if (!answer) continue;
+    if (focusPriority && answer.final_priority !== focusPriority) continue;
+    lit.set(item.building_id, answer.final_priority);
   }
   for (const [id, priority] of lit) {
     const point = houseScreen(buildingById(id));
@@ -1182,7 +1632,7 @@ function renderCallList() {
       syncPlayButton();
       const index = town.calls.findIndex((item) => item.id === call.id);
       if (index === callCursor) callCursor += 1;
-      runCall(call);
+      placeCall(call.opening, { fixtureId: call.id, how: "scripted call " + call.id });
     });
     item.append(button);
     list.append(item);
@@ -1190,68 +1640,9 @@ function renderCallList() {
   renderCallLegend();
 }
 
-function showReadout(call, decision, error) {
-  const box = document.getElementById("mubit-readout");
-  box.replaceChildren();
-  box.append(el("p", "msg", call.opening));
-  const hops = el("ol", "hops");
-  hops.append(el("li", null, "Call " + call.id));
-  hops.append(el("li", null, "GET /fixtures/" + call.id));
-  hops.append(el("li", null, "POST /triage"));
-  hops.append(el("li", "mubit", "Mubit gateway"));
-  if (decision) {
-    const source = decision.source_outcomes && decision.source_outcomes[0];
-    hops.append(el("li", null, source ? String(source.system).replaceAll("_", " ") : "system"));
-    hops.append(el("li", null, decision.final_priority + " · " + decision.final_route));
-    hops.append(el("li", null, String(decision.next_action).replaceAll("_", " ")));
-    const note = (decision.policy_notes || []).find((line) => String(line).toLowerCase().includes("mubit"));
-    if (note) box.append(el("p", "muted", note));
-  } else if (error) {
-    hops.append(el("li", "error", error));
-  } else {
-    hops.append(el("li", "muted", "Sending"));
-  }
-  box.append(hops);
-}
-
 function syncPlayButton() {
   const button = document.getElementById("calls-play");
   button.textContent = callPlaying ? "Pause" : "Play 20 calls";
-}
-
-async function runCall(call) {
-  activeCallId = call.id;
-  renderCallList();
-  const row = document.querySelector("#call-list li.active");
-  if (row) row.scrollIntoView({ block: "nearest" });
-  const node = document.getElementById("mubit-node");
-  node.classList.add("busy");
-  node.classList.remove("done");
-  showReadout(call, null, null);
-  updateCallLink();
-  select(call.building_id, false);
-  try {
-    const fixture = await getJson("/fixtures/" + encodeURIComponent(call.id));
-    const decision = await getJson("/triage", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(fixture.case_state),
-    });
-    callResults.set(call.id, decision);
-    live.triage = { forId: call.id, decision, caseState: fixture.case_state };
-    live.correctionNote = null;
-    showReadout(call, decision, null);
-    node.classList.remove("busy");
-    node.classList.add("done");
-  } catch (error) {
-    callResults.delete(call.id);
-    showReadout(call, null, error.message);
-    node.classList.remove("busy");
-  }
-  drawCallLights();
-  renderCallList();
-  updateCallLink();
-  renderPanel();
 }
 
 async function playCalls() {
@@ -1267,9 +1658,9 @@ async function playCalls() {
   while (callPlaying && token === callToken && callCursor < town.calls.length) {
     const call = town.calls[callCursor];
     callCursor += 1;
-    await runCall(call);
+    await placeCall(call.opening, { fixtureId: call.id, how: "scripted list, in fixture order" });
     if (!callPlaying || token !== callToken) break;
-    await new Promise((resolve) => setTimeout(resolve, 650));
+    await new Promise((resolve) => setTimeout(resolve, 400));
   }
   if (token === callToken) callPlaying = false;
   syncPlayButton();
@@ -1278,26 +1669,39 @@ async function playCalls() {
 function resetCalls() {
   callPlaying = false;
   callToken += 1;
+  flowToken += 1;
   callCursor = 0;
   callResults = new Map();
   activeCallId = null;
+  movers = [];
+  focusPriority = null;
+  phoneCases = new Map();
+  caseStates = new Map();
   live.triage = null;
-  const node = document.getElementById("mubit-node");
-  node.classList.remove("busy", "done");
-  document.getElementById("mubit-readout").replaceChildren();
+  live.correctionNote = null;
+  const correctHost = document.getElementById("correct-host");
+  if (correctHost) correctHost.replaceChildren();
+  drawMovers(0);
   drawCallLights();
   renderCallList();
   updateCallLink();
   syncPlayButton();
-  renderPanel();
+  document.getElementById("flow").replaceChildren();
+  document.getElementById("backend-log").replaceChildren();
+  document.getElementById("phone-log").replaceChildren();
+  document.querySelectorAll("[data-priority]").forEach((button) => button.classList.remove("on"));
+  const node = document.getElementById("mubit-node");
+  node.classList.remove("busy", "done");
+  greet();
+  loadLive();
 }
 
 function bindChrome() {
-  document.getElementById("flood-opacity").addEventListener("input", (event) => {
-    floodAlpha = Number(event.target.value) / 100;
-    if (floodG) floodG.alpha = floodAlpha;
-  });
   document.getElementById("view-fit").addEventListener("click", fitTown);
+  document.getElementById("view-dispatch").addEventListener("click", () => {
+    const camera = town.meta.camera;
+    lookAt(camera.look_at[0], camera.look_at[1], camera.zoom_px_per_m);
+  });
   document.getElementById("calls-play").addEventListener("click", () => playCalls());
   document.getElementById("calls-step").addEventListener("click", () => {
     callPlaying = false;
@@ -1305,30 +1709,23 @@ function bindChrome() {
     if (callCursor >= town.calls.length) return;
     const call = town.calls[callCursor];
     callCursor += 1;
-    runCall(call);
+    placeCall(call.opening, { fixtureId: call.id, how: "scripted list, stepped" });
   });
   document.getElementById("calls-reset").addEventListener("click", resetCalls);
-  renderCallList();
-  document.getElementById("view-dispatch").addEventListener("click", () => {
-    const camera = town.meta.camera;
-    lookAt(camera.look_at[0], camera.look_at[1], camera.zoom_px_per_m);
+  document.getElementById("phone-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const input = document.getElementById("phone-input");
+    const text = input.value;
+    input.value = "";
+    callPlaying = false;
+    syncPlayButton();
+    placeCall(text, null, { via: "typed message" });
   });
-  const box = document.getElementById("route-toggles");
-  for (const route of town.routes) {
-    const label = el("label", "check");
-    const input = document.createElement("input");
-    input.type = "checkbox";
-    input.dataset.route = route.id;
-    input.checked = true;
-    activeRoutes.add(route.id);
-    input.addEventListener("change", () => {
-      if (input.checked) activeRoutes.add(route.id);
-      else activeRoutes.delete(route.id);
-      drawRoutes(0);
-    });
-    label.append(input, document.createTextNode(" " + route.fixture_id + " " + route.mode));
-    box.append(label);
-  }
+  document.getElementById("phone-record").addEventListener("click", () => toggleRecord());
+  renderPresets();
+  renderPriorityButtons();
+  renderCallList();
+  greet();
   app.stage.eventMode = "static";
   app.stage.hitArea = app.screen;
   app.stage.on("pointerdown", (event) => {
@@ -1369,6 +1766,7 @@ function bindChrome() {
     { passive: false }
   );
   window.addEventListener("keydown", (event) => {
+    if (event.target && (event.target.id === "phone-input" || event.target.tagName === "INPUT")) return;
     if (event.key === "Escape") select(null, false);
     if (event.key === "+" || event.key === "=") zoomAt(1.15);
     if (event.key === "-" || event.key === "_") zoomAt(1 / 1.15);
@@ -1380,14 +1778,18 @@ function bindChrome() {
 }
 
 async function main() {
-  const [townBody, streetBody, floodBody] = await Promise.all([
+  const [townBody, streetBody, floodBody, responseBody] = await Promise.all([
     getJson("data/town.json"),
     getJson("data/streets.json"),
     getJson("data/flood.json"),
+    getJson("data/responses.json"),
   ]);
   town = townBody;
   streets = streetBody.streets;
   flood = floodBody;
+  responses = responseBody;
+  floodMax = Math.max(...flood.features.map((feature) => feature.properties.depth_m));
+  if (reduce) floodLevel = floodMax;
   streetById = Object.fromEntries(streets.map((street) => [street.id, street]));
   nodeById = Object.fromEntries(town.graph.nodes.map((node) => [node.id, node]));
   try {
@@ -1415,20 +1817,21 @@ async function main() {
   app.stage.addChild(world);
   buildScene();
   document.getElementById("loading").hidden = true;
-  document.getElementById("panel").hidden = false;
   document.getElementById("graph-stat").textContent =
     town.graph.nodes.length + " junctions · " + town.graph.edges.length + " links · " + town.buildings.length + " blocks";
   bindChrome();
   const camera = town.meta.camera;
   lookAt(camera.look_at[0], camera.look_at[1], camera.zoom_px_per_m);
-  renderPanel();
   const hash = decodeURIComponent(location.hash.replace("#", ""));
   if (hash && buildingById(hash)) select(hash, true);
-  let offset = 0;
   app.ticker.add((ticker) => {
+    if (!reduce && floodLevel < floodMax) {
+      floodLevel = Math.min(floodMax, floodLevel + ticker.deltaMS * 0.00015);
+      if (floodG) buildFlood(floodG);
+    }
     if (reduce) return;
-    offset += ticker.deltaMS * 0.04;
-    drawRoutes(offset);
+    moverClock += ticker.deltaMS;
+    drawMovers(moverClock);
     markerG.alpha = 0.55 + 0.45 * Math.sin(ticker.lastTime / 260);
     if (callLightG) callLightG.alpha = 0.72 + 0.28 * Math.sin(ticker.lastTime / 280);
   });
