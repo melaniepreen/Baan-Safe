@@ -24,9 +24,9 @@
     {
       "path": "docs/agents/policies-api.md",
       "title": "Policies and aid API",
-      "summary": "Aid HTTP stubs return 501. Escalation rules are listed and not evaluated by the gateway.",
-      "keywords": ["aid", "eligibility", "exceptions", "escalation"],
-      "files": ["api/routes/endpoints.py", "config/escalation.yaml"]
+      "summary": "Policy corpus is GET/POST /policies. Aid eligibility and exceptions still return 501.",
+      "keywords": ["aid", "policies", "corpus", "escalation"],
+      "files": ["api/routes/policies.py", "policies/service.py", "config/escalation.yaml"]
     },
     {
       "path": "docs/agents/decision-router.md",

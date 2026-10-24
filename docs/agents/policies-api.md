@@ -2,27 +2,33 @@
 title: Policies and aid API
 tags: [aid, eligibility, exceptions, escalation, policy]
 files:
+  - api/routes/policies.py
+  - policies/service.py
   - api/routes/endpoints.py
-  - system1/aid_eligibility.py
-  - system2/aid_exceptions.py
   - config/escalation.yaml
 ---
 
 ## Purpose
 
-Aid eligibility and exception endpoints are stubs. They do not approve a payment or an exception. Escalation rules are listed for humans and are not evaluated by the gateway.
+The policy corpus is served from `policies/service.py`. Aid eligibility and exception endpoints stay stubs and do not approve a payment or an exception. Escalation rules are listed for humans and are not evaluated by the gateway.
 
 ## Key files
 
+- `policies/service.py` — load, list, match, pin. `local_yaml` is the only live adapter (`policies/sources/local_yaml.py`).
+- `policies/*.yaml` — rule text. Provenance: `policies/SOURCES.md`.
+- `api/routes/policies.py` — prefix `/policies`. Mounted from `api/main.py`.
 - `api/routes/endpoints.py` — `GET /aid/eligibility`, `POST /aid/exceptions`. Both return HTTP 501.
 - `system1/aid_eligibility.py` — `check`. Owner: Melanie. No baht amount.
 - `system2/aid_exceptions.py` — `propose`. Owner: Melanie.
+- `system1/labels.py`, `system2/sapling_policy.py` — read the service.
 - `config/escalation.yaml` — `escalate_to_system_2_if_any`, `always_requires_human`, enrichment flag numbers, `stub_next_action_order`.
 - `gateway/policy.py` — one note: safeguarding and escalation rules were not evaluated.
-- `config/priorities.yaml`, `config/routes.yaml` — names. Not a live scorer.
 
 ## Interfaces/contracts
 
+- `GET /policies`, `GET /policies/labels`, `GET /policies/sources`, `GET /policies/{rule_id}`, `POST /policies/match`, `POST /policies/pins`.
+- Domains: `aid_eligibility`, `safeguarding`, `triage`. Jurisdiction: `TH` or `intl`. `lang` is `en` or `th`.
+- `POST /policies/pins` stores a corpus snapshot under `var/policy-pins/` (gitignored). Later reads pass `version` or `run_id`.
 - `GET /aid/eligibility?case_id=` loads a fixture or a stored case, calls `check`, and maps `NotImplementedError` to 501 (`not_ready`, owner Melanie).
 - `POST /aid/exceptions` takes a `CaseState` and calls `propose`. Same 501 path.
 - `AidEligibility` in `contracts/models.py` is the return shape. `check` does not return one yet.
@@ -30,25 +36,29 @@ Aid eligibility and exception endpoints are stubs. They do not approve a payment
 
 ## Invariants
 
-- Neither endpoint approves a payment or an exception.
+- Loading a rule by id does not make it authoritative. `policies.authoritative_set` is `TODO_HUMAN`.
+- ReliefWeb and DDPM were not used as corpus sources (`policies/SOURCES.md`).
+- Neither aid endpoint approves a payment or an exception.
 - The gateway does not read the rule strings in `escalation.yaml` to pick a system. Fixture `expected.system` is the harness stand-in.
 - Enrichment thresholds attach data flags. They do not change priority or route.
 - `stub_next_action_order` is plumbing for `use_stubs=True` only. It is not a merge policy.
 
 ## How to test
 
+- `tests/test_policies_api.py`, `tests/test_policy_corpus.py`.
 - `tests/test_architecture.py` — `test_aid_stubs_return_501`.
-- `tests/test_api.py` — route status codes.
-- `make validate` — escalation file is not executed; personal-data scan still applies to fixtures.
+- `make validate` — `policies.authoritative_set` stays `TODO_HUMAN`.
 
 ## Common pitfalls
 
 - Hardcoding a relief amount. `system1/aid_eligibility.py` does not read a baht figure. Regulations move.
 - Implementing escalation by editing `gateway/route.py`. Validate fails if that file contains `fields.medical` or `oxygen_dependent`.
 - Returning HTTP 200 from the aid routes before `check` / `propose` exist.
+- Treating a corpus match as an approval. Match only retrieves rule text.
 
 ## Open TODO_HUMAN keys
 
 - `system1.extraction_method` (named by `check`)
 - `system2.orchestrator_model`, `system2.max_latency_ms` (named by `propose`; hosting is already set)
+- `policies.authoritative_set`
 - `gateway.route_chooser` (live system choice, not the aid routes)

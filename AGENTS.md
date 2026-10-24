@@ -53,7 +53,7 @@ Index: `docs/agents/index.json`. Read one topic file, not the whole set.
 | Gateway, auth, memory, LLM host check | `docs/agents/gateway-and-llm-client.md` | `gateway/route.py`, `llm/client.py` |
 | Fast path | `docs/agents/system1.md` | `system1/decide.py` |
 | Nemotron, Sapling | `docs/agents/system2-and-sapling.md` | `system2/decide.py`, `system2/sapling.py` |
-| Aid eligibility, exceptions, escalation | `docs/agents/policies-api.md` | `api/routes/endpoints.py`, `config/escalation.yaml` |
+| Aid eligibility, policy corpus, escalation | `docs/agents/policies-api.md` | `policies/service.py`, `api/routes/policies.py` |
 | Router | `docs/agents/decision-router.md` | `router/merge.py` |
 | Corrections, learning eval, latte-bench | `docs/agents/correction-loop-and-evals.md` | `eval/correction_loop.py`, `eval/learning/` |
 | Ingest, SQLite, banned sources | `docs/agents/data-ingest.md` | `ingest/__main__.py`, `data/SOURCES.md` |
