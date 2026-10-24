@@ -171,12 +171,16 @@ triage_scale:
   id: niems-color-2013-slides
   wired_into_decide: false
   note: >
-    Five colour names are in policies/triage.yaml from a 2013 NIEM slide.
-    system1/decide.py maps needs onto P2, P3, and P4 and escalates medical
-    and rescue. It never reads a colour. The P1–P4 column below is a
-    hypothesis lined up with config/priorities.yaml. mapping_status stays
-    unverified. Black on the slide is "no patient". A Khon Kaen case study
-    calls black a false call. Those two texts are not the same rule.
+    Five colour names are in policies/triage.yaml. The 2013 NIEM slide and
+    the Royal Gazette announcement of B.E. 2554 (NIEMS-ANNOUNCEMENT-2554)
+    both name them. system1/decide.py maps needs onto P2, P3, and P4 and
+    escalates medical and rescue. It never reads a colour. The P1–P4 column
+    below is a hypothesis lined up with config/priorities.yaml.
+    mapping_status stays unverified. Black on the slide is "no patient".
+    A Khon Kaen case study calls black a false call. Those two texts are
+    not the same rule. policies/flood.yaml prints international depth
+    figures. The announcement does not map floodwater or a trapped caller
+    to a 1669 colour.
   levels:
     - id: red
       label_en: Life-threatening emergency, immediate
@@ -229,8 +233,10 @@ triage_scale:
         retrieved: "2026-10-24"
         note: >
           The slide does not call this a resuscitation category. No BaanSafe
-          priority is assigned. Flood depth and a trapped caller have no
-          verified colour. See FLOOD-WATER-DEPTH and FLOOD-TRAPPED-DISPATCH.
+          priority is assigned. The Royal Gazette text is
+          https://www.ratchakitcha.soc.go.th/DATA/PDF/2554/E/131/32.PDF
+          A plain download returned HTTP 403 on 24 October 2026. The corpus
+          still read it that day. It prints no flood depth and no boat rule.
 
 admin:
   levels:
@@ -385,6 +391,7 @@ aid_policy_corpus:
     - policies/triage.yaml
     - policies/sphere.yaml
     - policies/safeguarding.yaml
+    - policies/flood.yaml
   labels: policies/system1_labels.yaml
   national_instrument: Ministry of Finance emergency-relief criteria, B.E. 2569
   verification:
@@ -394,10 +401,12 @@ aid_policy_corpus:
     note: >
       Hosted by the Department of Agricultural Extension. policies/corpus.py
       loads this set. Jurisdiction TH is assigned by filename in
-      policies/sources/local_yaml.py. The B.E. 2569 date is not converted
-      to a Gregorian ISO date. Sphere and IFRC rows in the same corpus are
-      the international baseline. A separate countries policy file is not
-      needed for Thailand.
+      policies/sources/local_yaml.py. flood.yaml is jurisdiction intl.
+      It holds retrieved flood-safety figures from other countries and
+      states that none of them is a 1669 colour. The B.E. 2569 date is not
+      converted to a Gregorian ISO date. Sphere and IFRC rows in the same
+      corpus are the international baseline. A separate countries policy
+      file is not needed for Thailand.
 
 system1_labels:
   path: policies/system1_labels.yaml
