@@ -49,4 +49,4 @@ Product choices live in `config/decisions.yaml`. Readers fail loudly while a val
 
 ## Open TODO_HUMAN keys
 
-All leaves except the four in `DECIDED`. The groups are `system1`, `system2` (model id and `max_latency_ms`), `sapling` (except `client`), `gateway`, `memory`, `llm`, `speech_to_text`, `ui`, `data`, `policies` (`authoritative_set`), `correction_loop`, `learning_eval`, `latte_bench`, `modal`.
+All leaves except the four in `DECIDED`. The groups are `system1`, `system2` (model id and `max_latency_ms`), `sapling` (except `client`), `gateway`, `memory`, `llm`, `speech_to_text`, `ui`, `data`, `policies` (`authoritative_set`), `correction_loop`, `learning_eval`, `latte_bench`, `sim` (`caller_model`, `caller_gpu`), `modal`.

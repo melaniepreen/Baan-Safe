@@ -10,6 +10,7 @@ from eval.learning.loop import SeedScore, close_loop, freeze_gate
 from eval.learning.metrics import score_arm
 from eval.latte.section import external_section
 from eval.learning.report import render
+from eval.learning.simulators import render_trait_section
 from eval.learning.split import SEEDS, split_groups
 from paths import ROOT
 
@@ -85,6 +86,7 @@ def run(out_dir: Path | None = None, version_id: str = CANDIDATE_VERSION) -> dic
         current_scores,
         candidate_scores,
         external=external_section(out),
+        traits=render_trait_section(),
     )
     path = out / "learning.md"
     path.write_text(text, encoding="utf-8")

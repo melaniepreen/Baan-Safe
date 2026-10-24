@@ -74,6 +74,9 @@ def test_learning_eval_smoke(tmp_path):
         assert name in text
     assert "learning_eval.promotion" in text
     assert "learning_eval.freeze_mubit_auto_adapters" in text
+    assert "Held-out caller simulators" in text
+    assert "omits_location" in text
+    assert "under_reports" in text
     assert "External sanity check: does the model learn from feedback" in text
     assert "latte_bench.license_confirmation" in text
     assert "TODO_HUMAN" in text

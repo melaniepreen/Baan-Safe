@@ -13,6 +13,7 @@ gateway/route.py     auth note, memory/adapter.py, policy pre-check
 router               stub copies that one Outcome. router/merge.py is not called.
 correction           memory write -> eval/correction_loop.py -> stub version
 held-out eval        eval/learning/ ; eval/latte/ reads third_party/latte-bench
+sim (off path)       sim/callers, sim/env.py, sim/coach.py. Training and eval only.
 ```
 
 ## Invariants
@@ -33,6 +34,7 @@ make test
 make validate
 make replay-stubs
 make eval-learning
+make sim-eval
 make latte-bench
 make serve
 make modal-deploy-s1
@@ -56,6 +58,7 @@ Index: `docs/agents/index.json`. Read one topic file, not the whole set.
 | Aid eligibility, policy corpus, escalation | `docs/agents/policies-api.md` | `policies/service.py`, `api/routes/policies.py` |
 | Router | `docs/agents/decision-router.md` | `router/merge.py` |
 | Corrections, learning eval, latte-bench | `docs/agents/correction-loop-and-evals.md` | `eval/correction_loop.py`, `eval/learning/` |
+| Caller simulation, coach | `docs/agents/caller-simulation.md` | `sim/env.py`, `sim/coach.py` |
 | Ingest, SQLite, banned sources | `docs/agents/data-ingest.md` | `ingest/__main__.py`, `data/SOURCES.md` |
 | Modal, GPU, deploy | `docs/agents/modal-infra.md` | `infra/modal/`, `infra/HARDWARE.md` |
 | YAML decisions | `docs/agents/config-and-decisions.md` | `config/decisions.yaml`, `config/settings.py` |

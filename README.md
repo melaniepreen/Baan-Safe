@@ -45,6 +45,7 @@ make replay-stubs   # accuracy of s1/s2 stub files against expected labels
 make demo-stub      # gateway.handle(..., use_stubs=True) for every fixture
 make demo-correction-loop  # stub: correction -> JSONL -> model version -> before/after
 make eval-learning  # stub: held-out correction eval, writes eval/out/learning.md
+make sim-eval       # stub: caller simulator and coach notes, writes eval/out/sim.md
 make latte-bench    # third-party latte-bench by reference; skips if bun or the checkout is missing
 make serve          # API on :8000, docs at /docs, town sim at /ui/sim/
 make ingest         # public sources, using the cache
@@ -75,7 +76,9 @@ LLM calls, when a human writes them, go through `llm/client.py`. That client req
 
 `make demo-correction-loop` runs a synthetic correction through memory, writes an SFT/LoRA JSONL file under `eval/out/` (gitignored), registers stub model versions `stub-0` and `stub-1`, and prints quality, latency, and a null cost. It does not train weights and it does not promote a rule into System 1.
 
-`make eval-learning` writes the held-out stub scoreboard to `eval/out/learning.md`. The same file has an external section that reads [MubitLabs/latte-bench](https://github.com/MubitLabs/latte-bench) when the submodule is checked out. That repository publishes no license. BaanSafe does not vendor its source. `latte_bench.license_confirmation` stays `TODO_HUMAN` until someone confirms the terms with Mubit. Details are in `eval/LATTE.md`.
+`make eval-learning` writes the held-out stub scoreboard to `eval/out/learning.md`. The same file has an external section that reads [MubitLabs/latte-bench](https://github.com/MubitLabs/latte-bench) when the submodule is checked out. That repository publishes no license. BaanSafe does not vendor its source. `latte_bench.license_confirmation` stays `TODO_HUMAN` until someone confirms the terms with Mubit. Details are in `eval/LATTE.md`. The scoreboard also scores held-out caller trait combinations.
+
+`make sim-eval` runs the scripted caller environment and writes `eval/out/sim.md` plus coach notes at `eval/out/coach.jsonl` (`source=coach`, not promoted). `sim.caller_model` and `sim.caller_gpu` stay `TODO_HUMAN`. The ideas are from MIMESIS ([arXiv:2610.09484](https://huggingface.co/papers/2610.09484)). No paper code is copied. The simulator is not on the live path.
 
 ## Data
 

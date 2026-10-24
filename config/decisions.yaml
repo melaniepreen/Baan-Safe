@@ -42,6 +42,12 @@ learning_eval:
   freeze_mubit_auto_adapters: TODO_HUMAN  # freeze auto-adapters before a live eval run
 latte_bench:
   license_confirmation: TODO_HUMAN   # MubitLabs/latte-bench has no license; confirm with Mubit before any use beyond reference
+# Caller simulator. The scripted backend is the default and does not load weights.
+# A model backend must go through llm/client.py. A MIMESIS-style 9B is one option.
+# Weights and license are unconfirmed. Do not fill these in from the paper.
+sim:
+  caller_model: TODO_HUMAN
+  caller_gpu: TODO_HUMAN
 # Which corpus rule ids the demo may treat as authoritative. The files under
 # policies/ still load by id. A human chooses the set. Do not fill this in code.
 policies:

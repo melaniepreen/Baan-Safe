@@ -43,6 +43,13 @@
       "files": ["eval/correction_loop.py", "eval/learning/harness.py", "eval/LATTE.md"]
     },
     {
+      "path": "docs/agents/caller-simulation.md",
+      "title": "Caller simulation",
+      "summary": "Scripted flood callers and a coach, off the live path, for training and held-out trait evals.",
+      "keywords": ["sim", "caller", "coach", "mimesis", "traits"],
+      "files": ["sim/env.py", "sim/coach.py", "sim/callers/scripted.py"]
+    },
+    {
       "path": "docs/agents/data-ingest.md",
       "title": "Data ingest",
       "summary": "Public sources into SQLite. ReliefWeb sends no request. DDPM was not added.",

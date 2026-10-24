@@ -23,6 +23,7 @@ def render(
     current: list[SeedScore],
     candidate: list[SeedScore],
     external: str = "",
+    traits: str = "",
 ) -> str:
     lines = [
         "# Held-out correction eval (stub)",
@@ -129,6 +130,9 @@ def render(
     for reason in decision["reasons"]:
         lines.append(f"- {reason}")
     lines.append("")
+    if traits.strip():
+        lines.append(traits.strip())
+        lines.append("")
     if external.strip():
         lines.append(external.strip())
         lines.append("")

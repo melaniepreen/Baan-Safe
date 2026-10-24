@@ -27,6 +27,8 @@ Score stub labels, run a synthetic correction through a stub model version, and 
 - Correction loop: store a `Correction` via `memory/adapter.py`, write one SFT row to `eval/out/sft.jsonl`, register `stub-0` and `stub-1`. Job status `stub`. No weights.
 - Learning arms: A base, B memory, C correction JSONL with empty memory, shuffled control. Held-out rows only. Thai and English of one call stay on the same side.
 - Promotion recommendation does not promote. `promoted` stays false while `learning_eval.promotion` is `TODO_HUMAN`.
+- Coach notes from `sim/coach.py` are `eval/out/coach.jsonl` with `source=coach`. They are not `Correction` rows and they are not promoted. See `docs/agents/caller-simulation.md`.
+- Learning arms are also scored on held-out caller trait combinations (`eval/learning/simulators.py`).
 - latte-bench is a submodule with no license. The runner does not vendor its source. Free mode makes no API call.
 
 ## Invariants
@@ -42,6 +44,7 @@ Score stub labels, run a synthetic correction through a stub model version, and 
 - `make replay-stubs`
 - `make demo-correction-loop`
 - `make eval-learning`
+- `make sim-eval`
 - `tests/test_learning_eval.py`, `tests/test_latte.py`
 - `make latte-bench` only when bun and the submodule are present. Otherwise the skip path is the test.
 
