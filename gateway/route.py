@@ -1,17 +1,18 @@
 """Mubit gateway. Owner: Moly.
 
 One turn enriches the case, retrieves memory, records a policy pre-check, and
-routes to System 1 or System 2 — never both. Mubit does not reason: the route
-choice is the field precheck in gateway/chooser.py (the decided
-`gateway.route_chooser`), and the RouterDecision comes from router/merge.py.
+routes by the field precheck in gateway/chooser.py (the decided
+`gateway.route_chooser`). routing.yaml `mode: cascade` means a System 1
+escalate hands the same turn to System 2; `mode: exclusive` keeps one system
+per turn. Mubit does not reason: the RouterDecision comes from
+router/merge.py.
 
 Extraction runs before enrichment when the case has no fields yet, or again on
 a later turn once `keyword_extraction` is in policy_flags. Fixture cases carry
 hand-filled fields, so they are never extracted.
 
 use_stubs=True loads the stub for the chosen system. use_stubs=False, or
-S1_IMPL=real / S2_IMPL=real on the chosen system, calls that system's decide()
-and lets NotImplementedError through.
+S1_IMPL=real / S2_IMPL=real on the chosen system, calls that system's decide().
 """
 
 from __future__ import annotations
@@ -34,6 +35,7 @@ from enrich.context import location_context
 from gateway.auth import status as auth_status
 from gateway.chooser import choose
 from gateway.graduation import apply as apply_graduations
+from gateway.overlay import Overlay, load_from_env, narrow_signature
 from gateway.policy import precheck_notes
 from memory.adapter import retrieve
 from mocks.loader import (
@@ -49,14 +51,23 @@ from system1.extract import extract
 from system2 import decide as system2
 from trace import emit
 
+_MODES = ("exclusive", "cascade")
 
-def handle(case: CaseState, use_stubs: bool = True) -> RouterDecision:
+
+def handle(
+    case: CaseState,
+    use_stubs: bool = True,
+    overlay: Overlay | None = None,
+) -> RouterDecision:
+    if overlay is None:
+        overlay = load_from_env()
     started = _now()
     _extract(case)
     _enrich(case)
     case.memory_context = retrieve(case)
     graduations = apply_graduations(case)
-    system, triggers = _choose(case)
+    mode = _mode()
+    system, triggers = choose(case, overlay)
     notes = [auth_status(), *precheck_notes()]
     emit(
         TraceEvent(
@@ -67,7 +78,7 @@ def handle(case: CaseState, use_stubs: bool = True) -> RouterDecision:
             notes=(
                 "mubit gateway: "
                 + "; ".join(notes)
-                + f"; memory via adapter; exclusive route {system.value}"
+                + f"; memory via adapter; {mode} route {system.value}"
                 + "; triggers: "
                 + (", ".join(triggers) if triggers else "none")
                 + (
@@ -78,62 +89,88 @@ def handle(case: CaseState, use_stubs: bool = True) -> RouterDecision:
             ),
         )
     )
-    outcome = _run(case, system, use_stubs=use_stubs)
-    system_started = _now()
-    emit(
-        TraceEvent(
-            case_id=case.case_id,
-            stage=system.value,
-            started_at=system_started,
-            latency_ms=outcome.latency_ms or 0,
-            model=None,
-            outcome=outcome,
-            notes="stub outcome" if use_stubs else "real interface",
+    outcome = _run(case, system, use_stubs=use_stubs, overlay=overlay)
+    _trace_system(case.case_id, outcome, use_stubs)
+    prior: list[Outcome] = []
+    if mode == "cascade" and _should_cascade(system, outcome):
+        prior.append(outcome)
+        s2 = _run(
+            case,
+            System.system_2,
+            use_stubs=use_stubs,
+            overlay=overlay,
+            handoff=outcome,
+            recommendation=(
+                overlay.recommendations.get(narrow_signature(case))
+                if overlay is not None
+                else None
+            ),
         )
-    )
+        _trace_system(case.case_id, s2, use_stubs)
+        notes.append(
+            f"cascade: system_1 handed off to system_2 ({outcome.reason})"
+        )
+        outcome = s2
     router_started = _now()
-    decision = router.merge.merge(case, outcome, notes, resources=load_dispatch_resources())
+    decision = router.merge.merge(
+        case, outcome, notes, resources=load_dispatch_resources(), prior=prior
+    )
     emit(
         TraceEvent(
             case_id=case.case_id,
             stage="router",
             started_at=router_started,
             latency_ms=0,
-            notes="router.merge ran on the single selected outcome",
+            notes="router.merge ran on the selected outcome(s)",
         )
     )
     return decision
 
 
-def choose_system(case: CaseState) -> System:
-    """Pick System 1 or System 2. Never both.
+def choose_system(case: CaseState, overlay: Overlay | None = None) -> System:
+    """Pick the entry-point system via the field precheck.
 
-    The chooser is the field precheck in gateway/chooser.py, read from
-    config/escalation.yaml. Fixture ids no longer override it.
+    Cascade mode may still continue to System 2 inside the same turn.
     """
-    system, _triggers = _choose(case)
+    system, _triggers = choose(case, overlay)
     return system
 
 
-def _choose(case: CaseState) -> tuple[System, list[str]]:
+def _mode() -> str:
     mode = load_yaml("routing.yaml").get("mode")
-    if mode != "exclusive":
+    if mode not in _MODES:
         raise RuntimeError(
             f"config/routing.yaml mode is {mode!r}. "
-            "The gateway only implements exclusive routing "
-            "(System 1 or System 2, not System 1 then System 2)."
+            f"Implemented modes: {', '.join(_MODES)}."
         )
-    return choose(case)
+    return mode
 
 
-def _run(case: CaseState, system: System, use_stubs: bool) -> Outcome:
+def _should_cascade(system: System, outcome: Outcome) -> bool:
+    """A System 1 escalate continues to System 2. The no-stub fallback is
+    'no S1 result', not low confidence, and never cascades."""
+    return (
+        system is System.system_1
+        and outcome.escalate
+        and outcome.missing_evidence != ["fixture_stub"]
+    )
+
+
+def _run(
+    case: CaseState,
+    system: System,
+    use_stubs: bool,
+    overlay: Overlay | None = None,
+    handoff: Outcome | None = None,
+    recommendation: dict | None = None,
+) -> Outcome:
     real = (system is System.system_1 and _impl("S1_IMPL") == "real") or (
         system is System.system_2 and _impl("S2_IMPL") == "real"
     )
     if real or not use_stubs:
         if system is System.system_1:
-            return system1.decide(case)
-        return system2.decide(case)
+            return system1.decide(case, overlay=overlay)
+        return system2.decide(case, handoff=handoff, recommendation=recommendation)
     if system is System.system_1:
         if has_s1_stub(case.case_id):
             return load_s1_stub(case.case_id)
@@ -145,6 +182,20 @@ def _run(case: CaseState, system: System, use_stubs: bool) -> Outcome:
 
 def _impl(name: str) -> str:
     return os.environ.get(name, "stub").strip().lower() or "stub"
+
+
+def _trace_system(case_id: str, outcome: Outcome, use_stubs: bool) -> None:
+    emit(
+        TraceEvent(
+            case_id=case_id,
+            stage=outcome.system.value,
+            started_at=_now(),
+            latency_ms=outcome.latency_ms or 0,
+            model=None,
+            outcome=outcome,
+            notes="stub outcome" if use_stubs else "real interface",
+        )
+    )
 
 
 def _extract(case: CaseState) -> None:

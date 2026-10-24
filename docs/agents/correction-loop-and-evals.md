@@ -21,7 +21,7 @@ Score stub labels, run a synthetic correction through a stub model version, and 
 - `eval/__main__.py` — `make replay-stubs`. System 1, System 2, and Sapling stubs.
 - `eval/replay.py` — scores a callable against fixture labels.
 - `eval/correction_loop.py` — `make demo-correction-loop`. Case `CORR-LOOP-1`.
-- `gateway/graduation.py` — the graduation rule: `graduated_patterns` counts human `s1_triage` corrections sharing one `(needs, vulnerable, danger)` pattern and a `graduation_labels` entry across `correction_loop.graduation_threshold` distinct cases; `apply(case)` tags matches `complex_situation` and adds a recommendation MemoryItem.
+- `gateway/graduation.py` — the graduation rule: `graduated_patterns` counts human `s1_triage` corrections sharing one `(needs, vulnerable, danger)` pattern and a `graduation_labels` entry across `correction_loop.escalation_threshold` distinct cases; `apply(case)` tags matches `complex_situation` and adds a recommendation MemoryItem.
 - `eval/graduation_demo.py` — `make demo-graduation`. Temp event log, two corrections, F02 graduates.
 - `eval/compare.py` — route accuracy, latency, tokens. `cost_usd` stays null.
 - `eval/learning/` — `make eval-learning`. Seeds 17, 29, 41. Report `eval/out/learning.md`.
@@ -75,3 +75,5 @@ Score stub labels, run a synthetic correction through a stub model version, and 
 - `latte_bench.license_confirmation`
 - `llm.token_price_usd`
 - `modal.finetune_base_model` (the LoRA base the loop would train from)
+
+Decided: `correction_loop.graduation_threshold` is `2` — used by the RL loop in `eval/rl/` (see `docs/agents/rl-loop.md`), not by this stub.

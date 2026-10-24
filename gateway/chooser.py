@@ -8,8 +8,13 @@ means System 1. Signed off by Moly, 24 Oct 2026.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from config.settings import load_yaml
 from contracts.models import CaseState, System
+
+if TYPE_CHECKING:
+    from gateway.overlay import Overlay
 
 
 def _triggers_config() -> dict:
@@ -43,9 +48,13 @@ def system_2_triggers(case: CaseState) -> list[str]:
     return found
 
 
-def choose(case: CaseState) -> tuple[System, list[str]]:
-    """Pick the exclusive system and return the triggers behind the choice."""
+def choose(case: CaseState, overlay: Overlay | None = None) -> tuple[System, list[str]]:
+    """Pick the entry-point system and return the triggers behind the choice."""
+    from gateway.overlay import coarse_signature
+
     triggers = system_2_triggers(case)
+    if overlay is not None and coarse_signature(case) in overlay.demoted:
+        triggers.append("learned:demoted")
     if triggers:
         return System.system_2, triggers
     return System.system_1, triggers

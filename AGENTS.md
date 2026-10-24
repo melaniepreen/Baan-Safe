@@ -1,18 +1,22 @@
 # BaanSafe
 
-Flood and disaster call-triage scaffold. Mubit governs memory, policy, and traceability and does not reason. One turn goes to System 1 or System 2, never both. System 2's orchestrator is Nemotron, hosted as `openrouter via mubit gateway`. Banyan Sapling verifies System 2 aid-eligibility and denial claims before the Decision Router. System 2 decision logic is not implemented; System 1 is rules-only. Fixture callers are synthetic. Owners: `OWNERSHIP.md`. Architecture note: `BaanSafe_Revised_Architecture.md`.
+Flood and disaster call-triage scaffold. Mubit governs memory, policy, and traceability and does not reason. The field precheck picks one entry point; `mode: cascade` lets a System 1 escalate continue to System 2 in the same turn. System 2's orchestrator is Nemotron, hosted as `openrouter via mubit gateway` (model `nvidia/nemotron-3.5-lightning:free`). Banyan Sapling verifies System 2 aid-eligibility and denial claims before the Decision Router. System 1 is rules-only. Fixture callers are synthetic. Owners: `OWNERSHIP.md`. Architecture note: `BaanSafe_Revised_Architecture.md`.
 
 ## Architecture
 
 ```
 gateway/route.py     auth note, extract -> enrich -> memory -> policy pre-check
-        | exclusive (config/routing.yaml). gateway/chooser.py field precheck
+        | cascade (config/routing.yaml). gateway/chooser.py field precheck
+        | overlay: gateway/overlay.py learned rules (RL_OVERLAY opt-in)
         +-- system1/extract.py + decide.py       rules-only keywords, needs table
-        +-- system2/orchestrator.py              raises while model id or latency is unset
+        |        \-- s1 escalate --+             same turn, handoff to S2
+        +-- system2/orchestrator.py              Nemotron via llm/client.py
                  \-- system2/sapling.py          aid_eligibility, denial only
 router               router/merge.py -> next_action + provisional dispatches
+                     source_outcomes = [deciding, *prior]
 training             corrections, coach, sim -> event log -> export-training
                      -> per-task fine-tune -> eval/learning (group_id, source)
+eval/rl              reward loop: graduate, recommend, demote, shadow bandit
 ```
 
 ## Invariants
@@ -25,6 +29,7 @@ training             corrections, coach, sim -> event log -> export-training
 6. Push straight to `main`. Do not open a pull request.
 7. `make test` and `make validate` stay green.
 8. Do not edit `frontend-prototype/` unless the task says so.
+9. The no-stub fallback outcome (`missing_evidence == ["fixture_stub"]`) never cascades.
 
 ## Commands
 
@@ -33,6 +38,8 @@ make test
 make validate
 make replay-stubs
 make demo-graduation
+make rl-loop
+make rl-loop-replay
 make eval-learning
 make sim-eval
 make extract-eval
@@ -64,6 +71,7 @@ Index: `docs/agents/index.json`. Read one topic file, not the whole set.
 | Aid eligibility, policy corpus, escalation | `docs/agents/policies-api.md` | `policies/service.py`, `api/routes/policies.py` |
 | Router | `docs/agents/decision-router.md` | `router/merge.py` |
 | Corrections, learning eval, latte-bench | `docs/agents/correction-loop-and-evals.md` | `eval/correction_loop.py`, `eval/learning/` |
+| RL loop, overlay, cascade | `docs/agents/rl-loop.md` | `eval/rl/`, `gateway/overlay.py` |
 | Training log, export, per-task fine-tune | `docs/agents/training-schema.md` | `training/log.py`, `training/export.py`, `infra/modal/finetune_job.py` |
 | Caller simulation, coach | `docs/agents/caller-simulation.md` | `sim/env.py`, `sim/coach.py` |
 | Ingest, SQLite, banned sources | `docs/agents/data-ingest.md` | `ingest/__main__.py`, `data/SOURCES.md` |

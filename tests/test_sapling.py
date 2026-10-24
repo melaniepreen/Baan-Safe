@@ -173,8 +173,8 @@ def test_aid_case_is_eligibility_and_a_denial_flag_is_a_denial():
 def test_verifier_runs_after_reasoning_and_before_the_router(monkeypatch):
     order = []
 
-    def fake_orchestrate(case):
-        del case
+    def fake_orchestrate(case, handoff=None, recommendation=None):
+        del case, handoff, recommendation
         order.append("reason")
         return _aid_outcome()
 

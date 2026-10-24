@@ -135,14 +135,13 @@ def test_replay_and_metrics(client):
     assert "pct_handled_by_system_1" in metrics.json()
 
 
-def test_s2_real_returns_501(client, monkeypatch):
+def test_s2_real_returns_503(client, monkeypatch):
     monkeypatch.setenv("S2_IMPL", "real")
     case = json.loads(load_case("F10").model_dump_json())
     response = client.post("/triage", json=case)
-    assert response.status_code == 501
+    assert response.status_code == 503
     detail = response.json()["detail"]
-    assert "not implemented yet" in detail
-    assert "Melanie" in detail
+    assert "MUBIT_API_KEY is not set" in detail
 
 
 def test_docs(client):

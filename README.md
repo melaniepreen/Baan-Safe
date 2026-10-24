@@ -1,6 +1,6 @@
 # BaanSafe
 
-Flood and disaster call-triage scaffold. Mubit governs memory, policy, and traceability. System 1 acts fast. System 2 reasons deeply with Nemotron as its orchestrator. On aid-eligibility and denial checks, Banyan Sapling verifies the claim before the decision router. The decision router turns one system's outcome into the next action. Mubit does not reason.
+Flood and disaster call-triage scaffold. Mubit governs memory, policy, and traceability. System 1 acts fast. System 2 reasons deeply with Nemotron as its orchestrator. On aid-eligibility and denial checks, Banyan Sapling verifies the claim before the decision router. The field precheck picks the entry system; a System 1 escalate cascades to System 2 in the same turn, and the decision router turns the deciding outcome into the next action. Mubit does not reason.
 
 Sapling is [MubitLabs/banyan-sapling](https://huggingface.co/MubitLabs/banyan-sapling), the Apache-2.0 23B verifier (research preview). It takes a policy, evidence, and a claim, and returns `supported`, `violation`, `missing`, `contradicted`, or `unsure`, with probabilities. `supported` lets the proposed action stand. `violation` blocks it. `unsure`, `missing`, and `contradicted` hand the case to a human. The input limit is 16,384 tokens. It does not run on System 1. `system2.use_banyan_sapling` is true for those two checks. Hosting, the GPU, and Thai handling stay `TODO_HUMAN`. Tests use the stub client and do not load a GPU.
 
@@ -19,6 +19,8 @@ flowchart TD
   grad --> pick{"field precheck"}
   pick -->|no trigger| s1["S1 stub file"]
   pick -->|any trigger| s2["S2 stub file"]
+  s1 -->|"S1 escalate, cascade"| s2
+  ov["RL overlay if RL_OVERLAY"] -.-> pick
   s1 --> merge["router.merge + process ledger"]
   s2 --> merge
   snap["committed snapshots"] --> places["places → dispatch units"]
@@ -28,9 +30,9 @@ flowchart TD
   merge --> out["RouterDecision + dispatches"]
   s1 -.-> rules["system1.decide if S1_IMPL=real"]
   rules -.-> merge
-  s2 -.-> s2d["system2.decide raises"]:::unwired
+  s2 -.-> s2d["system2.decide if S2_IMPL=real"]
   s2d -.-> sap["Sapling gate, client stub"]:::unwired
-  s2d -.-> llm["Mubit LLM clients, model TODO"]:::unwired
+  s2d -.-> llm["Mubit LLM client, Nemotron"]
   packs["country packs, not loaded"]:::unwired
 ```
 
@@ -52,7 +54,7 @@ flowchart LR
   synth -.->|"EVAL_LEARNING_SET=synthetic"| eval
 ```
 
-This tree is Phase 0 plus a Phase 1 API. **System 2 decision logic is not implemented. System 1 is rules-only: keyword extraction plus a deterministic needs table.** Callers, households, and transcripts are synthetic. Real district names and public flood polygons are used only to anchor scenarios.
+This tree is Phase 0 plus a Phase 1 API. **System 2 calls live Nemotron through Mubit; System 1 is rules-only: keyword extraction plus a deterministic needs table.** `make rl-loop` runs the reward-scored learning loop (graduation, recommendations, demotion, shadow bandit) over the cascade; `GET /rl/run` serves the last report. Callers, households, and transcripts are synthetic. Real district names and public flood polygons are used only to anchor scenarios.
 
 The architecture note is `BaanSafe_Revised_Architecture.md`. What to do in the morning is `MORNING_REPORT.md`. Who owns each folder is `OWNERSHIP.md`. Background reading for Phase 1 is `research/INDEX.md`. The training event schema is `docs/agents/training-schema.md` (listed in `docs/agents/index.json`).
 
@@ -76,6 +78,8 @@ make test           # pytest
 make replay-stubs   # accuracy of s1/s2 stub files against expected labels
 make demo-stub      # gateway.handle(..., use_stubs=True) for every fixture
 make demo-correction-loop  # stub: correction -> JSONL -> model version -> before/after
+make rl-loop        # reward loop with live Nemotron (Mubit env required)
+make rl-loop-replay # reward loop replaying the cached System 2 replies
 make eval-learning  # stub: held-out correction eval, writes eval/out/learning.md
 make sim-eval       # stub: caller simulator and coach notes, writes eval/out/sim.md
 make latte-bench    # third-party latte-bench by reference; skips if bun or the checkout is missing
@@ -94,17 +98,17 @@ The town simulation is static files in `ui/sim/`. `make serve` mounts them at [h
 | Variable | Default tonight | Owner flips to |
 |---|---|---|
 | `S1_IMPL` | `stub` | `real` runs the rules in `system1/decide.py` |
-| `S2_IMPL` | `stub` | `real` when `system2/decide.py` exists |
+| `S2_IMPL` | `stub` | `real` runs the Nemotron orchestrator (`system2.orchestrator_model`) |
 | `MEMORY_IMPL` | `mock` | `mubit` when `memory/mubit.py` exists |
 | `ENRICH_IMPL` | `data` if `data/processed` exists, else `off` | `off` to skip lookups |
 
-`real` returns HTTP 501 (`not implemented yet — owner: …`) for System 2 and `mubit` for memory until that code exists. `S1_IMPL=real` is implemented.
+`real` on System 2 calls Nemotron through Mubit and returns HTTP 503 when `MUBIT_BASE_URL`/`MUBIT_API_KEY` is unset; `mubit` memory still returns HTTP 501. `S1_IMPL=real` is implemented.
 
-Stub gateway flow for `/triage` and `/cases/{id}/turns`: keyword-extract fields when the case has none (`system1/extract.py`) → enrich → memory through `memory/adapter.py` → route to System 1 **or** System 2 through the field precheck in `gateway/chooser.py` (`gateway.route_chooser` = `field precheck`; never both) → `router/merge.py` turns that one outcome into a `RouterDecision` with `next_action` and provisional dispatches → trace the gateway and the system that ran, with the outcome on the system event. With `use_stubs=True` the selected system's stub outcome stands in for `decide()`; a non-fixture id falls back to a generic escalation outcome.
+Stub gateway flow for `/triage` and `/cases/{id}/turns`: keyword-extract fields when the case has none (`system1/extract.py`) → enrich → memory through `memory/adapter.py` → route to System 1 or System 2 through the field precheck in `gateway/chooser.py` (`gateway.route_chooser` = `field precheck`; `mode: cascade` lets an S1 escalate hand off to S2 in the same turn — the no-stub fallback never cascades) → `router/merge.py` turns that one outcome into a `RouterDecision` with `next_action` and provisional dispatches → trace the gateway and the system that ran, with the outcome on the system event. With `use_stubs=True` the selected system's stub outcome stands in for `decide()`; a non-fixture id falls back to a generic escalation outcome.
 
 `GET /aid/eligibility` and `POST /aid/exceptions` return HTTP 501. They do not approve a payment.
 
-LLM calls go through `llm/client.py` / `llm/openai_client.py`. `llm.provider_route` is `mubit`. The OpenAI SDK base is `MUBIT_BASE_URL` (compat OpenRouter prefix) with `MUBIT_API_KEY`. It does not print the key. Chat still needs `system2.orchestrator_model`.
+LLM calls go through `llm/client.py` / `llm/openai_client.py`. `llm.provider_route` is `mubit`. The OpenAI SDK base is `MUBIT_BASE_URL` (compat OpenRouter prefix) with `MUBIT_API_KEY`. It does not print the key. `system2.orchestrator_model` is `nvidia/nemotron-3.5-lightning:free` and `system2.max_latency_ms` is 10000.
 
 `make demo-correction-loop` runs a synthetic correction through memory, writes an SFT/LoRA JSONL file under `eval/out/` (gitignored), registers stub model versions `stub-0` and `stub-1`, and prints quality, latency, and a null cost. It does not train weights and it does not promote a rule into System 1.
 
@@ -118,7 +122,7 @@ Public sources and row counts are in `data/SOURCES.md`. Raw responses are gitign
 
 ## Infra
 
-Modal apps live in `infra/modal/`. GPU sizes and the hourly arithmetic are in `infra/HARDWARE.md`. Model ids and GPU names stay `TODO_HUMAN` in git so the apps refuse to start until a human exports them. `make validate` allowlists decided leaves including Sapling on, `sapling.client` `stub`, `system2.hosting` `openrouter via mubit gateway`, and `llm.provider_route` `mubit`. The Nemotron model id and size stay `TODO_HUMAN`. The LLM client still refuses any host that is not Mubit. There is no OpenRouter client.
+Modal apps live in `infra/modal/`. GPU sizes and the hourly arithmetic are in `infra/HARDWARE.md`. Model ids and GPU names stay `TODO_HUMAN` in git so the apps refuse to start until a human exports them. `make validate` allowlists decided leaves including Sapling on, `sapling.client` `stub`, `system2.hosting` `openrouter via mubit gateway`, `llm.provider_route` `mubit`, the Nemotron model id (`nvidia/nemotron-3.5-lightning:free`), `system2.max_latency_ms`, and `correction_loop.graduation_threshold`. The deploy-time `modal.*` ids stay `TODO_HUMAN`. The LLM client still refuses any host that is not Mubit. There is no OpenRouter client.
 
 One-time setup, done by a person:
 

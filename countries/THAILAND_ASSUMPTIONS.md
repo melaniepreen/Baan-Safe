@@ -12,7 +12,7 @@ Police **191** and fire **199** are not in this count. They are not in the runti
 4. A second five-code description comes from one Khon Kaen hospital study. `policies/triage.yaml:161`. Its black code is a false call. The slide's black is "no patient".
 5. International pages print flood depths, including 6, 12, and 18 inches. None of them is a 1669 colour. The B.E. 2554 announcement does not map a trapped caller to a colour. `policies/flood.yaml:92`, `policies/triage.yaml:287`.
 6. P1–P4 text is a human judgement, not the NIEM scale, and it is not executed as the colour table. `config/priorities.yaml:4`.
-7. `decide()` maps needs to P2–P4 and never reads a colour. `system1/decide.py:19`.
+7. `decide()` maps needs to P2–P4 and never reads a colour. `system1/decide.py:23`.
 
 ## Aid, language, script
 
@@ -29,10 +29,10 @@ Police **191** and fire **199** are not in this count. They are not in the runti
 18. Policy languages are `en` and `th` only. `policies/schema.py:9`.
 19. A training language is `th`, `en`, or `mixed`. `contracts/training.py:28`.
 20. Thai text is detected as the Unicode block U+0E00–U+0E7F. `policies/sources/local_yaml.py:46`.
-21. Sapling refuses non-English while `sapling.thai_handling` is unset. `system2/sapling_client.py:199`, `config/decisions.yaml:19`.
+21. Sapling refuses non-English while `sapling.thai_handling` is unset. `system2/sapling_client.py:199`, `config/decisions.yaml:21`.
 22. Speech-to-text defaults the language form to `th`. `infra/modal/stt_app.py:62`.
 23. Label hypotheses already have a Thai sentence beside the English one. `policies/system1_labels.yaml:12`.
-24. The town draws with Noto Sans Thai and speaks a Thai line under English. `ui/sim/sim.js:532`, `ui/sim/README.md:51`.
+24. The town draws with Noto Sans Thai and speaks a Thai line under English. `ui/sim/sim.js:533`, `ui/sim/README.md:51`.
 25. One `group_id` keeps the Thai and English of the same call together. `docs/agents/training-schema.md:35`.
 
 ## Admin, identifiers, data
@@ -54,7 +54,7 @@ Police **191** and fire **199** are not in this count. They are not in the runti
 40. A country-sized ring is described as half of Thailand. `config/ingest.yaml:50`.
 41. Fixtures speak northern district names (Mae Mo, Lampang, and the same set). `fixtures/scenarios/F01.json:87`.
 42. Rescue fans out to a boat, and the sample boats sit in those districts. `router/merge.py:27`, `mocks/resources.json:7`.
-43. A resource matches when its district is a substring of the location string. `router/merge.py:138`.
+43. A resource matches when its district is a substring of the location string. `router/merge.py:144`.
 44. The town is a Bangkok flood placeholder, not a fetched map. `ui/sim/README.md:35`.
 45. Street names are marked with the Thai word for placeholder. `ui/sim/README.md:47`.
 46. A household has a district label and no country field. `contracts/models.py:203`.

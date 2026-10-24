@@ -9,10 +9,14 @@ decided `system1.extraction_method` is `rules-only`, so no model is read.
 from __future__ import annotations
 
 from time import perf_counter
+from typing import TYPE_CHECKING
 
 from config.settings import load_yaml
 from contracts.models import CaseState, Need, Outcome, Priority, Route, System
 from gateway.chooser import system_2_triggers
+
+if TYPE_CHECKING:
+    from gateway.overlay import Overlay
 
 DUPLICATE_RELEVANCE = 0.9
 
@@ -51,10 +55,23 @@ def _escalate(reason: str, confidence: float = 0.0, latency_ms: int = 0) -> Outc
     )
 
 
-def decide(case: CaseState) -> Outcome:
+def decide(case: CaseState, overlay: Overlay | None = None) -> Outcome:
     started = perf_counter()
     latency_ms = lambda: int((perf_counter() - started) * 1000)  # noqa: E731
     fields = case.fields
+
+    if overlay is not None:
+        from gateway.overlay import coarse_signature, narrow_signature
+
+        coarse = coarse_signature(case)
+        if coarse in overlay.demoted:
+            return _escalate(
+                "Learned demotion: this pattern under-triaged on the fast path.",
+                latency_ms=latency_ms(),
+            )
+        narrow = narrow_signature(case)
+    else:
+        narrow = None
 
     triggers = system_2_triggers(case)
     if triggers:
@@ -91,6 +108,10 @@ def decide(case: CaseState) -> Outcome:
 
     unmatched = [need.value for need in fields.needs if need not in NEEDS_TABLE]
     if not fields.needs or unmatched:
+        if not fields.needs:
+            graduated = _graduated(case, overlay, narrow)
+            if graduated is not None:
+                return graduated
         reason = (
             "No extracted needs for the fast path."
             if not fields.needs
@@ -102,6 +123,9 @@ def decide(case: CaseState) -> Outcome:
     confidence = fields.location_confidence
     minimum = float(load_yaml("escalation.yaml").get("system_1_min_confidence") or 0.8)
     if confidence is None or confidence < minimum:
+        graduated = _graduated(case, overlay, narrow)
+        if graduated is not None:
+            return graduated
         return _escalate(
             f"Location confidence {confidence} is below system_1_min_confidence "
             f"{minimum}.",
@@ -140,6 +164,42 @@ def decide(case: CaseState) -> Outcome:
         requires_human=False,
         escalate=False,
         latency_ms=latency_ms(),
+    )
+
+
+def _graduated(
+    case: CaseState,
+    overlay: Overlay | None,
+    narrow: str | None,
+) -> Outcome | None:
+    """A learned System 1 rule for this narrow signature, or None."""
+    if overlay is None or narrow is None:
+        return None
+    rule = overlay.graduated.get(narrow)
+    if rule is None:
+        return None
+    confidence = case.fields.location_confidence
+    if confidence is None:
+        confidence = float(
+            load_yaml("escalation.yaml").get("system_1_min_confidence") or 0.8
+        )
+    return Outcome(
+        system=System.system_1,
+        outcome="fast_route",
+        priority=Priority(rule["priority"]),
+        needs=[Need(need) for need in rule["needs"]],
+        route=Route(rule["route"]),
+        confidence=confidence,
+        reason=(
+            "Graduated pattern: System 2 decided this the same way "
+            f"{rule.get('wins', 0)} times."
+        ),
+        reasoning=None,
+        missing_evidence=[],
+        next_question=None,
+        requires_human=bool(rule["requires_human"]),
+        escalate=False,
+        latency_ms=0,
     )
 
 

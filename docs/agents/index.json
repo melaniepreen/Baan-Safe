@@ -3,7 +3,7 @@
     {
       "path": "docs/agents/gateway-and-llm-client.md",
       "title": "Gateway and LLM client",
-      "summary": "Exclusive System 1 or System 2 route via the field precheck, memory adapter, and the Mubit-only chat client.",
+      "summary": "Field-precheck route with an S1 to S2 cascade, memory adapter, and the Mubit-only chat client.",
       "keywords": [
         "gateway",
         "mubit",
@@ -18,7 +18,8 @@
         "gateway/graduation.py",
         "llm/client.py",
         "llm/openai_client.py",
-        "memory/adapter.py"
+        "memory/adapter.py",
+        "gateway/overlay.py"
       ]
     },
     {
@@ -98,6 +99,23 @@
         "eval/learning/synthetic_cases.py",
         "eval/LATTE.md",
         "scripts/gen_synthetic_calls.py"
+      ]
+    },
+    {
+      "path": "docs/agents/rl-loop.md",
+      "title": "RL loop",
+      "summary": "Reward loop over the cascade: graduation, recommendations, demotion, and a shadow bandit.",
+      "keywords": [
+        "rl",
+        "overlay",
+        "cascade",
+        "graduation",
+        "bandit"
+      ],
+      "files": [
+        "eval/rl/run.py",
+        "eval/rl/learner.py",
+        "gateway/overlay.py"
       ]
     },
     {
@@ -193,7 +211,7 @@
     {
       "path": "docs/agents/config-and-decisions.md",
       "title": "Config and decisions",
-      "summary": "decisions.yaml fails loud on TODO_HUMAN. Seven leaves are allowlisted in DECIDED.",
+      "summary": "decisions.yaml fails loud on TODO_HUMAN. Ten leaves are allowlisted in DECIDED.",
       "keywords": [
         "config",
         "decisions",

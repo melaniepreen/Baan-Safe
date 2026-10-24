@@ -1,6 +1,6 @@
 """Correction graduation. Owner: Moly.
 
-When `correction_loop.graduation_threshold` distinct cases share one
+When `correction_loop.escalation_threshold` distinct cases share one
 extracted-field pattern and a graduation label, that pattern is graduated:
 affected cases stay in System 2, tagged `complex_situation`, and System 2 gets
 a recommendation as a correction MemoryItem. Graduation never sets a priority
@@ -51,7 +51,7 @@ def graduated_patterns(
     events=None,
     resolve: Callable[[str], CaseState | None] | None = None,
 ) -> list[Graduation]:
-    threshold = int(require_decision("correction_loop.graduation_threshold"))
+    threshold = int(require_decision("correction_loop.escalation_threshold"))
     labels = set(load_yaml("escalation.yaml").get("graduation_labels") or [])
     resolver = resolve or _default_resolve
     if events is None:

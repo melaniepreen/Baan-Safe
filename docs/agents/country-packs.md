@@ -40,7 +40,7 @@ The inventory below has **49** Thailand-specific assumptions. Each row is one ha
 | 4 | A second five-code description comes from one Khon Kaen hospital study. | `policies/triage.yaml:161` |
 | 5 | International pages print flood depths, including 6, 12, and 18 inches. None of them is a 1669 colour. The B.E. 2554 announcement does not map a trapped caller to a colour. | `policies/flood.yaml:92`, `policies/triage.yaml:287` |
 | 6 | P1–P4 text is a human judgement, not the NIEM scale, and it is not executed. | `config/priorities.yaml:3` |
-| 7 | `decide()` maps needs to P2–P4 and never reads a colour. | `system1/decide.py:19` |
+| 7 | `decide()` maps needs to P2–P4 and never reads a colour. | `system1/decide.py:23` |
 | 8 | The national aid file is the Ministry of Finance criteria, B.E. 2569. | `policies/mof_relief.yaml:19` |
 | 9 | That filename is jurisdiction `TH`. Sphere and IFRC are `intl`. | `policies/sources/local_yaml.py:36` |
 | 10 | The B.E. 2569 date stays text. It is not turned into a Gregorian ISO date. | `policies/sources/local_yaml.py:63` |
@@ -54,10 +54,10 @@ The inventory below has **49** Thailand-specific assumptions. Each row is one ha
 | 18 | Policy languages are `en` and `th` only. | `policies/schema.py:9` |
 | 19 | A training language is `th`, `en`, or `mixed`. | `contracts/training.py:28` |
 | 20 | Thai text is detected as the Unicode block U+0E00–U+0E7F. | `policies/sources/local_yaml.py:46` |
-| 21 | Sapling refuses non-English while `sapling.thai_handling` is unset. | `system2/sapling_client.py:199`, `config/decisions.yaml:19` |
+| 21 | Sapling refuses non-English while `sapling.thai_handling` is unset. | `system2/sapling_client.py:199`, `config/decisions.yaml:21` |
 | 22 | Speech-to-text defaults the language form to `th`. | `infra/modal/stt_app.py:62` |
 | 23 | Label hypotheses already have a Thai sentence beside the English one. | `policies/system1_labels.yaml:12` |
-| 24 | The town draws with Noto Sans Thai and speaks a Thai line under English. | `ui/sim/sim.js:532`, `ui/sim/README.md:51` |
+| 24 | The town draws with Noto Sans Thai and speaks a Thai line under English. | `ui/sim/sim.js:533`, `ui/sim/README.md:51` |
 | 25 | One `group_id` keeps the Thai and English of the same call together. | `docs/agents/training-schema.md:35` |
 | 26 | The gazetteer is OSM `admin_level` 6 inside `ISO3166-2=TH-{code}`. Tambon (`admin_level` 8) is not stored. | `ingest/admin_districts.py:51` |
 | 27 | Eight province codes and English names are hardcoded (Chiang Mai through Songkhla). | `config/ingest.yaml:42`, `ingest/admin_districts.py:26` |
@@ -76,7 +76,7 @@ The inventory below has **49** Thailand-specific assumptions. Each row is one ha
 | 40 | A country-sized ring is described as half of Thailand. | `config/ingest.yaml:50` |
 | 41 | Fixtures speak northern district names (Mae Mo, Lampang, and the same set). | `fixtures/scenarios/F01.json:87` |
 | 42 | Rescue fans out to a boat, and the sample boats sit in those districts. | `router/merge.py:27`, `mocks/resources.json:7` |
-| 43 | A resource matches when its district is a substring of the location string. | `router/merge.py:138` |
+| 43 | A resource matches when its district is a substring of the location string. | `router/merge.py:144` |
 | 44 | The town is a Bangkok flood placeholder, not a fetched map. | `ui/sim/README.md:35` |
 | 45 | Street names are marked with the Thai word for placeholder. | `ui/sim/README.md:47` |
 | 46 | A household has a district label and no country field. | `contracts/models.py:203` |
@@ -184,7 +184,7 @@ For after the hackathon. The list is the smallest set of code changes that would
 
 The first five are the ones to do before any other country can affect a call.
 
-1. **No country on the request path.** `config/settings.py:20` reads only `config/<name>`. `gateway/route.py:150` calls `extract` with the transcript and no country. `contracts/models.py:203` has a district label and no country. Add an optional country code with default `th`, and a loader that is not called until a later step. Effort: small for the dormant loader, medium to thread it through the gateway. Risk: medium on the hot path, high if the contract field is required. Leave the field off the contract until a human accepts a schema change.
+1. **No country on the request path.** `config/settings.py:20` reads only `config/<name>`. `gateway/route.py:201` calls `extract` with the transcript and no country. `contracts/models.py:203` has a district label and no country. Add an optional country code with default `th`, and a loader that is not called until a later step. Effort: small for the dormant loader, medium to thread it through the gateway. Risk: medium on the hot path, high if the contract field is required. Leave the field off the contract until a human accepts a schema change.
 2. **Extractor, language, and gazetteer.** `system1/extract.py:20` keeps Latin tokens, `:279` reads `admin_districts`, and `:337` builds `Name, Province`. A pack-driven phrase list has to reproduce today's English table on the current fixtures before it accepts another language. Effort: medium. Risk: high. Fixture labels move if a phrase shifts.
 3. **Ingest providers, clock, and admin level.** The Thailand clients are `ingest/open_meteo.py:26` (`Asia/Bangkok`), `ingest/gistda.py:22`, `ingest/thaiwater.py:21`, `ingest/gdacs.py:25` (`country=THA`), `ingest/hdx.py:86` (`thailand flood`), `ingest/admin_districts.py:51` (`TH-{code}` and `admin_level` 6), and `config/ingest.yaml:42` (eight province codes). A registry should call today's functions for `th` and refuse a national URL that is `unverified`. Effort: large. Risk: high. These clients write SQLite and honour robots rules.
 4. **Policy jurisdiction, languages, and the file list.** `policies/schema.py:8` allows only `TH` and `intl`. `policies/schema.py:9` allows only `en` and `th`. `policies/sources/local_yaml.py:35` maps jurisdiction by filename. `policies/corpus.py:20` lists five files, including `flood.yaml`. Add a country by a new adapter pointed at `countries/<iso2>/policy-pack.yaml`. Do not move the Thailand YAML. The corpus hash is the file bytes. Effort: medium. Risk: high.
@@ -194,5 +194,5 @@ Later, still after the hackathon, and only once the five above keep the Thai fix
 
 - Speech default. `infra/modal/stt_app.py:62` posts `language=th`. Read the pack language only when the request omitted one. Effort: small. Risk: low if the default stays `th`. `modal.stt_model_id` stays `TODO_HUMAN`.
 - Sapling language gate. `system2/sapling_client.py:199` refuses non-English. Do not send another language until `sapling.thai_handling` is decided. Effort: small. Risk: high if the gate is removed.
-- Router district match. `router/merge.py:138` uses a substring of the location string, and `:27` sends rescue to a boat. Boats are a resource kind for this flood demo, not a national rule. Effort: small. Risk: medium if the location format changes.
+- Router district match. `router/merge.py:144` uses a substring of the location string, and `:27` sends rescue to a boat. Boats are a resource kind for this flood demo, not a national rule. Effort: small. Risk: medium if the location format changes.
 - Enrichment thresholds. `config/escalation.yaml:32` flags 30 mm in 24 hours for every caller. A pack may name a different flag later. It must not change the Thai flag in the same change. Effort: small. Risk: medium.

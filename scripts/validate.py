@@ -62,7 +62,10 @@ DECIDED = {
     "llm.provider_route": "mubit",
     "gateway.route_chooser": "field precheck",
     "system1.extraction_method": "rules-only",
+    "system2.orchestrator_model": "nvidia/nemotron-3.5-lightning:free",
+    "system2.max_latency_ms": 10000,
     "correction_loop.graduation_threshold": 2,
+    "correction_loop.escalation_threshold": 2,
 }
 
 
@@ -92,8 +95,8 @@ def check_decisions() -> None:
         if value != "TODO_HUMAN":
             fail(f"config/decisions.yaml:{path} was set to {value!r}; leave it TODO_HUMAN")
     routing = (ROOT / "config" / "routing.yaml").read_text(encoding="utf-8")
-    if "mode: exclusive" not in routing:
-        fail("config/routing.yaml mode must stay exclusive (System 1 or System 2, not both)")
+    if "mode: exclusive" not in routing and "mode: cascade" not in routing:
+        fail("config/routing.yaml mode must be exclusive or cascade")
 
 
 def check_sapling_stubs() -> None:

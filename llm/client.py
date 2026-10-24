@@ -84,6 +84,11 @@ def complete(
     messages: list[dict[str, str]],
     model: str | None = None,
     max_tokens: int = 256,
+    *,
+    timeout: float = 30.0,
+    temperature: float | None = None,
+    seed: int | None = None,
+    reasoning: dict | None = None,
 ) -> dict[str, Any]:
     """POST a chat completion to the Mubit OpenAI-compatible prefix.
 
@@ -103,18 +108,25 @@ def complete(
             "A human must name the model before an LLM call."
         )
     url = chat_completions_url(base)
+    body: dict[str, Any] = {
+        "model": model,
+        "messages": messages,
+        "max_tokens": max_tokens,
+    }
+    if temperature is not None:
+        body["temperature"] = temperature
+    if seed is not None:
+        body["seed"] = seed
+    if reasoning is not None:
+        body["reasoning"] = reasoning
     response = httpx.post(
         url,
         headers={
             "Authorization": f"Bearer {key}",
             "Content-Type": "application/json",
         },
-        json={
-            "model": model,
-            "messages": messages,
-            "max_tokens": max_tokens,
-        },
-        timeout=30.0,
+        json=body,
+        timeout=timeout,
     )
     response.raise_for_status()
     return response.json()
