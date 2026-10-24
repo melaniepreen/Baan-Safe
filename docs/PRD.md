@@ -30,7 +30,7 @@ Scope that is in the tree tonight:
 |---|---|---|---|
 | Gateway turn | Moly | live | `gateway/route.py` `handle` |
 | Field precheck | Moly | live. Decided value `field precheck` | `gateway/chooser.py`, `config/escalation.yaml` |
-| Keyword extract | Moly | live, English only. Skipped when the case already has fields and `keyword_extraction` is absent | `system1/extract.py` |
+| Keyword extract | Moly | live. English phrase and regex families. Skipped when the case already has fields and `keyword_extraction` is absent | `system1/extract.py` |
 | System 1 decide | Moly | live rules. Default request uses the stub file instead | `system1/decide.py`, `mocks/s1_stub/` |
 | Aid eligibility | Melanie | stub. `check` raises. `GET /aid/eligibility` is 501 | `system1/aid_eligibility.py` |
 | Router merge | Moly | live. Always called from `handle` | `router/merge.py` |
@@ -91,6 +91,8 @@ Chooser triggers (`config/escalation.yaml` `route_to_system_2_if_any`), any one 
 - `policy_flags` contains `safeguarding`, `conflicting_evidence`, or `aid_exception`
 - `needs` contains `rescue`, `medical`, or `aid_payment`
 
+`extract` reads caller turns only. A negator in the three words before a match drops it. Aid phrases and minimising phrases are exempt: "we cannot get the payment" and "not eligible" stay aid signals. Suggested flags are `conflicting_evidence` (minimising language plus danger, rescue, medical, or a child, elderly person, or immobile person), `safeguarding` (a child and an alone-phrase), and `aid_exception` (an aid phrase plus a refusal). Water at a door, step, or inside a room, or in the street, adds danger `rising_water`. That also adds need `rescue` when a child, elderly person, immobile person, or oxygen-dependent person was extracted, or when the water is at the building and evacuation was not already a need. "bus shelter" is not a shelter need.
+
 To match the chooser, Melanie must leave those field names and flag strings as they are when she builds a non-fixture case. Moly must keep `extract` English-only and must not treat operator turns as evidence. `system1.extraction_method` is `rules-only`. `system1.extraction_model` stays `TODO_HUMAN` and the rules do not read it.
 
 Minimal fields the fast path can accept:
@@ -107,7 +109,7 @@ Minimal fields the fast path can accept:
 }
 ```
 
-Mismatch: `make extract-eval` scores extract against the hand-filled fixture fields. An unsafe miss is a fixture whose hand fields route to System 2 while the extracted fields route to System 1. Fixture cases on the phone never take the extract path, so the demo does not show that score. Graduation fixtures `G01`–`G04` are labelled `expected.system` `system_1` with need `rescue`. The precheck routes `rescue` to System 2. The town labels are not that set. Town `calls[].expected_system` is the fixture label, not the chooser's result.
+Mismatch: `make extract-eval` scores extract against hand-filled fixture fields, and again against the scripted sim callers. An unsafe answer is a case whose true fields go to System 2 while the extracted fields get a System 1 answer with `requires_human` false. Fixture cases on the phone never take the extract path, so the demo does not show that score. `F15` hand fields include `vulnerable: child`, but the word "child" is only in an operator turn ("I can hear a child crying"). Caller text says "They are upset" and "invented bus shelter", which extract does not treat as a child or a shelter need. Graduation fixtures `G01`–`G04` are labelled `expected.system` `system_1` with need `rescue`. The precheck routes `rescue` to System 2. The town labels are not that set. Town `calls[].expected_system` is the fixture label, not the chooser's result.
 
 ### 3.3 Memory items to System 1 and the router
 
@@ -356,3 +358,4 @@ These leaves are `TODO_HUMAN` in `config/decisions.yaml`. Decided leaves, not op
 ## 5. Changelog
 
 - 2026-10-24 `1e4ca79` — First PRD. Field precheck, System 1 rules, and `router.merge` are live on the default turn only as described above. System 2, the Sapling client, and Mubit memory remain stubs.
+- 2026-10-24 `11e0859` — Extractor covers water at or inside the door, immobility, a child alone, aid refusals, and minimising. Aid and minimising matches are not dropped for a negator. `F15` still hides the child in an operator turn.
