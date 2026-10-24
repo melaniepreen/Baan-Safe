@@ -6,6 +6,8 @@ files:
   - infra/modal/s2_app.py
   - infra/modal/sapling_app.py
   - infra/HARDWARE.md
+  - scripts/sync_modal_secrets.py
+  - scripts/sync_workspace.py
 ---
 
 ## Purpose
@@ -20,9 +22,13 @@ Modal apps for System 1, System 2, Sapling, speech-to-text, and a finetune job. 
 - `infra/modal/vram.py` — footprint tables. Not a chosen model.
 - `infra/HARDWARE.md` — prices and the sizing note.
 - `infra/modal/runtime.py` — Modal secret `baansafe-mubit`, key name `MUBIT_API_KEY`. The value is not in git.
+- `scripts/sync_modal_secrets.py` — `make modal-secrets` from gitignored `.env`.
+- `scripts/sync_workspace.py` — `make sync` for both teammates: pull, `.env`, pip, Modal, secrets, push readiness.
 
 ## Interfaces/contracts
 
+- `make sync` runs `scripts/sync_workspace.py`: stash + `git pull --ff-only`, bootstrap/merge `.env` from `.env.example` without overwriting values, create/use `.venv` and `pip install` root + Modal requirements, Modal login check, then secret sync when keys exist. Prints push readiness. `SYNC_PUSH=1` pushes `main` only when ahead and not behind. Does not print secrets.
+- `make modal-secrets` runs `scripts/sync_modal_secrets.py`: pushes `HF_TOKEN` / `MUBIT_API_KEY` (and optional `S2_SERVE_API_KEY`) from gitignored `.env` into `baansafe-hf` / `baansafe-mubit`. Does not print values. Does not sync `OPENROUTER_API_KEY`.
 - `make modal-deploy-s1`, `modal-deploy-s2`, `modal-deploy-sapling`, `modal-deploy-stt` run `modal deploy`.
 - `make modal-finetune` runs `modal run -m infra.modal.finetune_app` with `DATASET` (default `eval/out/sft.jsonl`).
 - Sapling app reads `sapling.model_id` / `SAPLING_MODEL_ID` and `sapling.gpu` / `SAPLING_GPU`. It does not fall back to `MubitLabs/banyan-sapling`.

@@ -91,13 +91,12 @@ Modal apps live in `infra/modal/`. GPU sizes and the hourly arithmetic are in `i
 One-time setup, done by a person:
 
 ```bash
-pip install -r infra/modal/requirements.txt   # modal>=1.6
-modal token new                               # browser login; or `modal setup`
-modal secret create baansafe-hf HF_TOKEN=hf_...
-modal secret create baansafe-mubit MUBIT_API_KEY=mbt_...
+modal token new          # once per machine; browser login
+# Put HF_TOKEN and MUBIT_API_KEY in gitignored .env (make sync creates .env from .env.example)
+make sync                # git pull, deps, Modal check, secret sync; SYNC_PUSH=1 to push main
 ```
 
-`HF_TOKEN` and `MUBIT_API_KEY` are read from those Modal secrets. They are not written into the image or the repo. Optional: add `S2_SERVE_API_KEY` to `baansafe-mubit` (`modal secret create baansafe-mubit --force ...`). vLLM then requires that bearer token. Paste the same value into the Mubit console as the provider key for the self-hosted OpenAI base URL. The Modal URL is `https://<workspace>--baansafe-s2-serve.modal.run/v1`.
+`make sync` is the shared teammate path. It does not overwrite existing `.env` values. `HF_TOKEN` and `MUBIT_API_KEY` are read from Modal secrets `baansafe-hf` / `baansafe-mubit` after sync. They are not written into the image or the repo. Optional: add `S2_SERVE_API_KEY` to `.env` and re-run `make sync` or `make modal-secrets`. Paste the same value into the Mubit console as the provider key for the self-hosted OpenAI base URL. The Modal URL is `https://<workspace>--baansafe-s2-serve.modal.run/v1`.
 
 ```bash
 export S1_GPU=cpu

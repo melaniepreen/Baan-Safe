@@ -36,6 +36,8 @@ make eval-learning
 make sim-eval
 make latte-bench
 make serve
+make sync
+make modal-secrets
 make modal-deploy-s1
 make modal-deploy-s2
 make modal-deploy-sapling
