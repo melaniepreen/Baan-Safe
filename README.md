@@ -45,13 +45,15 @@ make replay-stubs   # accuracy of s1/s2 stub files against expected labels
 make demo-stub      # gateway.handle(..., use_stubs=True) for every fixture
 make demo-correction-loop  # stub: correction -> JSONL -> model version -> before/after
 make eval-learning  # stub: held-out correction eval, writes eval/out/learning.md
-make serve          # API on :8000, docs at /docs
+make serve          # API on :8000, docs at /docs, town sim at /ui/sim/
 make ingest         # public sources, using the cache
 make ingest-refresh # ignore the cache
 make data-report    # rewrite data/SOURCES.md
 ```
 
 `make` uses `python3` unless you pass `PYTHON=.venv/bin/python`.
+
+The town simulation is static files in `ui/sim/`. `make serve` mounts them at [http://127.0.0.1:8000/ui/sim/](http://127.0.0.1:8000/ui/sim/). It is a fixed isometric view (PixiJS, no GPU vendor requirement). How it sits on the contracts is `ui/sim/README.md`.
 
 ## API switches
 

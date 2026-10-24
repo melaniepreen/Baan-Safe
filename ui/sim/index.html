@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Baan-Safe town simulation</title>
+  <link rel="stylesheet" href="sim.css" />
+</head>
+<body>
+  <div id="scene"></div>
+
+  <header class="wordmark">
+    <p class="kicker">Baan-Safe / town block</p>
+    <div class="wordmark-actions">
+      <button type="button" id="view-dispatch">Dispatch frame</button>
+      <button type="button" id="view-fit">See the whole block</button>
+    </div>
+  </header>
+
+  <aside id="inspector" aria-live="polite">
+    <p class="kicker">Inspect</p>
+    <h1>Household</h1>
+    <div id="route-toggles" class="route-toggles"></div>
+    <p class="loading" id="loading">Loading town data…</p>
+    <div id="panel" hidden></div>
+  </aside>
+
+  <section class="block-map" aria-label="Block map">
+    <div class="map-head">
+      <p class="kicker">Block map</p>
+      <span id="cam-note">Camera fixed</span>
+    </div>
+    <canvas id="minimap" width="220" height="132"></canvas>
+    <label class="slider">
+      <span>Flood</span>
+      <input id="flood-opacity" type="range" min="0" max="100" value="82" />
+    </label>
+    <div class="legend">
+      <span><i class="swatch roof-red"></i>red</span>
+      <span><i class="swatch roof-blue"></i>blue</span>
+      <span><i class="swatch roof-grey"></i>grey</span>
+      <span><i class="swatch roof-pink"></i>school</span>
+      <span><i class="swatch roof-brown"></i>wood</span>
+      <span><i class="swatch accent"></i>route</span>
+    </div>
+    <p id="graph-stat" class="stat"></p>
+    <p class="stat">Street names are placeholders.</p>
+  </section>
+
+  <script type="module" src="sim.js"></script>
+</body>
+</html>

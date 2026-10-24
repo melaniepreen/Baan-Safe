@@ -93,6 +93,17 @@ def test_trace(client):
     assert {"gateway", "system_1", "router"} <= stages
 
 
+def test_town_sim_is_served(client):
+    page = client.get("/ui/sim/index.html")
+    assert page.status_code == 200
+    assert "Block map" in page.text
+    town = client.get("/ui/sim/data/town.json")
+    assert town.status_code == 200
+    body = town.json()
+    assert body["routes"] and body["buildings"]
+    assert client.get("/ui/sim/vendor/pixi.min.mjs").status_code == 200
+
+
 def test_context_resources_maps(client):
     context = client.get("/context", params={"district": "Mae Mo District"})
     assert context.status_code == 200
