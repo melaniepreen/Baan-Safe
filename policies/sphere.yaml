@@ -1,0 +1,259 @@
+# Sphere Handbook 2018. English source. No Thai edition was retrieved.
+# Live PDF returned HTTP 403 on 24 October 2026. Text is from the
+# Internet Archive capture of that file, 27 December 2024.
+
+license: &sphere_license >
+  Copyright © Sphere Association, 2018. Copyright for the Core Humanitarian
+  Standard on Quality and Accountability © CHS Alliance, Sphere Association
+  and Groupe URD, 2018. The handbook may be reproduced without fee for
+  educational purposes, including training, research and programme activities,
+  if the copyright holder is acknowledged. It is not intended for resale.
+  Other copying, posting online, reuse in other publications, or translation
+  or adaptation, needs prior written permission from info@spherestandards.org.
+  Official file: https://spherestandards.org/wp-content/uploads/Sphere-Handbook-2018-EN.pdf
+  That URL returned HTTP 403 on 24 October 2026. Wording was read from the
+  Internet Archive capture of 27 December 2024:
+  https://web.archive.org/web/20241227204521/https://www.spherestandards.org/wp-content/uploads/Sphere-Handbook-2018-EN.pdf
+
+source: &sphere_url https://spherestandards.org/wp-content/uploads/Sphere-Handbook-2018-EN.pdf
+retrieved: &sphere_date "2026-10-24"
+
+rules:
+  - id: SPHERE-WASH-2-1
+    status: verified
+    topic: wash
+    checks: [aid_eligibility]
+    text_en: >
+      Water supply standard 2.1 says people have equitable and affordable
+      access to a sufficient quantity of safe water to meet their drinking
+      and domestic needs. The sentence is the standard. It is not a baht
+      payment and it is not a Thai government entitlement.
+    text_th: ""
+    source_url: *sphere_url
+    source_excerpt: >
+      Water supply standard 2.1: Access and water quantity. People have
+      equitable and affordable access to a sufficient quantity of safe water
+      to meet their drinking and domestic needs.
+    retrieved: *sphere_date
+    license_note: *sphere_license
+    locator: "Sphere Handbook 2018, p. 105."
+
+  - id: SPHERE-WASH-15L
+    status: verified
+    topic: wash
+    checks: [aid_eligibility]
+    text_en: >
+      The key indicator under water supply standard 2.1 is a minimum of 15
+      litres per person per day for drinking and domestic hygiene, and the
+      quantity is to be determined from context and the phase of the response.
+      Guidance says a minimum of 15 litres per person per day is established
+      practice, is never a maximum, and may not suit every context. In the
+      acute phase of a drought, 7.5 litres per person per day may be
+      appropriate for a short time. In an urban middle-income context, 50
+      litres per person per day may be the minimum acceptable amount to
+      maintain health and dignity. 15 litres is not a ceiling and not a
+      reason to deny water above it.
+    text_th: ""
+    source_url: *sphere_url
+    source_excerpt: >
+      Average volume of water used for drinking and domestic hygiene per
+      household. Minimum of 15 litres per person per day. Determine quantity
+      based on context and phase of response. A minimum of 15 litres per
+      person per day is established practice. It is never a "maximum" and may
+      not suit all contexts or phases of a response. In the acute phase of a
+      drought, 7.5 litres per person per day may be appropriate for a short
+      time. In an urban middle-income context, 50 litres per person per day
+      may be the minimum acceptable amount to maintain health and dignity.
+    retrieved: *sphere_date
+    license_note: *sphere_license
+    locator: "Sphere Handbook 2018, pp. 106-107."
+
+  - id: SPHERE-WASH-BASIC-TABLE
+    status: verified
+    topic: wash
+    checks: [aid_eligibility]
+    text_en: >
+      The guidance table splits basic water into survival intake (drinking
+      and food) 2.5–3 litres per person per day, hygiene practices 2–6,
+      basic cooking 3–6, and total basic water 7.5–15. It says water needs
+      vary, particularly for persons with disabilities or facing mobility
+      barriers. These are the printed ranges. They are not a single number
+      to enforce on a household call.
+    text_th: ""
+    source_url: *sphere_url
+    source_excerpt: >
+      Survival: water intake (drinking and food) 2.5–3. Hygiene practices
+      2–6. Basic cooking 3–6. Total basic water 7.5–15. Minimum basic
+      survival water needs: Water needs will vary within the population,
+      particularly for persons with disabilities or facing mobility barriers,
+      and among groups with different religious practices.
+    retrieved: *sphere_date
+    license_note: *sphere_license
+    locator: "Sphere Handbook 2018, p. 107, needs table. Quantities are litres per person per day."
+
+  - id: SPHERE-FOOD-6-1
+    status: verified
+    topic: food
+    checks: [aid_eligibility]
+    text_en: >
+      Food assistance standard 6.1 says the basic nutritional needs of the
+      affected people, including the most vulnerable, are met. Key action 2
+      says to plan rations to make up the difference between nutritional
+      requirements and what people can provide for themselves. The standard
+      is not an order to deliver a full ration to every caller.
+    text_th: ""
+    source_url: *sphere_url
+    source_excerpt: >
+      Food assistance standard 6.1: General nutrition requirements. The basic
+      nutritional needs of the affected people, including the most vulnerable,
+      are met. Plan rations to make up the difference between the nutritional
+      requirements and what people can provide for themselves.
+    retrieved: *sphere_date
+    license_note: *sphere_license
+    locator: "Sphere Handbook 2018, p. 198."
+
+  - id: SPHERE-FOOD-2100
+    status: verified
+    topic: food
+    checks: [aid_eligibility]
+    text_en: >
+      The key indicator is the percentage of targeted households that receive
+      the minimum food energy requirements, printed as 2,100 kCal per person
+      per day, and the recommended daily micronutrient intake. Guidance says
+      the following estimates should be used for planning general rations and
+      adjusted to context: 2,100 kCal per person per day, with 10–12 per cent
+      of total energy from protein and 17 per cent from fat. It is a planning
+      figure to adjust, not a flat food issue and not a Thai baht amount.
+    text_th: ""
+    source_url: *sphere_url
+    source_excerpt: >
+      percentage of targeted households that receive the minimum food energy
+      requirements (2,100kCal per person per day) and recommended daily
+      micronutrient intake. The following estimates for a population's
+      minimum nutritional requirements should be used for planning general
+      rations and adjusted to context. 2,100 kCal per person per day with
+      10–12 per cent of total energy provided by protein and 17 per cent
+      provided by fat.
+    retrieved: *sphere_date
+    license_note: *sphere_license
+    locator: "Sphere Handbook 2018, pp. 198-199."
+
+  - id: SPHERE-FOOD-AT-RISK
+    status: verified
+    topic: food
+    checks: [aid_eligibility, safeguarding]
+    text_en: >
+      When setting eligibility for food assistance, Sphere says to consult
+      different groups so particular needs are not overlooked. Groups that
+      may need attention include older people, people living with HIV,
+      persons with disabilities, and caregivers. Older people's foods should
+      be easy to prepare and consume and should meet additional protein and
+      micronutrient requirements. This is a consultation rule, not a score.
+    text_th: ""
+    source_url: *sphere_url
+    source_excerpt: >
+      When setting eligibility criteria for food assistance, consult with
+      different groups to identify any particular needs that might otherwise
+      be overlooked. Specific population groups that may need attention
+      include older people, people living with HIV, persons with disabilities,
+      and caregivers. Older people should be able to access food sources and
+      food transfers easily. Foods should be easy to prepare and consume and
+      should meet the additional protein and micronutrient requirements of
+      older people.
+    retrieved: *sphere_date
+    license_note: *sphere_license
+    locator: "Sphere Handbook 2018, p. 200."
+
+  - id: SPHERE-SHELTER-3
+    status: verified
+    topic: shelter
+    checks: [aid_eligibility]
+    text_en: >
+      Shelter and settlement standard 3 says people have access to living
+      spaces that are safe and adequate, enabling essential household and
+      livelihoods activities to be undertaken with dignity. That is the
+      standard. The square-metre figures are indicators under it, in a
+      separate rule.
+    text_th: ""
+    source_url: *sphere_url
+    source_excerpt: >
+      Shelter and settlement standard 3: Living space. People have access to
+      living spaces that are safe and adequate, enabling essential household
+      and livelihoods activities to be undertaken with dignity.
+    retrieved: *sphere_date
+    license_note: *sphere_license
+    locator: "Sphere Handbook 2018, p. 254."
+
+  - id: SPHERE-SHELTER-3-5
+    status: verified
+    topic: shelter
+    checks: [aid_eligibility]
+    text_en: >
+      The living-space indicator is a minimum of 3.5 square metres of living
+      space per person, excluding cooking space, bathing area and sanitation
+      facility. Where internal cooking and bathing or sanitation are included,
+      in cold climates or urban settings, the indicator is 4.5–5.5 square
+      metres per person. Internal height is at least 2 metres at the highest
+      point, or 2.6 metres in hot climates. Guidance says to consider the
+      consequences of adopting 3.5 square metres per person (4.5 in cold
+      climates) and to agree any adaptation with partners. National
+      authorities or the response sector may guide the minimum. A temple hall
+      that is smaller is not, on this page, a promise the figure will be met.
+    text_th: ""
+    source_url: *sphere_url
+    source_excerpt: >
+      Minimum 3.5 square metres of living space per person, excluding cooking
+      space, bathing area and sanitation facility. 4.5–5.5 square metres of
+      living space per person in cold climates or urban settings where
+      internal cooking space and bathing and/or sanitation facilities are
+      included. Internal floor-to-ceiling height of at least 2 metres (2.6
+      metres in hot climates) at the highest point. Carefully consider the
+      potential consequences of adopting the minimum calculated space (3.5
+      square metres per person, 4.5 square metres in cold climates) and agree
+      any adaptation with partners.
+    retrieved: *sphere_date
+    license_note: *sphere_license
+    locator: "Sphere Handbook 2018, pp. 254-255."
+
+  - id: SPHERE-SETTLEMENT-AREA
+    status: verified
+    topic: shelter
+    checks: [aid_eligibility]
+    text_en: >
+      Settlement planning uses a different figure from covered living space:
+      45 square metres for each person in camp-type settlements, including
+      household plots, or 30 square metres for each person, including
+      household plots, where communal services can be provided outside the
+      planned settlement area. Do not treat 45 square metres as the covered
+      living-space minimum. That minimum is 3.5 square metres in
+      SPHERE-SHELTER-3-5.
+    text_th: ""
+    source_url: *sphere_url
+    source_excerpt: >
+      45 square metres for each person in camp-type settlements, including
+      household plots. 30 square metres for each person, including household
+      plots, where communal services can be provided outside the planned
+      settlement area.
+    retrieved: *sphere_date
+    license_note: *sphere_license
+    locator: "Sphere Handbook 2018, p. 250."
+
+  - id: SPHERE-CHILD-REFERRAL
+    status: verified
+    topic: safeguarding
+    checks: [safeguarding]
+    text_en: >
+      Sphere's protection guidance says to set up and use safe and effective
+      referral mechanisms to child protection services that support children
+      who are survivors of violence, exploitation, abuse and neglect. The
+      referral is to those services. It is not a question script for a child
+      and it is not a decision the model may close.
+    text_th: ""
+    source_url: *sphere_url
+    source_excerpt: >
+      Set up and use safe and effective referral mechanisms to child
+      protection services that support children who are survivors of violence,
+      exploitation, abuse and neglect.
+    retrieved: *sphere_date
+    license_note: *sphere_license
+    locator: "Sphere Handbook 2018, p. 42."

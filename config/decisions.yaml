@@ -42,6 +42,10 @@ learning_eval:
   freeze_mubit_auto_adapters: TODO_HUMAN  # freeze auto-adapters before a live eval run
 latte_bench:
   license_confirmation: TODO_HUMAN   # MubitLabs/latte-bench has no license; confirm with Mubit before any use beyond reference
+# Which corpus rule ids the demo may treat as authoritative. The files under
+# policies/ still load by id. A human chooses the set. Do not fill this in code.
+policies:
+  authoritative_set: TODO_HUMAN
 # Modal hosting. These do not replace system1.* or system2.*.
 # Apps read the environment variable first and refuse while the value is TODO_HUMAN.
 # Leave this block as TODO_HUMAN in git. scripts/validate.py rejects any other value here.

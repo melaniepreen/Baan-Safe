@@ -1,0 +1,228 @@
+# When a person must decide. IFRC 2018 minimum standards, and the UNHCR
+# emergency-handbook page on persons at risk. The UNHCR page says it is
+# outdated and under revision. That caveat is on the rules.
+
+license_ifrc: &ifrc_license >
+  © International Federation of Red Cross and Red Crescent Societies, Geneva,
+  2018. The PDF says copies of all or part of the study may be made for
+  noncommercial use, providing the source is acknowledged, and that requests
+  for commercial reproduction should be directed to secretariat@ifrc.org.
+  Retrieved 24 October 2026 from
+  https://www.ifrc.org/sites/default/files/Minimum-standards-for-protection-gender-and-inclusion-in-emergencies-LR.pdf
+
+license_unhcr: &unhcr_license >
+  UNHCR Emergency Handbook, "Overview: Persons at risk", last updated
+  21 January 2026, retrieved 24 October 2026. The page says this entry is
+  outdated and under revision. No redistribution licence was printed on the
+  page. This is a short quotation for the research corpus. Confirm before
+  republishing.
+  https://emergency.unhcr.org/protection/persons-risk/overview-persons-risk
+
+ifrc: &ifrc_url https://www.ifrc.org/sites/default/files/Minimum-standards-for-protection-gender-and-inclusion-in-emergencies-LR.pdf
+unhcr: &unhcr_url https://emergency.unhcr.org/protection/persons-risk/overview-persons-risk
+retrieved: &sg_date "2026-10-24"
+
+rules:
+  - id: IFRC-PGI-DO-NO-HARM
+    status: verified
+    topic: safeguarding
+    checks: [safeguarding]
+    text_en: >
+      The IFRC minimum standards say emergency programmes must limit people's
+      exposure to the risks of violence and abuse and "do no harm". They are
+      based on gender, age, disability and other diversity factors. A fast
+      triage label does not replace that duty.
+    text_th: ""
+    source_url: *ifrc_url
+    source_excerpt: >
+      It provides practical guidance on how to mainstream these four
+      principles in all sectors, based on a consideration of gender, age,
+      disability and other diversity factors. This includes limiting people's
+      exposure to the risks of violence and abuse and ensuring that emergency
+      programmes "do no harm".
+    retrieved: *sg_date
+    license_note: *ifrc_license
+    locator: "IFRC Minimum standards for PGI in emergencies, 2018, introduction."
+
+  - id: IFRC-PGI-MARGINALISED
+    status: verified
+    topic: safeguarding
+    checks: [safeguarding]
+    text_en: >
+      The IFRC defines marginalised groups, for these standards, as including
+      older people, children (including adolescents), persons with physical,
+      sensory or intellectual disabilities, persons with mental health
+      disabilities, survivors of sexual and gender-based violence, victims of
+      trafficking, and people living with HIV/AIDS or other chronic illnesses.
+      The same passage says users must analyse the situation and see who else
+      is included in that context. The list is not a score and it does not
+      say every person in a category needs the same package.
+    text_th: ""
+    source_url: *ifrc_url
+    source_excerpt: >
+      In all cases, marginalised groups are understood to include older
+      people, children (including adolescents), persons with physical, sensory
+      or intellectual disabilities, persons with mental health disabilities,
+      survivors of SGBV, victims of trafficking and people living with
+      HIV/AIDS or other chronic illnesses. Users of these minimum standards
+      are therefore encouraged to analyse the situation carefully and
+      understand exactly which individuals and groups are included in
+      "marginalised groups".
+    retrieved: *sg_date
+    license_note: *ifrc_license
+    locator: "IFRC PGI minimum standards, 2018, definitions."
+
+  - id: IFRC-PGI-DISABILITY
+    status: verified
+    topic: safeguarding
+    checks: [safeguarding]
+    text_en: >
+      The IFRC says disability results from the interaction between persons
+      with impairments and the attitudinal and environmental barriers that
+      hinder their full and effective participation in society on an equal
+      basis with others. Persons with disabilities include those who have
+      long-term physical, mental, intellectual or sensory impairments. Do not
+      treat disability as a reason to deny assistance, and do not treat the
+      label alone as proof of a specialised package.
+    text_th: ""
+    source_url: *ifrc_url
+    source_excerpt: >
+      Disability results from the interaction between persons with impairments
+      and the attitudinal and environmental barriers that hinder their full
+      and effective participation in society on an equal basis with others.
+      Persons with disabilities include those who have long-term physical,
+      mental, intellectual or sensory impairments.
+    retrieved: *sg_date
+    license_note: *ifrc_license
+    locator: "IFRC PGI minimum standards, 2018, definitions."
+
+  - id: IFRC-PGI-CHILD-DEFINITION
+    status: verified
+    topic: safeguarding
+    checks: [safeguarding]
+    text_en: >
+      The IFRC says child protection refers to the prevention of, and response
+      to, abuse, neglect, exploitation and violence against children. In the
+      child-protection policy passage it says children means under 18 years.
+      A call that involves a child is a protection matter for a person, not a
+      welfare label the model may close.
+    text_th: ""
+    source_url: *ifrc_url
+    source_excerpt: >
+      Child protection refers to the prevention of, and response to, abuse,
+      neglect, exploitation and violence against children. In 2013, the IFRC
+      launched its Child Protection Policy to provide a framework for ensuring
+      that children (i.e. under 18 years) are protected from all forms of
+      abuse and exploitation in all IFRC operations, activities and programmes.
+    retrieved: *sg_date
+    license_note: *ifrc_license
+    locator: "IFRC PGI minimum standards, 2018, definitions and the child-protection section."
+
+  - id: IFRC-PGI-UASC
+    status: verified
+    topic: safeguarding
+    checks: [safeguarding]
+    text_en: >
+      The IFRC says that in emergencies, children, especially unaccompanied
+      and separated children, are among the most vulnerable, and that child
+      protection is the responsibility of all personnel. When a child receives
+      any kind of assistance or service, a parent or guardian has to give
+      consent on behalf of the child. Do not ask a child for a graphic account.
+    text_th: ""
+    source_url: *ifrc_url
+    source_excerpt: >
+      In emergencies, children, especially unaccompanied and separated
+      children, are among the most vulnerable. Child protection is the
+      responsibility of all personnel in all the work we do. When a child
+      receives any kind of assistance or service (e.g. medical or legal), a
+      parent or guardian has to give consent on behalf of the child.
+    retrieved: *sg_date
+    license_note: *ifrc_license
+    locator: "IFRC PGI minimum standards, 2018, safety section."
+
+  - id: IFRC-PGI-CHILD-HUMAN
+    status: verified
+    topic: safeguarding
+    checks: [safeguarding]
+    text_en: >
+      Where there are concerns about the child's parent or caregiver, the IFRC
+      says to consult child protection specialists. If an unaccompanied or
+      separated child needs critical health care and has no recognised legal
+      guardian, the healthcare provider must make the treatment decision in
+      consultation with the child and with relevant local protection
+      authorities. Those decisions are for the specialist, the provider, and
+      the protection authority. They are not for the model.
+    text_th: ""
+    source_url: *ifrc_url
+    source_excerpt: >
+      In a situation where there are concerns regarding the child's parent or
+      caregiver, it is advised to consult child protection specialists for the
+      best course of action. If an unaccompanied or separated child is in need
+      of critical health care but is without a recognised legal guardian, the
+      healthcare provider must make a decision concerning treatment in
+      consultation with the child and with relevant local protection authorities.
+    retrieved: *sg_date
+    license_note: *ifrc_license
+    locator: "IFRC PGI minimum standards, 2018, emergency health."
+
+  - id: UNHCR-HEIGHTENED-RISK
+    status: verified
+    topic: safeguarding
+    checks: [safeguarding]
+    text_en: >
+      UNHCR says the following are generally considered to be at heightened
+      risk to be prioritised at registration, and that additional groups may
+      matter in context: girls and boys, including unaccompanied and separated
+      children; persons with serious health conditions; persons with special
+      legal or physical protection needs; single women; women-headed
+      households; older persons; persons with disabilities; and LGBTIQ+
+      persons. The same page says not every individual in those categories
+      has specific needs, that needs change, and that staff should analyse
+      risks rather than issue a standard package to a labelled group.
+    text_th: ""
+    source_url: *unhcr_url
+    source_excerpt: >
+      Individuals in the following categories are generally considered to be
+      at heightened risk to be prioritized at registration, noting that
+      additional groups may be relevant as regard to the context: girls and
+      boys, including unaccompanied and separated children; persons with
+      serious health conditions; persons with special legal or physical
+      protection needs; single women; women-headed households; older persons;
+      persons with disabilities; and persons of diverse sexual orientation
+      gender identity, gender expression and/or sex characteristics (LGBTIQ+
+      persons). It is important to remember that not every individual in the
+      above categories has specific needs.
+    retrieved: *sg_date
+    license_note: *unhcr_license
+    locator: "UNHCR Emergency Handbook, Overview of persons at risk, retrieved 24 October 2026."
+    caveat: >
+      The page says: This entry is outdated and under revision. Please check
+      back later. Last updated 21 January 2026.
+
+  - id: UNHCR-DO-NOT-SCORE
+    status: verified
+    topic: safeguarding
+    checks: [safeguarding, denial]
+    text_en: >
+      UNHCR says systems that prioritise persons with specific needs on
+      individual characteristics alone, without other risk factors and
+      without the community, may create misinformation and tensions. Review
+      prioritisation with communities as the emergency changes. A category
+      label is not, on this sentence, a reason to deny someone else or to
+      approve a fixed package.
+    text_th: ""
+    source_url: *unhcr_url
+    source_excerpt: >
+      Systems that simplistically prioritize persons with specific needs
+      based on individual characteristics alone, without considering
+      additional risk factors in the environment and without engaging
+      communities in this process, may create misinformation and tensions in
+      the community. For this reason, regularly review specific needs and
+      their prioritization in consultation with communities as the emergency
+      context evolves.
+    retrieved: *sg_date
+    license_note: *unhcr_license
+    locator: "UNHCR Emergency Handbook, protection risks, retrieved 24 October 2026."
+    caveat: >
+      The page says: This entry is outdated and under revision. Last updated
+      21 January 2026.

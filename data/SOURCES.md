@@ -93,4 +93,4 @@ DDPM situation reports were not added. The repo owner took DDPM out of this run.
 - HDX admin boundaries: later — human to approve. Not fetched.
 - EM-DAT: later — human to approve. Not fetched.
 - World Bank 2011 loss tables: later — human to approve. Not fetched.
-- policy corpus: later — human to approve. Not fetched.
+- policy corpus: drafted in `policies/` on 24 October 2026 and served by the policy service (`local_yaml` is the only live adapter). See `policies/SOURCES.md`. Which rule ids are authoritative for the demo is `policies.authoritative_set` and is still `TODO_HUMAN`. ReliefWeb and DDPM were not used. Remote catalogs that did not return rule text are candidates there, not adapters.

@@ -1,0 +1,166 @@
+# Zero-shot NLI hypotheses for System 1. Each hypothesis is a full sentence.
+# Thai lines are templates for the model. They are quotations only where
+# thai_is_quotation is true. They are not a priority score. config/priorities.yaml
+# is still a human judgement call. Score every hypothesis on its own.
+
+labels:
+  - id: niems_red_critical
+    status: verified
+    label_en: Life-threatening emergency, immediate
+    label_th: ผู้ป่วยฉุกเฉินวิกฤติ ทันที
+    hypothesis_en: This call is a life-threatening emergency that must be handled immediately.
+    hypothesis_th: สายนี้เป็นผู้ป่วยฉุกเฉินวิกฤติที่คุกคามชีวิต และต้องจัดการทันที
+    derived_from: [NIEMS-COLOR-RED]
+    thai_is_quotation: false
+
+  - id: niems_yellow_urgent
+    status: verified
+    label_en: Urgent emergency, after life-threatening cases
+    label_th: ผู้ป่วยฉุกเฉินเร่งด่วน หลังสีแดง
+    hypothesis_en: This call is an urgent emergency that is handled after a life-threatening case.
+    hypothesis_th: สายนี้เป็นผู้ป่วยฉุกเฉินเร่งด่วน และต้องจัดการหลังผู้ป่วยที่คุกคามชีวิต
+    derived_from: [NIEMS-COLOR-YELLOW]
+    thai_is_quotation: false
+
+  - id: niems_green_not_severe
+    status: verified
+    label_en: Emergency that is not severe, after urgent cases
+    label_th: ผู้ป่วยฉุกเฉินไม่รุนแรง หลังสีเหลือง
+    hypothesis_en: This call is an emergency that is not severe and is handled after urgent cases.
+    hypothesis_th: สายนี้เป็นผู้ป่วยฉุกเฉินไม่รุนแรง และต้องจัดการหลังผู้ป่วยเร่งด่วน
+    derived_from: [NIEMS-COLOR-GREEN]
+    thai_is_quotation: false
+
+  - id: niems_white_general
+    status: verified
+    label_en: General patient, elsewhere or after green
+    label_th: ผู้ป่วยทั่วไป
+    hypothesis_en: This call is a general patient who can be directed elsewhere or after the emergency cases.
+    hypothesis_th: สายนี้เป็นผู้ป่วยทั่วไป ที่ไปรับบริการที่อื่นหรือหลังผู้ป่วยฉุกเฉินไม่รุนแรง
+    derived_from: [NIEMS-COLOR-WHITE]
+    thai_is_quotation: false
+
+  - id: niems_black_not_a_patient
+    status: verified
+    label_en: No patient, another public-health request
+    label_th: ไม่มีผู้ป่วย
+    hypothesis_en: This call has no patient and is another public-health request, for another time or another place.
+    hypothesis_th: สายนี้ไม่มีผู้ป่วย และเป็นคำขอรับบริการสาธารณสุขอย่างอื่น ในเวลาอื่นหรือที่อื่น
+    derived_from: [NIEMS-COLOR-BLACK]
+    thai_is_quotation: false
+
+  - id: niems_not_conscious_or_breathing
+    status: verified
+    label_en: Not conscious, or not breathing normally
+    label_th: ไม่รู้สึกตัวหรือหายใจไม่ปกติ
+    hypothesis_en: The person is not conscious or is not breathing normally.
+    hypothesis_th: ผู้ป่วยไม่รู้สึกตัว หรือหายใจไม่ปกติ
+    derived_from: [CBD-STEP1-CONSCIOUS-BREATHING]
+    thai_is_quotation: false
+
+  - id: sphere_water_short
+    status: verified
+    label_en: Drinking and domestic water below the Sphere minimum
+    label_th: น้ำดื่มและน้ำใช้ต่ำกว่าตัวชี้วัด Sphere
+    hypothesis_en: >
+      The household has less than the Sphere minimum of 15 litres per person
+      per day for drinking and domestic hygiene, and that figure is not a maximum.
+    hypothesis_th: >
+      ครัวเรือนนี้มีน้ำสำหรับดื่มและสุขอนามัยไม่ถึง 15 ลิตรต่อคนต่อวันตามตัวชี้วัดขั้นต่ำของ Sphere
+      และตัวเลขนี้ไม่ใช่เพดาน
+    derived_from: [SPHERE-WASH-15L]
+    thai_is_quotation: false
+
+  - id: sphere_food_short
+    status: verified
+    label_en: Food energy below the Sphere planning figure
+    label_th: พลังงานอาหารต่ำกว่าตัวเลขวางแผนของ Sphere
+    hypothesis_en: >
+      The household is not receiving the Sphere planning figure of 2,100 kilocalories
+      per person per day, and that figure is adjusted to context rather than issued in full by default.
+    hypothesis_th: >
+      ครัวเรือนนี้ไม่ได้รับพลังงานอาหารตามตัวเลขวางแผนของ Sphere ที่ 2,100 กิโลแคลอรีต่อคนต่อวัน
+      และตัวเลขนี้ต้องปรับตามบริบท ไม่ใช่การแจกเต็มจำนวนโดยอัตโนมัติ
+    derived_from: [SPHERE-FOOD-2100, SPHERE-FOOD-6-1]
+    thai_is_quotation: false
+
+  - id: sphere_shelter_crowded
+    status: verified
+    label_en: Covered living space below the Sphere minimum
+    label_th: พื้นที่ใช้สอยต่ำกว่าตัวชี้วัด Sphere
+    hypothesis_en: >
+      The shelter has less than the Sphere minimum of 3.5 square metres of living
+      space per person, excluding cooking space, bathing area and sanitation.
+    hypothesis_th: >
+      ที่พักนี้มีพื้นที่ใช้สอยน้อยกว่า 3.5 ตารางเมตรต่อคน โดยยังไม่นับพื้นที่ทำอาหาร พื้นที่อาบน้ำ และสุขาภิบาล
+    derived_from: [SPHERE-SHELTER-3-5]
+    thai_is_quotation: false
+
+  - id: safeguarding_child
+    status: verified
+    label_en: A child needs a person to decide
+    label_th: มีเด็ก และต้องให้คนตัดสินใจ
+    hypothesis_en: A child is involved and a person responsible for child protection must decide.
+    hypothesis_th: มีเด็กเกี่ยวข้อง และต้องให้คนที่รับผิดชอบการคุ้มครองเด็กเป็นผู้ตัดสินใจ
+    derived_from: [IFRC-PGI-UASC, IFRC-PGI-CHILD-HUMAN, SPHERE-CHILD-REFERRAL]
+    thai_is_quotation: false
+
+  - id: safeguarding_older_person
+    status: verified
+    label_en: An older person needs an individual assessment
+    label_th: มีผู้สูงอายุ และต้องประเมินรายคน
+    hypothesis_en: An older person is involved and the risk has to be assessed for that person rather than by age alone.
+    hypothesis_th: มีผู้สูงอายุเกี่ยวข้อง และต้องประเมินความเสี่ยงของคนนั้น ไม่ใช่ตัดสินจากอายุอย่างเดียว
+    derived_from: [IFRC-PGI-MARGINALISED, UNHCR-HEIGHTENED-RISK, UNHCR-DO-NOT-SCORE]
+    thai_is_quotation: false
+
+  - id: safeguarding_disability
+    status: verified
+    label_en: A person with a disability needs an individual assessment
+    label_th: มีคนพิการ และต้องประเมินรายคน
+    hypothesis_en: A person with a disability is involved and barriers, not the label alone, have to be assessed by a person.
+    hypothesis_th: มีคนพิการเกี่ยวข้อง และต้องให้คนประเมินอุปสรรค ไม่ใช่ตัดสินจากคำว่าพิการอย่างเดียว
+    derived_from: [IFRC-PGI-DISABILITY, UNHCR-DO-NOT-SCORE]
+    thai_is_quotation: false
+
+  - id: safeguarding_serious_health
+    status: verified
+    label_en: Serious health condition, a person must decide
+    label_th: มีปัญหาสุขภาพรุนแรง และต้องให้คนตัดสินใจ
+    hypothesis_en: A serious health condition is described and a person must decide the medical response.
+    hypothesis_th: มีปัญหาสุขภาพรุนแรง และต้องให้คนตัดสินใจเรื่องการรักษา
+    derived_from: [UNHCR-HEIGHTENED-RISK, CBD-ONLINE-MEDICAL-DIRECTION]
+    thai_is_quotation: false
+
+  - id: safeguarding_protection_referral
+    status: verified
+    label_en: Protection risk, refer to a person
+    label_th: มีความเสี่ยงด้านการคุ้มครอง ต้องส่งต่อให้คน
+    hypothesis_en: There is a protection risk and the case must be referred to a person who can act on it.
+    hypothesis_th: มีความเสี่ยงด้านการคุ้มครอง และต้องส่งต่อให้คนที่รับผิดชอบ
+    derived_from: [IFRC-PGI-DO-NO-HARM, SPHERE-CHILD-REFERRAL]
+    thai_is_quotation: false
+
+  - id: flood_water_depth
+    status: unverified
+    label_en: Flood water depth
+    label_th: ความลึกของน้ำท่วม
+    hypothesis_en: >
+      TODO_HUMAN. No verified flood water-depth threshold is in the corpus.
+      This hypothesis must not be used as a priority.
+    hypothesis_th: >
+      TODO_HUMAN ยังไม่มีเกณฑ์ความลึกของน้ำท่วมที่ยืนยันจากแหล่งที่มา ห้ามใช้สมมติฐานนี้เป็นลำดับความสำคัญ
+    derived_from: [FLOOD-WATER-DEPTH]
+    thai_is_quotation: false
+
+  - id: flood_trapped
+    status: unverified
+    label_en: Trapped by floodwater
+    label_th: ติดอยู่ในน้ำท่วม
+    hypothesis_en: >
+      TODO_HUMAN. No verified rule maps being trapped by floodwater to a 1669 colour or a time target.
+      This hypothesis must not be used as a priority.
+    hypothesis_th: >
+      TODO_HUMAN ยังไม่มีเกณฑ์ที่ยืนยันว่าคนติดอยู่ในน้ำท่วมตรงกับสีใดของ 1669 ห้ามใช้สมมติฐานนี้เป็นลำดับความสำคัญ
+    derived_from: [FLOOD-TRAPPED-DISPATCH]
+    thai_is_quotation: false

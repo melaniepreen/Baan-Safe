@@ -130,14 +130,6 @@ def verify_before_router(
 
 
 def _request_from_case(case: CaseState, outcome: Outcome, check: str) -> dict[str, str]:
-    policies = [item.summary for item in case.memory_context if item.kind == "policy"]
-    if policies:
-        policy = "\n".join(policies)
-    else:
-        policy = (
-            "No policy text was retrieved. "
-            f"The check is {check}. Missing policy text is not support for the claim."
-        )
     parts: list[str] = []
     if case.fields.location:
         parts.append(f"Location label: {case.fields.location}.")
@@ -147,6 +139,23 @@ def _request_from_case(case: CaseState, outcome: Outcome, check: str) -> dict[st
         parts.append(f"{turn.speaker}: {turn.text}")
     evidence = "\n".join(parts) if parts else "No evidence text was retrieved."
     claim = outcome.reason.strip() or f"The {check.replace('_', ' ')} claim is ready to act on."
+    # Corpus text is used when the case names rule ids, or when a human has
+    # set policies.authoritative_set. While that decision is TODO_HUMAN and
+    # the case names no rule, memory summaries stay the policy text.
+    from system2.sapling_policy import policy_text_for_case
+
+    loaded = policy_text_for_case(case, evidence, claim)
+    if loaded is not None:
+        policy = loaded
+    else:
+        policies = [item.summary for item in case.memory_context if item.kind == "policy"]
+        if policies:
+            policy = "\n".join(policies)
+        else:
+            policy = (
+                "No policy text was retrieved. "
+                f"The check is {check}. Missing policy text is not support for the claim."
+            )
     return {"policy": policy, "evidence": evidence, "claim": claim}
 
 
