@@ -90,7 +90,7 @@ def test_trace(client):
     response = client.get("/cases/F03/trace")
     assert response.status_code == 200
     stages = {event["stage"] for event in response.json()}
-    assert {"gateway", "system_1", "router"} <= stages
+    assert {"enrich", "memory", "gateway", "system_1", "router"} <= stages
 
 
 def test_town_sim_is_served(client):

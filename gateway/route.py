@@ -63,8 +63,28 @@ def handle(
         overlay = load_from_env()
     started = _now()
     _extract(case)
-    _enrich(case)
+    enrich_started = _now()
+    enrich_note = _enrich(case)
+    emit(
+        TraceEvent(
+            case_id=case.case_id,
+            stage="enrich",
+            started_at=enrich_started,
+            latency_ms=0,
+            notes=enrich_note,
+        )
+    )
+    memory_started = _now()
     case.memory_context = retrieve(case)
+    emit(
+        TraceEvent(
+            case_id=case.case_id,
+            stage="memory",
+            started_at=memory_started,
+            latency_ms=0,
+            notes=f"memory via adapter; items={len(case.memory_context)}",
+        )
+    )
     graduations = apply_graduations(case)
     mode = _mode()
     system, triggers = choose(case, overlay)
@@ -185,6 +205,16 @@ def _impl(name: str) -> str:
 
 
 def _trace_system(case_id: str, outcome: Outcome, use_stubs: bool) -> None:
+    real = (outcome.system is System.system_1 and _impl("S1_IMPL") == "real") or (
+        outcome.system is System.system_2 and _impl("S2_IMPL") == "real"
+    )
+    if real or not use_stubs:
+        path = "real"
+    else:
+        path = "stub"
+    note = f"{path} interface"
+    if outcome.system is System.system_2 and path == "real":
+        note = "real interface; mubit_chat hop traced in llm.complete"
     emit(
         TraceEvent(
             case_id=case_id,
@@ -193,7 +223,7 @@ def _trace_system(case_id: str, outcome: Outcome, use_stubs: bool) -> None:
             latency_ms=outcome.latency_ms or 0,
             model=None,
             outcome=outcome,
-            notes="stub outcome" if use_stubs else "real interface",
+            notes=note,
         )
     )
 
@@ -210,14 +240,14 @@ def _extract(case: CaseState) -> None:
         _add(case.policy_flags, flag)
 
 
-def _enrich(case: CaseState) -> None:
+def _enrich(case: CaseState) -> str:
     from ingest import store
 
     mode = os.environ.get("ENRICH_IMPL", "").strip().lower()
     if not mode:
         mode = "data" if store.available() else "off"
     if mode == "off":
-        return
+        return "enrich=off"
     ctx = location_context(case.fields.location, None, None)
     case.resources = {**case.resources, "location_context": ctx}
     thresholds = load_yaml("escalation.yaml").get("enrichment_flags") or {}
@@ -238,6 +268,7 @@ def _enrich(case: CaseState) -> None:
     if ctx.get("near_flood_extent"):
         _add(flags, "near_flood_extent")
     case.policy_flags = flags
+    return f"enrich={mode}"
 
 
 def _add(flags: list[str], flag: str) -> None:

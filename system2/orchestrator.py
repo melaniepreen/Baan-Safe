@@ -109,6 +109,7 @@ def orchestrate(
     started = perf_counter()
     latency_ms = lambda: int((perf_counter() - started) * 1000)  # noqa: E731
     try:
+        # llm.complete emits mubit_chat before/after the Mubit hop (case_id set).
         reply = _completer(
             _messages(case, handoff, recommendation),
             model=model,
@@ -117,6 +118,7 @@ def orchestrate(
             temperature=0,
             seed=7,
             reasoning=_REASONING,
+            case_id=case.case_id,
         )
         outcome = _outcome_from_reply(reply, latency_ms)
     except (httpx.HTTPError, ValueError, KeyError, TypeError) as exc:
