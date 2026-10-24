@@ -4,7 +4,7 @@ Flood and disaster call-triage scaffold. Mubit governs memory, policy, and trace
 
 Sapling is [MubitLabs/banyan-sapling](https://huggingface.co/MubitLabs/banyan-sapling), the Apache-2.0 23B verifier (research preview). It takes a policy, evidence, and a claim, and returns `supported`, `violation`, `missing`, `contradicted`, or `unsure`, with probabilities. `supported` lets the proposed action stand. `violation` blocks it. `unsure`, `missing`, and `contradicted` hand the case to a human. The input limit is 16,384 tokens. It does not run on System 1. `system2.use_banyan_sapling` is true for those two checks. Hosting, the GPU, and Thai handling stay `TODO_HUMAN`. Tests use the stub client and do not load a GPU.
 
-Solid edges run on `POST /cases/{id}/turns` with `use_stubs=True`. Dashed nodes are not called on that request. `system1.decide` replaces the stub file only when `S1_IMPL=real` or `use_stubs=False`.
+Solid edges run on `POST /cases/{id}/turns` with `use_stubs=True`. Dashed nodes are not called on that request. Graduation may tag `complex_situation` and add a `graduated-*` recommendation before the field precheck. That sets no priority and does not move a pattern into System 1. `router/ledger.py` reserves stock in this process only. `system1.decide` replaces the stub file only when `S1_IMPL=real` or `use_stubs=False`.
 
 ```mermaid
 flowchart TD
@@ -15,10 +15,11 @@ flowchart TD
   gw --> enrich["enrich: sqlite or off"]
   gw --> mem["memory mock files"]
   mem -.-> mm["memory.mubit raises"]:::unwired
-  gw --> pick{"field precheck"}
+  mem --> grad["graduation to System 2"]
+  grad --> pick{"field precheck"}
   pick -->|no trigger| s1["S1 stub file"]
   pick -->|any trigger| s2["S2 stub file"]
-  s1 --> merge["router.merge"]
+  s1 --> merge["router.merge + process ledger"]
   s2 --> merge
   merge --> out["RouterDecision + dispatches"]
   s1 -.-> rules["system1.decide if S1_IMPL=real"]

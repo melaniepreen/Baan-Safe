@@ -15,7 +15,7 @@ Key corrections:
 
 Target flow: Caller → live speech-to-text → Call Agent → Mubit Gateway (memory retrieval, policy pre-check, route) → System 1 (simple, clear, low-risk) or System 2 (ambiguous or high-risk, Nemotron, then Sapling when the claim is aid eligibility or a denial) → Decision Router → Call Agent (next question, update case, or provisional dispatch).
 
-The diagram is `gateway/route.py` on the default request (`use_stubs=True`). Solid edges run. A dashed node is not called on that request. The field precheck in `gateway/chooser.py` picks the system. `router/merge.py` builds the `RouterDecision`. `system1/decide.py` runs only when `S1_IMPL=real` or `use_stubs=False`, and then it replaces the stub file. `llm/client.py` and `llm/openai_client.py` accept only a Mubit host (`llm.provider_route` is `mubit`, including the compat OpenRouter prefix). The orchestrator does not reach them while `system2.orchestrator_model` is `TODO_HUMAN`. `GET /policies` serves the local corpus on its own. Aid routes return 501. Modal apps refuse to start while their model and GPU values are `TODO_HUMAN`.
+The diagram is `gateway/route.py` on the default request (`use_stubs=True`). Solid edges run. A dashed node is not called on that request. After mock memory, `gateway/graduation.py` may tag `complex_situation` and add a `graduated-*` recommendation. That sets no priority and does not move a pattern into System 1. The field precheck in `gateway/chooser.py` picks the system. `router/merge.py` builds the `RouterDecision` and `router/ledger.py` reserves stock in this process only. `system1/decide.py` runs only when `S1_IMPL=real` or `use_stubs=False`, and then it replaces the stub file. `llm/client.py` and `llm/openai_client.py` accept only a Mubit host (`llm.provider_route` is `mubit`, including the compat OpenRouter prefix). The orchestrator does not reach them while `system2.orchestrator_model` is `TODO_HUMAN`. `GET /policies` serves the local corpus on its own. Aid routes return 501. Modal apps refuse to start while their model and GPU values are `TODO_HUMAN`.
 
 ```mermaid
 flowchart TD
@@ -26,10 +26,11 @@ flowchart TD
   gw --> enrich["enrich: sqlite or off"]
   gw --> mem["memory mock files"]
   mem -.-> mm["memory.mubit raises"]:::unwired
-  gw --> pick{"field precheck"}
+  mem --> grad["graduation to System 2"]
+  grad --> pick{"field precheck"}
   pick -->|no trigger| s1["S1 stub file"]
   pick -->|any trigger| s2["S2 stub file"]
-  s1 --> merge["router.merge"]
+  s1 --> merge["router.merge + process ledger"]
   s2 --> merge
   merge --> out["RouterDecision + dispatches"]
   s1 -.-> rules["system1.decide if S1_IMPL=real"]

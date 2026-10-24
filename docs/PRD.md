@@ -11,16 +11,16 @@ Demo story, as the town page runs it (`ui/sim/`, `make serve`, `http://127.0.0.1
 - The picture is a placeholder block. `data.demo_event` is `TODO_HUMAN`. Household districts are the fixture districts (Lampang, Phrae, Nan, Phayao). Street names in `ui/sim/data/streets.json` are marked placeholder.
 - The phone sends a line by matching it to one of 20 fixture ids (`ui/sim/data/town.json` `calls`, same order as `fixtures/index.json`), then `POST /cases` with that `fixture_id` and `POST /cases/{id}/turns` with the typed or spoken text.
 - The gateway returns a `RouterDecision`. `final_priority` lights the house (P1 red, P2 amber, P3 yellow, P4 blue). The phone speaks a scripted line from `ui/sim/data/replies.json`, not a live operator.
-- The right-hand feed plays `ui/sim/data/sim_events.json`. Every card is badged simulated. Its confidence threshold (default 0.75) is page-only. It is not `system_1_min_confidence` (0.80) and it is not the field precheck.
+- The right-hand feed plays `ui/sim/data/sim_events.json`. Every card is badged simulated. `confidence_threshold` is 0.8, the same number as `system_1_min_confidence`. The accept/reject story is still the page's scores, not `source_outcomes[0].system`.
 - Reject opens Correct this (`ui/correct.js`) and posts `POST /cases/{id}/corrections`.
 - Speech uses the browser Web Speech API, else `POST /stt/transcribe`. This API does not mount `infra/modal/stt_app`. If neither returns words, the phone shows a stub transcript and sends nothing.
 
 Scope that is in the tree tonight:
 
-- Gateway: keyword-extract when fields are empty, enrich, mock memory, field precheck, one stub outcome, `router.merge`.
+- Gateway: keyword-extract when fields are empty, enrich, mock memory, graduation (`complex_situation` when a pattern has enough human corrections), field precheck, one stub outcome, `router.merge`. `router/ledger.py` reserves stock in this process only.
 - System 1 rules (`system1/extract.py`, `system1/decide.py`) when `S1_IMPL=real` or `use_stubs=False`. The API default is `use_stubs=True`, so a normal `/turns` call still uses the stub outcome file.
 - System 2, Sapling's live client, aid eligibility, aid exceptions, and the Mubit memory client still raise or return HTTP 501.
-- Integration named in `OWNERSHIP.md`: `S1_IMPL=real`, `S2_IMPL=real`, and `MEMORY_IMPL=mubit` together. Contracts are v0.2 plus CR-003 (`Dispatch`, `RouterDecision.dispatches`, tag pending).
+- Integration named in `OWNERSHIP.md`: `S1_IMPL=real`, `S2_IMPL=real`, and `MEMORY_IMPL=mubit` together. Contracts stay frozen at `v0.3-contracts` until then. CR-003 (`Dispatch`, `RouterDecision.dispatches`) is tagged `v0.3-contracts`.
 
 `frontend-prototype/` is not part of this product surface.
 
@@ -30,20 +30,21 @@ Scope that is in the tree tonight:
 |---|---|---|---|
 | Gateway turn | Moly | live | `gateway/route.py` `handle` |
 | Field precheck | Moly | live. Decided value `field precheck` | `gateway/chooser.py`, `config/escalation.yaml` |
-| Keyword extract | Moly | live. English phrase and regex families. Skipped when the case already has fields and `keyword_extraction` is absent | `system1/extract.py` |
+| Keyword extract | Moly | live. English phrase and regex families, plus caller-confirmed operator facts. A matched district is `District, Province`. An ambiguous name gets confidence 0.6, which the precheck sends to System 2. Skipped when the case already has fields and `keyword_extraction` is absent | `system1/extract.py`, `ingest/admin_districts.py` |
 | System 1 decide | Moly | live rules. Default request uses the stub file instead | `system1/decide.py`, `mocks/s1_stub/` |
 | Aid eligibility | Melanie | stub. `check` raises. `GET /aid/eligibility` is 501 | `system1/aid_eligibility.py` |
-| Router merge | Moly | live. Always called from `handle` | `router/merge.py` |
+| Router merge | Moly | live. Always called from `handle`. Provisional dispatches reserve stock in this process | `router/merge.py`, `router/ledger.py` |
 | Auth | Moly | TODO_HUMAN. A note is recorded. The request is not rejected | `gateway/auth.py` |
 | Enrichment | shared | live when SQLite exists, else off | `enrich/context.py`, `ingest/db.py` |
 | Policy pre-check | Moly | live notes only. Does not change priority | `gateway/policy.py` |
 | Memory mock | Melanie | live for fixture ids | `memory/adapter.py`, `mocks/memory_context/` |
 | Mubit memory client | Melanie | stub. Raises. Three keys are TODO_HUMAN | `memory/mubit.py` |
+| Graduation | Moly | live. `correction_loop.graduation_threshold` is 2. A matching pattern is tagged `complex_situation` and gets a `graduated-*` correction `MemoryItem`. It sets no priority and does not move the pattern into System 1 | `gateway/graduation.py`, `eval/graduation_demo.py` |
 | System 2 / Nemotron | Melanie | stub. `orchestrate` raises while the model id or latency is TODO_HUMAN | `system2/decide.py`, `system2/orchestrator.py` |
 | Sapling | Melanie | gate is written. Client is `stub`. Not reached while `orchestrate` raises | `system2/sapling.py`, `system2/sapling_client.py` |
 | Aid exceptions | Melanie | stub. `POST /aid/exceptions` is 501 | `system2/aid_exceptions.py` |
 | LLM clients | Melanie wires the call | host check is live. Not called on a triage turn | `llm/client.py`, `llm/openai_client.py` |
-| Policy corpus | Melanie | live `GET/POST /policies`. `policies.authoritative_set` is TODO_HUMAN | `policies/service.py`, `api/routes/policies.py` |
+| Policy corpus | Melanie | live `GET/POST /policies`. `flood.yaml` is in the loaded corpus. Packs under `countries/` are not imported. `policies.authoritative_set` is TODO_HUMAN | `policies/service.py`, `policies/corpus.py`, `api/routes/policies.py` |
 | Town phone and feed | `OWNERSHIP.md` lists `ui/` as Moly. The phone, feed, and rulebook are what the demo consumes | live page. Feed and vehicle picture are simulated | `ui/sim/sim.js`, `ui/sim/data/` |
 | Correct this | Moly | live post of a v1 correction | `ui/correct.js`, `ui/player.html` |
 | Training log and export | shared log, Melanie eval | live append and export. Fine-tune refuses a TODO_HUMAN base model | `training/log.py`, `training/export.py`, `infra/modal/finetune_job.py` |
@@ -59,11 +60,13 @@ Models are Pydantic v2 with `extra=forbid`. JSON Schema copies are `contracts/sc
 
 ### Must provide
 
-- To match CR-003, Moly provides `Dispatch` and `RouterDecision.dispatches`. The change is accepted in `contracts/CHANGE_REQUESTS.md` and the tag is pending. Melanie's `ui/sim/sim.js` does not read `dispatches`.
+- To match CR-003, Moly provides `Dispatch` and `RouterDecision.dispatches`. The tag is `v0.3-contracts`. Contracts stay frozen there until the 19:00 integration. Melanie's town must show the router's reserved `resource_id` rather than picking its own unit. `ui/sim/sim.js` still does not read `dispatches`.
+- To match graduation, System 2 treats the `complex_situation` flag and the `graduated-*` correction `MemoryItem` as recommendations only. The summary says the rule sets no priority. Graduation never moves a pattern into System 1.
 - To match the router, Melanie must return exactly one `Outcome` with `system` `system_2`. A Sapling `violation` must surface as `requires_human`, as the `route`, or as `missing_evidence`. `merge` does not read a `sapling_verdict` string.
-- To match the chooser, both sides must keep the flag strings `safeguarding`, `conflicting_evidence`, and `aid_exception`, and the `ExtractedFields` names (`location`, `location_confidence`, `people_count`, `vulnerable`, `medical`, `danger`, `needs`), stable.
-- To match extract, Moly keeps it English-only and limited to caller turns. `F15` is still misrouted: the child is only in an operator turn.
+- To match the chooser, both sides must keep the flag strings `safeguarding`, `conflicting_evidence`, `aid_exception`, and `complex_situation`, and the `ExtractedFields` names (`location`, `location_confidence`, `people_count`, `vulnerable`, `medical`, `danger`, `needs`), stable.
+- To match extract, Moly keeps it English-only. Caller turns count, plus an operator question the caller confirms with yes, yeah, correct, or that's right. Those confirmed facts count for `vulnerable`, `people_count`, and `danger` only. `F15` is still misrouted: the child is only in an operator turn, and the caller does not confirm it.
 - `system2.orchestrator_model` and `system2.max_latency_ms` are `TODO_HUMAN` and block Melanie. `orchestrate` raises before Sapling and before `llm.complete`.
+- On #6 and #7, `ui/sim/README.md` and `ui/sim/sim.js` still say `gateway.route_chooser` is `TODO_HUMAN`. On main the decided value is `field precheck`.
 
 ### 3.1 Phone turn to the gateway
 
@@ -81,7 +84,7 @@ Minimal turn:
 { "t_ms": 1000, "speaker": "caller", "text": "Our rice is finished." }
 ```
 
-Mismatch: open item 1. `demoChoose` and `ui/sim/README.md` still say `gateway.route_chooser` is `TODO_HUMAN`. The decided value is `field precheck`. The phone posts `fixture_id`, so extract and the chooser never see the spoken text.
+Mismatch: open item 5. `demoChoose` and `ui/sim/README.md` still say `gateway.route_chooser` is `TODO_HUMAN`. The decided value is `field precheck`. The phone posts `fixture_id`, so extract and the chooser never see the spoken text.
 
 ### 3.2 Extracted fields to the chooser and to System 1
 
@@ -96,12 +99,12 @@ Chooser triggers (`config/escalation.yaml` `route_to_system_2_if_any`), any one 
 - `fields.medical`
 - `vulnerable` contains `oxygen_dependent` or `immobile`
 - location is missing, confidence is missing, or confidence is below 0.7
-- `policy_flags` contains `safeguarding`, `conflicting_evidence`, or `aid_exception`
+- `policy_flags` contains `safeguarding`, `conflicting_evidence`, `aid_exception`, or `complex_situation`
 - `needs` contains `rescue`, `medical`, or `aid_payment`
 
-`extract` reads caller turns only. A negator in the three words before a match drops it. Aid phrases and minimising phrases are exempt: "we cannot get the payment" and "not eligible" stay aid signals. Suggested flags are `conflicting_evidence` (minimising language plus danger, rescue, medical, or a child, elderly person, or immobile person), `safeguarding` (a child and an alone-phrase), and `aid_exception` (an aid phrase plus a refusal). Water at a door, step, or inside a room, or in the street, adds danger `rising_water`. That also adds need `rescue` when a child, elderly person, immobile person, or oxygen-dependent person was extracted, or when the water is at the building and evacuation was not already a need. "bus shelter" is not a shelter need.
+`extract` reads caller turns, plus an operator question the next caller sentence confirms (`yes`, `yeah`, `correct`, or `that's right`). Confirmed operator text counts for `vulnerable`, `people_count`, and `danger` only, never for needs or flags. A negator in the three words before a match drops it. Aid phrases and minimising phrases are exempt: "we cannot get the payment" and "not eligible" stay aid signals. Suggested flags are `conflicting_evidence` (minimising language plus danger, rescue, medical, or a child, elderly person, or immobile person), `safeguarding` (a child and an alone-phrase), and `aid_exception` (an aid phrase plus a refusal). Water at a door, step, or inside a room, or in the street, adds danger `rising_water`. That also adds need `rescue` when a child, elderly person, immobile person, or oxygen-dependent person was extracted, or when the water is at the building and evacuation was not already a need. "bus shelter" is not a shelter need.
 
-To match the chooser, Melanie must leave those field names and flag strings as they are when she builds a non-fixture case. Moly must keep `extract` English-only and must not treat operator turns as evidence. `system1.extraction_method` is `rules-only`. `system1.extraction_model` stays `TODO_HUMAN` and the rules do not read it.
+To match the chooser, Melanie must leave those field names and flag strings as they are when she builds a non-fixture case. Moly must keep `extract` English-only. A confirmed operator question counts for `vulnerable`, `people_count`, and `danger` only. `system1.extraction_method` is `rules-only`. `system1.extraction_model` stays `TODO_HUMAN` and the rules do not read it.
 
 Minimal fields the fast path can accept:
 
@@ -117,7 +120,7 @@ Minimal fields the fast path can accept:
 }
 ```
 
-Mismatch: `make extract-eval` scores extract against hand-filled fixture fields, and again against the scripted sim callers. An unsafe answer is a case whose true fields go to System 2 while the extracted fields get a System 1 answer with `requires_human` false. Fixture cases on the phone never take the extract path. `F15` is still misrouted for that reason: hand fields include `vulnerable: child`, the word "child" is only in an operator turn ("I can hear a child crying"), and caller text says "They are upset" and "invented bus shelter". Open item 2: `G01`–`G04` are labelled `expected.system` `system_1` with need `rescue`, and `config/escalation.yaml` routes `rescue` to System 2. Town `calls[].expected_system` is the fixture label, not the chooser's result.
+Mismatch: `make extract-eval` scores extract against hand-filled fixture fields, and again against the scripted sim callers. An unsafe answer is a case whose true fields go to System 2 while the extracted fields get a System 1 answer with `requires_human` false. Fixture cases on the phone never take the extract path. `F15` is still misrouted for that reason: hand fields include `vulnerable: child`, the word "child" is only in an operator turn ("I can hear a child crying"), and caller text says "They are upset" and "invented bus shelter". Open item 6: `G01`–`G04` are labelled `expected.system` `system_1` with need `rescue`, and `config/escalation.yaml` routes `rescue` to System 2. Town `calls[].expected_system` is the fixture label, not the chooser's result.
 
 ### 3.3 Memory items to System 1 and the router
 
@@ -181,7 +184,7 @@ Minimal System 1 outcome:
 
 `merge` next action, first match: `supervisor_escalation` or policy flag `safeguarding` → `escalate_to_supervisor`; `aid_caseworker` → `escalate_to_supervisor`; `escalate` → `escalate_to_supervisor`; `duplicate_merge` → `finalize_case`; any `missing_evidence`, a `next_question`, or no `fields.location` → `ask_next_question`; `information_only` → `finalize_case`; else `create_provisional_dispatch`.
 
-Dispatch fan-out only for that last action, one `Dispatch` per mapped need: `rescue`→`boat`, `medical`→`ambulance`, `water` and `food`→`welfare_point`, `shelter` and `evacuation`→`shelter`. `power`, `information`, and `aid_payment` produce none. Same-district unit wins (district name contained in `fields.location`), else the first available unit, else `status=unfilled` and `resource_id` null. Stock is not decremented. Units come from `mocks/resources.json`.
+Dispatch fan-out only for that last action, one `Dispatch` per mapped need: `rescue`→`boat`, `medical`→`ambulance`, `water` and `food`→`welfare_point`, `shelter` and `evacuation`→`shelter`. `power`, `information`, and `aid_payment` produce none. A unit this case already holds wins, else a same-district unit (district name contained in `fields.location`), else the first usable unit, else `status=unfilled` and `resource_id` null. Usable means `mocks/resources.json` `available` minus reservations other cases hold in `router/ledger.py`. The JSON file is not rewritten. Holds live in this process and reset on restart.
 
 `Dispatch` required: `need`, `resource_kind` (`boat`, `ambulance`, `shelter`, `welfare_point`), `status` (`provisional` or `unfilled`). Optional: `resource_id`, `same_district` (default false), `note`.
 
@@ -202,7 +205,7 @@ The phone reads these fields and no others for the reply, the light, and the fee
 
 `operatorReply` uses `final_priority`, `final_route`, `source_outcomes[0].needs`, `source_outcomes[0].next_question`, and `requires_human`. The vehicle comes from `ui/sim/data/rulebook.json` (`matchRule`), which looks at `final_priority`, `final_route`, outcome `needs`, the typed text, and whether the building's `water_m` is at least 0.25. The rulebook file says it is a draft and not repo policy.
 
-To match the phone, Moly must keep those `RouterDecision` and `Outcome` fields populated on every turn, including stub turns. `source_outcomes` must have one entry. Melanie must keep reading `final_priority` for the house light. CR-003 is accepted and the tag is pending. `sim.js` does not read `dispatches`, `resource_id`, or `resource_kind`. Whether the town should show them is on the 19:00 list.
+To match the phone, Moly must keep those `RouterDecision` and `Outcome` fields populated on every turn, including stub turns. `source_outcomes` must have one entry. Melanie must keep reading `final_priority` for the house light. CR-003 is tagged `v0.3-contracts`. Melanie's town must show the router's reserved `resource_id`. `sim.js` still does not read `dispatches`, `resource_id`, or `resource_kind`.
 
 Minimal decision the phone can render:
 
@@ -239,7 +242,7 @@ Minimal decision the phone can render:
 }
 ```
 
-Mismatch: open item 4. The feed's ACCEPTED/REJECTED verdict comes from `sim_events.json` scores plus a page threshold of 0.75 (and pattern memory in `localStorage`), not from `source_outcomes[0].system`. It can say ACCEPTED while that system is `system_2`, or the reverse. Sapling cards use a simulated `verdict` (`supported`, `violation`, `missing`, `unsure`). The gateway does not add `sapling_verdict` on the stub path. `contradicted` is a real Sapling label and is not one of the simulated card verdicts. There is no `GET /cases/{id}/events` stream. `BaanSafeSim.attachLiveFeed` is the unused hook.
+Mismatch: open item 1 below. The feed's ACCEPTED/REJECTED verdict comes from `sim_events.json` scores. `confidence_threshold` is now 0.8, matching `system_1_min_confidence`. `learning.promote_after` is still 3, and the copy says the fast path can take the call. That is not `source_outcomes[0].system`, and it is not graduation. It can say ACCEPTED while that system is `system_2`, or the reverse. Sapling cards use a simulated `verdict` (`supported`, `violation`, `missing`, `unsure`). The gateway does not add `sapling_verdict` on the stub path. `contradicted` is a real Sapling label and is not one of the simulated card verdicts. There is no `GET /cases/{id}/events` stream. `BaanSafeSim.attachLiveFeed` is the unused hook.
 
 ### 3.6 Corrections to memory and to a MemoryRecord
 
@@ -327,7 +330,7 @@ Producer: Melanie `system1.aid_eligibility.check(case) -> AidEligibility` and `s
 
 Endpoints: `GET /aid/eligibility?case_id=` and `POST /aid/exceptions` with a `CaseState`. Both return HTTP 501.
 
-To match the contract, Melanie must return `AidEligibility` with `status` `unset` or `needs_human` and must not add an approved status. Moly must not treat a welfare `RouterDecision` as an aid payment. `aid_payment` is a System 2 trigger and is not a System 1 needs-table row. `policies.authoritative_set` is `TODO_HUMAN`, so Sapling does not treat the corpus as the binding set unless the case names rule ids (`system2/sapling_policy.py`).
+To match the contract, Melanie must return `AidEligibility` with `status` `unset` or `needs_human` and must not add an approved status. Moly must not treat a welfare `RouterDecision` as an aid payment. `aid_payment` is a System 2 trigger and is not a System 1 needs-table row. `policies.authoritative_set` is `TODO_HUMAN`, so Sapling does not treat the corpus as the binding set unless the case names rule ids (`system2/sapling_policy.py`). `policies/flood.yaml` is loaded with the rest of the corpus. Its depth figures are not a 1669 colour, and the chooser does not read them. Nothing under `countries/` is imported. Thailand stays the demo.
 
 ### 3.8 System 2 outcome to Sapling, then to the router
 
@@ -341,23 +344,25 @@ Today this boundary does not run on a request. `system2.orchestrator_model` and 
 
 ## 4. Open items
 
-These are conflicts on `52d3123`. They are not decisions in `config/decisions.yaml`.
+These are conflicts on `ae01643`. They are not decisions in `config/decisions.yaml`.
 
-1. **Phone chooser text is stale, and spoken text never reaches extract.** `ui/sim/sim.js` `demoChoose` and `ui/sim/README.md` still say `gateway.route_chooser` is `TODO_HUMAN`. The decided value is `field precheck` (`gateway/chooser.py`). `runPlaceCall` posts `POST /cases` with `fixture_id`. Fixture cases already have hand-filled `fields` and no `keyword_extraction` flag, so `_extract` returns without reading the new sentence, and the chooser sees the fixture fields. Recommendation: Melanie sends the free text as a case with no fields. `POST /cases` already accepts that. `CreateCase` allows `transcript` with `fixture_id` and `fields` omitted (`extra` is forbidden). `create_case` then stores `fields` as an empty `ExtractedFields` and `caller_id_hash` as `synthetic:{case_id}` when the hash is omitted. A body with neither `fixture_id` nor `transcript` is HTTP 422. `POST /cases` does not call `handle`. Extract and the chooser run on the following `POST /cases/{id}/turns`, or on `POST /triage`.
-2. **`G01`–`G04` disagree with the chooser.** Each graduation fixture is labelled `expected.system` `system_1` with need `rescue`. `config/escalation.yaml` `needs_any` includes `rescue`, so the field precheck routes them to System 2. Recommendation: relabel them, or change their need. This note does not do either.
-3. **`4f9e631` edited Melanie's files.** That commit implements System 1 extract, the field precheck, and `router.merge`. It also changes `sim/env.py`, `sim/report.py`, `tests/test_sim.py`, `mocks/memory_context/F09.json`, and the `MemoryRecord` schema (`contracts/models.py`, `contracts/schemas/MemoryRecord.json`). It relabels `F08` from `duplicate_merge` to `welfare_distribution` (`F09` stays the duplicate). Melanie should pull and run `make test`.
-4. **The feed verdict is not the gateway decision.** ACCEPTED/REJECTED in `ui/sim/sim.js` comes from `ui/sim/data/sim_events.json` scores and a page threshold of 0.75 (`eventsFile.confidence_threshold`), not from `source_outcomes[0].system`. Recommendation: drive that verdict from the real decision.
+1. **The town learning story still promotes into System 1.** `ui/sim/data/sim_events.json` `learning.promote_after` is 3. `ui/sim/README.md` and `ui/sim/patterns.js` say that after that many repeats the fast path can take the call. `correction_loop.graduation_threshold` is 2, and `gateway/graduation.py` sends the pattern to System 2 as `complex_situation`. It never moves a pattern into System 1. `confidence_threshold` in the same file is 0.8, which now matches `system_1_min_confidence`. Melanie should align the promote-after story with graduation. The ACCEPTED/REJECTED badge is still the page scores, not `source_outcomes[0].system`.
+2. **`town.json` edits versus a rebuild.** On main, `calls` `F08` has `expected_route` `welfare_distribution` and `F09` has a `similar_case` memory summary. `ui/sim/build_town.py` on main copies `expected_route` from the fixture and `memory` `kind` plus `summary` from `mocks/memory_context/`. #6's `ui/sim/data/town.json` already has `F09` `memory` as `[]` while `F08` is `welfare_distribution`. Whether the next `build_town.py` run on that branch drops main's F09 line is unverified. This note did not run the script.
+3. **Stock holds do not survive a second container.** `router/ledger.py` keeps reservations in a process dict. They reset on restart and are not written to disk. #7 hosts the API as one Modal ASGI app and says cases stay in memory until the container scales down. Several containers would each hold their own stock. Recommendation: pin that app to one container, or persist the holds. This note does not pick which.
+4. **#6 and #7 are 10 commits behind `main`.** `origin/cursor/town-visuals-1370` (#6, https://github.com/melaniepreen/Baan-Safe/pull/6) and `origin/cursor/modal-gateway-1370` (#7, https://github.com/melaniepreen/Baan-Safe/pull/7, stacked on #6) both lack `11e0859`, `aa3adde`, `52d3123`, `e5db4c7`, `0679725`, `26b74a1`, `2ecbfc3`, `cc020d4`, `45ba930`, and `ae01643`. They need updating and a test run before merging.
+5. **Phone chooser text is stale, and spoken text never reaches extract.** On main, and in the README and `sim.js` text on #6 and #7, `gateway.route_chooser` is still described as `TODO_HUMAN`. The decided value is `field precheck`. `runPlaceCall` posts `fixture_id`, so extract and the chooser never see the spoken sentence. Recommendation: Melanie sends the free text as a case with no fields. `POST /cases` already accepts a `transcript` with `fixture_id` and `fields` omitted. Extract runs on the following `POST /cases/{id}/turns`, or on `POST /triage`.
+6. **`G01`–`G04` labels still say System 1.** Each fixture `expected.system` is `system_1` with need `rescue`. The precheck routes `rescue` to System 2. `mocks/s2_stub/G01.json` through `G04.json` are the stub outcomes that path loads. `G01.json`'s reason still says the threshold is unset. The threshold is 2. Recommendation: relabel the fixtures, or change their need. This note does not do either.
 
 ## 5. Decide before 19:00 integration
 
-`OWNERSHIP.md` names the integration as `S1_IMPL=real`, `S2_IMPL=real`, and `MEMORY_IMPL=mubit` together. Two choices are still open. This list does not pick them.
+`OWNERSHIP.md` names the integration as `S1_IMPL=real`, `S2_IMPL=real`, and `MEMORY_IMPL=mubit` together. Contracts stay frozen at `v0.3-contracts` until then. This list does not pick the remaining choice.
 
-- Free text versus fixture ids on the phone. Today the phone posts a fixture id. `POST /cases` already accepts a transcript and empty fields (open item 1).
-- Whether the town shows `dispatches`. `router.merge` fills them. `sim.js` does not read them (open item 4 is the separate feed-verdict question).
+- Free text versus fixture ids on the phone. Today the phone posts a fixture id. `POST /cases` already accepts a transcript and empty fields (open item 5).
+- The town showing `dispatches` is no longer an open choice. Melanie shows the router's reserved `resource_id` (must-provide). `sim.js` does not read it yet.
 
 ## 6. Open decisions
 
-These leaves are `TODO_HUMAN` in `config/decisions.yaml`. Decided leaves, not open: `system1.extraction_method` `rules-only`, `gateway.route_chooser` `field precheck`, `system2.hosting` `openrouter via mubit gateway`, `system2.use_banyan_sapling` true, `system2.sapling_scope` `aid_eligibility,denial`, `sapling.client` `stub`, `llm.provider_route` `mubit`.
+These leaves are `TODO_HUMAN` in `config/decisions.yaml`. Decided leaves, not open: `system1.extraction_method` `rules-only`, `gateway.route_chooser` `field precheck`, `system2.hosting` `openrouter via mubit gateway`, `system2.use_banyan_sapling` true, `system2.sapling_scope` `aid_eligibility,denial`, `sapling.client` `stub`, `llm.provider_route` `mubit`, `correction_loop.graduation_threshold` `2`.
 
 | Key | Who is blocked |
 |---|---|
@@ -372,7 +377,6 @@ These leaves are `TODO_HUMAN` in `config/decisions.yaml`. Decided leaves, not op
 | `ui.framework` | Nobody for the static town page. A framework choice is blocked. |
 | `data.demo_event` | Anyone claiming the picture is a specific flood. The page stays a placeholder. |
 | `data.production_db` | A production database. SQLite remains the store. |
-| `correction_loop.graduation_threshold` | Melanie. The correction loop does not promote a rule into System 1. |
 | `learning_eval.promotion`, `learning_eval.freeze_mubit_auto_adapters` | Melanie. Eval records the unset value and does not promote. Setting either key without an implementation makes the gate raise. |
 | `latte_bench.license_confirmation` | Melanie. Use beyond the reference checkout stays blocked. |
 | `sim.caller_model`, `sim.caller_gpu` | Melanie's model caller. The scripted simulator still runs. |
@@ -384,3 +388,5 @@ These leaves are `TODO_HUMAN` in `config/decisions.yaml`. Decided leaves, not op
 - 2026-10-24 `1e4ca79` — First PRD. Field precheck, System 1 rules, and `router.merge` are live on the default turn only as described above. System 2, the Sapling client, and Mubit memory remain stubs.
 - 2026-10-24 `11e0859` — Extractor covers water at or inside the door, immobility, a child alone, aid refusals, and minimising. Aid and minimising matches are not dropped for a negator. `F15` still hides the child in an operator turn.
 - 2026-10-24 `52d3123` — Open items for the stale phone chooser, `G01`–`G04`, the `4f9e631` overlap with Melanie's sim and `F08`, and the simulated feed. Must-provide lines for CR-003, one System 2 `Outcome`, stable flags, English extract, and the two System 2 TODOs. Diagrams unchanged.
+- 2026-10-24 `26b74a1` — District gazetteer, caller-confirmed facts, G stubs, in-process stock holds, and graduation to System 2 (`complex_situation`, threshold 2). CR-003 is `v0.3-contracts`. Open items for the town's promote-after story, the `town.json` rebuild, and the ledger across containers.
+- 2026-10-24 `ae01643` — `flood.yaml` joins the loaded corpus. Depth figures are not a 1669 colour and do not change the chooser or System 1. Country packs under `countries/` stay unloaded. #6 and #7 are 10 commits behind this SHA. The call diagram is still the `26b74a1` path.
