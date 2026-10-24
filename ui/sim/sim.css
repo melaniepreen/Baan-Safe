@@ -709,16 +709,26 @@ input[type="range"] { width: 100%; accent-color: var(--yellow); }
   font-size: 11px;
 }
 
-.mubit-readout {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--line);
+.mubit-readout, .metrics-strip {
+  margin: 10px 0 4px;
+  padding: 10px 12px;
+  border: 1px solid #243044;
+  border-radius: 12px;
+  background: #0b1220;
   font-size: 12px;
 }
-.mubit-readout .msg { margin: 0 0 6px; }
-.hops { margin: 0; padding-left: 16px; }
+.mubit-readout .msg { margin: 0 0 6px; color: #e6edf5; }
+.mubit-readout .kicker, .metrics-strip .kicker {
+  margin: 0 0 4px;
+  color: #ED7401;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.hops { margin: 0; padding-left: 16px; color: #9aa8bb; }
 .hops li { margin: 2px 0; }
 .hops .mubit { color: #ED7401; }
+.metrics-strip #metrics-body { margin: 0; }
 
 .pri-p1 { background: #d1241a; color: #fff; }
 .pri-p2 { background: #ED7401; color: #012246; }

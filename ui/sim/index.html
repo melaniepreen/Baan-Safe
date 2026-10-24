@@ -110,6 +110,15 @@
       </div>
       <div class="feed-meter" aria-hidden="true"><div id="feed-progress"></div></div>
       <p id="feed-count" class="muted"></p>
+      <section id="gateway-hop" class="mubit-readout" hidden>
+        <p class="kicker">Model path</p>
+        <p id="gateway-hop-line" class="msg"></p>
+        <ul id="gateway-hop-list" class="hops"></ul>
+      </section>
+      <section id="metrics-strip" class="metrics-strip" hidden>
+        <p class="kicker">Gateway metrics</p>
+        <p id="metrics-body" class="muted"></p>
+      </section>
       <label class="threshold">Confidence threshold
         <input id="threshold" type="number" min="0" max="1" step="0.01" value="0.75" />
       </label>

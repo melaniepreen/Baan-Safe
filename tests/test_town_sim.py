@@ -221,7 +221,7 @@ def test_twenty_calls_link_fixtures_to_buildings():
     assert priorities == {"P1", "P2", "P3", "P4"}
     page = (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
     assert 'id="calls-play"' in page
-    assert "Mubit" not in page
+    assert "MUBIT_API_KEY" not in page
     assert 'id="mubit-node"' not in page
     assert "link-to-mubit" not in page
     assert 'id="town-reset"' in page
@@ -545,6 +545,16 @@ def test_wire_frontend_p0_contracts():
     assert "{ fixture_id: call.id }" in source
     assert "ruleFromDispatches" in source
     assert "renderLocationContext" in source
+    assert "mubitHopSummary" in source
+    assert "renderMetricsStrip" in source
+    assert "postDispatchAction" in source
+    assert "/dispatches/" in source
+    assert 'id="gateway-hop"' in page
+    assert 'id="metrics-strip"' in page
+    assert "data.demo_event is still TODO_HUMAN" not in source
+    assert "Mubit" in source
+    assert "MUBIT_API_KEY" not in source
+    assert "OPENROUTER_API_KEY" not in source
     assert 'id="location-context"' in page
     assert "gateway.route_chooser is still TODO_HUMAN" not in source
     assert "gateway.route_chooser is still TODO_HUMAN" not in page

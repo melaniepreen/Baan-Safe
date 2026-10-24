@@ -102,6 +102,7 @@ const PLAIN_PRIORITY = {
 };
 const STEP_META = {
   memory: { icon: "M", kicker: "Mubit" },
+  mubit: { icon: "M", kicker: "Mubit hop" },
   tool: { icon: "T", kicker: "Tool" },
   system_1: { icon: "1", kicker: "System 1" },
   handoff: { icon: "→", kicker: "Handoff" },
@@ -1784,7 +1785,7 @@ function setComposerReady(ready) {
 function framingNote() {
   const framing = responses && responses.framing
     ? responses.framing
-    : "Sukhumvit block in Watthana, drawn in local metres. data.demo_event is still TODO_HUMAN.";
+    : "Sukhumvit block in Watthana, drawn in local metres. data.demo_event is Hat Yai / Songkhla for flood enrichment.";
   return framing + " Flood rises from flood.json. Type, speak, or open Prompts. The stub gateway returns the priority, and that result lights the house. Replies are not a live model.";
 }
 
@@ -2468,13 +2469,117 @@ function setPriorityBadge(priority) {
   badge.textContent = "Gateway " + priority;
 }
 
+
+function system2Decided(decision) {
+  const outcomes = (decision && decision.source_outcomes) || [];
+  return outcomes.some((row) => String(row.system) === "system_2");
+}
+
+function mubitHopSummary(decision, trace) {
+  if (!system2Decided(decision)) return null;
+  const events = trace || [];
+  const chat = [...events].reverse().find((event) => event.stage === "mubit_chat");
+  const s2 = [...events].reverse().find((event) => event.stage === "system_2");
+  const deciding = ((decision && decision.source_outcomes) || [])[0] || {};
+  const latency =
+    chat && Number.isFinite(chat.latency_ms)
+      ? chat.latency_ms
+      : s2 && Number.isFinite(s2.latency_ms)
+        ? s2.latency_ms
+        : deciding.latency_ms != null
+          ? deciding.latency_ms
+          : null;
+  const notes = (chat && chat.notes) || (s2 && s2.notes) || "";
+  const stub = /stub outcome/i.test(notes) || !chat;
+  const model = (chat && chat.model) || "nvidia/nemotron-3-nano-30b-a3b";
+  let headline = "Mubit → Nemotron";
+  if (latency != null) headline += " · " + latency + " ms";
+  if (stub) {
+    headline += " · gateway traced System 2 (stub hop until Mubit credentials make S2 real)";
+  } else {
+    headline += " · openrouter via mubit gateway · " + model;
+  }
+  return {
+    headline,
+    latency_ms: latency,
+    stub,
+    model,
+    notes: notes || null,
+    source_systems: ((decision && decision.source_outcomes) || []).map((row) => row.system),
+  };
+}
+
+function renderGatewayHop(decision, trace) {
+  const panel = document.getElementById("gateway-hop");
+  const line = document.getElementById("gateway-hop-line");
+  const list = document.getElementById("gateway-hop-list");
+  if (!panel || !line || !list) return;
+  const hop = mubitHopSummary(decision, trace);
+  if (!hop) {
+    panel.hidden = true;
+    line.textContent = "";
+    list.replaceChildren();
+    return;
+  }
+  panel.hidden = false;
+  line.textContent = hop.headline;
+  list.replaceChildren();
+  for (const system of hop.source_systems) {
+    const item = el("li", system === "system_2" ? "mubit" : null, "source_outcomes · " + system);
+    list.append(item);
+  }
+  if (hop.notes) list.append(el("li", null, hop.notes));
+  list.append(el("li", null, "Token cost not shown — llm.token_price_usd is TODO_HUMAN."));
+}
+
+async function renderMetricsStrip(decision) {
+  const panel = document.getElementById("metrics-strip");
+  const body = document.getElementById("metrics-body");
+  if (!panel || !body) return;
+  if (!system2Decided(decision)) {
+    panel.hidden = true;
+    body.textContent = "";
+    return;
+  }
+  panel.hidden = false;
+  body.textContent = "Loading GET /metrics…";
+  try {
+    const metrics = await getJson("/metrics");
+    const mubit = metrics.mubit_chat || {};
+    const avg = (metrics.avg_latency_ms || {}).mubit_chat;
+    const s2share = metrics.pct_handled_by_system_2;
+    const parts = [
+      "Cases traced " + (metrics.cases_traced || 0),
+      "S2 share " + (s2share == null ? "—" : Math.round(Number(s2share) * 100) + "%"),
+    ];
+    if (mubit.call_count != null) {
+      parts.push(
+        "Mubit chat " +
+          mubit.call_count +
+          " call(s) · ok " +
+          (mubit.ok_count || 0) +
+          " · err " +
+          (mubit.error_count || 0)
+      );
+    }
+    if (avg != null) parts.push("avg Mubit hop " + Math.round(avg) + " ms");
+    else if ((metrics.avg_latency_ms || {}).system_2 != null) {
+      parts.push("avg System 2 " + Math.round(metrics.avg_latency_ms.system_2) + " ms");
+    }
+    parts.push("no token $ (llm.token_price_usd unset)");
+    body.textContent = parts.join(" · ");
+  } catch (error) {
+    body.textContent = "GET /metrics unavailable. source_outcomes still show System 2 on the hop card.";
+  }
+}
+
 function writePayload(call, decision, trace, text) {
   const source = (decision.source_outcomes && decision.source_outcomes[0]) || {};
   const log = document.getElementById("backend-log");
   log.replaceChildren();
   const details = document.createElement("details");
   const summary = document.createElement("summary");
-  summary.textContent = "Stub payload";
+  summary.textContent = "Gateway payload";
   const pre = el("pre");
   pre.textContent = JSON.stringify(
     {
@@ -2487,9 +2592,22 @@ function writePayload(call, decision, trace, text) {
       next_action: decision.next_action,
       requires_human: decision.requires_human,
       reason: source.reason || null,
+      source_outcomes: (decision.source_outcomes || []).map((row) => ({
+        system: row.system,
+        priority: row.priority,
+        route: row.route,
+        latency_ms: row.latency_ms,
+        reason: row.reason,
+      })),
+      dispatches: decision.dispatches || [],
+      mubit_hop: mubitHopSummary(decision, trace),
+      // llm.token_price_usd is TODO_HUMAN — never invent a cost here
+      token_cost_usd: null,
       trace: (trace || []).map((event) => ({
         case_id: event.case_id,
         stage: event.stage,
+        latency_ms: event.latency_ms,
+        model: event.model || null,
         notes: event.notes,
       })),
     },
@@ -2748,6 +2866,17 @@ async function playFeed(call, decision, trace, text, fast) {
       text: "Cascade: System 1 escalated and System 2 decided this turn.",
     });
   }
+  const hop = mubitHopSummary(decision, trace);
+  if (hop) {
+    const at = steps.findIndex((step) => step.kind === "system_2" || step.kind === "handoff");
+    steps.splice(at >= 0 ? at : 0, 0, {
+      id: "mubit-hop",
+      kind: "mubit",
+      delay_ms: 420,
+      source: "gateway",
+      text: hop.headline,
+    });
+  }
   let dispatchStep = null;
   if (gated) {
     dispatchStep = scenarioKind(scenario, "dispatch") || {
@@ -2897,8 +3026,30 @@ function attachLiveFeed(source) {
   source.addEventListener("step", (event) => appendLiveStep((event && event.detail) || event));
 }
 
+function reviewCaseId(row) {
+  if (!row) return null;
+  if (row.decision && row.decision.case_id) return row.decision.case_id;
+  if (row.call && phoneCases.has(row.call.id)) return phoneCases.get(row.call.id);
+  return null;
+}
+
+async function postDispatchAction(caseId, action) {
+  if (!caseId) return null;
+  const path = "/cases/" + encodeURIComponent(caseId) + "/dispatches/" + action;
+  try {
+    return await postJson(path, {});
+  } catch (error) {
+    const message = String(error && error.message ? error.message : error);
+    if (!/\b422\b/.test(message)) {
+      pushPhone("note", "Dispatch " + action + " failed. " + message);
+    }
+    return null;
+  }
+}
+
 function acceptReview() {
   if (!review) return;
+  const caseId = reviewCaseId(review);
   if (review.approval === "pending") {
     review.approval = "dispatched";
     const entry = pushDecisionLog(logEntry(review.call, review.decision, review.rule, "dispatched"));
@@ -2912,8 +3063,10 @@ function acceptReview() {
     clearApprovalChrome();
     drawCallLights();
     drawSelection();
+    postDispatchAction(caseId, "confirm");
   } else if (review.entryId) {
     updateDecisionLog(review.entryId, { operator: "accepted" });
+    postDispatchAction(caseId, "confirm");
   }
   if (review.themeId) {
     const rows = readPatterns();
@@ -2929,6 +3082,7 @@ function acceptReview() {
 
 function rejectReview() {
   if (!review) return;
+  const caseId = reviewCaseId(review);
   if (review.approval === "pending") {
     review.approval = "rejected";
     pushDecisionLog(logEntry(review.call, review.decision, review.rule, "rejected", "Rejected before dispatch. " + review.rule.action));
@@ -2939,10 +3093,12 @@ function rejectReview() {
     clearApprovalChrome();
     drawCallLights();
     drawSelection();
+    postDispatchAction(caseId, "cancel");
   } else {
     updateDecisionLog(review.entryId, { operator: "rejected" });
     trips = [];
     drawTrips(0);
+    postDispatchAction(caseId, "cancel");
   }
   showCorrection(review.call.id);
   document.getElementById("op-accept").disabled = true;
@@ -3030,7 +3186,7 @@ function useFixtureCreate(choice, options) {
   if (options.useFixture === true) return true;
   if (options.useFixture === false) return false;
   const how = choice && choice.how ? String(choice.how) : "";
-  return /^scripted/.test(how);
+  return /^scripted/.test(how) || /^saved prompt/.test(how);
 }
 
 function facilityLine(row) {
