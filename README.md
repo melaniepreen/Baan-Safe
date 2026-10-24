@@ -1,6 +1,24 @@
 # BaanSafe
 
-Flood and disaster call-triage scaffold. Mubit governs memory, policy, and traceability. System 1 acts fast. System 2 reasons deeply with Nemotron as its orchestrator. The decision router turns one system's outcome into the next action. Mubit does not reason.
+Flood and disaster call-triage scaffold. Mubit governs memory, policy, and traceability. System 1 acts fast. System 2 reasons deeply with Nemotron as its orchestrator. On aid-eligibility and denial checks, Banyan Sapling verifies the claim before the decision router. The decision router turns one system's outcome into the next action. Mubit does not reason.
+
+Sapling is [MubitLabs/banyan-sapling](https://huggingface.co/MubitLabs/banyan-sapling), the Apache-2.0 23B verifier (research preview). It takes a policy, evidence, and a claim, and returns `supported`, `violation`, `missing`, `contradicted`, or `unsure`, with probabilities. `supported` lets the proposed action stand. `violation` blocks it. `unsure`, `missing`, and `contradicted` hand the case to a human. The input limit is 16,384 tokens. It does not run on System 1. `system2.use_banyan_sapling` is true for those two checks. Hosting, the GPU, and Thai handling stay `TODO_HUMAN`. Tests use the stub client and do not load a GPU.
+
+```mermaid
+flowchart TD
+  gateway[Mubit gateway]
+  gateway -->|routine low risk| system1[System 1 fast path]
+  gateway -->|ambiguous or high risk| reason[System 2 reasoning]
+  reason --> stake{Aid eligibility or denial?}
+  stake -->|no| router[Decision router]
+  stake -->|yes| sapling[Banyan Sapling]
+  sapling -->|supported| router
+  sapling -->|violation| block[Block the action]
+  sapling -->|unsure, missing, or contradicted| human[Human handoff]
+  block --> router
+  human --> router
+  system1 --> router
+```
 
 This tree is Phase 0 plus a Phase 1 API. **System 1 and System 2 decision logic are not implemented.** Callers, households, and transcripts are synthetic. Real district names and public flood polygons are used only to anchor scenarios.
 
@@ -26,6 +44,8 @@ make test           # pytest
 make replay-stubs   # accuracy of s1/s2 stub files against expected labels
 make demo-stub      # gateway.handle(..., use_stubs=True) for every fixture
 make demo-correction-loop  # stub: correction -> JSONL -> model version -> before/after
+make eval-learning  # stub: held-out correction eval, writes eval/out/learning.md
+make latte-bench    # third-party latte-bench by reference; skips if bun or the checkout is missing
 make serve          # API on :8000, docs at /docs
 make ingest         # public sources, using the cache
 make ingest-refresh # ignore the cache
@@ -53,13 +73,15 @@ LLM calls, when a human writes them, go through `llm/client.py`. That client req
 
 `make demo-correction-loop` runs a synthetic correction through memory, writes an SFT/LoRA JSONL file under `eval/out/` (gitignored), registers stub model versions `stub-0` and `stub-1`, and prints quality, latency, and a null cost. It does not train weights and it does not promote a rule into System 1.
 
+`make eval-learning` writes the held-out stub scoreboard to `eval/out/learning.md`. The same file has an external section that reads [MubitLabs/latte-bench](https://github.com/MubitLabs/latte-bench) when the submodule is checked out. That repository publishes no license. BaanSafe does not vendor its source. `latte_bench.license_confirmation` stays `TODO_HUMAN` until someone confirms the terms with Mubit. Details are in `eval/LATTE.md`.
+
 ## Data
 
 Public sources and row counts are in `data/SOURCES.md`. Raw responses are gitignored under `data/raw/`. SQLite is the overnight store. The production database is `TODO_HUMAN` in `config/decisions.yaml`.
 
 ## Infra
 
-Modal apps live in `infra/modal/`. GPU sizes and the hourly arithmetic are in `infra/HARDWARE.md`. The committed decisions stay `TODO_HUMAN` so `make validate` keeps passing. Export the variable for the one deploy you are doing. The app refuses to guess a model or a GPU.
+Modal apps live in `infra/modal/`. GPU sizes and the hourly arithmetic are in `infra/HARDWARE.md`. Model ids and GPU names stay `TODO_HUMAN` in git so the apps refuse to start until a human exports them. `make validate` allowlists four decisions a human already made: the Sapling verifier is on, its scope is aid eligibility and denial, `sapling.client` is `stub`, and `system2.hosting` is `openrouter via mubit gateway`. The Nemotron model id and size stay `TODO_HUMAN`. The LLM client still refuses any host that is not Mubit. There is no OpenRouter client.
 
 One-time setup, done by a person:
 
@@ -91,9 +113,13 @@ make modal-finetune
 export STT_GPU=cpu
 export STT_MODEL_ID=openai/whisper-large-v3
 make modal-deploy-stt
+
+export SAPLING_GPU=L40S
+export SAPLING_MODEL_ID=MubitLabs/banyan-sapling
+make modal-deploy-sapling
 ```
 
-The exports above are examples of the variable names, not a decision that those checkpoints are chosen. `infra/HARDWARE.md` is the sizing note. A dry run of the version id, with no GPU and no Modal token, is `python -m infra.modal.finetune_job --dataset eval/out/sft.jsonl` after `FINETUNE_BASE_MODEL` is set.
+The exports above are examples of the variable names. `SAPLING_MODEL_ID` is the published checkpoint. `SAPLING_GPU=L40S` is Modal's 48 GB board; an A6000 is the self-hosted board of the same class and is not a Modal GPU string. `sapling.hosting` is still unset, so the in-process client keeps using the stub until a human confirms that Mubit can route to this endpoint. `infra/HARDWARE.md` is the sizing note. A dry run of the version id, with no GPU and no Modal token, is `python -m infra.modal.finetune_job --dataset eval/out/sft.jsonl` after `FINETUNE_BASE_MODEL` is set.
 
 Local API container (CPU). This is the same process as `make serve`:
 

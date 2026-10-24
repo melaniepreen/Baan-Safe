@@ -1,0 +1,10 @@
+{
+  "id": "S04",
+  "check": "denial",
+  "policy": "A denial is recorded only when the synthetic household is absent from the district list.",
+  "evidence": "Synthetic household H-204 is on the Ban Luang list. Synthetic household H-204 is absent from the Ban Luang list.",
+  "claim": "Synthetic household H-204 is denied the flood assistance review.",
+  "expected_verdict": "contradicted",
+  "expected_action": "human_handoff",
+  "notes": "Stub label. The evidence contradicts itself."
+}

@@ -8,7 +8,9 @@ Mubit is the gateway, and it does not reason. `gateway/` now does auth (recorded
 
 There is no memory fetch in front of the gateway. `MEMORY_IMPL=mock` still reads the fixture files. `MEMORY_IMPL=mubit` still raises in `memory/mubit.py`.
 
-System 2's `decide()` calls `system2/orchestrator.py` (the Nemotron stub). The orchestrator raises while its decisions are unset, before any network call. The only LLM client is `llm/client.py`. It requires `MUBIT_BASE_URL` on a `mubit.ai` host and `MUBIT_API_KEY`, it never prints the key, and it still refuses while `llm.provider_route` is `TODO_HUMAN`.
+System 2's `decide()` calls `system2/orchestrator.py` (the Nemotron stub), then `system2/sapling.py` when that call returns. The orchestrator still raises while its model id and latency budget are unset, before any network call. `system2.hosting` is `openrouter via mubit gateway`. That path does not call OpenRouter directly. The Sapling step sits between that reasoning and the Decision Router. It runs only for aid eligibility and denials, and it does not run on System 1. `supported` leaves the proposed action in place. `violation` blocks it. `unsure`, `missing`, and `contradicted` set `requires_human`. The committed client is the stub in `mocks/sapling_stub/` (`S01`–`S05`). `SAPLING_IMPL=live` refuses while `sapling.hosting`, `sapling.gpu`, `sapling.model_id`, or `sapling.thai_handling` is unset, and it does not open a socket.
+
+The chat client is `llm/client.py`. It requires `MUBIT_BASE_URL` on a `mubit.ai` host and `MUBIT_API_KEY`, it never prints the key, and it still refuses while `llm.provider_route` is `TODO_HUMAN`. Sapling's live call is the same rule: Mubit stays the hop, and a route from Mubit to a self-hosted Sapling endpoint is unconfirmed.
 
 Each turn writes one system trace, and that event carries the outcome. `make demo-stub` now prints `sources=1` for every fixture.
 
@@ -28,7 +30,7 @@ Synthetic case `CORR-LOOP-1` only. It stores a correction via the memory adapter
 
 1. **Which track** (recurring tasks, own-your-intelligence, or fast refresh). The stub loop covers the first and prints the second's three numbers. It does not retrain when the flood data changes. `research/DEMO_PLAN.md`.
 2. **`gateway.route_chooser`.** Until this is set, only fixture ids can be triaged. The harness reading `expected.system` must not become the live rule by accident.
-3. **`system2.orchestrator_model` and `system2.hosting`.** Nemotron options, with sizes and Thai notes, are in `research/MODELS.md`. Not chosen here.
+3. **`system2.orchestrator_model`.** Hosting is already `openrouter via mubit gateway`. The Nemotron id and size are not chosen. Options and Thai notes are in `research/MODELS.md`.
 4. **`llm.provider_route`, plus `MUBIT_API_KEY` and `MUBIT_BASE_URL` in `.env`.** The client will not call out before the decision is set, even if the URL is present. Do not put the key in chat or in git.
 5. **`data.demo_event`.** Northern fixture districts, Hat Yai, or the central plain. The polygons do not decide this.
 6. **`correction_loop.graduation_threshold`.** Leave it unset unless you want a correction to become a System 1 rule. The demo does not.
@@ -47,6 +49,8 @@ Synthetic case `CORR-LOOP-1` only. It stores a correction via the memory adapter
 | Live API on `127.0.0.1:8000` | `/health` ok, `F01` routed only to System 1, `F10` only to System 2, `GET /aid/eligibility` returned 501 naming Melanie, OpenAPI lists both aid routes. Server was stopped after the smoke. |
 
 Run those with `PYTHON=.venv/bin/python` if `python3` has no pytest. This environment is Python 3.12. The code targets 3.11.
+
+The table is the morning run. After the Sapling verifier, `make test` is 60 tests and `make replay-stubs` also scores stub triples `S01`–`S05`.
 
 ### Data sources
 
@@ -83,7 +87,7 @@ No phone numbers or 13-digit ids were written into SQLite text. Summaries are cl
 | `research/lessons-thai-floods.md` | 2011 and Hat Yai in November 2025, for call triage. |
 | `research/glossary-and-risk-areas.md` | Thai/English flood words, caller phrases, and the places the public records actually name. |
 | `research/MUBIT.md` | Public Mubit docs. Gateway, SDK, memory, learning loop, adapters. Thin on a correction-to-weights API. |
-| `research/MODELS.md` | Nemotron, Thai small models, speech, embeddings. Options, not a pick. |
+| `research/MODELS.md` | Sapling is the selected verifier. Nemotron, Thai small models, speech, and embeddings stay options. |
 | `research/PAPERS.md` | Annotated links for triage, crisis tweets, fast/slow systems, routing, LoRA, corrections, floods. |
 | `research/DATASETS.md` | HumAID, CrisisLex, LST20, and the absence of a public call corpus. Licences as checked. |
 | `research/DEMO_PLAN.md` | Three beats, four judging criteria, track options, check-ins, A/B Saturday list, 19:00. |
@@ -103,10 +107,11 @@ Stub outcomes live in `mocks/s1_stub/` and `mocks/s2_stub/`. They are fixtures f
 
 ### Still `TODO_HUMAN` in `config/decisions.yaml`
 
-Code that needs one of these raises until a human sets it. None were filled in.
+Code that needs one of these raises until a human sets it. The Sapling decisions below are the ones already filled in.
 
 - `system1.extraction_method`, `system1.extraction_model`
-- `system2.orchestrator_model`, `system2.hosting`, `system2.use_banyan_sapling`, `system2.max_latency_ms`
+- `system2.orchestrator_model`, `system2.max_latency_ms` (`system2.hosting` is `openrouter via mubit gateway`)
+- `sapling.hosting`, `sapling.gpu`, `sapling.thai_handling`, `sapling.model_id`
 - `gateway.route_chooser`, `gateway.auth`
 - `memory.mubit_project`, `memory.retrieval_top_k`, `memory.token_budget`
 - `llm.provider_route`, `llm.token_price_usd`
@@ -115,6 +120,16 @@ Code that needs one of these raises until a human sets it. None were filled in.
 - `data.demo_event` (not chosen)
 - `data.production_db` (SQLite is only the overnight store)
 - `correction_loop.graduation_threshold`
+
+### Decided for Sapling
+
+Humans turned the verifier on. `scripts/validate.py` allowlists these three leaves and still rejects every other committed value that is not `TODO_HUMAN`.
+
+- `system2.use_banyan_sapling` is true.
+- `system2.sapling_scope` is `aid_eligibility,denial`.
+- `sapling.client` is `stub`, so `make test` and `make replay-stubs` do not load a GPU.
+
+The published checkpoint is `MubitLabs/banyan-sapling` (Apache-2.0, 23,042,164,740 stored parameters, 16,384-token input limit, 48GB-class GPU). `sapling.model_id` stays unset in git so `infra/modal/sapling_app.py` refuses until `SAPLING_MODEL_ID` and `SAPLING_GPU` are exported. `sapling.hosting` stays unset because every model call goes through Mubit and nobody has confirmed that Mubit can route to a self-hosted endpoint. `sapling.thai_handling` stays unset because the card's evaluated language is English and this pass does not choose a translation step. `sapling.gpu` stays unset; the hardware note names an L40S on Modal or an A6000 when self-hosting.
 
 ### Judgement calls already given a starting value
 

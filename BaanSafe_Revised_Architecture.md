@@ -9,10 +9,27 @@ Key corrections:
 - System 1 is a separate fast deterministic system (rules, keyword or field extraction, priority rules, simple routing, duplicate checks, fast evidence-gap detection). Its outcome is `fast_route`. It never handles ambiguous or high-risk cases.
 - System 2 is a separate deliberative system orchestrated by Nemotron (evidence synthesis, ambiguity, medical dependency, safeguarding, complex routing, aid exceptions, correction proposals and root cause). Its outcome is `reasoned_recommendation`. It never handles routine low-risk cases.
 - Nemotron is the System 2 orchestrator. It is not embedded in Mubit. Mubit calls Nemotron when System 2 is required. Nemotron returns the result to Mubit for policy validation, tracing, and the memory write.
+- Banyan Sapling (`MubitLabs/banyan-sapling`, Apache-2.0, about 23B stored parameters) verifies System 2 claims after that reasoning and before the Decision Router. It runs only for aid eligibility and denials. System 1 does not call it. The input is a policy, evidence, and a claim, capped at 16,384 tokens. `supported` lets the proposed action stand. `violation` blocks it. `unsure`, `missing` (the checkpoint label `insufficient_information`), and `contradicted` (the checkpoint label `inconsistent_context`) hand the case to a human. The committed client is a stub. Hosting, the 48GB-class GPU, and whether Thai is translated first stay `TODO_HUMAN` in `config/decisions.yaml`.
 - The Decision Router merges the System 1 or System 2 outcome, applies final policy and safeguarding, requires human review when needed, and returns one of `ask_next_question`, `create_provisional_dispatch`, `escalate_to_supervisor`, `finalize_case`, or `request_more_evidence`.
 - Every System 1 outcome and every System 2 outcome is recorded separately. Humans keep authority over denials, safeguarding exceptions, and irreversible actions.
 
-Flow: Caller → live speech-to-text → Call Agent → Mubit Gateway (memory retrieval, policy pre-check, route) → System 1 (simple, clear, low-risk) or System 2 (ambiguous or high-risk, Nemotron) → Decision Router → Call Agent (next question, update case, or provisional dispatch).
+Flow: Caller → live speech-to-text → Call Agent → Mubit Gateway (memory retrieval, policy pre-check, route) → System 1 (simple, clear, low-risk) or System 2 (ambiguous or high-risk, Nemotron, then Sapling when the claim is aid eligibility or a denial) → Decision Router → Call Agent (next question, update case, or provisional dispatch).
+
+```mermaid
+flowchart TD
+  caller[Caller] --> agent[Call agent]
+  agent --> gateway[Mubit gateway]
+  gateway -->|routine low risk| system1[System 1]
+  gateway -->|ambiguous or high risk| reason[System 2 reasoning]
+  reason --> stake{Aid eligibility or denial?}
+  stake -->|no| router[Decision router]
+  stake -->|yes| sapling[Banyan Sapling]
+  sapling -->|supported: action stands| router
+  sapling -->|violation: block| router
+  sapling -->|unsure, missing, contradicted: human| router
+  system1 --> router
+  router --> agent
+```
 
 Parallel workstreams during a call feed Mubit: evidence extraction (location, people, danger, medical), policy and safety, Mubit memory retrieval, and resource status (boats, ambulances, shelters).
 
@@ -25,6 +42,7 @@ Parallel workstreams during a call feed Mubit: evidence extraction (location, pe
 | System 1 | Fast deterministic triage and routing | Deliberate reasoning, memory synthesis, complex exceptions |
 | System 2 | Deliberate reasoning, evidence synthesis, orchestration | Routine low-risk routing |
 | Nemotron | System 2 orchestration and reasoning | Being embedded in Mubit |
+| Banyan Sapling | Verification of System 2 aid-eligibility and denial claims, with calibrated probabilities | System 1, routine triage, and being the orchestrator |
 | Human operator | Final decisions on high-risk, safeguarding, and irreversible actions | Being replaced for routine dispatch acceptance |
 
 ## Ontology
@@ -44,7 +62,7 @@ Person A is Moly. Person B is Melanie. The working table is `OWNERSHIP.md`.
 | Call agent | Live call UX, transcript, operator controls, dispatch view | Aid caseworker view, policy dashboard |
 | Mubit Gateway | API gateway, routing to System 1 or System 2, trace logging | Memory schemas, retrieval behaviour, correction memory |
 | System 1 | Fast triage rules, deterministic routing | Aid eligibility fast checks |
-| System 2 | Complex triage and medical reasoning | Exception reasoning, correction proposals, replay |
+| System 2 | Complex triage and medical reasoning | Exception reasoning, correction proposals, replay, and the Sapling gate (`system2/sapling.py`) |
 | Nemotron | System 2 orchestration for response cases | System 2 orchestration for aid and correction cases |
 | Evaluation | Triage and dispatch replay | Aid, exclusion, and correction replay |
 

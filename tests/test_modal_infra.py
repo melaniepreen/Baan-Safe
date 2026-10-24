@@ -22,6 +22,8 @@ def test_modal_decisions_stay_unset(monkeypatch):
         "FINETUNE_BASE_MODEL",
         "STT_GPU",
         "STT_MODEL_ID",
+        "SAPLING_GPU",
+        "SAPLING_MODEL_ID",
     ):
         monkeypatch.delenv(name, raising=False)
     with pytest.raises(UnsetDecision, match="TODO_HUMAN"):
@@ -88,13 +90,22 @@ def test_app_modules_import_when_a_human_exports_the_env(monkeypatch):
     monkeypatch.setenv("FINETUNE_BASE_MODEL", "nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1")
     monkeypatch.setenv("STT_GPU", "cpu")
     monkeypatch.setenv("STT_MODEL_ID", "openai/whisper-small")
+    monkeypatch.setenv("SAPLING_GPU", "L40S")
+    monkeypatch.setenv("SAPLING_MODEL_ID", "MubitLabs/banyan-sapling")
     # Importing builds the Modal image definition. It does not deploy.
+    import sys
+
+    sys.modules.pop("infra.modal.sapling_app", None)
     import infra.modal.s1_app as s1
     import infra.modal.s2_app as s2
     import infra.modal.finetune_app as ft
     import infra.modal.stt_app as stt
+    import infra.modal.sapling_app as sapling
 
     assert s1.GPU is None
     assert s2.GPU == "T4"
     assert ft.GPU == "T4"
     assert stt.GPU is None
+    assert sapling.GPU == "L40S"
+    assert sapling.MODEL_ID == "MubitLabs/banyan-sapling"
+    sys.modules.pop("infra.modal.sapling_app", None)

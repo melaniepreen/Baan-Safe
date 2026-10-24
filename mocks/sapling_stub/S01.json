@@ -1,0 +1,10 @@
+{
+  "id": "S01",
+  "check": "aid_eligibility",
+  "policy": "A synthetic household is eligible for a flood assistance review when it is on the district list and that district is on the flood list. This text states no payment amount.",
+  "evidence": "Synthetic household H-204 is on the Ban Luang district list. Ban Luang is on the flood list for this exercise.",
+  "claim": "Synthetic household H-204 is eligible for a flood assistance review.",
+  "expected_verdict": "supported",
+  "expected_action": "proceed",
+  "notes": "Stub label for a synthetic household. Not a model output."
+}

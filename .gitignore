@@ -8,5 +8,6 @@ data/raw/
 traces.jsonl
 data/processed/corrections.jsonl
 eval/out/
+var/
 *.egg-info/
 .DS_Store

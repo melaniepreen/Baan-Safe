@@ -1,6 +1,12 @@
 # Candidate models
 
-Options for a human. Nothing here is selected. `system2.orchestrator_model`, `system1.extraction_model`, `system2.hosting`, and `speech_to_text.provider` stay `TODO_HUMAN`. Sizes and licences move; read the card on the day you pick.
+Options for a human, plus one verifier the humans have already selected. `system2.hosting` is `openrouter via mubit gateway`: Nemotron is served via OpenRouter, and Mubit stays the hop. `system2.orchestrator_model`, `system1.extraction_model`, and `speech_to_text.provider` stay `TODO_HUMAN`. Sizes and licences move; read the card on the day you pick. There is no direct OpenRouter client.
+
+## Banyan Sapling, selected for verification
+
+`system2.use_banyan_sapling` is true, scoped to aid eligibility and denials. The checkpoint is [`MubitLabs/banyan-sapling`](https://huggingface.co/MubitLabs/banyan-sapling) (Apache-2.0, research preview, card read 24 October 2026). It is a pruned Qwen3-30B-A3B with a verification head: 23,042,164,740 stored parameters, BF16 weights of about 46 GB, input limit 16,384 tokens, evaluated language English. It classifies a policy, evidence, and a claim. The checkpoint labels are `supported`, `violation`, `insufficient_information`, and `inconsistent_context`. Calibrated `status` may be `unsure`. BaanSafe calls the middle two `missing` and `contradicted`.
+
+`sapling.model_id` is still `TODO_HUMAN` in git so the Modal app refuses to start. The id to export is the repo above. `sapling.hosting`, `sapling.gpu`, and `sapling.thai_handling` are `TODO_HUMAN` on purpose: every model call has to go through Mubit, and it is unconfirmed that Mubit can route to a self-hosted endpoint; the GPU is an L40S on Modal or an A6000 when self-hosting; the card does not say to translate Thai, and this note does not decide that. The committed client is the stub. See `infra/HARDWARE.md`.
 
 Every LLM call in this repo has to be able to go through Mubit (`research/MUBIT.md`). Self-hosting and a vendor endpoint are hosting options only if Mubit is still the hop the hackathon rule requires. That is a constraint, not a choice of model.
 
@@ -15,7 +21,7 @@ Two public checkpoints, as options:
 | `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16` | About 30B total, about 3B active | The card's language list does not feature Thai | 15 Dec 2025 | https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16 |
 | `nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-Base-BF16` | About 120B total, about 12B active. This card is a base model | The README lists Thai among supported languages | 4 Mar 2026 | https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-Base-BF16 |
 
-Trade-off, not a recommendation. Nano is the one you can realistically serve on a single large GPU, and it is a weak bet for Thai calls. Super is the one whose card claims Thai, and it is a base checkpoint at a size that needs serious hardware or a hosted endpoint. Other Nemotron sizes exist. A human should open the current NVIDIA and Hugging Face lists before locking `system2.orchestrator_model`. Hosting (`system2.hosting`) is a separate decision: through Mubit, self-hosted, or another provider, still with Mubit as the application hop.
+Trade-off, not a recommendation. Nano is the one you can realistically serve on a single large GPU, and it is a weak bet for Thai calls. Super is the one whose card claims Thai, and it is a base checkpoint at a size that needs serious hardware or a hosted endpoint. Other Nemotron sizes exist. A human should open the current NVIDIA and Hugging Face lists before locking `system2.orchestrator_model`. Hosting is already `openrouter via mubit gateway`. The model id and size are still open. Mubit stays the application hop.
 
 ## Small models for System 1 extraction
 

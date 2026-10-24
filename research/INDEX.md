@@ -10,7 +10,7 @@ Notes for Moly and Melanie before Phase 1. They are background, not product rule
 | `research/lessons-thai-floods.md` | What 2011 and Hat Yai in November 2025 imply for a call-taker. |
 | `research/glossary-and-risk-areas.md` | Thai and English flood words, caller phrases, and provinces that show up in the public records we actually hold. |
 | `research/MUBIT.md` | Public Mubit docs: gateway, SDK, memory, learning loop, adapters. Thin on a correction-to-LoRA API. |
-| `research/MODELS.md` | Open-model options for Nemotron, Thai extraction, speech, and embeddings. Not a selection. |
+| `research/MODELS.md` | Sapling is the selected verifier. Nemotron, Thai extraction, speech, and embeddings are still options. |
 | `research/PAPERS.md` | Annotated links: call triage, crisis tweets, fast/slow systems, routing, LoRA, human corrections, floods. |
 | `research/DATASETS.md` | Labelled sets and their licences. HumAID, CrisisLex, LST20. No public emergency-call audio. |
 | `research/DEMO_PLAN.md` | Three-beat demo, the four judging criteria, track options, 12:00 and 12:00–18:00 check-ins, A/B tasks, 19:00. |

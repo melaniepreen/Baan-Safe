@@ -2,7 +2,7 @@
 
 These Pydantic v2 models are the only shared language between Moly (System 1, gateway, router, UI) and Melanie (System 2, memory, eval). JSON Schemas in `contracts/schemas/` are exported for a TypeScript or JavaScript UI. The schemas describe shapes. They do not choose a priority or a route.
 
-Priority names, route names, and escalation rules live in `config/` and are waiting for human sign-off. Model choice, hosting, speech-to-text, the demo flood event, and the production database are `TODO_HUMAN` in `config/decisions.yaml`.
+Priority names, route names, and escalation rules live in `config/` and are waiting for human sign-off. `system2.hosting` is `openrouter via mubit gateway`. The Nemotron model id, speech-to-text, the demo flood event, and the production database are `TODO_HUMAN` in `config/decisions.yaml`.
 
 ## Priority
 

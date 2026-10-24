@@ -53,13 +53,69 @@ def check_text(label: str, text: str) -> None:
             fail(f"{label}: contains '{word}'")
 
 
+# Humans already made these. Any other leaf stays TODO_HUMAN.
+DECIDED = {
+    "system2.use_banyan_sapling": True,
+    "system2.sapling_scope": "aid_eligibility,denial",
+    "sapling.client": "stub",
+    "system2.hosting": "openrouter via mubit gateway",
+}
+
+
 def check_decisions() -> None:
     for path, value in iter_decision_leaves():
+        if path in DECIDED:
+            if value != DECIDED[path]:
+                fail(
+                    f"config/decisions.yaml:{path} must stay {DECIDED[path]!r}; "
+                    f"found {value!r}"
+                )
+            continue
         if value != "TODO_HUMAN":
             fail(f"config/decisions.yaml:{path} was set to {value!r}; leave it TODO_HUMAN")
     routing = (ROOT / "config" / "routing.yaml").read_text(encoding="utf-8")
     if "mode: exclusive" not in routing:
         fail("config/routing.yaml mode must stay exclusive (System 1 or System 2, not both)")
+
+
+def check_sapling_stubs() -> None:
+    from system2.sapling_client import ACTIONS, CHECKS, VERDICTS
+
+    folder = MOCKS / "sapling_stub"
+    paths = sorted(folder.glob("*.json")) if folder.is_dir() else []
+    if len(paths) != 5:
+        fail(f"mocks/sapling_stub should hold 5 cases, found {len(paths)}")
+    seen: set[str] = set()
+    verdicts: set[str] = set()
+    checks: set[str] = set()
+    for path in paths:
+        body = load_json(path)
+        if body is None:
+            continue
+        label = str(path.relative_to(ROOT))
+        for key in ("id", "check", "policy", "evidence", "claim", "expected_verdict", "expected_action", "notes"):
+            if key not in body:
+                fail(f"{label}: missing {key}")
+        if body.get("id") in seen:
+            fail(f"{label}: duplicate id")
+        seen.add(body.get("id"))
+        for key in ("policy", "evidence", "claim", "notes"):
+            check_text(label, str(body.get(key) or ""))
+        verdict = body.get("expected_verdict")
+        action = body.get("expected_action")
+        check = body.get("check")
+        if verdict not in VERDICTS:
+            fail(f"{label}: unexpected verdict {verdict!r}")
+        elif ACTIONS.get(verdict) != action:
+            fail(f"{label}: {verdict} must map to {ACTIONS.get(verdict)}, found {action!r}")
+        if check not in CHECKS:
+            fail(f"{label}: check {check!r} is outside aid_eligibility,denial")
+        verdicts.add(verdict)
+        checks.add(check)
+    if verdicts != set(VERDICTS):
+        fail(f"sapling stubs should cover every verdict, found {sorted(verdicts)}")
+    if checks != set(CHECKS):
+        fail(f"sapling stubs should cover aid eligibility and denial, found {sorted(checks)}")
 
 
 def check_stubs_are_stubs() -> None:
@@ -264,6 +320,7 @@ def check_counts(payloads: list[dict]) -> None:
 
 def main() -> int:
     check_decisions()
+    check_sapling_stubs()
     check_stubs_are_stubs()
     check_schemas()
     index = load_json(FIXTURES / "index.json")

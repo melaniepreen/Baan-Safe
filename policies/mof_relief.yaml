@@ -1,0 +1,689 @@
+# Ministry of Finance disaster-relief criteria, B.E. 2569.
+# Host: Department of Agricultural Extension. Not a DDPM or ReliefWeb copy.
+# Text-layer note: ไม,เกิน is the word ไม่เกิน. Excerpts keep that form.
+# No numeral in a verified rule was repaired. A Latin "1" between Thai digits
+# is not treated as a baht amount.
+
+license: &mof_license >
+  Ministry of Finance criteria PDF hosted by the Department of Agricultural
+  Extension, retrieved 24 October 2026. Thai Copyright Act B.E. 2537 section 7
+  excludes regulations, announcements and orders of ministries and other state
+  agencies from copyright. A human should confirm that this criteria document
+  falls under that section before any reuse beyond this research corpus.
+  Text-layer note: ไม,เกิน is ไม่เกิน. No numeral was repaired.
+
+source: &mof_url https://plan.doae.go.th/wp-content/uploads/2026/04/หลักเกณฑ์-ปี-69.pdf
+retrieved: &mof_date "2026-10-24"
+
+rules:
+  - id: MOF-2569-INSTRUMENT
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility]
+    text_en: >
+      The instrument's own name, in clause 1, is the criteria, methods and
+      conditions for spending the government advance to assist emergency
+      disaster victims, B.E. 2569. Clause 3 says it replaces the B.E. 2563
+      criteria announced on 5 October B.E. 2563. It is issued under clause 27
+      of the Ministry of Finance regulation B.E. 2568. The regulation's title
+      line in this PDF did not extract as a clean sentence, so this rule does
+      not restate that title.
+    text_th: >
+      หลักเกณฑ์ วิธีการ เงื่อนไข การใช้จ่ายเงินทดรองราชการเพื่อช่วยเหลือผู้ประสบภัยพิบัติกรณีฉุกเฉิน พ.ศ. ๒๕๖๙
+    source_url: *mof_url
+    source_excerpt: >
+      ๑. หลักเกณฑ์นี้เรียกว่า "หลักเกณฑ์ วิธีการ เงื่อนไข การใช้จ่ายเงินทดรองราชการเพื่อช่วยเหลือผู้ประสบภัยพิบัติกรณีฉุกเฉิน พ.ศ. ๒๕๖๙"
+      อาศัยอำนาจตามความในข้อ ๒๗ แห่งระเบียบกระทรวงการคลัง พ.ศ. ๒๕๖๘
+      ๓. ให้ยกเลิกหลักเกณฑ์การใช้จ่ายเงินทดรองราชการเพื่อช่วยเหลือผู้ประสบภัยพิบัติกรณีฉุกเฉิน พ.ศ. ๒๕๖๓ ประกาศ ณ วันที่ ๕ ตุลาคม พ.ศ. ๒๕๖๓
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clauses 1 and 3, and the empowering line, page 1 of the DOAE PDF."
+
+  - id: MOF-2569-EFFECTIVE
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Clause 2 prints the date 6 March B.E. 2569 as the date
+      from which the criteria apply to a disaster. Vowel marks on the verbs
+      in that line are damaged in the text layer. Do not treat a retyped
+      sentence as more certain than the excerpt. A disaster date before that
+      printed date is not decided by this rule.
+    text_th: "ตั้งแต่วันที่ ๖ มีนาคม ๒๕๖๙ เป็นต้นไป"
+    source_url: *mof_url
+    source_excerpt: "๒. หลักเกณฑ์นื๋ให่ใช้บังคับวันที,เกิดภัย ตั้งแต่วันที่ ๖ มีนาคม ๒๕๖๙ เป็นด้นไป"
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 2, page 1. The excerpt keeps the damaged vowels."
+    caveat: >
+      The date numerals are clear. The verbs around them are not a clean text layer.
+
+  - id: MOF-2569-WITHIN-REGULATION
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Clause 4 says advance spending must be assistance to emergency disaster
+      victims within the meaning of the Ministry of Finance regulation. This
+      criteria PDF does not itself contain that definition. Do not add a
+      definition of flood or of who counts as a victim from another edition.
+    text_th: >
+      ขอบเขตการจ่ายเงินทดรองราชการจะต้องเป็นการช่วยเหลือผู้ประสบภัยพิบัติกรณีฉุกเฉินตามความหมายแห่งระเบียบกระทรวงการคลัง
+    source_url: *mof_url
+    source_excerpt: >
+      ๔. ขอบเขต การจ่ายเงินทดรองราชการ จะต้องเป็นการช่วยเหลือผู้ประสบภัยพิบัติกรณีฉุกเฉิน ตามความหมายแห่งระเบียบกระทรวงการคลัง ว่าด้วยเงินทดรองราชการเพื่อช่วยเหลือผู้ประสบภัยพิบัติกรณีฉุกเฉิน
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 4, page 1."
+
+  - id: MOF-2568-REGULATION-TEXT
+    status: unverified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      TODO_HUMAN. The B.E. 2568 regulation's own text was not retrieved from
+      a host other than DDPM. Do not copy a definition of disaster, flood
+      (อุทกภัย), victim, or "this is not full compensation" from the repealed
+      B.E. 2556 regulation or from memory. Eligibility and denial on those
+      points stay unverified.
+    text_th: ""
+    source_url: *mof_url
+    source_excerpt: >
+      The 2569 criteria cite the 2568 regulation at clause 27 and clause 4.
+      The regulation PDF itself was not retrieved for this corpus.
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Gap. Not a quotation of the 2568 regulation."
+
+  - id: MOF-2569-CHANNEL
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility]
+    text_en: >
+      Clause 5 says the advance may be paid in cash, by cheque, or through
+      the electronic payment system (e-Payment) under government rules, and
+      that the rates and conditions below then apply. It does not name a
+      bank product and it does not authorise collecting an account number.
+    text_th: "ให้จ่ายเป็นเงินสด หรือเช็ค หรือจ่ายผ่านระบบอิเล็กทรอนิกส์ (e-Payment) ตามระเบียบของทางราชการ"
+    source_url: *mof_url
+    source_excerpt: >
+      ๕. การจ่ายเงินทดรองราชการเพื่อช่วยเหลือผู้ประสบภัยพิบัติกรณีฉุกเฉิน ให้จ่ายเป็นเงินสด หรือเช็ค หรือจ่ายผ่านระบบอิเล็กทรอนิกส์ (e-Payment) ตามระเบียบของทางราชการ
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5, page 1."
+
+  - id: MOF-2569-FOOD
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Clause 5.1.1 caps prepared meals at not more than 3 meals a day and not
+      more than 80 baht per person per meal. The word in the text layer is
+      ไม่เกิน (printed as ไม,เกิน). It is a ceiling. It is not a flat payment
+      and it does not by itself prove that a household is eligible.
+    text_th: "ค่าอาหารจัดเลี้ยง วันละไม่เกิน ๓ มื้อ มื้อละไม่เกิน ๘๐ บาทต่อคน"
+    source_url: *mof_url
+    source_excerpt: "๕.๑.๑ ค่าอาหารจัดเลี้ยง วันละไม,เกิน ๓ มื้อ มื้อละไม,เกิน ๘๐ บาทต่อคน"
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.1, page 1."
+
+  - id: MOF-2569-KIT
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Clause 5.1.2 caps a survival kit at not more than 1,000 baht per family.
+      A further kit of not more than 1,000 baht per person may be considered
+      for a child not over 7 years, a person with a disability, and an older
+      person, and only when that person is in the database of the Ministry of
+      Social Development and Human Security. The first 1,000 is Thai digits
+      ๑ ๐ ๐ ๐ with broken spacing. The second 1,000 is printed as ๑,๐๐๐.
+      Being a child, a disabled person, or an older person is not enough if
+      the database condition is not met. The cap is not a flat payment.
+    text_th: >
+      ค่าถุงยังชีพ ชุดละไม่เกิน ๑,๐๐๐ บาทต่อครอบครัว และสำหรับเด็กอายุไม่เกิน ๗ ปี
+      คนพิการ และผู้สูงอายุ ซึ่งอยู่ในระบบฐานข้อมูลของกระทรวงการพัฒนาสังคมและความมั่นคงของมนุษย์
+      ชุดละไม่เกิน ๑,๐๐๐ บาทต่อคน
+    source_url: *mof_url
+    source_excerpt: >
+      ๕.๑.๒ ค่าถุงยังชีพ ชุดละไม่เกิน ๑ ,๐ ๐ ๐ บาท ต่อครอบครัว และในกรณีที่ผู้ประสบภัยพิบัติเป็นเด็กอายุไม,เกิน ๗ ปี คนพิการ และผู้สูงอายุ ซึ่งเป็นกลุ่มที่อยู่ในระบบฐานข้อมูล ชองกระทรวงการพัฒนาสังคมและความมั่นคงของมนุษย์ ให้พิจารณาช่วยเหลือค่าถุงยังชีพเพิ่มเติมได้อีก ชุดละไม,เกิน ๑,๐๐๐ บาทต่อคน
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.2, page 1. The particle before the ministry name extracted as ชอง."
+    caveat: >
+      The ministry name การพัฒนาสังคมและความมั่นคงของมนุษย์ is fully printed.
+      The particle glyph immediately before กระทรวง is damaged.
+
+  - id: MOF-2569-WATER-ACTUAL
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility]
+    text_en: >
+      Clause 5.1.3 allows the actual cost of buying or arranging water for
+      drinking and household use, as necessary, until the disaster situation
+      returns to normal. This clause prints no baht cap. Do not invent one.
+    text_th: >
+      ค่าจัดซื้อหรือจัดหาน้ำสำหรับบริโภคและใช้สอยในที่อยู่อาศัย เท่าที่จ่ายจริงตามความจำเป็นจนกว่าเหตุการณ์จะเข้าสู่ภาวะปกติ
+    source_url: *mof_url
+    source_excerpt: >
+      ๕.๑.๓ ค่าจัดซื้อหรือจัดหานํ้าสำหรับบริโภคและใช้สอยในที่อยู่อาศัย เท่าที่จ่ายจริง ตามความจำเป็นจนกว่าเหตุการณ์ประสบภัยพิบัติจะเข้าสู่ภาวะปกติ
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.3, page 1."
+
+  - id: MOF-2569-LIVING-TOTAL
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Clause 5.1.4 caps initial living costs, where the dwelling is damaged
+      in its entirety, at actual cost not more than 4,900 baht per family.
+      It is a ceiling for that case. It is not a flat grant and it does not
+      apply, on this clause's own words, to partial damage.
+    text_th: >
+      ค่าใช้จ่ายในการดำรงชีพเบื้องต้น กรณีที่อยู่อาศัยได้รับความเสียหายทั้งหลัง เท่าที่จ่ายจริงครอบครัวละไม่เกิน ๔,๙๐๐ บาท
+    source_url: *mof_url
+    source_excerpt: >
+      ๕.๑.๔ ค่าใช้จ่ายในการดำรงชีพเบื้องด้น กรณีที่อยู่อาศัยได้รับความเสียหายทั้งหลัง เท่าที่จ่ายจริงครอบครัวละไม่เกิน ๔,๙๐๐ บาท
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.4, page 1."
+
+  - id: MOF-2569-HOUSE-REPAIR
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Clause 5.1.5 caps repair of the permanent everyday dwelling at actual
+      cost not more than 88,600 baht per house. The same sentence says this
+      does not include a rented house. A claim for a rented house under this
+      clause is outside the clause. The figure is a ceiling, not a flat grant.
+    text_th: >
+      ค่าซ่อมแซมที่อยู่อาศัยประจำ เท่าที่จ่ายจริงหลังละไม่เกิน ๘๘,๖๐๐ บาท ทั้งนี้ไม่รวมถึงบ้านเช่า
+    source_url: *mof_url
+    source_excerpt: >
+      ๕.๑.๕ ค่าซ่อมแซมที่อยู่อาศัยประจำ เท่าที่จ่ายจริงหลังละไม,เกิน ๘๘,๖๐๐ บาท ทั้งนี้ ไม,รวมถึงบ้านเช่า
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.5, page 1."
+
+  - id: MOF-2569-FARM-BUILDING
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Clause 5.1.6 caps repair of a rice barn, a crop store, and an animal
+      pen at actual cost not more than 6,800 baht per family. The figure is
+      a ceiling, not a flat grant.
+    text_th: >
+      ค่าซ่อมแซมยุ้งข้าว โรงเรือนสำหรับเก็บพืชผล และคอกสัตว์ เท่าที่จ่ายจริงครอบครัวละไม่เกิน ๖,๘๐๐ บาท
+    source_url: *mof_url
+    source_excerpt: >
+      ๕.๑.๖ ค่าซ่อมแซมยุ้งข้าว โรงเรือนสำหรับเก็บพืชผล และคอกสัตว์ที่ได้รับความเสียหาย เท่าที่จ่ายจริงครอบครัวละไม,เกิน ๖,๘๐๐ บาท
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.6, page 1."
+
+  - id: MOF-2569-RENT
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Clause 5.1.7 applies when the victim rents someone else's house and
+      that rented house is wholly damaged, or partly damaged so that it
+      cannot be lived in. Assistance is the actual rent, not more than 2,500
+      baht per family per month, for not more than 2 months. A habitable
+      rented house is outside this clause. The figure is a ceiling.
+    text_th: >
+      บ้านเช่าเสียหายทั้งหลังหรือเสียหายบางส่วนจนอยู่อาศัยไม่ได้ ให้ช่วยเหลือค่าเช่าเท่าที่จ่ายจริงครอบครัวละไม่เกินเดือนละ ๒,๕๐๐ บาท เป็นเวลาไม่เกิน ๒ เดือน
+    source_url: *mof_url
+    source_excerpt: >
+      ๕.๑.๗ กรณีที่ผู้ประสบภัยพิบัติเช่าบ้านเรือนของผู้อื่น และบ้านเช่าเสียหายจากภัยพิบัติทั้งหลังหรือเสียหายบางส่วนจนอยู่อาศัยไม,ได้ ให้ช่วยเหลือเป็นค่าเช่าบ้านแก่ผู้ประสบภัยพิบัติ เท่าที่จ่ายจริงในอัตราครอบครัวละไม่เกินเดือนละ ๒,๕๐๐ บาท เป็นเวลาไม่เกิน ๒ เดือน
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.7, page 1."
+
+  - id: MOF-2569-TARP
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      The second limb of clause 5.1.8 caps canvas, plastic sheet, or other
+      material for sun and rain at actual cost not more than 1,200 baht per
+      family. The figure is a ceiling. The conversion-of-premises cap in the
+      same clause is a separate unverified rule because its digits are not stable.
+    text_th: >
+      ค่าผ้าใบหรือผ้าพลาสติกหรือวัสดุอื่น ๆ สำหรับกันแดดกันฝน เท่าที่จ่ายจริงครอบครัวละไม่เกิน ๑,๒๐๐ บาท
+    source_url: *mof_url
+    source_excerpt: >
+      หรือค่าผ้าใบหรือผ้าพลาสติกหรือวัสดุอื่น ๆ สำหรับกันแดดกันฝน เท่าที่จ่ายจริงครอบครัวละไม่เกิน ๑,๒๐๐ บาท
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.8, second limb, page 2."
+
+  - id: MOF-2569-TEMP-SHELTER-CAP
+    status: unverified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      TODO_HUMAN. Clause 5.1.8 caps the cost of converting a place into
+      temporary shelter, per family, at actual cost. In the PDF text layer
+      the amount is a Thai ๓, then a Latin digit 1, then Thai ๐๐๐. That
+      Latin 1 is not a Thai numeral and is not recorded here as a baht
+      amount. Do not turn that glyph into a baht figure.
+    text_th: ""
+    source_url: *mof_url
+    source_excerpt: >
+      Clause 5.1.8, first limb, page 2. The cap glyph did not extract as a
+      stable Thai number. The amount is not stored.
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.8, first limb, page 2."
+
+  - id: MOF-2569-TOILET-RATIO
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility]
+    text_en: >
+      Clause 5.1.9 (3) says toilets provided by a government agency at a
+      temporary shelter are 1 place per 10 people. The baht figure on that
+      line is not stable and is not part of this rule.
+    text_th: "จัดสร้างหรือจัดหาห้องน้ำ ห้องส้วม ๑ ที่ ต่อ ๑๐ คน"
+    source_url: *mof_url
+    source_excerpt: "๕.๑.๙ (๓) จัดสร้างหรือจัดหาห้องนํ้า ห้องส้วม ๑ ที่ ต่อ ๑๐ คน"
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.9 (3), page 2. Baht glyphs on the next line are excluded."
+
+  - id: MOF-2569-TOILET-BLOCK-COST
+    status: unverified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      TODO_HUMAN. The per-place baht cap in clause 5.1.9 (3) extracted as
+      a Thai ๒, a Latin digit 1, then Thai ๕๐๐. That is not recorded as a
+      baht amount. Do not read it as 2,500. Clause 5.1.17 is a different
+      sentence and is stored as its own rule.
+    text_th: ""
+    source_url: *mof_url
+    source_excerpt: >
+      Clause 5.1.9 (3), page 2. The average per-place cap did not extract as
+      a stable Thai number.
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.9 (3), page 2."
+
+  - id: MOF-2569-CLOTHING
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Clause 5.1.10 caps clothing that is damaged and cannot be used again,
+      or that is needed because the person has none during the disaster, at
+      not more than 1,300 baht per person. The figure is a ceiling.
+    text_th: "ค่าเครื่องนุ่งห่ม คนละไม่เกิน ๑,๓๐๐ บาท"
+    source_url: *mof_url
+    source_excerpt: >
+      ๕.๑.๑๐ ค่าเครื่องบุ่งห่มที่ได้รับความเสียหายและไม,สามารถนำกลับมาใช้ได้อีก หรือมีความจำเป็นต้องใช้ในการดำรงชีพ กรณีไม่มีเครื่องบุ่งห่มในการดำรงชีพขณะเกิดภัย คนละไม่เกิน ๑,๓๐๐ บาท
+    caveat: >
+      The text layer prints เครื่องบุ่งห่ม. The plain-language Thai uses เครื่องนุ่งห่ม. The cap ๑,๓๐๐ was not edited.
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.10, page 2. Heading vowels were damaged; the cap line ๑,๓๐๐ is clear and the heading reads เครื่องนุ่งห่ม."
+
+  - id: MOF-2569-LIVELIHOOD
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Clause 5.1.11 caps tools and or capital for the victim's main
+      occupation, the one that supports the family, at actual cost not more
+      than 13,500 baht per family. The figure is a ceiling, not a flat grant.
+    text_th: >
+      ค่าเครื่องมือประกอบอาชีพ และหรือเงินทุน ที่เป็นอาชีพหลัก เท่าที่จ่ายจริงครอบครัวละไม่เกิน ๑๓,๕๐๐ บาท
+    source_url: *mof_url
+    source_excerpt: >
+      ๕.๑.๑๑ ค่าเครื่องมือประกอบอาชีพ และหรือเงินทุนสำหรับผู้ประสบภัยพิบัติ ที่เป็นอาชีพหลักในการหาเลี้ยงครอบครัวของผู้ประสบภัยพิบัติ เท่าที่จ่ายจริงครอบครัวละไม,เกิน ๑๓,๕๐๐ บาท
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.11, page 2."
+
+  - id: MOF-2569-INJURY-HOSPITAL
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Clause 5.1.12 (1) pays initial assistance of 5,000 baht for a severe
+      injury that needs continuous inpatient treatment for at least 3 days.
+      The printed amount is ๕,๐๐๐, not a range. Stacking with the other two
+      injury limbs is forbidden by MOF-2569-INJURY-ONE-ONLY.
+    text_th: >
+      กรณีบาดเจ็บสาหัสที่ต้องรักษาในสถานพยาบาลติดต่อกันตั้งแต่ ๓ วันขึ้นไป ให้จ่ายเงินช่วยเหลือเบื้องต้น ๕,๐๐๐ บาท
+    source_url: *mof_url
+    source_excerpt: >
+      (๑) กรณีบาดเจ็บสาหัสที่ต้องรักษาในสถานพยาบาลติดต่อกัน ตั้งแต่ ๓ วันขึ้นไป ให้จ่ายเงินช่วยเหลือเบื้องด้นเป็นเงินจำนวน ๕,๐๐๐ บาท
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.12 (1), page 2."
+
+  - id: MOF-2569-INJURY-DISABILITY
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Clause 5.1.12 (2) pays initial assistance of 16,600 baht where the
+      injury reaches disability such that the person cannot do their normal
+      occupation. The printed amount is ๑๖,๖๐๐. Stacking with the other two
+      injury limbs is forbidden by MOF-2569-INJURY-ONE-ONLY.
+    text_th: >
+      กรณีบาดเจ็บจนถึงขั้นพิการไม่สามารถประกอบอาชีพตามปกติได้ ให้ช่วยเหลือเบื้องต้น ๑๖,๖๐๐ บาท
+    source_url: *mof_url
+    source_excerpt: >
+      (๒) กรณีบาดเจ็บจนถึงขั้นพิการไม่สามารถประกอบอาชีพตามปกติได้ ให้ช่วยเหลือเบื้องด้นเป็นเงินจำนวน ๑๖,๖๐๐ บาท
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.12 (2), page 2."
+
+  - id: MOF-2569-INJURY-SOLATIUM
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Clause 5.1.12 (3) allows money and or consolation goods, not more than
+      2,600 baht per person, for an injured person treated in a health
+      facility, and only where the disaster is a large or severe public
+      disaster that shocks the general public. The figure is a ceiling.
+      Stacking with the other two injury limbs is forbidden by
+      MOF-2569-INJURY-ONE-ONLY.
+    text_th: >
+      กรณีสาธารณภัยขนาดใหญ่หรือรุนแรงเป็นที่สะเทือนขวัญของประชาชนทั่วไป ให้จ่ายเงินและหรือสิ่งของปลอบขวัญผู้บาดเจ็บที่รักษาตัวในสถานพยาบาล คนละไม่เกิน ๒,๖๐๐ บาท
+    source_url: *mof_url
+    source_excerpt: >
+      (๓) กรณีภัยพิบัติที่เป็นสาธารณภัยขนาดใหญ่หรือรุนแรงเป็นที่สะเทือนขวัญของประชาชนทั่วไป ให้จ่ายเงินและหรือสิ่งของปลอบขวัญผู้ที่ได้รับบาดเจ็บที่รักษาตัวในสถานพยาบาล คนละไม่เกิน ๒,๖๐๐ บาท
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.12 (3), page 2."
+
+  - id: MOF-2569-INJURY-ONE-ONLY
+    status: verified
+    topic: denial
+    checks: [denial]
+    text_en: >
+      After the three injury limbs, the criteria say assistance under (1),
+      (2) and (3) may be given for one case only. A claim that stacks the
+      5,000 baht, the 16,600 baht, and the 2,600 baht ceiling is outside
+      this sentence.
+    text_th: >
+      การให้ความช่วยเหลือตามข้อ (๑) (๒) (๓) สามารถให้ความช่วยเหลือได้เพียงหนึ่งกรณีเท่านั้น
+    source_url: *mof_url
+    source_excerpt: >
+      การให้ความช่วยเหลือตาม ข้อ (๑) (๒) (๓) สามารถให้ความช่วยเหลือได้เพียงหนึ่งกรณีเท่านั้น
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.12, closing lines, page 2."
+
+  - id: MOF-2569-FUNERAL
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Clause 5.1.13 caps funeral arrangements for a person who died at not
+      more than 35,700 baht per person. Where the person who died was earning
+      income to support the family, a further family grant of not more than
+      35,700 baht may be considered. The PDF says ผู้หารายได้เลี้ยงดูครอบครัว.
+      It does not, in this sentence, say "head of household". Both figures
+      are ceilings (ไม่เกิน), not flat grants.
+    text_th: >
+      ค่าจัดการศพผู้เสียชีวิต รายละไม่เกิน ๓๕,๗๐๐ บาท และถ้าผู้เสียชีวิตเป็นผู้หารายได้เลี้ยงดูครอบครัว ให้พิจารณาช่วยเหลือเงินสงเคราะห์ครอบครัวอีกไม่เกิน ๓๕,๗๐๐ บาท
+    source_url: *mof_url
+    source_excerpt: >
+      ๕.๑.๑๓ ค่าจัดการศพ ผู้เสียชีวิต รายละไม่เกิน ๓๕,๗๐๐ บาท และในกรณีผู้ประสบภัยที่เสียชีวิตเป็นผู้หารายได้เลี้ยงดูครอบครัวให้พิจารณาช่วยเหลือเงินสงเคราะห์ครอบครัวอีกไม,เกิน ๓๕,๗๐๐ บาท
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.13, page 2."
+
+  - id: MOF-2569-BEDDING
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Clause 5.1.16 caps bedding that is lost or damaged and cannot be used
+      again, or that is needed because the person has none during the
+      disaster, at actual cost not more than 1,200 baht per person. The cap
+      line prints ๑,๒๐๐. The clause heading is spaced in the text layer but
+      reads เครื่องนอน.
+    text_th: "ค่าเครื่องนอน เท่าที่จ่ายจริงคนละไม่เกิน ๑,๒๐๐ บาท"
+    source_url: *mof_url
+    source_excerpt: >
+      ค่าเครื่องนอน ที่สูญหายหรือได้รับความเสียหายและไม่สามารถนำกลับมาใช้ได้อีก หรือมีความจำเป็นต้องใช้ในการดำรงชีพกรณีไม่มีเครื่องนอนในการดำรงชีพขณะเกิดภัย เท่าที่จ่ายจริงคนละไม่เกิน ๑,๒๐๐ บาท
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.16, page 3."
+
+  - id: MOF-2569-MOBILE-TOILET
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Clause 5.1.17, where a toilet cannot be built during the disaster,
+      allows a mobile or floating toilet at 1 place per 10 people, actual
+      cost, on average not more than 5,000 baht, in a suitable area. Where
+      the dwelling's own toilet cannot be used, paper toilets or other
+      materials are capped at not more than 1,000 baht per person. The
+      sentence says hygiene and cleaning are essential. These figures are
+      ceilings. They are not the unstable per-place figure in clause 5.1.9 (3).
+    text_th: >
+      รถสุขาเคลื่อนที่หรือสุขาลอยน้ำ ๑ ที่ต่อ ๑๐ คน เฉลี่ยไม่เกิน ๕,๐๐๐ บาท หรือสุขากระดาษหรือวัสดุอื่น คนละไม่เกิน ๑,๐๐๐ บาท
+    source_url: *mof_url
+    source_excerpt: >
+      ๕.๑.๑๗ ขณะเกิดภัยพิบัติในพื้นที่ไม่สามารถจัดสร้างห้องนํ้าห้องส้วมให้เข่า รถสุขาเคลื่อนที่ สุขาลอยนํ้า ๑ ที่ ต่อ ๑๐ คน เท่าที่จ่ายจริง เฉลี่ยไม่เกิน ๕,๐๐๐ บาท ในพื้นที่ที่เหมาะสม หรือกรณีที่อยู่อาศัยไม,สามารถใช้ห้องนํ้า ห้องส้วมได้ให้จัดหาสุขากระดาษ หรือวัสดุอื่น ๆ คนละไม่เกิน ๑,๐๐๐ บาท
+    caveat: >
+      The verb before รถสุขาเคลื่อนที่ extracted as ให้เข่า, which was not repaired. Amounts ๕,๐๐๐ and ๑,๐๐๐ and the ratio ๑ ที่ ต่อ ๑๐ คน were stable.
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.1.17, page 3. Amounts ๕,๐๐๐ and ๑,๐๐๐ extracted as stable Thai digits."
+
+  - id: MOF-2569-DRINKING-WATER
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Under medical and public health assistance, clause 5.3.1 (2) caps
+      drinking water for a family that lacks clean drinking water at not
+      more than 250 baht per family. The figure is a ceiling. It is a
+      different sentence from clause 5.1.3, which has no baht cap.
+    text_th: "ค่าน้ำดื่มแก่ครอบครัวที่ขาดแคลนน้ำสะอาดบริโภค ครอบครัวละไม่เกิน ๒๕๐ บาท"
+    source_url: *mof_url
+    source_excerpt: >
+      (๒) ค่าน้ำดื่มแก่ครอบครัวที่ขาดแคลนน้ำสะอาดบริโภค ครอบครัวละไม่เกิน ๒๕๐ บาท
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.3.1 (2), page 3."
+
+  - id: MOF-2569-PROTEIN
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Clause 5.3.1 (3) caps protein supplements and food useful to the body,
+      for recovery and immunity, at not more than 700 baht per family. The
+      figure is a ceiling. It is not a kilocalorie standard.
+    text_th: "ค่าอาหารเสริมโปรตีนและอาหารที่มีประโยชน์ ครอบครัวละไม่เกิน ๗๐๐ บาท"
+    source_url: *mof_url
+    source_excerpt: >
+      (๓) ค่าอาหารเสริมโปรตีน และอาหารที่มีประโยชน์ต่อร่างกายแก่ประชาชนผู้ประสบภัย เพื่อการฟื้นฟูสภาพร่างกายและเสริมสร้างภูมิคุ้มกันโรค ครอบครัวละไม,เกิน ๗๐๐ บาท
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.3.1 (3), page 3."
+
+  - id: MOF-2569-SANITATION
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Clause 5.3.1 (4) caps materials to improve household sanitation,
+      hygiene, and environmental health after a disaster at not more than
+      500 baht per household. The figure is a ceiling.
+    text_th: "ค่าวัสดุชุดดูแลสุขภาพอนามัยเพื่อปรับปรุงสุขาภิบาลครัวเรือน ครัวเรือนละไม่เกิน ๕๐๐ บาท"
+    source_url: *mof_url
+    source_excerpt: >
+      กรณีปรับปรุงด้านสุขาภิบาล การดูแลสุขอนามัย และอนามัยสิ่งแวดล้อม ในครัวเรือนที่ได้รับผลกระทบจากภัยพิบัติ ครัวเรือนละไม,เกิน ๕๐๐ บาท
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.3.1 (4), first case, page 3."
+
+  - id: MOF-2569-FLOOD-DISINFECTION
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      The flood limb of clause 5.3.1 (4) caps mould removal and disinfection
+      for a household affected by flood (อุทกภัย) at not more than 600 baht
+      per household. The figure is a ceiling. This is the clause that names
+      flood. It does not define who a flood victim is.
+    text_th: >
+      กรณีกำจัดเชื้อราและฆ่าเชื้อโรคในครัวเรือนที่ได้รับผลกระทบจากอุทกภัย ครัวเรือนละไม่เกิน ๖๐๐ บาท
+    source_url: *mof_url
+    source_excerpt: >
+      กรณีกำจัดเชื้อราและฆ่าเชื้อโรคในครัวเรือนที่ได้รับผลกระทบจากอุทกภัย ครัวเรือนละไม,เกิน ๖๐๐ บาท
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.3.1 (4), flood limb, page 3."
+
+  - id: MOF-2569-WELL
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      Clause 5.3.1 (1) caps materials, chemicals, or the cost of hiring a
+      clean of a household shallow well at not more than 750 baht per well.
+      The figure is a ceiling.
+    text_th: "ค่าล้างทำความสะอาดบ่อน้ำตื้น บ่อละไม่เกิน ๗๕๐ บาท"
+    source_url: *mof_url
+    source_excerpt: >
+      (๑) ค่าใช้จ่ายในการจัดหาวัสดุอุปกรณ์ เคมีภัณฑ์ หรือค่าจัดจ้างล้างทำความสะอาดบ่อน้ำตื้นของประชาชน บ่อละไม,เกิน ๗๕๐ บาท
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.3.1 (1), page 3."
+
+  - id: MOF-2569-AG-REGISTERED
+    status: verified
+    topic: denial
+    checks: [denial, aid_eligibility]
+    text_en: >
+      The agriculture section says assistance in money or in kind is for
+      victims who had already registered, and updated that registration,
+      with the supervising agency of the Ministry of Agriculture and
+      Cooperatives before the disaster. Someone who was not registered
+      beforehand is outside this sentence. The section does not print a
+      baht-per-rai price.
+    text_th: >
+      ช่วยเหลือผู้ประสบภัยที่ขึ้นทะเบียนและปรับปรุงทะเบียนกับหน่วยงานที่กำกับดูแลของกระทรวงเกษตรและสหกรณ์ก่อนเกิดภัยพิบัติแล้วเท่านั้น
+    source_url: *mof_url
+    source_excerpt: >
+      ด้านการเกษตร ให้ดำเนินการช่วยเหลือโดยจ่ายเป็นเงินหรือเป็นสิ่งของแก่ผู้ประสบภัยพิบัติที่ขึ้นทะเบียนและปรับปรุงทะเบียนกับหน่วยงานที่กำกับดูแลแต่ละด้านของกระทรวงเกษตรและสหกรณ์ ก่อนเกิดภัยพิบัติแล้วเท่านั้น
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Agriculture chapeau, page 4. The clause number extracted as ๔.๔; the words are the chapeau of the agriculture section."
+
+  - id: MOF-2569-CROP-CAP
+    status: verified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      For crops that die or are damaged, assistance follows the actual
+      damaged farm area and is not more than 30 rai per household, using
+      average production cost. Labour is assisted at 30 percent of the
+      labour cost for both short-lived crops and fruit or perennial trees.
+      Fruit or perennial trees that are stunted, or whose yield is damaged,
+      but that are not dead and can recover, are assisted at not more than
+      30 rai per household and at 40 percent of the fruit-tree rate. The two
+      limbs together are not more than 30 rai per household. Debris that a
+      government agency cannot clear is assisted for not more than 5 rai.
+      No baht-per-rai price is printed. Do not invent one.
+    text_th: >
+      ไม่เกินครัวเรือนละ ๓๐ ไร่ ค่าแรงร้อยละ ๓๐ ของค่าแรง ไม้ผลที่ชะงักร้อยละ ๔๐ ของอัตราไม้ผล และเศษวัสดุทับถมไม่เกิน ๕ ไร่
+    source_url: *mof_url
+    source_excerpt: >
+      ตามจำนวนพื้นที่ทำการเกษตรจริงที่ได้รับความเสียหาย ทั้งนี้ ไม่เกินครัวเรือนละ ๓๐ ไร่
+      รายการค่าแรงให้ช่วยเหลือในอัตราร้อยละ ๓๐ ของค่าแรง
+      ให้ช่วยเหลือไม่เกินครัวเรือนละ ๓๐ ไร่ ในอัตราร้อยละ ๔๐ ของข้อ ๔.๔.๑.๑ (๒)
+      รวมกันไม่เกินครัวเรือนละ ๓๐ ไร่
+      ในขนาดพื้นที่ไม่เกิน ๕ ไร่
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Crop clauses on pages 4 and 5. Clause numbers in the text layer jump between ๔.๔ and ๕.๔."
+
+  - id: MOF-2569-NO-DUPLICATE
+    status: verified
+    topic: denial
+    checks: [denial]
+    text_en: >
+      Clause 6 says agencies, local government, private parties, and
+      charities must coordinate so that assistance reaches people and is not
+      duplicated. A second payment for the same assistance is outside this
+      sentence. The clause does not define a matching procedure.
+    text_th: >
+      ให้มีการประสานงานกันเพื่อให้การช่วยเหลือทั่วถึงไม่ซ้ำซ้อนกัน
+    source_url: *mof_url
+    source_excerpt: >
+      ๖. การให้ความช่วยเหลือข้างต้น ให้มีการประสานงานกันระหว่างส่วนราชการ หน่วยงานอื่นของรัฐ องค์กรปกครองส่วนท้องถิ่น เอกชน และองค์กรการกุศลที่เกี่ยวข้อง เพื่อให้การช่วยเหลือทั่วถึงไม่ซ้ำซ้อนกัน
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 6, page 8."
+
+  - id: MOF-2569-CASH-DISCRETION
+    status: verified
+    topic: denial
+    checks: [denial, aid_eligibility]
+    text_en: >
+      Clause 5.7 says that where an item is not specified to be paid in
+      money, the authority who approves assistance may decide to pay money,
+      considering the situation. That decision is the approver's discretion.
+      It is not a decision for the model, and it states no amount.
+    text_th: >
+      หากรายการใดมิได้กำหนดให้จ่ายเป็นเงิน ให้อยู่ในดุลยพินิจของผู้มีอำนาจอนุมัติให้การช่วยเหลือ
+    source_url: *mof_url
+    source_excerpt: >
+      ๕.๗ กรณีมีความจำเป็น หากรายการใดมิได้กำหนดให้จ่ายเป็นเงิน ให้อยู่ในดุลยพินิจของผู้มีอำนาจอนุมัติให้การช่วยเหลือพิจารณาให้จ่ายเป็นเงินก็ได้ โดยคำนึงถึงสภาพและเหตุการณ์ตามความเหมาะสม
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 5.7, page 8."
+
+  - id: MOF-2569-OUTSIDE-APPROVAL
+    status: verified
+    topic: denial
+    checks: [denial]
+    text_en: >
+      Clause 9 says that where assistance is needed outside these criteria
+      and methods, approval must be sought from the Ministry of Finance.
+      A payment that these clauses do not cover is not approved by this
+      sentence. It has to be taken to the Ministry.
+    text_th: >
+      กรณีที่มีความจำเป็นต้องให้ความช่วยเหลือนอกเหนือจากหลักเกณฑ์นี้ ให้ขออนุมัติต่อกระทรวงการคลัง
+    source_url: *mof_url
+    source_excerpt: >
+      ๙. กรณีที่มีความจำเป็นต้องให้ความช่วยเหลือนอกเหนือจากหลักเกณฑ์ และวิธีดำเนินการนี้ ให้ขออนุมัติต่อกระทรวงการคลัง
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Clause 9, page 8."
+
+  - id: MOF-2569-PM25
+    status: unverified
+    topic: aid_eligibility
+    checks: [aid_eligibility, denial]
+    text_en: >
+      TODO_HUMAN. The mask and dust-net clauses name children, older people,
+      pregnant women, and some illnesses, and they print a per-set cap. The
+      age glyphs mix Thai digits with a Latin 0, and the baht cap contains a
+      Latin 1. Those ages and that amount are not recorded. Do not state an
+      age threshold or a baht amount for this clause.
+    text_th: ""
+    source_url: *mof_url
+    source_excerpt: >
+      Mask and dust-net clauses on page 4. Age and baht glyphs were not stable.
+      No number from those lines is stored.
+    retrieved: *mof_date
+    license_note: *mof_license
+    locator: "Page 4, the two PM2.5 clauses. Clause numbers in the text layer repeat."

@@ -1,0 +1,285 @@
+# Emergency triage. The five colour names are from a 2013 NIEM slide that
+# cites the กพฉ announcement. The phone-triage prose is from a Khon Kaen
+# Hospital case study of criteria-based dispatch. Flood water depth and a
+# trapped-person colour are not in either document.
+
+license_niem: &niem_license >
+  Slides hosted by NSTDA, "National Institute for Emergency Medicine (NIEM)
+  Thailand's Disaster Emergency Medical System", retrieved 24 October 2026.
+  No licence line was extracted from the slides. Short quotation for this
+  research corpus. Confirm before redistribution. The slides describe the
+  กพฉ announcement. They are not that announcement.
+  https://www.nstda.or.th/nac/2013/download/presentation/Set4/NT-106-02/04Pairoj.pdf
+
+license_kkh: &kkh_license >
+  Khon Kaen Hospital EMS ebook, retrieved 24 October 2026. No licence line
+  was extracted. The chapter describes one centre's phone triage using the
+  criteria-based dispatch protocol and says a computer program to assist
+  triage was under development by NIEM. It is not a retrieved national
+  regulation. Short quotation for this research corpus. Confirm before
+  redistribution.
+  https://www.kkh.go.th/wp-content/uploads/2023/09/EMS-KKH-2023_eBook-2.pdf
+
+niem: &niem_url https://www.nstda.or.th/nac/2013/download/presentation/Set4/NT-106-02/04Pairoj.pdf
+kkh: &kkh_url https://www.kkh.go.th/wp-content/uploads/2023/09/EMS-KKH-2023_eBook-2.pdf
+retrieved: &triage_date "2026-10-24"
+
+rules:
+  - id: NIEMS-COLOR-RED
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      The NIEM slide names ผู้ป่วยฉุกเฉินวิกฤติ (คุกคามชีวิต), symbol dark
+      red, operational urgency ทันที (immediately). The slide does not print
+      a water depth, a symptom list, or a minute target.
+    text_th: "ผู้ป่วยฉุกเฉินวิกฤติ (คุกคามชีวิต) สีแดง (เข้ม) ทันที"
+    source_url: *niem_url
+    source_excerpt: "ผู้ป่วยฉุกเฉินวิกฤติ (คุกคามชีวิต) สีแดง (เข้ม) ทันที"
+    retrieved: *triage_date
+    license_note: *niem_license
+    locator: "NIEM slide, page 19 of the NSTDA PDF. Caption: หลักเกณฑ์การประเมินเพื่อคัดแยกระดับความฉุกเฉินและมาตรฐานการปฏิบัติการฉุกเฉิน ตามประกาศ กพฉ."
+
+  - id: NIEMS-COLOR-YELLOW
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      The NIEM slide names ผู้ป่วยฉุกเฉินเร่งด่วน, symbol yellow, operational
+      urgency หลังสีแดง (after red). No minute target is printed on the slide.
+    text_th: "ผู้ป่วยฉุกเฉินเร่งด่วน สีเหลือง หลังสีแดง"
+    source_url: *niem_url
+    source_excerpt: "ผู้ป่วยฉุกเฉินเร่งด่วน สีเหลือง หลังสีแดง"
+    retrieved: *triage_date
+    license_note: *niem_license
+    locator: "NIEM slide, page 19 of the NSTDA PDF."
+
+  - id: NIEMS-COLOR-GREEN
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      The NIEM slide names ผู้ป่วยฉุกเฉินไม่รุนแรง, symbol green, operational
+      urgency หลังสีเหลือง (after yellow).
+    text_th: "ผู้ป่วยฉุกเฉินไม่รุนแรง สีเขียว หลังสีเหลือง"
+    source_url: *niem_url
+    source_excerpt: "ผู้ป่วยฉุกเฉินไม่รุนแรง สีเขียว หลังสีเหลือง"
+    retrieved: *triage_date
+    license_note: *niem_license
+    locator: "NIEM slide, page 19 of the NSTDA PDF."
+
+  - id: NIEMS-COLOR-WHITE
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      The NIEM slide names ผู้ป่วยทั่วไป, symbol white, operational urgency
+      ที่อื่น / หลังสีเขียว (elsewhere, or after green).
+    text_th: "ผู้ป่วยทั่วไป สีขาว ที่อื่น / หลังสีเขียว"
+    source_url: *niem_url
+    source_excerpt: "ผู้ป่วยทั่วไป สีขาว ที่อื่น / หลังสีเขียว"
+    retrieved: *triage_date
+    license_note: *niem_license
+    locator: "NIEM slide, page 19 of the NSTDA PDF."
+
+  - id: NIEMS-COLOR-BLACK
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      The NIEM slide names ไม่มีผู้ป่วย (รับบริการสาธารณสุขอื่น), symbol
+      black, operational urgency เวลาอื่นหรือที่อื่น (another time or another
+      place). The slide does not call this colour a resuscitation category.
+    text_th: "ไม่มีผู้ป่วย (รับบริการสาธารณสุขอื่น) สีดำ เวลาอื่นหรือที่อื่น"
+    source_url: *niem_url
+    source_excerpt: "ไม่มีผู้ป่วย (รับบริการสาธารณสุขอื่น) สีดำ เวลาอื่นหรือที่อื่น"
+    retrieved: *triage_date
+    license_note: *niem_license
+    locator: "NIEM slide, page 19 of the NSTDA PDF."
+
+  - id: NIEMS-1669-PATH
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      The same NIEM deck shows the public entry as telephone 1669, then a
+      split between not urgent and urgent or unclear, before dispatch. The
+      diagram is a flow, not a symptom card. No flood depth is printed.
+    text_th: "โทร 1669 จำแนกอาการ ไม่ฉุกเฉิน หรือ ฉุกเฉิน/ไม่ชัดเจน"
+    source_url: *niem_url
+    source_excerpt: "โทร 1669 จำแนกอาการ ไม่ฉุกเฉิน ฉุกเฉิน/ไม่ชัดเจน แผนผังการรับบริการฉุกเฉิน จัดทำโดย สถาบันการแพทย์ฉุกเฉินแห่งชาติ"
+    retrieved: *triage_date
+    license_note: *niem_license
+    locator: "NIEM slide, page 18 of the NSTDA PDF."
+
+  - id: NIEMS-ANNOUNCEMENT-2554
+    status: unverified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      TODO_HUMAN. The slides cite ประกาศ กพฉ. หลักเกณฑ์การประเมินเพื่อคัดแยกระดับความฉุกเฉินและมาตรฐานการปฏิบัติการฉุกเฉิน พ.ศ. 2554.
+      The announcement PDF was not retrieved. Do not treat the slide, or a
+      hospital case study, as the announcement's symptom lists or time targets.
+    text_th: ""
+    source_url: *niem_url
+    source_excerpt: >
+      The NSTDA PDF names the 2554 กพฉ announcement on pages 7 and 19. The
+      announcement text itself is not in this corpus.
+    retrieved: *triage_date
+    license_note: *niem_license
+    locator: "Gap. The announcement was not retrieved."
+
+  - id: CBD-FIVE-CODES
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      A Khon Kaen Hospital case study of phone triage says the criteria-based
+      dispatch protocol puts calls in five groups: Red, Yellow, Green, White,
+      and Black. Red through Green require EMS. White does not: medical
+      advice and or a suggestion to go to hospital on their own is given.
+      Black is a false or prank call, meaning there is no patient, and the
+      call is terminated. Green is described as mild, semi-urgent. Yellow is
+      intermediate severity, urgent. Red is the highest severity, emergency.
+      This is that centre's description. Minute targets in its table did not
+      extract as a stable sentence and are not in this rule.
+    text_th: ""
+    source_url: *kkh_url
+    source_excerpt: >
+      According to the CBD protocol, the emergency calls are categorized
+      (phone triage) into five groups: Red, Yellow, Green, White, and Black
+      codes. The Red to Green codes are considered to require EMS but the
+      White code is not; the Black code is false or prank calls (i.e., there
+      is no patient). For the White code, medical advice and/or suggestion to
+      go to hospital on their own is given. For the Black code, the calls are
+      just terminated. For the Green codes, which are mild cases
+      (semi-urgent). For the Yellow code cases with intermediate severity
+      (urgent). For the Red code cases with the highest severity (emergency).
+    retrieved: *triage_date
+    license_note: *kkh_license
+    locator: "Khon Kaen Hospital EMS ebook, phone-triage section. Response-time table cells were not used."
+    caveat: >
+      One hospital's description of the protocol, not the กพฉ announcement.
+
+  - id: CBD-STEP1-CONSCIOUS-BREATHING
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      The same case study says the first questions, applied to all cases,
+      cover the symptom, where the patient is, the caller's telephone number,
+      the caller's name, whether the patient is conscious or awake, whether
+      the patient is breathing normally, and age and gender. Consciousness
+      and breathing are asked to identify critical cases such as cardiac
+      arrest. The study does not say to store the telephone number. This
+      corpus does not store one.
+    text_th: ""
+    source_url: *kkh_url
+    source_excerpt: >
+      Then important vital signs (consciousness and breathing) are asked to
+      promptly identify critical cases such as cardiac arrest. 1 What's the
+      patient's symptom? 2 Where is/are the patients? 5 Is the patient
+      conscious / Awake? 6 Is the patient breathing normally (or not
+      breathing)? 7 What is the patient's age and gender?
+    retrieved: *triage_date
+    license_note: *kkh_license
+    locator: "Khon Kaen Hospital EMS ebook, Table 2. Questions 3 and 4 ask for a callback number and a name and are intentionally not copied into the rule text as data to collect."
+    caveat: >
+      One hospital's question list. Questions 3 and 4, which ask for a
+      telephone number and a name, are omitted here so the corpus does not
+      become a collection script for those identifiers.
+
+  - id: CBD-DROWNING-CATEGORY
+    status: verified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      The case study lists CBD23 as "Drowning / Marine injury", one of 25
+      symptom sets. The questions inside that set are not in the extract.
+      Do not invent flood questions, a water depth, or a colour for CBD23.
+    text_th: ""
+    source_url: *kkh_url
+    source_excerpt: "CBD23 Drowning / Marine injury"
+    retrieved: *triage_date
+    license_note: *kkh_license
+    locator: "Khon Kaen Hospital EMS ebook, list of 25 CBD symptom sets."
+    caveat: "The name of the set only. The question card was not in the extract."
+
+  - id: CBD-ONLINE-MEDICAL-DIRECTION
+    status: verified
+    topic: safeguarding
+    checks: [safeguarding, triage]
+    text_en: >
+      The case study says advanced procedures such as endotracheal
+      intubation, cardioversion, and intravenous drug administration are
+      performed via online medical direction, with EMS personnel speaking to
+      the EMS medical director for specific instructions. Those procedures
+      are a human medical decision. The model does not give that instruction.
+    text_th: ""
+    source_url: *kkh_url
+    source_excerpt: >
+      Advanced procedures such as endotracheal intubation, cardioversion, and
+      intravenous drug administration are performed via online medical
+      directions, in which EMS personnel directly communicate with the EMS MD
+      to receive specific instructions.
+    retrieved: *triage_date
+    license_note: *kkh_license
+    locator: "Khon Kaen Hospital EMS ebook, EMS medical director passage."
+    caveat: "One centre's description of medical direction."
+
+  - id: CBD-RESPONSE-MINUTES
+    status: unverified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      TODO_HUMAN. The case study's response-time table did not extract as a
+      stable sentence. No minute target is stored. Do not use a remembered
+      dispatch interval as policy.
+    text_th: ""
+    source_url: *kkh_url
+    source_excerpt: >
+      Table 3, "Triage categories for EMS dispatch", was present. Its time
+      cells were not stable enough to quote. No minute figure is stored.
+    retrieved: *triage_date
+    license_note: *kkh_license
+    locator: "Khon Kaen Hospital EMS ebook, Table 3. Gap."
+
+  - id: FLOOD-WATER-DEPTH
+    status: unverified
+    topic: triage
+    checks: [triage]
+    text_en: >
+      TODO_HUMAN. No flood water-depth threshold was retrieved from NIEMS,
+      the 1669 material above, or the Sphere handbook. Do not use a depth in
+      centimetres, a knee, a waist, or a chest as a dispatch rule until a
+      human attaches a source.
+    text_th: ""
+    source_url: TODO_HUMAN
+    source_excerpt: >
+      No source excerpt. A depth threshold was not found in the documents
+      retrieved for this corpus.
+    retrieved: *triage_date
+    license_note: >
+      No source was retrieved, so there is no licence in a threshold. Do not
+      invent one. ReliefWeb and DDPM were not used.
+    locator: "Gap."
+
+  - id: FLOOD-TRAPPED-DISPATCH
+    status: unverified
+    topic: triage
+    checks: [triage, safeguarding]
+    text_en: >
+      TODO_HUMAN. No retrieved rule maps a person trapped by floodwater to a
+      1669 colour, a time target, or a priority above a welfare request.
+      Do not invent that mapping. Consciousness, breathing, and the red
+      "immediate" row remain the retrieved medical signals.
+    text_th: ""
+    source_url: TODO_HUMAN
+    source_excerpt: >
+      No source excerpt. A trapped-person dispatch rule was not found in the
+      documents retrieved for this corpus.
+    retrieved: *triage_date
+    license_note: >
+      No source was retrieved, so there is no licence in a mapping. Do not
+      invent one. ReliefWeb and DDPM were not used.
+    locator: "Gap."

@@ -2,8 +2,10 @@
 
 The client refuses to run unless MUBIT_BASE_URL and MUBIT_API_KEY are set,
 and it refuses any host that is not api.mubit.ai or a subdomain of mubit.ai.
-It never prints the key. llm.provider_route stays TODO_HUMAN until a human
-confirms the route, so a configured URL still does not leave the process.
+system2.hosting is OpenRouter behind that gateway. This module does not read
+OPENROUTER_API_KEY and it does not call openrouter.ai. It never prints the
+key. llm.provider_route stays TODO_HUMAN until a human confirms the route,
+so a configured URL still does not leave the process.
 """
 
 from __future__ import annotations

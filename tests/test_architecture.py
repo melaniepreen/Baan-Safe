@@ -67,6 +67,18 @@ def test_llm_refuses_other_hosts_and_hides_the_key(monkeypatch):
     assert "mbt_should_not_appear" not in str(caught.value)
 
 
+def test_llm_refuses_openrouter_and_ignores_its_key(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-should_not_appear")
+    monkeypatch.setenv("MUBIT_BASE_URL", "https://openrouter.ai/api/v1")
+    monkeypatch.setenv("MUBIT_API_KEY", "mbt_should_not_appear")
+    with pytest.raises(RuntimeError, match="not a Mubit host") as caught:
+        complete([{"role": "user", "content": "synthetic"}])
+    text = str(caught.value)
+    assert "sk-should_not_appear" not in text
+    assert "mbt_should_not_appear" not in text
+    assert "openrouter.ai" in text
+
+
 def test_llm_does_not_call_out_while_provider_route_is_unset(monkeypatch):
     monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai")
     monkeypatch.setenv("MUBIT_API_KEY", "mbt_should_not_appear")

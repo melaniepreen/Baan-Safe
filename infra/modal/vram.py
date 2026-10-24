@@ -243,6 +243,37 @@ def table_rows() -> list[dict]:
     return rows
 
 
+# Banyan Sapling. Stored-parameter count is the figure on the model card
+# (MubitLabs/banyan-sapling, read 24 October 2026), not a safetensors recount.
+# 48 layers, 4 KV heads, head dim 128 are from that repo's config.json.
+# The reference runtime is one example at a time and generates no tokens.
+# Quantized and CPU inference are outside that runtime, so this row is bf16 only.
+SAPLING = {
+    "label": "Banyan Sapling",
+    "repo": "MubitLabs/banyan-sapling",
+    "params": 23_042_164_740,
+    "attn_layers": 48,
+    "kv_heads": 4,
+    "head_dim": 128,
+    "input_tokens": 16384,
+}
+SAPLING_GPU_GIB = 48.0
+
+
+def sapling_footprint(tokens: int | None = None) -> dict[str, float]:
+    """BF16 weights + KV at the given token count + the 2 GiB reserve."""
+    length = SAPLING["input_tokens"] if tokens is None else tokens
+    weights = weight_gib(SAPLING["params"], "bf16")
+    kv = kv_gib(SAPLING, length)
+    return {
+        "weights": weights,
+        "kv": kv,
+        "reserve": RESERVE_GIB,
+        "total": weights + kv + RESERVE_GIB,
+        "slack_on_48": SAPLING_GPU_GIB - (weights + kv + RESERVE_GIB),
+    }
+
+
 def main() -> None:
     print(f"reserve_gib={RESERVE_GIB} demo_tokens={DEMO_TOKENS} kv_dtype=fp16/bf16")
     print()
@@ -253,6 +284,14 @@ def main() -> None:
             f"| {row['label']} | {row['quant']} | {row['weights']:.2f} | "
             f"{row['kv']:.2f} | {row['total']:.2f} | {row['gpu']} | {row['comfortable']} |"
         )
+    sap = sapling_footprint()
+    print()
+    print("| Model | Quant | Weights GiB | KV 16384 GiB | Weights+KV+reserve | Slack on 48 GiB |")
+    print("|---|---|---:|---:|---:|---:|")
+    print(
+        f"| Banyan Sapling | bf16 | {sap['weights']:.2f} | {sap['kv']:.2f} | "
+        f"{sap['total']:.2f} | {sap['slack_on_48']:.2f} |"
+    )
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from api.routes.endpoints import router
+from api.routes.policies import router as policies_router
 from config.envfile import load_env_file
 from paths import ROOT
 
@@ -25,4 +26,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(router)
+app.include_router(policies_router)
 app.mount("/ui", StaticFiles(directory=ROOT / "ui", html=True), name="ui")
