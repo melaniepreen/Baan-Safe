@@ -2,8 +2,8 @@
 # Humans fill these in. Do not resolve them in code.
 # scripts/validate.py allowlists only the decisions a human has already made:
 # system2.use_banyan_sapling, system2.sapling_scope, sapling.client,
-# system2.hosting, llm.provider_route, gateway.route_chooser, and
-# system1.extraction_method.
+# system2.hosting, llm.provider_route, gateway.route_chooser,
+# system1.extraction_method, and correction_loop.graduation_threshold.
 system1:
   extraction_method: rules-only      # decided: keyword rules in system1/extract.py; extraction_model stays TODO_HUMAN
   extraction_model: TODO_HUMAN       # only if a model is used
@@ -37,7 +37,7 @@ data:
   demo_event: TODO_HUMAN             # which flood event / provinces anchor the demo
   production_db: TODO_HUMAN          # SQLite is used tonight
 correction_loop:
-  graduation_threshold: TODO_HUMAN   # corrections before an S2 pattern becomes an S1 rule
+  graduation_threshold: 2            # decided: distinct corrected cases before a pattern graduates to System 2 (never into System 1)
 learning_eval:
   promotion: TODO_HUMAN              # do not promote a version from eval/learning
   freeze_mubit_auto_adapters: TODO_HUMAN  # freeze auto-adapters before a live eval run

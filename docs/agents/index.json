@@ -15,6 +15,7 @@
       "files": [
         "gateway/route.py",
         "gateway/chooser.py",
+        "gateway/graduation.py",
         "llm/client.py",
         "llm/openai_client.py",
         "memory/adapter.py"

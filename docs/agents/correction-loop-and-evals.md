@@ -3,6 +3,8 @@ title: Correction loop and evals
 tags: [eval, correction, learning, latte, sapling-replay]
 files:
   - eval/correction_loop.py
+  - eval/graduation_demo.py
+  - gateway/graduation.py
   - eval/learning/harness.py
   - eval/latte/run.py
   - eval/replay.py
@@ -17,6 +19,8 @@ Score stub labels, run a synthetic correction through a stub model version, and 
 - `eval/__main__.py` — `make replay-stubs`. System 1, System 2, and Sapling stubs.
 - `eval/replay.py` — scores a callable against fixture labels.
 - `eval/correction_loop.py` — `make demo-correction-loop`. Case `CORR-LOOP-1`.
+- `gateway/graduation.py` — the graduation rule: `graduated_patterns` counts human `s1_triage` corrections sharing one `(needs, vulnerable, danger)` pattern and a `graduation_labels` entry across `correction_loop.graduation_threshold` distinct cases; `apply(case)` tags matches `complex_situation` and adds a recommendation MemoryItem.
+- `eval/graduation_demo.py` — `make demo-graduation`. Temp event log, two corrections, F02 graduates.
 - `eval/compare.py` — route accuracy, latency, tokens. `cost_usd` stays null.
 - `eval/learning/` — `make eval-learning`. Seeds 17, 29, 41. Report `eval/out/learning.md`.
 - `eval/latte/` — `make latte-bench`. Pin in `eval/latte/pin.py`. Notes in `eval/LATTE.md`.
@@ -30,6 +34,7 @@ Score stub labels, run a synthetic correction through a stub model version, and 
 - Coach notes from `sim/coach.py` are `eval/out/coach.jsonl` with `source=coach`. They are not `Correction` rows and they are not promoted. See `docs/agents/caller-simulation.md`.
 - Learning arms are also scored on held-out caller trait combinations (`eval/learning/simulators.py`).
 - latte-bench is a submodule with no license. The runner does not vendor its source. Free mode makes no API call.
+- Graduation hands System 2 a recommendation only: the case stays in System 2 tagged `complex_situation`, the rule sets no priority, and nothing moves into System 1. Routine labels (`sphere_*`, `niems_green_not_severe`, `niems_white_general`) never graduate. Non-human sources and same-case repeats do not count.
 
 ## Invariants
 
@@ -43,6 +48,8 @@ Score stub labels, run a synthetic correction through a stub model version, and 
 
 - `make replay-stubs`
 - `make demo-correction-loop`
+- `make demo-graduation`
+- `tests/test_graduation.py`
 - `make eval-learning`
 - `make sim-eval`
 - `tests/test_learning_eval.py`, `tests/test_latte.py`
@@ -57,7 +64,6 @@ Score stub labels, run a synthetic correction through a stub model version, and 
 
 ## Open TODO_HUMAN keys
 
-- `correction_loop.graduation_threshold`
 - `learning_eval.promotion`, `learning_eval.freeze_mubit_auto_adapters`
 - `latte_bench.license_confirmation`
 - `llm.token_price_usd`

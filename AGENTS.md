@@ -32,6 +32,7 @@ training             corrections, coach, sim -> event log -> export-training
 make test
 make validate
 make replay-stubs
+make demo-graduation
 make eval-learning
 make sim-eval
 make extract-eval
