@@ -126,7 +126,19 @@ _WATER_AT_STREET_END = re.compile(
 
 VULNERABLE_PHRASES: dict[str, tuple[str, ...]] = {
     "elderly": ("grandmother", "grandfather", "elderly", "old"),
-    "child": ("child", "baby", "kid", "son", "daughter", "infant"),
+    "child": (
+        "children",
+        "grandchild",
+        "grandchildren",
+        "child",
+        "babies",
+        "baby",
+        "kids",
+        "kid",
+        "son",
+        "daughter",
+        "infant",
+    ),
     "oxygen_dependent": ("oxygen",),
     "immobile": (
         "can't walk",
@@ -476,6 +488,11 @@ def extract(
         for pattern in IMMOBILE_PATTERNS
     ):
         vulnerable.append("immobile")
+    # "Unaccompanied" alone is a child-alone signal (HANDOVER safety gap #1).
+    if "child" not in vulnerable and any(
+        _match_any(sentence, ("unaccompanied",)) for sentence in fact_sentences
+    ):
+        vulnerable.append("child")
 
     vulnerable_hit = any(
         tag in vulnerable for tag in ("elderly", "immobile", "oxygen_dependent", "child")

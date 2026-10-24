@@ -155,6 +155,61 @@ def test_child_unaccompanied_flags_safeguarding():
     assert "safeguarding" in flags
 
 
+def test_kids_alone_flags_safeguarding():
+    fields, flags = extract(
+        _turns(
+            (
+                "caller",
+                "My two kids are alone at a shelter. They are unaccompanied.",
+            )
+        ),
+        districts=DISTRICTS,
+    )
+    assert "child" in fields.vulnerable
+    assert "safeguarding" in flags
+
+
+def test_children_alone_flags_safeguarding():
+    fields, flags = extract(
+        _turns(("caller", "The children are alone without an adult.")),
+        districts=DISTRICTS,
+    )
+    assert "child" in fields.vulnerable
+    assert "safeguarding" in flags
+
+
+def test_grandchild_unaccompanied_flags_safeguarding():
+    fields, flags = extract(
+        _turns(
+            (
+                "caller",
+                "My grandchild is alone and unaccompanied at the shelter.",
+            )
+        ),
+        districts=DISTRICTS,
+    )
+    assert "child" in fields.vulnerable
+    assert "safeguarding" in flags
+
+
+def test_unaccompanied_alone_implies_child_safeguarding():
+    fields, flags = extract(
+        _turns(("caller", "They are unaccompanied at the shelter.")),
+        districts=DISTRICTS,
+    )
+    assert "child" in fields.vulnerable
+    assert "safeguarding" in flags
+
+
+def test_not_unaccompanied_does_not_imply_child():
+    fields, flags = extract(
+        _turns(("caller", "They are not unaccompanied. We need drinking water.")),
+        districts=DISTRICTS,
+    )
+    assert "child" not in fields.vulnerable
+    assert "safeguarding" not in flags
+
+
 def test_child_with_adult_no_safeguarding():
     _, flags = extract(
         _turns(("caller", "My son is here with me. We need food.")),
