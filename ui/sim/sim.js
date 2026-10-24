@@ -1766,7 +1766,7 @@ async function playFeed(call, decision, trace, text, fast) {
   if (planned.theme) rememberPattern(planned.theme, decision, path, planned.stored, planned.consistent);
   setFeedProgress(0, steps.length);
   for (const step of steps) {
-    let headline = applyTemplate(step.text, bag);
+    let headline = applyTemplate(step.text, bag).replace(/\s*Gateway reason:.*$/i, "").trim();
     if (step.kind === "memory" && path.timesBefore > 0 && planned.stored && planned.consistent) {
       const seen = path.timesBefore;
       headline =
