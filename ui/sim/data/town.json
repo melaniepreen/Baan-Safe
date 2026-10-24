@@ -101,7 +101,7 @@
     {
       "resource_id": "welfare-fictional-01",
       "kind": "welfare_point",
-      "name": "Water desk",
+      "name": "Sun Chuai Lue Nam Thuam",
       "district": "Mae Mo District",
       "available": 40
     }
@@ -16672,8 +16672,8 @@
     {
       "id": "bldg-school",
       "kind": "school",
-      "name_th": "School",
-      "name_en": "School",
+      "name_th": "XCL American School",
+      "name_en": "XCL American School",
       "x": 238.0,
       "y": 92.0,
       "w": 122.0,
@@ -16733,8 +16733,8 @@
     {
       "id": "bldg-tower-pink",
       "kind": "concrete",
-      "name_th": "Pink apartment block",
-      "name_en": "Pink apartment block",
+      "name_th": "Baan Chompoo Apartment",
+      "name_en": "Baan Chompoo Apartment",
       "x": 58.0,
       "y": 18.0,
       "w": 24.0,
@@ -16815,8 +16815,8 @@
     {
       "id": "bldg-welfare",
       "kind": "welfare",
-      "name_th": "Water desk",
-      "name_en": "Water desk",
+      "name_th": "Sun Chuai Lue Nam Thuam",
+      "name_en": "Sun Chuai Lue Nam Thuam",
       "x": 156.0,
       "y": 40.0,
       "w": 12.0,

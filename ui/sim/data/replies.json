@@ -23,13 +23,13 @@
     {
       "id": "food-van",
       "when": { "vehicle": "van", "needs_any": ["food"] },
-      "en": "A supply boat is leaving the water desk with food. It should reach your lane in about {eta} minutes. Please keep your phone with you.",
+      "en": "A supply boat is leaving Sun Chuai Lue Nam Thuam with food. It should reach your lane in about {eta} minutes. Please keep your phone with you.",
       "th": "เรือสวัสดิการกำลังออกไปพร้อมอาหาร ประมาณ {eta} นาที"
     },
     {
       "id": "water-van",
       "when": { "vehicle": "van", "needs_any": ["water"] },
-      "en": "A supply boat is leaving the water desk with drinking water. It should reach your lane in about {eta} minutes. Please keep your phone with you.",
+      "en": "A supply boat is leaving Sun Chuai Lue Nam Thuam with drinking water. It should reach your lane in about {eta} minutes. Please keep your phone with you.",
       "th": "เรือสวัสดิการกำลังออกไปพร้อมน้ำดื่ม ประมาณ {eta} นาที"
     },
     {

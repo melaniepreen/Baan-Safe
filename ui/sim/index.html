@@ -17,10 +17,15 @@
     <div class="wordmark-actions">
       <button type="button" id="view-dispatch">Dispatch frame</button>
       <button type="button" id="town-reset">Reset</button>
-      <button type="button" id="rl-open">Learning loop</button>
       <button type="button" id="view-fit">See the whole block</button>
     </div>
   </header>
+
+  <p id="dispatch-pending" class="dispatch-pending" hidden>
+    <strong>PENDING APPROVAL</strong>
+    <span id="dispatch-pending-title"></span>
+    <span id="dispatch-pending-text">Awaiting operator approval</span>
+  </p>
 
   <aside id="phone" aria-label="Caller phone">
     <div class="island" aria-hidden="true"></div>
@@ -95,7 +100,7 @@
       <div class="feed-head">
         <div>
           <p class="kicker">Backend</p>
-          <h1>This call</h1>
+          <h1 id="call-heading">No call yet</h1>
         </div>
         <div class="feed-head-actions">
           <button type="button" id="dispatch-reset">Reset</button>
@@ -108,15 +113,36 @@
         <input id="threshold" type="number" min="0" max="1" step="0.01" value="0.75" />
       </label>
       <div id="scores"></div>
-      <div class="operator-actions">
-        <button type="button" id="op-accept" disabled>Accept</button>
-        <button type="button" id="op-reject" disabled>Reject</button>
+      <div id="approval-gate">
+        <div id="approval-banner" class="approval-banner" hidden>
+          <p class="approval-kicker">PENDING APPROVAL</p>
+          <p id="approval-status">Awaiting operator approval</p>
+          <p id="approval-proposal"></p>
+        </div>
+        <div class="operator-actions">
+          <button type="button" id="op-accept" disabled>Accept</button>
+          <button type="button" id="op-reject" disabled>Reject</button>
+        </div>
       </div>
       <ol id="flow"></ol>
       <div id="priority-legend" class="legend"></div>
-      <h2>Pattern memory <span class="sim-badge">simulated</span></h2>
+      <h2>Patterns <span class="sim-badge">simulated</span></h2>
       <p id="pattern-rule" class="demo-note">Repeats of the same theme raise the fast-path score. Life-safety stays with System 2 until Accept.</p>
-      <ol id="pattern-list"></ol>
+      <div class="pattern-wrap">
+        <table id="pattern-list" hidden>
+          <thead>
+            <tr>
+              <th>Pattern</th>
+              <th class="num">Times seen</th>
+              <th>Path now</th>
+              <th>Status</th>
+              <th>Last seen</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <p id="pattern-empty" class="pattern-empty">No patterns yet — repeated calls will show up here</p>
+      </div>
       <button type="button" id="pattern-reset">Reset patterns</button>
       <h2>Rulebook</h2>
       <p id="rulebook-label" class="demo-note"></p>
@@ -128,7 +154,6 @@
       <ol id="decision-log"></ol>
       <div id="backend-log"></div>
       <div id="correct-host"></div>
-      <section id="rl-panel" hidden aria-label="Learning loop"></section>
       <p class="loading" id="loading">Loading town data…</p>
     </aside>
   </div>
