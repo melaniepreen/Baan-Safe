@@ -35,8 +35,8 @@
     {
       "id": "shelter",
       "when": { "needs_any": ["shelter"] },
-      "en": "There is space at the north hall. An evacuation boat can collect you in about {eta} minutes. Please pack a small bag and keep your phone with you.",
-      "th": "ที่พักทางเหนือยังมีที่ เรือจะไปรับประมาณ {eta} นาที"
+      "en": "There is space at the evacuation shelter. An evacuation boat can collect you in about {eta} minutes. Please pack a small bag and keep your phone with you.",
+      "th": "ที่พักอพยพยังมีที่ เรือจะไปรับประมาณ {eta} นาที"
     },
     {
       "id": "truck",

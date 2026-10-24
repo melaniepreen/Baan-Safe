@@ -5,7 +5,7 @@
     {
       "id": "hospital-flood",
       "when": { "text": "hospital", "flooded": true },
-      "action": "Needs a hospital and the street is flooded: send a boat to the fictional clinic.",
+      "action": "Needs a hospital and the street is flooded: send a boat to the clinic.",
       "vehicle": "boat",
       "outbound": "rescue",
       "return_to": "clinic",

@@ -804,19 +804,72 @@ function buildCourtyards(g) {
   }
 }
 
+function floodPaint(depth) {
+  if (depth >= 1.2) return { color: 0x2c4a48, alpha: 0.74, edge: 0x6d8a78 };
+  if (depth >= 0.7) return { color: 0x3a5854, alpha: 0.66, edge: 0x6d8a78 };
+  if (depth >= 0.4) return { color: 0x4e6d66, alpha: 0.55, edge: 0x7d9a90 };
+  return { color: 0x5f7c72, alpha: 0.42, edge: 0x8aaba0 };
+}
+
+function ringBounds(ring) {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const point of ring) {
+    minX = Math.min(minX, point[0]);
+    minY = Math.min(minY, point[1]);
+    maxX = Math.max(maxX, point[0]);
+    maxY = Math.max(maxY, point[1]);
+  }
+  return { minX, minY, maxX, maxY };
+}
+
+function pointInBounds(x, y, bounds) {
+  return x > bounds.minX && x < bounds.maxX && y > bounds.minY && y < bounds.maxY;
+}
+
+function drawFloodRipple(g, outer, holes, phase) {
+  const box = ringBounds(outer);
+  const holeBoxes = holes.map(ringBounds);
+  const span = box.maxY - box.minY;
+  const bands = span > 80 ? 4 : 2;
+  for (let band = 0; band < bands; band += 1) {
+    const y0 = box.minY + ((band + 1) / (bands + 1)) * span;
+    let drawing = false;
+    for (let x = box.minX + 3; x <= box.maxX - 3; x += 4) {
+      const y = y0 + Math.sin(x / 16 + phase + band) * 1.15;
+      const dry = holeBoxes.some((hole) => pointInBounds(x, y, hole));
+      const point = project(x, y, 0.12);
+      if (dry) {
+        drawing = false;
+        continue;
+      }
+      if (!drawing) g.moveTo(point[0], point[1]);
+      else g.lineTo(point[0], point[1]);
+      drawing = true;
+    }
+    g.stroke({ color: 0x9bb8ae, width: 1.15, alpha: 0.34 });
+  }
+}
+
 function buildFlood(g) {
   g.clear();
   const features = flood.features.slice().sort((a, b) => a.properties.depth_m - b.properties.depth_m);
+  const phase = reduce ? 0 : performance.now() / 900;
   for (const feature of features) {
     const depth = feature.properties.depth_m;
     if (depth > floodLevel + 0.001) continue;
-    const color = depth >= 1.2 ? 0x4a3424 : depth >= 0.7 ? 0x6a4a30 : 0x7d5a3a;
-    const alpha = depth >= 1.2 ? 0.78 : depth >= 0.7 ? 0.62 : 0.5;
+    const paint = floodPaint(depth);
     const rings = feature.geometry.coordinates;
+    const outer = rings[0];
+    const holes = rings.slice(1);
     const ringPoints = (ring) => flat(ring.map((point) => project(point[0], point[1], 0.08)));
-    g.poly(ringPoints(rings[0]), true).fill({ color, alpha });
-    for (const hole of rings.slice(1)) g.poly(ringPoints(hole), true).cut();
-    g.poly(ringPoints(rings[0]), true).stroke({ color: 0xc9a15a, width: 1.2, alpha: 0.85 });
+    g.poly(ringPoints(outer), true).fill({ color: paint.color, alpha: paint.alpha });
+    for (const hole of holes) g.poly(ringPoints(hole), true).cut();
+    g.poly(ringPoints(outer), true).stroke({ color: paint.edge, width: 7, alpha: 0.22 });
+    g.poly(ringPoints(outer), true).stroke({ color: paint.edge, width: 1.5, alpha: 0.5 });
+    if (!reduce) drawFloodRipple(g, outer, holes, phase);
   }
 }
 
@@ -881,9 +934,16 @@ function buildLabels() {
     if (Math.hypot(end[0] - start[0], end[1] - start[1]) < 70) continue;
     let angle = Math.atan2(end[1] - start[1], end[0] - start[0]);
     if (angle > Math.PI / 2 || angle < -Math.PI / 2) angle += Math.PI;
-    const midX = (start[0] + end[0]) / 2;
-    const midY = (start[1] + end[1]) / 2;
-    addLabel(street.name_en || street.name_th, midX, midY, angle, street.kind === "main" ? 15 : 12, 0xf7f8ff);
+    const named = street.labels && street.labels.length
+      ? street.labels
+      : [{ name_en: street.name_en, name_th: street.name_th, t: 0.5 }];
+    for (const row of named) {
+      const t = row.t == null ? 0.5 : row.t;
+      const worldX = a[0] + (b[0] - a[0]) * t;
+      const worldY = a[1] + (b[1] - a[1]) * t;
+      const point = project(worldX, worldY, 0.4);
+      addLabel(row.name_en || row.name_th, point[0], point[1], angle, street.kind === "main" ? 15 : 12, 0xf7f8ff);
+    }
   }
   for (const building of town.buildings) {
     if (!building.landmark || !(building.name_en || building.name_th)) continue;
@@ -1009,9 +1069,9 @@ function drawBoatSprite(screen, angle, cue) {
 
 function drawWake(route, distance) {
   for (let i = 1; i <= 3; i++) {
-    const sample = pointAt(route, distance - i * 3.2);
-    if (!sample) continue;
-    const screen = project(sample.here.x, sample.here.y, 0.4);
+    const spot = pointAt(route, distance - i * 3.2);
+    if (!spot) continue;
+    const screen = project(spot.here.x, spot.here.y, 0.4);
     routeG.ellipse(screen[0], screen[1], 7 - i, 2.4).stroke({ color: 0x9fd4ff, width: 1.2, alpha: 0.45 / i });
   }
 }
@@ -1039,10 +1099,10 @@ function drawTrips(offset) {
     }
     const route = (trip.phases || [])[trip.phase];
     if (!route) continue;
-    const sample = pointAt(route, trip.travel);
-    if (!sample) continue;
+    const spot = pointAt(route, trip.travel);
+    if (!spot) continue;
     const behind = pointAt(route, Math.max(0, trip.travel - 1.4));
-    const screen = project(sample.here.x, sample.here.y, 1.2);
+    const screen = project(spot.here.x, spot.here.y, 1.2);
     const prev = behind ? project(behind.here.x, behind.here.y, 1.2) : screen;
     const angle = Math.atan2(screen[1] - prev[1], screen[0] - prev[0]);
     drawWake(route, trip.travel);
@@ -1376,18 +1436,18 @@ function updateMinimap() {
   const w = town.meta.world.width_m;
   const d = town.meta.world.depth_m;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#0b1020";
+  ctx.fillStyle = "#0b1220";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   const pad = 8;
   const sx = (canvas.width - pad * 2) / w;
   const sy = (canvas.height - pad * 2) / d;
   const map = (x, y) => [pad + x * sx, pad + y * sy];
-  ctx.strokeStyle = "#d6ff3c";
+  ctx.strokeStyle = "#9aa8bb";
   ctx.globalAlpha = 0.9;
   ctx.lineWidth = 1;
   ctx.strokeRect(pad, pad, w * sx, d * sy);
-  ctx.globalAlpha = 0.35;
-  ctx.fillStyle = "#6a4a30";
+  ctx.globalAlpha = 0.45;
+  ctx.fillStyle = "#3a5854";
   ctx.fillRect(pad, pad + 180 * sy, (w - 8) * sx, (d - 180) * sy);
   ctx.globalAlpha = 1;
   for (const building of town.buildings) {
@@ -1414,16 +1474,16 @@ function updateMinimap() {
     else ctx.moveTo(mx, my);
   });
   ctx.closePath();
-  ctx.fillStyle = "rgba(214, 255, 60, 0.16)";
+  ctx.fillStyle = "rgba(0, 118, 216, 0.16)";
   ctx.fill();
-  ctx.strokeStyle = "#d6ff3c";
+  ctx.strokeStyle = "#0076D8";
   ctx.lineWidth = 1.5;
   ctx.stroke();
   const focus = screenToWorld(app.screen.width * 0.42, app.screen.height * 0.48);
   const [fx, fy] = map(focus[0], focus[1]);
   ctx.beginPath();
   ctx.arc(fx, fy, 3.2, 0, Math.PI * 2);
-  ctx.fillStyle = "#d6ff3c";
+  ctx.fillStyle = "#ED7401";
   ctx.fill();
   ctx.restore();
 }
@@ -1666,7 +1726,7 @@ function pushPhone(kind, text, thai) {
 function greet() {
   const framing = responses && responses.framing
     ? responses.framing
-    : "Placeholder block for a Bangkok flood demo. data.demo_event is still TODO_HUMAN.";
+    : "Sukhumvit block in Watthana, drawn in local metres. data.demo_event is still TODO_HUMAN.";
   pushPhone("note", framing + " Flood rises from flood.json. Type, speak, or open Prompts. The stub gateway returns the priority, and that result lights the house. Replies are not a live model.");
   document.getElementById("chooser-note").textContent =
     "DEMO-ONLY chooser. It lives in this page. gateway.route_chooser is still TODO_HUMAN.";
@@ -1876,7 +1936,7 @@ function floodLine(call) {
 function shelterLine(call) {
   const route = town.response_routes.find((item) => item.call_id === call.id && item.role === "evac");
   if (!route) return "No drawn shelter path.";
-  return "Nearest drawn shelter path is " + route.length_m + " m to the fictional north hall. Simulated lookup on response_routes.";
+  return "Nearest drawn shelter path is " + route.length_m + " m to the evacuation shelter. Simulated lookup on response_routes.";
 }
 
 function ruleMatches(rule, ctx) {
@@ -2943,8 +3003,10 @@ async function main() {
   const hash = decodeURIComponent(location.hash.replace("#", ""));
   if (hash && buildingById(hash)) select(hash, true);
   app.ticker.add((ticker) => {
-    if (!reduce && floodLevel < floodMax) {
-      floodLevel = Math.min(floodMax, floodLevel + ticker.deltaMS * 0.00015);
+    if (!reduce) {
+      if (floodLevel < floodMax) {
+        floodLevel = Math.min(floodMax, floodLevel + ticker.deltaMS * 0.00015);
+      }
       if (floodG) buildFlood(floodG);
     }
     moverClock += ticker.deltaMS;

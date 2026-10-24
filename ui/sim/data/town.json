@@ -1,9 +1,9 @@
 {
   "meta": {
     "id": "synthetic-operator-block",
-    "title": "Placeholder block for a Bangkok flood demo",
-    "district_anchor": "Fixture households stay labelled with their district (Lampang, Phrae, Nan, Phayao). data.demo_event is still TODO_HUMAN. This picture is not a Bangkok street map.",
-    "disclaimer": "Placeholder for a Bangkok flood demo, not a cadastral map and not one real town. EOS-RS eos-rs-thailand-flood-bangkok-sep-2026 is listed in data/SOURCES.md and was not fetched. Street names are placeholders in streets.json. Household location_label stays the fixture district. Plots are local metres, not home addresses. F12's blue temple and F06's north hall are the invented landmarks from the fixtures. Access lanes are synthetic links from each call house to the nearest clear street or canal.",
+    "title": "Sukhumvit block, Watthana",
+    "district_anchor": "Fixture households stay labelled with their district (Lampang, Phrae, Nan, Phayao). data.demo_event is still TODO_HUMAN. Drawn streets use Sukhumvit names in local metres.",
+    "disclaimer": "Local-metre picture of streets around Soi Sukhumvit 49 in Watthana, Bangkok. Not a cadastral survey. EOS-RS eos-rs-thailand-flood-bangkok-sep-2026 is listed in data/SOURCES.md and was not fetched. Household location_label stays the fixture district. Plots are local metres, not home addresses. Wat That Thong stands on Thanon Sukhumvit beside BTS Ekkamai; this block draws the compound on the south side of the drawn road. Khlong Saen Saep is drawn along the west edge. Access lanes link each call house to the nearest clear street or canal. data.demo_event is still TODO_HUMAN.",
     "projection": "fixed isometric 2:1. x east, y south toward the camera. z up.",
     "camera": {
       "look_at": [
@@ -30,78 +30,78 @@
     {
       "hazard_id": "haz-flood-canal",
       "kind": "flood",
-      "summary": "Placeholder canal water along the west edge of the synthetic block.",
-      "location_label": "synthetic operator block"
+      "summary": "Khlong Saen Saep along the west edge of the block.",
+      "location_label": "Sukhumvit, Watthana"
     },
     {
       "hazard_id": "haz-flood-south-deep",
       "kind": "flood",
-      "summary": "Deeper standing water in the southern lanes. The temple compound is the hole in this polygon.",
-      "location_label": "synthetic operator block"
+      "summary": "Deeper standing water in the southern lanes. The Wat That Thong compound is the dry hole.",
+      "location_label": "Sukhumvit, Watthana"
     },
     {
       "hazard_id": "haz-flood-streets",
       "kind": "flood",
-      "summary": "Shallow floodwater on the main road and the lanes south of it.",
-      "location_label": "synthetic operator block"
+      "summary": "Shallow floodwater on Thanon Sukhumvit and the lanes south of it.",
+      "location_label": "Sukhumvit, Watthana"
     },
     {
       "hazard_id": "haz-flood-soi-khlong",
       "kind": "flood",
-      "summary": "Water sitting in the northern section of Soi Nana.",
-      "location_label": "synthetic operator block"
+      "summary": "Water sitting in the northern section of Soi Sukhumvit 39.",
+      "location_label": "Sukhumvit, Watthana"
     },
     {
       "hazard_id": "haz-flood-soi-wat-fa",
       "kind": "flood",
-      "summary": "Water sitting in the northern section of Soi Thong Lo.",
-      "location_label": "synthetic operator block"
+      "summary": "Water sitting in the northern section of Soi Sukhumvit 49.",
+      "location_label": "Sukhumvit, Watthana"
     },
     {
       "hazard_id": "haz-flood-soi-talat",
       "kind": "flood",
-      "summary": "Water sitting in the northern section of Soi Ekkamai.",
-      "location_label": "synthetic operator block"
+      "summary": "Water sitting in the northern section of Soi Sukhumvit 55.",
+      "location_label": "Sukhumvit, Watthana"
     },
     {
       "hazard_id": "haz-flood-soi-fai",
       "kind": "flood",
-      "summary": "Water sitting in the northern section of Soi Sukhumvit 49.",
-      "location_label": "synthetic operator block"
+      "summary": "Water sitting in the northern section of Soi Sukhumvit 63.",
+      "location_label": "Sukhumvit, Watthana"
     },
     {
       "hazard_id": "haz-flood-soi-bon",
       "kind": "flood",
-      "summary": "Shallow water on Soi Ari.",
-      "location_label": "synthetic operator block"
+      "summary": "Shallow water on Thanon Phetchaburi Tat Mai.",
+      "location_label": "Sukhumvit, Watthana"
     }
   ],
   "resources": [
     {
       "resource_id": "boat-fictional-01",
       "kind": "boat",
-      "name": "Fictional river boat A",
+      "name": "Rescue boat",
       "district": "Wang Chin District",
       "available": 2
     },
     {
       "resource_id": "amb-fictional-01",
       "kind": "ambulance",
-      "name": "Fictional clinic van 1",
+      "name": "Clinic ambulance",
       "district": "Mueang Phrae District",
       "available": 1
     },
     {
       "resource_id": "shelter-fictional-01",
       "kind": "shelter",
-      "name": "Fictional North Canal hall",
+      "name": "Evacuation shelter",
       "district": "Den Chai District",
       "available": 30
     },
     {
       "resource_id": "welfare-fictional-01",
       "kind": "welfare_point",
-      "name": "Fictional market-day water desk",
+      "name": "Water desk",
       "district": "Mae Mo District",
       "available": 40
     }
@@ -2160,7 +2160,7 @@
   "routes": [
     {
       "id": "route-f06-evac",
-      "label": "F06 walk to the fictional north hall",
+      "label": "F06 walk to the evacuation shelter",
       "fixture_id": "F06",
       "contract_route": "shelter_placement",
       "needs": [
@@ -2184,11 +2184,11 @@
       ],
       "length_m": 191.5,
       "source": "mock",
-      "note": "contracts.Route is the dispatch category, not a polyline. This path is the shortest allowed walk on the synthetic graph."
+      "note": "contracts.Route is the dispatch category, not a polyline. This path is the shortest allowed walk on the drawn street graph."
     },
     {
       "id": "route-f10-rescue",
-      "label": "F10 boat from the fictional jetty",
+      "label": "F10 boat from the jetty",
       "fixture_id": "F10",
       "contract_route": "rescue_coordination",
       "needs": [
@@ -2213,7 +2213,7 @@
       ],
       "length_m": 171.24,
       "source": "mock",
-      "note": "contracts.Route is the dispatch category, not a polyline. This path is the shortest allowed walk on the synthetic graph."
+      "note": "contracts.Route is the dispatch category, not a polyline. This path is the shortest allowed walk on the drawn street graph."
     }
   ],
   "response_routes": [
@@ -16667,8 +16667,8 @@
     {
       "id": "bldg-school",
       "kind": "school",
-      "name_th": "อาคารเรียนจำลอง",
-      "name_en": "PLACEHOLDER long school block",
+      "name_th": "School",
+      "name_en": "School",
       "x": 238.0,
       "y": 92.0,
       "w": 122.0,
@@ -16711,8 +16711,8 @@
     {
       "id": "bldg-tower-white",
       "kind": "concrete",
-      "name_th": "อาคารขาวจำลอง",
-      "name_en": "PLACEHOLDER white block",
+      "name_th": "White apartment block",
+      "name_en": "White apartment block",
       "x": 436.0,
       "y": 22.0,
       "w": 26.0,
@@ -16728,8 +16728,8 @@
     {
       "id": "bldg-tower-pink",
       "kind": "concrete",
-      "name_th": "อาคารชมพูจำลอง",
-      "name_en": "PLACEHOLDER pink block",
+      "name_th": "Pink apartment block",
+      "name_en": "Pink apartment block",
       "x": 58.0,
       "y": 18.0,
       "w": 24.0,
@@ -16745,8 +16745,8 @@
     {
       "id": "bldg-shelter",
       "kind": "shelter",
-      "name_th": "หอเหนือจำลอง",
-      "name_en": "Fictional North Canal hall",
+      "name_th": "Evacuation shelter",
+      "name_en": "Evacuation shelter",
       "x": 236.0,
       "y": 158.0,
       "w": 42.0,
@@ -16792,8 +16792,8 @@
     {
       "id": "bldg-clinic",
       "kind": "clinic",
-      "name_th": "คลินิกจำลอง",
-      "name_en": "Fictional clinic",
+      "name_th": "Clinic",
+      "name_en": "Clinic",
       "x": 392.0,
       "y": 158.0,
       "w": 18.0,
@@ -16810,8 +16810,8 @@
     {
       "id": "bldg-welfare",
       "kind": "welfare",
-      "name_th": "จุดน้ำจำลอง",
-      "name_en": "Fictional market-day water desk",
+      "name_th": "Water desk",
+      "name_en": "Water desk",
       "x": 156.0,
       "y": 40.0,
       "w": 12.0,
@@ -16828,8 +16828,8 @@
     {
       "id": "bldg-jetty",
       "kind": "jetty",
-      "name_th": "ท่าเรือจำลอง",
-      "name_en": "Fictional river boat A",
+      "name_th": "Jetty",
+      "name_en": "Jetty",
       "x": 8.0,
       "y": 188.0,
       "w": 18.0,
@@ -16846,8 +16846,8 @@
     {
       "id": "bldg-temple",
       "kind": "temple",
-      "name_th": "วัดฟ้าจำลอง",
-      "name_en": "PLACEHOLDER blue temple",
+      "name_th": "Wat That Thong",
+      "name_en": "Wat That Thong",
       "x": 158.0,
       "y": 334.0,
       "w": 30.0,
@@ -16864,8 +16864,8 @@
     {
       "id": "bldg-sala",
       "kind": "temple",
-      "name_th": "ศาลาจำลอง",
-      "name_en": "PLACEHOLDER sala",
+      "name_th": "Sala",
+      "name_en": "Sala",
       "x": 150.0,
       "y": 360.0,
       "w": 16.0,
@@ -16882,8 +16882,8 @@
     {
       "id": "bldg-stupa",
       "kind": "stupa",
-      "name_th": "เจดีย์จำลอง",
-      "name_en": "PLACEHOLDER stupa",
+      "name_th": "Chedi",
+      "name_en": "Chedi",
       "x": 198.0,
       "y": 344.0,
       "w": 9.0,
