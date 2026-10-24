@@ -1,0 +1,23 @@
+{
+  "title": "S1Label",
+  "description": "Closed s1_triage labels. The ids are the policies API label ids.",
+  "type": "string",
+  "enum": [
+    "niems_red_critical",
+    "niems_yellow_urgent",
+    "niems_green_not_severe",
+    "niems_white_general",
+    "niems_black_not_a_patient",
+    "niems_not_conscious_or_breathing",
+    "sphere_water_short",
+    "sphere_food_short",
+    "sphere_shelter_crowded",
+    "safeguarding_child",
+    "safeguarding_older_person",
+    "safeguarding_disability",
+    "safeguarding_serious_health",
+    "safeguarding_protection_referral",
+    "flood_water_depth",
+    "flood_trapped"
+  ]
+}

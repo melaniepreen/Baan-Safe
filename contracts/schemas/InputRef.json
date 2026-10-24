@@ -1,0 +1,51 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "case_id": {
+      "minLength": 1,
+      "title": "Case Id",
+      "type": "string"
+    },
+    "turn_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Turn Ids",
+      "type": "array"
+    },
+    "lang": {
+      "enum": [
+        "th",
+        "en",
+        "mixed"
+      ],
+      "title": "Lang",
+      "type": "string"
+    },
+    "policy_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Policy Ids",
+      "type": "array"
+    },
+    "memory_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Memory Ref"
+    }
+  },
+  "required": [
+    "case_id",
+    "lang"
+  ],
+  "title": "InputRef",
+  "type": "object"
+}

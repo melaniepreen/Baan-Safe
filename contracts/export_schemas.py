@@ -6,6 +6,7 @@ import json
 from enum import Enum
 
 from contracts.models import MODEL_TYPES
+from contracts.training import TRAINING_SCHEMA_TYPES
 from paths import ROOT
 
 SCHEMA_DIR = ROOT / "contracts" / "schemas"
@@ -14,7 +15,7 @@ SCHEMA_DIR = ROOT / "contracts" / "schemas"
 def export_schemas() -> list[str]:
     SCHEMA_DIR.mkdir(parents=True, exist_ok=True)
     written: list[str] = []
-    for model in MODEL_TYPES:
+    for model in [*MODEL_TYPES, *TRAINING_SCHEMA_TYPES]:
         if isinstance(model, type) and issubclass(model, Enum):
             schema = {
                 "title": model.__name__,

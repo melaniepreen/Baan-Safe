@@ -27,10 +27,12 @@ from contracts.models import (
     TraceEvent,
     TrainingJob,
 )
+from contracts.training import adapt_correction
 from eval.compare import compare_runs
 from memory.adapter import retrieve, store_correction
 from paths import ROOT
 from trace import emit
+from training.log import append_event
 
 CASE_ID = "CORR-LOOP-1"
 CORRECTED_ROUTE = "welfare_distribution"
@@ -79,8 +81,21 @@ def _run(out: Path) -> dict:
         new_value=CORRECTED_ROUTE,
         reason="Synthetic water request with a district. The information-only label was wrong.",
         created_at=started,
+        schema_version=1,
+        task="s1_triage",
+        group_id=CASE_ID,
+        lang="en",
+        policy_ids=["SPHERE-WASH-15L"],
+        memory_ref="runtime:corr-loop-stub",
+        output_model=None,
+        output_correct="sphere_water_short",
+        source="human",
+        model_version="s1@stub-0",
     )
+    # Route names stay on the memory row. The log stores the closed s1 label.
+    event = adapt_correction(correction)
     store_correction(correction)
+    logged = append_event(event)
     memory = retrieve(_bare_case())
     emit(
         TraceEvent(
@@ -161,6 +176,8 @@ def _run(out: Path) -> dict:
     comparison["memory_items"] = len(memory)
     comparison["dataset"] = str(dataset)
     comparison["training_job"] = job.model_dump()
+    comparison["training_event_id"] = logged.event.event_id
+    comparison["training_event_written"] = logged.written
     (out / "comparison.json").write_text(
         json.dumps(comparison, indent=2) + "\n",
         encoding="utf-8",
@@ -244,6 +261,10 @@ def _print(comparison: dict, dataset: Path) -> None:
     print(f"correction captured corr-loop-stub on {CASE_ID}")
     print(f"memory stored via adapter; items now {comparison['memory_items']}")
     print(f"dataset {dataset} (1 SFT/LoRA messages row)")
+    print(
+        f"training event {comparison['training_event_id']} "
+        f"written={comparison['training_event_written']}"
+    )
     print("training job stub-job-1 status=stub (no weights trained)")
     print("model version stub-0 -> stub-1")
     print(

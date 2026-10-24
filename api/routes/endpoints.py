@@ -24,6 +24,15 @@ from contracts.models import (
     TraceEvent,
     TranscriptTurn,
 )
+from contracts.training import (
+    AdaptError,
+    InputRef,
+    Lang,
+    Source,
+    Task,
+    adapt_correction,
+    correction_is_v1,
+)
 from enrich.context import location_context
 from eval.replay import replay
 from fixtures.load import all_ids, list_entries, load_case, load_fixture
@@ -31,6 +40,7 @@ from config.settings import DecisionRequired
 from gateway.route import handle
 from ingest.db import DB_PATH, connect
 from memory.adapter import retrieve, store_correction
+from training.log import append_event
 from mocks.loader import (
     load_resources,
     load_s1_stub,
@@ -70,6 +80,14 @@ class CaseDetail(BaseModel):
 
 
 class CorrectionIn(BaseModel):
+    """Legacy correction body, plus optional TrainingEvent v1 fields.
+
+    A body that only sends corrected_by, field, old_value, new_value, and
+    reason still validates. v1 fields are copied onto Correction and then
+    through adapt_correction. input_ref, when set, supplies the case link
+    and overrides the flat turn_ids, lang, policy_ids, and memory_ref.
+    """
+
     model_config = ConfigDict(extra="forbid")
 
     corrected_by: Literal["operator", "supervisor", "caseworker"]
@@ -77,6 +95,19 @@ class CorrectionIn(BaseModel):
     old_value: Any = None
     new_value: Any = None
     reason: str = Field(min_length=1)
+    task: Task | None = None
+    group_id: str | None = None
+    turn_ids: list[str] = Field(default_factory=list)
+    lang: Lang | None = None
+    policy_ids: list[str] = Field(default_factory=list)
+    memory_ref: str | None = None
+    input_ref: InputRef | None = None
+    output_model: str | None = None
+    output_correct: str | None = None
+    source: Source | None = None
+    weight: float | None = Field(default=None, ge=0)
+    model_version: str | None = None
+    policy_version: str | None = None
 
 
 class CorrectionResult(BaseModel):
@@ -234,9 +265,18 @@ def triage(case: CaseState) -> RouterDecision:
     return execute(case)
 
 
-@router.post("/cases/{case_id}/corrections", response_model=CorrectionResult)
-def correct(case_id: str, body: CorrectionIn) -> CorrectionResult:
-    stored = _require_case(case_id)
+def _correction_from_body(case_id: str, body: CorrectionIn) -> Correction:
+    turn_ids = list(body.turn_ids)
+    lang = body.lang
+    policy_ids = list(body.policy_ids)
+    memory_ref = body.memory_ref
+    if body.input_ref is not None:
+        if body.input_ref.case_id != case_id:
+            raise HTTPException(status_code=422, detail="input_ref.case_id must match the case")
+        turn_ids = list(body.input_ref.turn_ids)
+        lang = body.input_ref.lang
+        policy_ids = list(body.input_ref.policy_ids)
+        memory_ref = body.input_ref.memory_ref
     correction = Correction(
         correction_id="corr-" + uuid.uuid4().hex[:10],
         case_id=case_id,
@@ -246,12 +286,41 @@ def correct(case_id: str, body: CorrectionIn) -> CorrectionResult:
         new_value=body.new_value,
         reason=body.reason,
         created_at=_now(),
+        task=body.task,
+        group_id=body.group_id,
+        turn_ids=turn_ids,
+        lang=lang,
+        policy_ids=policy_ids,
+        memory_ref=memory_ref,
+        output_model=body.output_model,
+        output_correct=body.output_correct,
+        source=body.source,
+        weight=body.weight,
+        model_version=body.model_version,
+        policy_version=body.policy_version,
     )
+    if correction_is_v1(correction):
+        correction = correction.model_copy(update={"schema_version": 1})
+    return correction
+
+
+@router.post("/cases/{case_id}/corrections", response_model=CorrectionResult)
+def correct(case_id: str, body: CorrectionIn) -> CorrectionResult:
+    stored = _require_case(case_id)
+    correction = _correction_from_body(case_id, body)
+    event = None
+    try:
+        event = adapt_correction(correction)
+    except AdaptError as exc:
+        if correction_is_v1(correction):
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
     try:
         store_correction(correction)
     except NotImplementedError as exc:
         raise not_ready("Melanie", exc) from exc
     stored.corrections.append(correction)
+    if event is not None:
+        append_event(event)
     emit(
         TraceEvent(
             case_id=case_id,

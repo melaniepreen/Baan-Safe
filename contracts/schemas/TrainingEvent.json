@@ -1,0 +1,241 @@
+{
+  "$defs": {
+    "InputRef": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "minLength": 1,
+          "title": "Case Id",
+          "type": "string"
+        },
+        "turn_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Turn Ids",
+          "type": "array"
+        },
+        "lang": {
+          "enum": [
+            "th",
+            "en",
+            "mixed"
+          ],
+          "title": "Lang",
+          "type": "string"
+        },
+        "policy_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Policy Ids",
+          "type": "array"
+        },
+        "memory_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Memory Ref"
+        }
+      },
+      "required": [
+        "case_id",
+        "lang"
+      ],
+      "title": "InputRef",
+      "type": "object"
+    },
+    "S1Label": {
+      "description": "Closed s1_triage labels. The ids are the policies API label ids.",
+      "enum": [
+        "niems_red_critical",
+        "niems_yellow_urgent",
+        "niems_green_not_severe",
+        "niems_white_general",
+        "niems_black_not_a_patient",
+        "niems_not_conscious_or_breathing",
+        "sphere_water_short",
+        "sphere_food_short",
+        "sphere_shelter_crowded",
+        "safeguarding_child",
+        "safeguarding_older_person",
+        "safeguarding_disability",
+        "safeguarding_serious_health",
+        "safeguarding_protection_referral",
+        "flood_water_depth",
+        "flood_trapped"
+      ],
+      "title": "S1Label",
+      "type": "string"
+    },
+    "S2Action": {
+      "description": "Closed s2_action labels. The same set as RouterDecision.next_action.",
+      "enum": [
+        "ask_next_question",
+        "create_provisional_dispatch",
+        "escalate_to_supervisor",
+        "finalize_case",
+        "request_more_evidence"
+      ],
+      "title": "S2Action",
+      "type": "string"
+    },
+    "SaplingVerdict": {
+      "description": "Closed sapling_verdict labels.\n\nThis is the label set. `system2.sapling_client.SaplingVerdict` is the\nruntime result object and is a different type.",
+      "enum": [
+        "supported",
+        "violation",
+        "missing",
+        "contradicted",
+        "unsure"
+      ],
+      "title": "SaplingVerdict",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One append-only training row. schema v1.",
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "event_id": {
+      "title": "Event Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "task": {
+      "enum": [
+        "s1_triage",
+        "s2_action",
+        "sapling_verdict"
+      ],
+      "title": "Task",
+      "type": "string"
+    },
+    "group_id": {
+      "minLength": 1,
+      "title": "Group Id",
+      "type": "string"
+    },
+    "input_ref": {
+      "$ref": "#/$defs/InputRef"
+    },
+    "output_model": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/S1Label"
+        },
+        {
+          "$ref": "#/$defs/S2Action"
+        },
+        {
+          "$ref": "#/$defs/SaplingVerdict"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Output Model"
+    },
+    "output_correct": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/S1Label"
+        },
+        {
+          "$ref": "#/$defs/S2Action"
+        },
+        {
+          "$ref": "#/$defs/SaplingVerdict"
+        }
+      ],
+      "title": "Output Correct"
+    },
+    "reason": {
+      "minLength": 1,
+      "title": "Reason",
+      "type": "string"
+    },
+    "source": {
+      "enum": [
+        "human",
+        "coach",
+        "sim"
+      ],
+      "title": "Source",
+      "type": "string"
+    },
+    "corrected_by": {
+      "anyOf": [
+        {
+          "enum": [
+            "operator",
+            "supervisor",
+            "caseworker"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Corrected By"
+    },
+    "weight": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Weight"
+    },
+    "model_version": {
+      "minLength": 1,
+      "title": "Model Version",
+      "type": "string"
+    },
+    "policy_version": {
+      "minLength": 1,
+      "title": "Policy Version",
+      "type": "string"
+    },
+    "content_hash": {
+      "default": "",
+      "title": "Content Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "task",
+    "group_id",
+    "input_ref",
+    "output_correct",
+    "reason",
+    "source",
+    "model_version",
+    "policy_version"
+  ],
+  "title": "TrainingEvent",
+  "type": "object"
+}

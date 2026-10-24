@@ -133,6 +133,8 @@ Produced by the decision router (Moly). Consumed by the call agent. Points at `n
 
 Produced by an operator, supervisor, or caseworker. Consumed by memory (`write_correction`) and, on the paired fixture, retrieved as a `MemoryItem` of kind `correction`.
 
+v1 adds optional training fields: `schema_version`, `task`, `group_id`, `turn_ids`, `lang`, `policy_ids`, `memory_ref`, `output_model`, `output_correct`, `source`, `weight`, `model_version`, and `policy_version`. Older rows that only have the original fields still validate. The training log does not read this model directly. `contracts.training.adapt_correction` copies a row into a `TrainingEvent`. The event shape is `docs/agents/training-schema.md`.
+
 ## MemoryRecord
 
 Produced by the gateway after a decision. Consumed by Mubit's write path (Melanie). Bundles a summary, the evidence, the router decision, an optional outcome label, an optional failure note, and corrections.

@@ -7,6 +7,7 @@ __pycache__/
 data/raw/
 traces.jsonl
 data/processed/corrections.jsonl
+training/events/*.jsonl
 eval/out/
 var/
 *.egg-info/

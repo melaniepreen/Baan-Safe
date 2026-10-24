@@ -145,3 +145,14 @@ def test_correction_loop_exports_jsonl_and_comparison(tmp_path, monkeypatch):
     assert versions == ["stub-0", "stub-1"]
     assert registry["jobs"][0]["status"] == "stub"
     assert "MUBIT_BASE_URL" not in os.environ or os.environ.get("MUBIT_BASE_URL", "") == ""
+    from training.log import read_events
+
+    events = read_events()
+    assert len(events) == 1
+    assert events[0].task == "s1_triage"
+    assert events[0].source == "human"
+    assert events[0].output_correct.value == "sphere_water_short"
+    assert events[0].output_model is None
+    assert events[0].group_id == "CORR-LOOP-1"
+    assert events[0].schema_version == 1
+    assert report["training_event_written"] is True

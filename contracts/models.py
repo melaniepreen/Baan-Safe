@@ -123,6 +123,14 @@ class RouterDecision(_Model):
 
 
 class Correction(_Model):
+    """Operator correction. v1 fields are optional so older JSONL rows still load.
+
+    `field`, `old_value`, and `new_value` stay the memory record. When a row
+    is copied into the training log, `contracts.training.adapt_correction`
+    reads the v1 fields and, if they are absent, infers the task from `field`.
+    Task names match `contracts.training.Task`.
+    """
+
     correction_id: str = Field(min_length=1)
     case_id: str = Field(min_length=1)
     corrected_by: Literal["operator", "supervisor", "caseworker"]
@@ -131,6 +139,19 @@ class Correction(_Model):
     new_value: Any = None
     reason: str = Field(min_length=1)
     created_at: datetime
+    schema_version: Literal[1] | None = None
+    task: Literal["s1_triage", "s2_action", "sapling_verdict"] | None = None
+    group_id: str | None = None
+    turn_ids: list[str] = Field(default_factory=list)
+    lang: Literal["th", "en", "mixed"] | None = None
+    policy_ids: list[str] = Field(default_factory=list)
+    memory_ref: str | None = None
+    output_model: str | None = None
+    output_correct: str | None = None
+    source: Literal["human", "coach", "sim"] | None = None
+    weight: float | None = Field(default=None, ge=0)
+    model_version: str | None = None
+    policy_version: str | None = None
 
 
 class MemoryRecord(_Model):

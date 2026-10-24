@@ -1,5 +1,6 @@
 {
   "additionalProperties": false,
+  "description": "Operator correction. v1 fields are optional so older JSONL rows still load.\n\n`field`, `old_value`, and `new_value` stay the memory record. When a row\nis copied into the training log, `contracts.training.adapt_correction`\nreads the v1 fields and, if they are absent, infers the task from `field`.\nTask names match `contracts.training.Task`.",
   "properties": {
     "correction_id": {
       "minLength": 1,
@@ -42,6 +43,169 @@
       "format": "date-time",
       "title": "Created At",
       "type": "string"
+    },
+    "schema_version": {
+      "anyOf": [
+        {
+          "const": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Schema Version"
+    },
+    "task": {
+      "anyOf": [
+        {
+          "enum": [
+            "s1_triage",
+            "s2_action",
+            "sapling_verdict"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Task"
+    },
+    "group_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Group Id"
+    },
+    "turn_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Turn Ids",
+      "type": "array"
+    },
+    "lang": {
+      "anyOf": [
+        {
+          "enum": [
+            "th",
+            "en",
+            "mixed"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lang"
+    },
+    "policy_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Policy Ids",
+      "type": "array"
+    },
+    "memory_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Memory Ref"
+    },
+    "output_model": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Output Model"
+    },
+    "output_correct": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Output Correct"
+    },
+    "source": {
+      "anyOf": [
+        {
+          "enum": [
+            "human",
+            "coach",
+            "sim"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source"
+    },
+    "weight": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Weight"
+    },
+    "model_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Version"
+    },
+    "policy_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Policy Version"
     }
   },
   "required": [

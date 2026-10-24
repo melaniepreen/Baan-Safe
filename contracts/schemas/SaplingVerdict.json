@@ -1,0 +1,12 @@
+{
+  "title": "SaplingVerdict",
+  "description": "Closed sapling_verdict labels.\n\n    This is the label set. `system2.sapling_client.SaplingVerdict` is the\n    runtime result object and is a different type.\n    ",
+  "type": "string",
+  "enum": [
+    "supported",
+    "violation",
+    "missing",
+    "contradicted",
+    "unsure"
+  ]
+}

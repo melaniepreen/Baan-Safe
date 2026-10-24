@@ -11,6 +11,7 @@ from api.store import reset
 def isolated_runtime(tmp_path, monkeypatch):
     monkeypatch.setenv("TRACE_PATH", str(tmp_path / "traces.jsonl"))
     monkeypatch.setenv("MOCK_CORRECTIONS_PATH", str(tmp_path / "corrections.jsonl"))
+    monkeypatch.setenv("TRAINING_EVENTS_PATH", str(tmp_path / "events.jsonl"))
     monkeypatch.setenv("S1_IMPL", "stub")
     monkeypatch.setenv("S2_IMPL", "stub")
     monkeypatch.setenv("MEMORY_IMPL", "mock")
