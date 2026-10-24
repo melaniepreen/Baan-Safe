@@ -24,7 +24,7 @@ ENV_PATH = ROOT / ".env"
 ENV_EXAMPLE = ROOT / ".env.example"
 VENV = ROOT / ".venv"
 REQS = (ROOT / "requirements.txt", ROOT / "infra" / "modal" / "requirements.txt")
-SECRET_KEYS = ("HF_TOKEN", "MUBIT_API_KEY")
+SECRET_KEYS = ("HF_TOKEN", "MUBIT_API_KEY", "MUBIT_BASE_URL")
 # Local noise we do not stash/commit through sync.
 SKIP_DIRTY_PREFIXES = (".vscode/", ".vscode")
 
@@ -330,7 +330,7 @@ def sync_secrets(py: Path, logged_in: bool) -> None:
         return
     keys = parse_dotenv(ENV_PATH)
     if not all(keys.get(k) for k in SECRET_KEYS):
-        print("skipped (need HF_TOKEN and MUBIT_API_KEY in .env)")
+        print("skipped (need HF_TOKEN, MUBIT_API_KEY, and MUBIT_BASE_URL in .env)")
         return
     env = os.environ.copy()
     env["PATH"] = str(py.parent) + os.pathsep + env.get("PATH", "")

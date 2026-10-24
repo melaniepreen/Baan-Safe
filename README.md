@@ -135,7 +135,7 @@ make push                # send: Modal secrets + git push main (syncs first if b
 make push MSG='summary'  # commit local work (not .env), then push
 ```
 
-`make sync` / `make push` are the shared teammate path. Sync does not overwrite existing `.env` values. `HF_TOKEN` and `MUBIT_API_KEY` are read from Modal secrets `baansafe-hf` / `baansafe-mubit` after sync. They are not written into the image or the repo. Optional: add `S2_SERVE_API_KEY` to `.env` and re-run `make sync` or `make push`. Paste the same value into the Mubit console as the provider key for the self-hosted OpenAI base URL. The Modal URL is `https://<workspace>--baansafe-s2-serve.modal.run/v1`.
+`make sync` / `make push` are the shared teammate path. Sync does not overwrite existing `.env` values. Sync pushes `HF_TOKEN`, `MUBIT_API_KEY`, and `MUBIT_BASE_URL` from `.env` into Modal secrets `baansafe-hf` / `baansafe-mubit`; Modal apps read them there. A Modal secret cannot be downloaded, so a teammate who runs System 2 locally still needs the Mubit values in their own `.env`. They are not written into the image or the repo. Optional: add `S2_SERVE_API_KEY` to `.env` and re-run `make sync` or `make push`. Paste the same value into the Mubit console as the provider key for the self-hosted OpenAI base URL. The Modal URL is `https://<workspace>--baansafe-s2-serve.modal.run/v1`.
 
 ```bash
 export S1_GPU=cpu
