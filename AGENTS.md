@@ -34,6 +34,7 @@ make validate
 make replay-stubs
 make eval-learning
 make sim-eval
+make extract-eval
 make latte-bench
 make serve
 make sync

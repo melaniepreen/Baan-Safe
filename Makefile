@@ -1,7 +1,7 @@
 PYTHON ?= $(shell test -x .venv/bin/python && echo .venv/bin/python || echo python3)
 export PYTHONPATH := .
 
-.PHONY: validate test replay-stubs demo-stub demo-correction-loop eval-learning sim-eval latte-bench serve ingest ingest-refresh data-report \
+.PHONY: validate test replay-stubs demo-stub demo-correction-loop eval-learning sim-eval extract-eval latte-bench serve ingest ingest-refresh data-report \
 	export-training sync push modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune docker-build docker-run
 
 IMAGE ?= baansafe-api:local
@@ -28,6 +28,9 @@ eval-learning:
 
 sim-eval:
 	$(PYTHON) -m sim
+
+extract-eval:
+	$(PYTHON) -m eval.extract_eval
 
 # Free mode replays the calibrated reference and exits. No API call.
 # LATTE_SERVE=1 starts `bun run dev` in the submodule (Try without an API).
