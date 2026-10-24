@@ -4,38 +4,98 @@ Flood and disaster call-triage scaffold. Mubit governs memory, policy, and trace
 
 Sapling is [MubitLabs/banyan-sapling](https://huggingface.co/MubitLabs/banyan-sapling), the Apache-2.0 23B verifier (research preview). It takes a policy, evidence, and a claim, and returns `supported`, `violation`, `missing`, `contradicted`, or `unsure`, with probabilities. `supported` lets the proposed action stand. `violation` blocks it. `unsure`, `missing`, and `contradicted` hand the case to a human. The input limit is 16,384 tokens. It does not run on System 1. `system2.use_banyan_sapling` is true for those two checks. Hosting, the GPU, and Thai handling stay `TODO_HUMAN`. Tests use the stub client and do not load a GPU.
 
-Solid edges run on `POST /cases/{id}/turns` with `use_stubs=True`. Dashed nodes are not called on that request. A System 1 escalate continues to the System 2 stub in the same turn. Human-correction graduation may tag `complex_situation` before the field precheck. That sets no priority and does not move a pattern into System 1. The RL overlay is off unless `RL_OVERLAY` is set. `router/ledger.py` reserves stock in this process only. The places snapshot joins the dispatch list on every turn. The gazetteer snapshot is read when extract runs. Open-Meteo and RID are read only when SQLite enrichment is on, and those flags do not change priority. Country packs are not loaded. `system1.decide` and `system2.decide` replace the stub file only when that system's `*_IMPL=real` or `use_stubs=False`. The Modal gateway app stays on stubs. After that response, the page holds a System 2 or cascade vehicle until the operator presses Accept or Reject. The wait is in the browser. The ledger has already reserved stock.
+The diagram follows one caller turn from top to bottom. Solid boxes and edges are implemented. Dashed ones are a stub, opt-in, or not wired. Green is System 1, blue is System 2, and yellow is where a person decides. By default both systems answer from stub files (`S1_IMPL=stub`, `S2_IMPL=stub`). `S1_IMPL=real` runs the needs table, and `S2_IMPL=real` calls Nemotron through Mubit. The Modal gateway app stays on stubs. `router/ledger.py` holds stock in this process only, and the hold resets on restart. Country packs are not loaded. The file-by-file request map is in `BaanSafe_Revised_Architecture.md`.
+
+<!-- Diagram guide for the agent that refreshes this README. This diagram is the model: keep its layout. Keep the numbered subgraphs (1 caller, 2 Mubit gateway with its data inputs, 3a System 1, 3b System 2, 4 decision router with the dispatch list, 5 operator review, 6 learning loops), the colour classes (s1 green, s2 blue, human yellow, store grey, unwired dashed with a transparent fill so it reads in dark mode), hexagons for decisions, data stores beside the step that reads them, and the legend above (solid = implemented, dashed = stub, opt-in, or not wired). Each box names its step, its file, and the rule or numbers it applies. When the code changes, update labels, edges, and status in place, and keep the legend paragraph true. Do not shrink it back to a file-by-file request map. That map lives in BaanSafe_Revised_Architecture.md. -->
 
 ```mermaid
 flowchart TD
-  classDef unwired stroke-dasharray: 5 5
-  phone["ui/sim phone"] --> turns["POST /cases/{id}/turns"]
-  turns --> gw["gateway.handle, stubs on"]
-  gw --> extract["extract if fields empty"]
-  gw --> enrich["enrich: sqlite or off"]
-  gw --> mem["memory mock files"]
-  mem -.-> mm["memory.mubit raises"]:::unwired
-  mem --> grad["graduation to System 2"]
-  grad --> pick{"field precheck"}
-  pick -->|no trigger| s1["S1 stub file"]
-  pick -->|any trigger| s2["S2 stub file"]
-  s1 -->|"S1 escalate, cascade"| s2
-  ov["eval/rl overlay if RL_OVERLAY"] -.-> pick
-  s1 --> merge["router.merge + process ledger"]
-  s2 --> merge
-  snap["committed snapshots"] --> places["places → dispatch units"]
-  places --> merge
-  snap -.-> extract
-  snap -.-> enrich
-  merge --> out["RouterDecision + dispatches"]
-  out -.-> hold["town holds S2 or cascade"]
-  s1 -.-> rules["system1.decide if S1_IMPL=real"]
-  rules -.-> merge
-  s2 -.-> s2d["system2.decide if S2_IMPL=real"]
-  s2d -.-> sap["Sapling gate, client stub"]:::unwired
-  s2d -.-> llm["Nemotron nano, life-safety outage P1"]:::unwired
-  packs["country packs, not loaded"]:::unwired
-  modal["Modal gateway_app, stubs"]:::unwired
+  classDef s1 fill:#e3f2e6,stroke:#2e7d32,color:#10261a
+  classDef s2 fill:#e4e8f7,stroke:#3949ab,color:#141a3d
+  classDef human fill:#fff3cd,stroke:#b8860b,color:#3d2e00
+  classDef store fill:#eceff1,stroke:#78909c,color:#263238
+  classDef unwired fill:transparent,stroke:#9e9e9e,color:#9e9e9e,stroke-dasharray:5 5
+
+  subgraph L1["1 · Caller — browser, ui/sim phone"]
+    stt["Speech to text<br/>browser API · /stt/transcribe not mounted"]:::unwired
+    caller["Synthetic caller<br/>typed line or voice"]
+  end
+
+  subgraph L2["2 · Mubit gateway — gateway/route.py · routes, traces every stage to traces.jsonl, never reasons"]
+    places_db[("SQLite districts<br/>gazetteer snapshot")]:::store
+    extract["Extract — system1/extract.py<br/>runs when a case arrives without fields<br/>needs · people · danger · location confidence"]
+    geo_db[("SQLite weather · flood extent · 4,218 facilities<br/>Open-Meteo and RID snapshots")]:::store
+    enrich["Enrich — enrich/context.py<br/>rain · reservoirs · flood polygons<br/>nearest hospitals and shelters<br/>flags only, never changes priority"]
+    memory["Memory — memory/adapter.py<br/>similar cases · past corrections<br/>mock files"]
+    mmem["Mubit memory<br/>memory/mubit.py raises"]:::unwired
+    grad["Correction escalation — gateway/graduation.py<br/>2 cases with a high-risk human correction on one pattern<br/>tag complex_situation · sets no priority"]
+    pick{{"Field precheck — gateway/chooser.py<br/>medical · oxygen or immobile<br/>location below 0.7 · rescue, medical or aid need<br/>safeguarding · conflict · aid exception · complex?"}}
+  end
+
+  subgraph L3a["3a · System 1 — fast_route · rules-only"]
+    s1["Needs table — system1/decide.py<br/>water, food → welfare point P3<br/>shelter P3 · evacuation → shelter P2<br/>power P3 · information P4 · never P1<br/>open similar case in memory → duplicate merge<br/>escalates below 0.80, on a missing or unknown need, or a trigger"]:::s1
+  end
+
+  subgraph L3b["3b · System 2 — reasoned_recommendation"]
+    nemo["Nemotron nano 30B-A3B — system2/orchestrator.py<br/>through Mubit to OpenRouter · 10 s budget<br/>safeguarding and aid always need a human"]:::s2
+    down["No usable reply → system2_unavailable<br/>P1 if life-safety, else P2 · human"]:::s2
+    sap["Banyan Sapling gate — system2/sapling.py<br/>aid eligibility and denial only<br/>supported stands · violation blocks · else human<br/>stub client, not hosted"]:::unwired
+  end
+
+  subgraph L4["4 · Decision router — router/merge.py · first match wins"]
+    merge{{"Merge the deciding outcome<br/>source_outcomes: deciding, then prior<br/>human if the outcome asks, a supervisor or aid route,<br/>safeguarding, or an unfilled dispatch"}}
+    sup["escalate_to_supervisor<br/>supervisor or aid route · safeguarding · escalate"]:::human
+    fin["finalize_case<br/>duplicate merge · information only"]
+    ask["ask_next_question<br/>missing evidence, a question, or no location"]
+    disp["create_provisional_dispatch<br/>one dispatch per need"]
+    units[("Places snapshot: shelters, hospitals, boat points<br/>then mocks/resources.json units")]:::store
+    fan["rescue → boat · medical → ambulance<br/>water, food → welfare point<br/>shelter, evacuation → shelter<br/>same district first · held in router/ledger.py<br/>none free → unfilled, human confirms"]
+  end
+
+  subgraph L5["5 · Operator review — browser, ui/sim"]
+    hold["Operator Accept / Reject<br/>System 2 and cascade vehicles wait here"]:::human
+    form["Correction form<br/>ui/correct.js"]:::human
+  end
+
+  subgraph L6["6 · Learning loops"]
+    log[("Training event log<br/>training/events")]:::store
+    rl["RL loop — make rl-loop<br/>graduate · recommend · demote"]
+    overlay["Learned overlay<br/>only with RL_OVERLAY"]:::unwired
+    ft["Fine-tune on Modal<br/>base model TODO · weights not loaded"]:::unwired
+  end
+
+  stt -.-> caller
+  caller -->|"POST /cases/{id}/turns"| extract
+  places_db --> extract
+  extract --> enrich
+  geo_db --> enrich
+  enrich --> memory
+  memory -.-> mmem
+  memory --> grad --> pick
+  pick -->|"no trigger"| s1
+  pick -->|"any trigger"| nemo
+  s1 -->|"fast_route"| merge
+  s1 -->|"escalate · cascade, same turn"| nemo
+  nemo --> merge
+  nemo -.->|"aid or denial claim"| sap
+  sap -.-> merge
+  nemo -->|"timeout or error"| down
+  down --> merge
+  merge --> sup
+  merge --> fin
+  merge --> ask
+  merge --> disp --> fan
+  ask -->|"next question, next turn"| caller
+  fan --> hold
+  hold -->|"Reject"| form
+  form -->|"POST /cases/{id}/corrections"| log
+  log -->|"read every turn"| grad
+  rl --> overlay
+  rl -->|"sim events"| log
+  overlay -.->|"demoted pattern"| pick
+  overlay -.->|"learned rule"| s1
+  log -.->|"make export-training"| ft
+  units --> fan
 ```
 
 The training path is separate. `fixtures/synthetic` feeds a SetFit row export and a Laya JSONL export. `laya-train` skips unless `LAYA_TRAIN=1` and a GPU or Modal task is present. Held-out eval does not load those weights. `EVAL_LEARNING_SET=synthetic` scores the same call set and still does not promote.
