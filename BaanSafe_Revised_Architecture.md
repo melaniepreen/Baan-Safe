@@ -15,27 +15,28 @@ Key corrections:
 
 Target flow: Caller → live speech-to-text → Call Agent → Mubit Gateway (memory retrieval, policy pre-check, route) → System 1 (simple, clear, low-risk) or System 2 (ambiguous or high-risk, Nemotron, then Sapling when the claim is aid eligibility or a denial) → Decision Router → Call Agent (next question, update case, or provisional dispatch).
 
-The diagram is `gateway/route.py` as it runs. Solid edges are that request. A dashed node is in the tree and is not called on it. `llm/client.py` and `llm/openai_client.py` accept only a Mubit host (`llm.provider_route` is `mubit`, including the compat OpenRouter prefix). The orchestrator does not reach them while `system2.orchestrator_model` is `TODO_HUMAN`. `GET /policies` serves the local corpus on its own. Aid routes return 501. Modal apps refuse to start while their model and GPU values are `TODO_HUMAN`.
+The diagram is `gateway/route.py` on the default request (`use_stubs=True`). Solid edges run. A dashed node is not called on that request. The field precheck in `gateway/chooser.py` picks the system. `router/merge.py` builds the `RouterDecision`. `system1/decide.py` runs only when `S1_IMPL=real` or `use_stubs=False`, and then it replaces the stub file. `llm/client.py` and `llm/openai_client.py` accept only a Mubit host (`llm.provider_route` is `mubit`, including the compat OpenRouter prefix). The orchestrator does not reach them while `system2.orchestrator_model` is `TODO_HUMAN`. `GET /policies` serves the local corpus on its own. Aid routes return 501. Modal apps refuse to start while their model and GPU values are `TODO_HUMAN`.
 
 ```mermaid
 flowchart TD
   classDef unwired stroke-dasharray: 5 5
-  sim["ui/sim or POST /triage"] --> gw["Mubit gateway stub"]
+  phone["ui/sim phone"] --> turns["POST /cases/{id}/turns"]
+  turns --> gw["gateway.handle, stubs on"]
+  gw --> extract["extract if fields empty"]
   gw --> enrich["enrich: sqlite or off"]
-  gw --> mem["memory adapter mock"]
+  gw --> mem["memory mock files"]
   mem -.-> mm["memory.mubit raises"]:::unwired
-  gw --> pick{"fixture expected.system"}
-  pick -.-> chooser["route_chooser TODO"]:::unwired
-  pick -->|system_1| s1["S1 stub outcome"]
-  pick -->|system_2| s2["S2 stub outcome"]
-  s1 --> copy["copy into RouterDecision"]
-  s2 --> copy
-  copy -.-> merge["router.merge raises"]:::unwired
-  s1 -.-> d1["system1.decide raises"]:::unwired
-  s2 -.-> d2["system2.decide"]:::unwired
-  d2 -.-> orch["orchestrate raises"]:::unwired
-  d2 -.-> sap["Sapling gate, client stub"]:::unwired
-  orch -.-> llm["llm/client.py + openai_client.py"]:::unwired
+  gw --> pick{"field precheck"}
+  pick -->|no trigger| s1["S1 stub file"]
+  pick -->|any trigger| s2["S2 stub file"]
+  s1 --> merge["router.merge"]
+  s2 --> merge
+  merge --> out["RouterDecision + dispatches"]
+  s1 -.-> rules["system1.decide if S1_IMPL=real"]
+  rules -.-> merge
+  s2 -.-> s2d["system2.decide raises"]:::unwired
+  s2d -.-> sap["Sapling gate, client stub"]:::unwired
+  s2d -.-> llm["Mubit LLM clients, model TODO"]:::unwired
 ```
 
 Training is a separate path from that call. Operator corrections, coach notes, and simulator outcomes append one `TrainingEvent` each. `make export-training` reads the log. The fine-tune job takes one dataset per task and does not start while its base model is `TODO_HUMAN`. Held-out eval splits on `group_id` and filters `source`. It scores stub arms and does not load fine-tune weights.

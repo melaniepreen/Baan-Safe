@@ -4,27 +4,28 @@ Flood and disaster call-triage scaffold. Mubit governs memory, policy, and trace
 
 Sapling is [MubitLabs/banyan-sapling](https://huggingface.co/MubitLabs/banyan-sapling), the Apache-2.0 23B verifier (research preview). It takes a policy, evidence, and a claim, and returns `supported`, `violation`, `missing`, `contradicted`, or `unsure`, with probabilities. `supported` lets the proposed action stand. `violation` blocks it. `unsure`, `missing`, and `contradicted` hand the case to a human. The input limit is 16,384 tokens. It does not run on System 1. `system2.use_banyan_sapling` is true for those two checks. Hosting, the GPU, and Thai handling stay `TODO_HUMAN`. Tests use the stub client and do not load a GPU.
 
-Solid edges are the stub request in `gateway/route.py`. Dashed nodes are in the tree and are not called on `POST /triage`.
+Solid edges run on `POST /cases/{id}/turns` with `use_stubs=True`. Dashed nodes are not called on that request. `system1.decide` replaces the stub file only when `S1_IMPL=real` or `use_stubs=False`.
 
 ```mermaid
 flowchart TD
   classDef unwired stroke-dasharray: 5 5
-  sim["ui/sim or POST /triage"] --> gw["Mubit gateway stub"]
+  phone["ui/sim phone"] --> turns["POST /cases/{id}/turns"]
+  turns --> gw["gateway.handle, stubs on"]
+  gw --> extract["extract if fields empty"]
   gw --> enrich["enrich: sqlite or off"]
-  gw --> mem["memory adapter mock"]
+  gw --> mem["memory mock files"]
   mem -.-> mm["memory.mubit raises"]:::unwired
-  gw --> pick{"fixture expected.system"}
-  pick -.-> chooser["route_chooser TODO"]:::unwired
-  pick -->|system_1| s1["S1 stub outcome"]
-  pick -->|system_2| s2["S2 stub outcome"]
-  s1 --> copy["copy into RouterDecision"]
-  s2 --> copy
-  copy -.-> merge["router.merge raises"]:::unwired
-  s1 -.-> d1["system1.decide raises"]:::unwired
-  s2 -.-> d2["system2.decide"]:::unwired
-  d2 -.-> orch["orchestrate raises"]:::unwired
-  d2 -.-> sap["Sapling gate, client stub"]:::unwired
-  orch -.-> llm["llm/client.py + openai_client.py"]:::unwired
+  gw --> pick{"field precheck"}
+  pick -->|no trigger| s1["S1 stub file"]
+  pick -->|any trigger| s2["S2 stub file"]
+  s1 --> merge["router.merge"]
+  s2 --> merge
+  merge --> out["RouterDecision + dispatches"]
+  s1 -.-> rules["system1.decide if S1_IMPL=real"]
+  rules -.-> merge
+  s2 -.-> s2d["system2.decide raises"]:::unwired
+  s2d -.-> sap["Sapling gate, client stub"]:::unwired
+  s2d -.-> llm["Mubit LLM clients, model TODO"]:::unwired
 ```
 
 This tree is Phase 0 plus a Phase 1 API. **System 2 decision logic is not implemented. System 1 is rules-only: keyword extraction plus a deterministic needs table.** Callers, households, and transcripts are synthetic. Real district names and public flood polygons are used only to anchor scenarios.
