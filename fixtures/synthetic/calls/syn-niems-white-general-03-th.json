@@ -1,0 +1,131 @@
+{
+  "id": "syn-niems-white-general-03-th",
+  "group_id": "syn-niems-white-general-03",
+  "lang": "th",
+  "primary_label": "niems_white_general",
+  "colour": "white",
+  "labels": [
+    "niems_white_general"
+  ],
+  "hard_negatives": [
+    "niems_red_critical"
+  ],
+  "title": "niems_white_general th 3",
+  "tags": [
+    "synthetic",
+    "system_1",
+    "th",
+    "niems_white_general",
+    "hard_negative"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "ดิฉัน ขวัญ สายน้ำ ผู้ป่วยทั่วไป คลินิกเปิดกี่โมงพรุ่งนี้"
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "ไม่มีใครบาดเจ็บ อยากทราบเวลาคลินิก"
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "โทรจากอำเภออะไรคะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอเมืองแพร่ จังหวัดแพร่ ใกล้ซอยตัวอย่าง 8 ค่ะ"
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "มีกี่คนคะ"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสามคนค่ะ"
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-niems-white-general-03-th",
+    "caller_id_hash": "synthetic:syn-niems-white-general-03",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "ดิฉัน ขวัญ สายน้ำ ผู้ป่วยทั่วไป คลินิกเปิดกี่โมงพรุ่งนี้"
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "ไม่มีใครบาดเจ็บ อยากทราบเวลาคลินิก"
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "โทรจากอำเภออะไรคะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอเมืองแพร่ จังหวัดแพร่ ใกล้ซอยตัวอย่าง 8 ค่ะ"
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "มีกี่คนคะ"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสามคนค่ะ"
+      }
+    ],
+    "fields": {
+      "location": "Mueang Phrae District, Phrae",
+      "location_confidence": 0.92,
+      "people_count": 3,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "information"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T08:52:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_1",
+    "priority": "P4",
+    "route": "information_only",
+    "needs": [
+      "information"
+    ],
+    "requires_human": false,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_white_general"
+    ],
+    "action": "finalize_case"
+  },
+  "notes": "Synthetic niems_white_general. Colour white. Route information_only on system_1."
+}

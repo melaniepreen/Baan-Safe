@@ -1,0 +1,136 @@
+{
+  "id": "syn-niems-black-not-a-patient-04-mixed",
+  "group_id": "syn-niems-black-not-a-patient-04",
+  "lang": "mixed",
+  "primary_label": "niems_black_not_a_patient",
+  "colour": "black",
+  "labels": [
+    "niems_black_not_a_patient"
+  ],
+  "hard_negatives": [
+    "niems_red_critical"
+  ],
+  "title": "niems_black_not_a_patient mixed 4",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "mixed",
+    "niems_black_not_a_patient",
+    "hard_negative",
+    "missing_location"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Malee Phueng. No patient here. ประกาศจะออกเมื่อไร"
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "No patient. ไม่มีใครบาดเจ็บ"
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district คะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "ใกล้ศาลาน้ำเงิน, the invented blue temple. I do not know the district."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people, มีกี่คน?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีห้าคน, five of us."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-niems-black-not-a-patient-04-mixed",
+    "caller_id_hash": "synthetic:syn-niems-black-not-a-patient-04",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Malee Phueng. No patient here. ประกาศจะออกเมื่อไร"
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "No patient. ไม่มีใครบาดเจ็บ"
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district คะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "ใกล้ศาลาน้ำเงิน, the invented blue temple. I do not know the district."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people, มีกี่คน?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีห้าคน, five of us."
+      }
+    ],
+    "fields": {
+      "location": null,
+      "location_confidence": null,
+      "people_count": 5,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "information"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T09:11:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P4",
+    "route": "information_only",
+    "needs": [
+      "information"
+    ],
+    "requires_human": false,
+    "missing_evidence": [
+      "location"
+    ],
+    "acceptable_next_questions": [
+      "Which district are you in?"
+    ],
+    "labels": [
+      "niems_black_not_a_patient"
+    ],
+    "action": "ask_next_question"
+  },
+  "notes": "Synthetic niems_black_not_a_patient. Colour black. District was not said. Route information_only on system_2."
+}

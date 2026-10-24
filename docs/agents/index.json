@@ -15,6 +15,7 @@
       "files": [
         "gateway/route.py",
         "gateway/chooser.py",
+        "gateway/graduation.py",
         "llm/client.py",
         "llm/openai_client.py",
         "memory/adapter.py"
@@ -94,7 +95,9 @@
       "files": [
         "eval/correction_loop.py",
         "eval/learning/harness.py",
-        "eval/LATTE.md"
+        "eval/learning/synthetic_cases.py",
+        "eval/LATTE.md",
+        "scripts/gen_synthetic_calls.py"
       ]
     },
     {
@@ -111,7 +114,9 @@
       "files": [
         "contracts/training.py",
         "training/log.py",
-        "training/export.py"
+        "training/export.py",
+        "training/laya_export.py",
+        "training/synthetic_export.py"
       ]
     },
     {
@@ -145,6 +150,26 @@
         "ingest/__main__.py",
         "ingest/reliefweb.py",
         "data/SOURCES.md"
+      ]
+    },
+    {
+      "path": "docs/agents/data-sources.md",
+      "title": "Live public data sources",
+      "summary": "GISTDA, Open-Meteo, Overpass, COD-AB, RID, and the TMD miss, with committed snapshots and data flags that do not change priority.",
+      "keywords": [
+        "ingest",
+        "gistda",
+        "open-meteo",
+        "overpass",
+        "gazetteer",
+        "snapshots"
+      ],
+      "files": [
+        "ingest/demo_sources.py",
+        "ingest/snapshots.py",
+        "config/escalation.yaml",
+        "system1/extract.py",
+        "enrich/context.py"
       ]
     },
     {
@@ -209,6 +234,23 @@
         "ui/player.html",
         "ui/correct.js",
         "ui/transcript_player.py"
+      ]
+    },
+    {
+      "path": "docs/agents/country-packs.md",
+      "title": "Country packs",
+      "summary": "Unloaded per-country packs. Thailand stays the default and the demo. A new country is files only until the loader refactor.",
+      "keywords": [
+        "country",
+        "locale",
+        "hotline",
+        "gazetteer",
+        "thailand"
+      ],
+      "files": [
+        "countries/TEMPLATE/pack.yaml",
+        "countries/th/pack.yaml",
+        "countries/ph/pack.yaml"
       ]
     }
   ]

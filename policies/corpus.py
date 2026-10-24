@@ -22,6 +22,7 @@ RULE_FILES = (
     "sphere.yaml",
     "safeguarding.yaml",
     "triage.yaml",
+    "flood.yaml",
 )
 REQUIRED = (
     "id",

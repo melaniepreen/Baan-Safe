@@ -23,7 +23,7 @@ Agents who think a contract is wrong must add a proposal here. They do not edit
 - why: The real `router/merge.py` fans out one provisional dispatch per dispatchable need when `next_action` is `create_provisional_dispatch`. The change is additive; existing data still validates.
 - from: Moly (repo owner), 24 Oct 2026
 - status: accepted
-- tag: pending — the Lead tags
+- tag: v0.3-contracts
 
 ## Template
 

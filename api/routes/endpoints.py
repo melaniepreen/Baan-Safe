@@ -42,7 +42,7 @@ from ingest.db import DB_PATH, connect
 from memory.adapter import retrieve, store_correction
 from training.log import append_event
 from mocks.loader import (
-    load_resources,
+    load_dispatch_resources,
     load_s1_stub,
     read_corrections,
 )
@@ -358,7 +358,7 @@ def context(
 
 @router.get("/resources")
 def resources():
-    return load_resources()
+    return load_dispatch_resources()
 
 
 def _geojson(path: Path) -> dict:

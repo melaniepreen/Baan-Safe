@@ -1,0 +1,82 @@
+# Policy pack. Sphere and the IFRC protection minimums are the baseline
+# for every country. The national slots are empty until a human retrieves
+# the instrument. Rules in policies/*.yaml stay the loaded corpus.
+# This file is not an adapter. policies/corpus.py will refuse a ReliefWeb
+# or DDPM URL if a rule is later copied into policies/. Do not put those
+# hosts here either.
+#
+# A verified rule needs id, status, text, source_url, source_excerpt,
+# retrieved, and license_note, the same required keys as policies/corpus.py.
+# Copy a short excerpt. Do not paste a handbook chapter or a payment table
+# you did not read off the page. Do not repair a damaged digit into an amount.
+
+schema_version: baansafe.policy_pack.v0
+runtime: unloaded
+iso2: xx
+
+baseline:
+  - id: sphere-2018
+    role: wash_food_shelter_minimums
+    jurisdiction: intl
+    loaded_from: policies/sphere.yaml
+    verification:
+      status: verified
+      source_url: https://spherestandards.org/wp-content/uploads/Sphere-Handbook-2018-EN.pdf
+      retrieved: "2026-10-24"
+      note: >
+        The handbook wording already in policies/sphere.yaml was read from
+        an archive capture after the live PDF returned HTTP 403. See the
+        license note in that file. Do not start a second Sphere corpus.
+        Archive capture recorded there:
+        https://web.archive.org/web/20241227204521/https://www.spherestandards.org/wp-content/uploads/Sphere-Handbook-2018-EN.pdf
+
+  - id: ifrc-pgi-2018
+    role: when_a_person_must_decide
+    jurisdiction: intl
+    loaded_from: policies/safeguarding.yaml
+    verification:
+      status: verified
+      source_url: https://www.ifrc.org/sites/default/files/Minimum-standards-for-protection-gender-and-inclusion-in-emergencies-LR.pdf
+      retrieved: "2026-10-24"
+      note: >
+        IFRC 2018 minimum standards for protection, gender and inclusion.
+        The same loaded file also quotes the UNHCR persons-at-risk page,
+        which says it is outdated and under revision:
+        https://emergency.unhcr.org/protection/persons-risk/overview-persons-risk
+
+# National instruments. Leave status unverified and text empty until the
+# PDF or the statute page is in front of you. A framework act is not an
+# aid-amount table. A hospital case study is not a national regulation.
+national:
+  - slot: triage
+    instrument: null
+    status: unverified
+    effective: null
+    text_en: null
+    text_local: null
+    source_excerpt: null
+    verification:
+      status: unverified
+      source_url: null
+      retrieved: null
+      note: >
+        Look for the national emergency-medical or disaster warning scale.
+        Record the name, the source URL, and whether it states a time target.
+        Do not map it onto P1–P4 unless the document itself does.
+
+  - slot: aid
+    instrument: null
+    status: unverified
+    effective: null
+    text_en: null
+    text_local: null
+    source_excerpt: null
+    verification:
+      status: unverified
+      source_url: null
+      retrieved: null
+      note: >
+        Look for the finance or social-welfare instrument that caps
+        assistance. If the digit layer is damaged, keep the gap. Do not
+        convert a local currency into another currency. system1/aid_eligibility.py
+        does not approve a payment.

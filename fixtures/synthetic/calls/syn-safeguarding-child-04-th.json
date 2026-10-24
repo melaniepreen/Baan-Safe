@@ -1,0 +1,141 @@
+{
+  "id": "syn-safeguarding-child-04-th",
+  "group_id": "syn-safeguarding-child-04",
+  "lang": "th",
+  "primary_label": "safeguarding_child",
+  "colour": "yellow",
+  "labels": [
+    "niems_yellow_urgent",
+    "safeguarding_child",
+    "safeguarding_protection_referral"
+  ],
+  "hard_negatives": [],
+  "title": "safeguarding_child th 4",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "th",
+    "safeguarding_child",
+    "multi_label"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "ดิฉัน อรุณ ใจดี ลูกอยู่คนเดียวที่พัก ไม่มีผู้ใหญ่"
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "ไม่มีผู้ใหญ่อยู่ด้วย พวกเขาลำพัง"
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "โทรจากอำเภออะไรคะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอแม่ทะ จังหวัดลำปาง ใกล้ซอยตัวอย่าง 6 ค่ะ"
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "มีกี่คนคะ"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสามคน ลูกสองคนกับฉัน"
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-safeguarding-child-04-th",
+    "caller_id_hash": "synthetic:syn-safeguarding-child-04",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "ดิฉัน อรุณ ใจดี ลูกอยู่คนเดียวที่พัก ไม่มีผู้ใหญ่"
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "ไม่มีผู้ใหญ่อยู่ด้วย พวกเขาลำพัง"
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "โทรจากอำเภออะไรคะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอแม่ทะ จังหวัดลำปาง ใกล้ซอยตัวอย่าง 6 ค่ะ"
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "มีกี่คนคะ"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสามคน ลูกสองคนกับฉัน"
+      }
+    ],
+    "fields": {
+      "location": "Mae Tha District, Lampang",
+      "location_confidence": 0.92,
+      "people_count": 3,
+      "vulnerable": [
+        "child"
+      ],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "shelter"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [
+      "safeguarding"
+    ],
+    "resources": {},
+    "received_at": "2026-10-24T10:25:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P2",
+    "route": "supervisor_escalation",
+    "needs": [
+      "shelter"
+    ],
+    "requires_human": true,
+    "missing_evidence": [
+      "guardian_contact_status"
+    ],
+    "acceptable_next_questions": [
+      "Is a named guardian expected, or should a supervisor take this now?"
+    ],
+    "labels": [
+      "niems_yellow_urgent",
+      "safeguarding_child",
+      "safeguarding_protection_referral"
+    ],
+    "action": "escalate_to_supervisor"
+  },
+  "notes": "Synthetic safeguarding_child. Colour yellow. Route supervisor_escalation on system_2."
+}

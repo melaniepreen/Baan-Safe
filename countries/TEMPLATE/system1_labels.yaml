@@ -1,0 +1,36 @@
+# System 1 label hypotheses. One full sentence per label per language.
+# A hypothesis is a template for a future zero-shot check. It is not a
+# priority, and system1/decide.py does not score it.
+# quotation: true only when the sentence is copied from the source.
+# The loaded file for the demo is policies/system1_labels.yaml.
+# Languages must be a subset of the country pack. The code's closed set
+# is th, en, and mixed (contracts/training.py). A new language is a
+# proposal until that literal grows.
+
+schema_version: baansafe.system1_labels.v0
+runtime: unloaded
+iso2: xx
+
+labels:
+  - id: example_life_safety
+    status: unverified
+    # BaanSafe priority this hypothesis would suggest. Unverified unless
+    # a retrieved scale names that priority.
+    baansafe_priority: null
+    mapping_status: unverified
+    derived_from: []
+    languages:
+      en:
+        label: null
+        hypothesis: null
+        quotation: false
+      # Replace "local" with the BCP 47 subtag from the pack.
+      local:
+        label: null
+        hypothesis: null
+        quotation: false
+    verification:
+      status: unverified
+      source_url: null
+      retrieved: null
+      note: Draft a sentence a caller could confirm or deny. Do not invent a threshold.

@@ -32,6 +32,7 @@ training             corrections, coach, sim -> event log -> export-training
 make test
 make validate
 make replay-stubs
+make demo-graduation
 make eval-learning
 make sim-eval
 make extract-eval
@@ -45,6 +46,7 @@ make modal-deploy-s2
 make modal-deploy-sapling
 make modal-deploy-stt
 make export-training
+make export-laya
 make modal-finetune
 ```
 
@@ -65,10 +67,12 @@ Index: `docs/agents/index.json`. Read one topic file, not the whole set.
 | Training log, export, per-task fine-tune | `docs/agents/training-schema.md` | `training/log.py`, `training/export.py`, `infra/modal/finetune_job.py` |
 | Caller simulation, coach | `docs/agents/caller-simulation.md` | `sim/env.py`, `sim/coach.py` |
 | Ingest, SQLite, banned sources | `docs/agents/data-ingest.md` | `ingest/__main__.py`, `data/SOURCES.md` |
+| Live public sources, snapshots | `docs/agents/data-sources.md` | `ingest/demo_sources.py`, `data/snapshots/` |
 | Modal, GPU, deploy | `docs/agents/modal-infra.md` | `infra/modal/`, `infra/HARDWARE.md` |
 | YAML decisions | `docs/agents/config-and-decisions.md` | `config/decisions.yaml`, `config/settings.py` |
 | Tests and validate | `docs/agents/testing.md` | `tests/`, `scripts/validate.py` |
 | UI, correct this | `docs/agents/frontend.md` | `ui/player.html`, `ui/correct.js` |
+| Country packs | `docs/agents/country-packs.md` | `countries/` |
 
 ## Done
 

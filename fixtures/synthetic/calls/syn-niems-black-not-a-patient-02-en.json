@@ -1,0 +1,131 @@
+{
+  "id": "syn-niems-black-not-a-patient-02-en",
+  "group_id": "syn-niems-black-not-a-patient-02",
+  "lang": "en",
+  "primary_label": "niems_black_not_a_patient",
+  "colour": "black",
+  "labels": [
+    "niems_black_not_a_patient"
+  ],
+  "hard_negatives": [
+    "niems_red_critical"
+  ],
+  "title": "niems_black_not_a_patient en 2",
+  "tags": [
+    "synthetic",
+    "system_1",
+    "en",
+    "niems_black_not_a_patient",
+    "hard_negative"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Dao Saengthong. No patient here. When does the flood update come out?"
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, or is water inside the rooms?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "No patient and nobody is hurt."
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district are you calling from?"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "We are in Mueang Phrae District, Phrae, near Placeholder Soi 8."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people are with you?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "There are three of us."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-niems-black-not-a-patient-02-en",
+    "caller_id_hash": "synthetic:syn-niems-black-not-a-patient-02",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Dao Saengthong. No patient here. When does the flood update come out?"
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, or is water inside the rooms?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "No patient and nobody is hurt."
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district are you calling from?"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "We are in Mueang Phrae District, Phrae, near Placeholder Soi 8."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people are with you?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "There are three of us."
+      }
+    ],
+    "fields": {
+      "location": "Mueang Phrae District, Phrae",
+      "location_confidence": 0.92,
+      "people_count": 3,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "information"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T09:03:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_1",
+    "priority": "P4",
+    "route": "information_only",
+    "needs": [
+      "information"
+    ],
+    "requires_human": false,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_black_not_a_patient"
+    ],
+    "action": "finalize_case"
+  },
+  "notes": "Synthetic niems_black_not_a_patient. Colour black. Route information_only on system_1."
+}

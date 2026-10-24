@@ -1,0 +1,140 @@
+# Country pack schema. Copy this directory to countries/<iso2>/ and fill it.
+# Nothing under countries/ is imported. Thailand in countries/th/pack.yaml
+# describes the code on main. A filled pack does not change a route, a
+# hotline the router dials, or a policy the corpus loads.
+#
+# Verification is one of two strings, the same pair policies/corpus.py allows:
+#   verified    — a retrieved page states this value. Keep the URL.
+#   unverified  — the value is missing, or a page was opened and did not state it.
+# Leave the number null when you cannot point at a page. Do not invent a
+# hotline, an API path, a threshold, or a payment amount.
+# Do not fetch ReliefWeb. Do not add DDPM (disaster.go.th, ddpm.go.th) as a
+# source. Do not store a caller phone, a national id, or a payment identifier.
+# Synthetic people only.
+
+schema_version: baansafe.country_pack.v0
+runtime: unloaded
+
+# ISO 3166-1 alpha-2, lowercase directory name. "xx" is the blank template.
+iso2: xx
+# ISO 3166-1 alpha-3. Used by GDACS-style country filters and by geoBoundaries.
+iso3: null
+name_en: null
+# True only for the demo country. Thailand stays the demo.
+default_demo: false
+
+locale:
+  # BCP 47 primary language subtags the pack is willing to label.
+  # The closed set in code today is th, en, and mixed. See contracts/training.py.
+  languages: []
+  # IANA timezone name. The Open-Meteo client currently hardcodes Asia/Bangkok.
+  timezone:
+    iana: null
+    verification:
+      status: unverified
+      source_url: null
+      retrieved: null
+      note: null
+  currency:
+    # ISO 4217 alphabetic code, the name callers use, and the minor unit.
+    # Aid code must not format an amount from this block.
+    code: null
+    name_en: null
+    minor_unit: null
+    verification:
+      status: unverified
+      source_url: null
+      retrieved: null
+      note: null
+  units:
+    # What the fast path and the enricher assume. National area units
+    # (rai, hectare) stay in the policy pack, not in a converter.
+    rain: null            # mm is what config/escalation.yaml counts
+    distance: null        # km is what ingest matching counts
+    wind: null            # kmh is what the Open-Meteo calls request
+    temperature: null     # celsius is the Open-Meteo default
+    verification:
+      status: unverified
+      source_url: null
+      retrieved: null
+      note: null
+  phone:
+    # Describe the national pattern. Do not put a real subscriber number here.
+    # scripts/validate.py currently matches Thailand only: +66 or a leading 0.
+    country_code: null
+    national_prefix: null
+    description: null
+    verification:
+      status: unverified
+      source_url: null
+      retrieved: null
+      note: null
+
+# Public short codes by service. One object per line the public can dial.
+# number is a string so a leading zero cannot be eaten. null if unverified.
+hotlines: []
+# Each hotline object, when you copy this list into a real pack:
+# - service: medical | fire | police | disaster | other
+# - name: agency name as printed on the source page
+# - number: "1669" or null
+# - wired: false until router code actually selects it. Packs stay unwired.
+# - verification: {status, source_url, retrieved, note}
+
+# National triage or warning scale, and a hypothesis for BaanSafe P1–P4.
+# mapping_status is unverified unless a retrieved document names P1–P4.
+# system1/decide.py does not read this list.
+triage_scale:
+  id: null
+  wired_into_decide: false
+  levels: []
+  # Each level:
+  # - id: stable token
+  # - label_en: short name from the source, or null
+  # - source_excerpt: short quotation, or null
+  # - baansafe_priority: P1 | P2 | P3 | P4 | null
+  # - mapping_status: verified | unverified
+  # - verification: {status, source_url, retrieved, note}
+
+admin:
+  # Ordered from largest to smallest. gazetteer_grain is the level the
+  # extractor should match. Thailand's code uses OSM admin_level 6 and
+  # does not store the tambon.
+  levels: []
+  # Each level: {id, name_en, name_local, osm_admin_level, cod_ab_level, verification}
+  gazetteer:
+    grain: null
+    source: null          # overpass | hdx-cod-ab | geoboundaries | national
+    query_note: null
+    verification:
+      status: unverified
+      source_url: null
+      retrieved: null
+      note: null
+
+# Bindings into countries/TEMPLATE/providers.yaml. One key per capability.
+# A national provider may be null. The global fallback in the interface
+# still applies. wired: true only when today's client already calls it.
+providers:
+  flood_extent: null
+  rain_and_forecast: null
+  river_levels: null
+  shelters_and_facilities: null
+  boundaries: null
+  stt_asr: null
+
+# Id of the aid corpus this country would bind. The live corpus id is the
+# file set in policies/corpus.py. A new country points at its own
+# policy-pack.yaml and does not edit policies/.
+aid_policy_corpus:
+  id: null
+  path: null
+  verification:
+    status: unverified
+    source_url: null
+    retrieved: null
+    note: null
+
+# Path of the System 1 hypothesis file for this country.
+system1_labels:
+  path: null
+  languages: []

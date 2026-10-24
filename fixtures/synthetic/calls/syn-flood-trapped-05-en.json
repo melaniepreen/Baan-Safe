@@ -1,0 +1,137 @@
+{
+  "id": "syn-flood-trapped-05-en",
+  "group_id": "syn-flood-trapped-05",
+  "lang": "en",
+  "primary_label": "flood_trapped",
+  "colour": "red",
+  "labels": [
+    "niems_red_critical",
+    "flood_trapped",
+    "flood_water_depth"
+  ],
+  "hard_negatives": [],
+  "title": "flood_trapped en 5",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "en",
+    "flood_trapped",
+    "calm_critical",
+    "multi_label",
+    "demo"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Ton Mai. I am calm. We are on the roof and cannot get out. The water is inside the house."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, or is water inside the rooms?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "No shouting. We are trapped."
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district are you calling from?"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "We are in Mueang Phayao District, Phayao, near Placeholder Soi 4."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people are with you?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "There are five of us."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-flood-trapped-05-en",
+    "caller_id_hash": "synthetic:syn-flood-trapped-05",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Ton Mai. I am calm. We are on the roof and cannot get out. The water is inside the house."
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, or is water inside the rooms?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "No shouting. We are trapped."
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district are you calling from?"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "We are in Mueang Phayao District, Phayao, near Placeholder Soi 4."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people are with you?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "There are five of us."
+      }
+    ],
+    "fields": {
+      "location": "Mueang Phayao District, Phayao",
+      "location_confidence": 0.92,
+      "people_count": 5,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [
+        "rising_water"
+      ],
+      "needs": [
+        "rescue"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T11:57:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P1",
+    "route": "rescue_coordination",
+    "needs": [
+      "rescue"
+    ],
+    "requires_human": true,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_red_critical",
+      "flood_trapped",
+      "flood_water_depth"
+    ],
+    "action": "create_provisional_dispatch"
+  },
+  "notes": "Synthetic flood_trapped. Colour red. Calm delivery with a critical fact. Rescue is system_2 rescue_coordination. Route rescue_coordination on system_2."
+}

@@ -1,0 +1,85 @@
+# Philippines policy pack. Baseline points at the loaded international
+# files. National rows are only what was retrieved. Not an adapter.
+
+schema_version: baansafe.policy_pack.v0
+runtime: unloaded
+iso2: ph
+
+baseline:
+  - id: sphere-2018
+    role: wash_food_shelter_minimums
+    jurisdiction: intl
+    loaded_from: policies/sphere.yaml
+    verification:
+      status: verified
+      source_url: https://spherestandards.org/wp-content/uploads/Sphere-Handbook-2018-EN.pdf
+      retrieved: "2026-10-24"
+      note: Same loaded file as Thailand. Do not fork the handbook text.
+
+  - id: ifrc-pgi-2018
+    role: when_a_person_must_decide
+    jurisdiction: intl
+    loaded_from: policies/safeguarding.yaml
+    verification:
+      status: verified
+      source_url: https://www.ifrc.org/sites/default/files/Minimum-standards-for-protection-gender-and-inclusion-in-emergencies-LR.pdf
+      retrieved: "2026-10-24"
+      note: Same loaded file as Thailand.
+
+national:
+  - slot: drm_framework
+    instrument: Republic Act No. 10121
+    status: verified
+    effective: null
+    text_en: >
+      Section 1 titles this Act the Philippine Disaster Risk Reduction and
+      Management Act of 2010. It is the framework that provides for the
+      National Disaster Risk Reduction and Management Plan. It is not a
+      call-triage card and it is not a payment table.
+    text_local: null
+    source_excerpt: >
+      This Act shall be known as the "Philippine Disaster Risk Reduction and Management Act of 2010".
+    verification:
+      status: verified
+      source_url: https://lawphil.net/statutes/repacts/ra2010/ra_10121_2010.html
+      retrieved: "2026-10-24"
+      note: >
+        Title retrieved from the Lawphil copy of the Act. A Senate catalogue
+        entry points at the same Act:
+        https://ldr.senate.gov.ph/legislative-issuance/republic-act-no-10121
+        No peso figure from the Act is stored.
+
+  - slot: triage
+    instrument: PAGASA rainfall warning icons
+    status: verified
+    effective: null
+    text_en: >
+      Three retrieved rows: advisory (flooding possible), alert (flooding
+      threatening), emergency (severe flooding expected). Colour names and
+      millimetre thresholds were not in the text. This is not a medical scale.
+    text_local: null
+    source_excerpt: >
+      Advisory, community awareness: flooding is possible in low-lying areas
+      and near river channels. Alert, community preparedness: flooding is
+      threatening. Emergency, community response: severe flooding is expected.
+    verification:
+      status: verified
+      source_url: https://www.pagasa.dost.gov.ph/information/rainfall-and-thunderstorm-warning-system
+      retrieved: "2026-10-24"
+      note: The official page spells the alert row THREATHENING. No mapping onto P1–P4 was retrieved.
+
+  - slot: aid
+    instrument: null
+    status: unverified
+    effective: null
+    text_en: null
+    text_local: null
+    source_excerpt: null
+    verification:
+      status: unverified
+      source_url: null
+      retrieved: "2026-10-24"
+      note: >
+        A current social-welfare or finance assistance schedule was not
+        retrieved. Do not copy a peso ceiling from memory or from a news
+        article. Eligibility stays a human decision, as it does for Thailand.

@@ -1,0 +1,153 @@
+{
+  "checked_at": "2026-10-24T17:38:31.410213+00:00",
+  "refresh": {
+    "gistda": {
+      "origin": "live",
+      "keys": [
+        "arcgis",
+        "checked_at",
+        "licence",
+        "open_api",
+        "rate_limit"
+      ]
+    },
+    "open_meteo": {
+      "origin": "live",
+      "keys": [
+        "archive_url",
+        "checked_at",
+        "licence",
+        "locations",
+        "rate_limit",
+        "robots",
+        "url"
+      ]
+    },
+    "gazetteer": {
+      "origin": "live",
+      "keys": [
+        "checked_at",
+        "districts",
+        "download",
+        "level",
+        "licence",
+        "rate_limit",
+        "url"
+      ]
+    },
+    "places": {
+      "origin": "live",
+      "keys": [
+        "checked_at",
+        "licence",
+        "notes",
+        "places",
+        "rate_limit",
+        "url"
+      ]
+    },
+    "rid": {
+      "origin": "live",
+      "keys": [
+        "checked_at",
+        "dams",
+        "date",
+        "licence",
+        "rate_limit",
+        "scope",
+        "url"
+      ]
+    },
+    "tmd": {
+      "origin": "live",
+      "keys": [
+        "checked_at",
+        "data_host",
+        "detail",
+        "http_status",
+        "licence",
+        "rate_limit",
+        "status",
+        "url"
+      ]
+    },
+    "geoboundaries": {
+      "origin": "live",
+      "keys": [
+        "checked_at",
+        "detail",
+        "licence",
+        "rate_limit",
+        "status",
+        "url",
+        "year"
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "gistda_open_api",
+      "status": "blocked",
+      "url": "https://api-gateway.gistda.or.th/api/2.0/resources/features/flood/1day",
+      "licence": "GISTDA open API. A key is required.",
+      "rate_limit": "One unauthenticated probe when the key is unset.",
+      "detail": "GISTDA_API_KEY was not set. A request without a key was sent and the server returned HTTP 407. No key was written."
+    },
+    {
+      "id": "gistda_arcgis",
+      "status": "ok",
+      "url": "https://gistdaportal.gistda.or.th/arcgis/rest/services/app/GISTDA_flood/MapServer",
+      "licence": "Public GISTDA MapServer.",
+      "rate_limit": "Two count queries.",
+      "detail": "Layer 0 count=0. Layer 1 count=63."
+    },
+    {
+      "id": "open_meteo",
+      "status": "ok",
+      "url": "https://api.open-meteo.com/v1/forecast",
+      "licence": "CC BY 4.0 (Open-Meteo). Attribution required.",
+      "rate_limit": "About 10,000 requests a day on the free API. This refresh sends 8 calls, slower than 1 per second.",
+      "detail": "Town rows=4."
+    },
+    {
+      "id": "overpass_places",
+      "status": "ok",
+      "url": "https://overpass.openstreetmap.fr/api/interpreter",
+      "licence": "OpenStreetMap, ODbL. Attribution and share-alike.",
+      "rate_limit": "overpass.openstreetmap.fr has no robots.txt. One query per town or fixture district, at most one per second. overpass-api.de is not used.",
+      "detail": "Stored places=148."
+    },
+    {
+      "id": "hdx_cod_ab",
+      "status": "ok",
+      "url": "https://data.humdata.org/dataset/cod-ab-tha",
+      "licence": "Creative Commons Attribution for Intergovernmental Organisations (CC BY-IGO)",
+      "rate_limit": "HDX CKAN. One spreadsheet download. Geometry zips are hundreds of megabytes and are not fetched.",
+      "detail": "ADM2 rows=928. Tambon geometry was not stored."
+    },
+    {
+      "id": "geoboundaries",
+      "status": "available_not_used",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/THA/ADM2/",
+      "licence": "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)",
+      "rate_limit": "robots.txt Crawl-delay 10. One metadata request. The geometry file is not downloaded.",
+      "detail": "ADM2 metadata answered. The gazetteer uses the HDX COD-AB spreadsheet because it carries Thai district names and centroids. Geometry URL was present: True."
+    },
+    {
+      "id": "rid_dams",
+      "status": "ok",
+      "url": "https://app.rid.go.th/reservoir/api/dam/public",
+      "licence": "Royal Irrigation Department public dam JSON. No licence page is linked from the payload. Treat as a public operational feed and keep the attribution.",
+      "rate_limit": "No published limit. One request per refresh. robots.txt on app.rid.go.th is HTTP 404.",
+      "detail": "Northern region dams. The feed has no coordinates, so these rows are not joined to a district and do not change priority."
+    },
+    {
+      "id": "tmd",
+      "status": "failed",
+      "url": "https://data.tmd.go.th/",
+      "licence": "Not stored.",
+      "rate_limit": "data.tmd.go.th robots.txt is Disallow: /. That host was not called.",
+      "detail": "data.tmd.go.th robots.txt disallows every path, so the registered data API was not called. https://www.tmd.go.th/api/weather returned an HTML error page, not observations."
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "id": "syn-safeguarding-disability-04-en",
+  "group_id": "syn-safeguarding-disability-04",
+  "lang": "en",
+  "primary_label": "safeguarding_disability",
+  "colour": "black",
+  "labels": [
+    "niems_black_not_a_patient",
+    "safeguarding_disability"
+  ],
+  "hard_negatives": [
+    "flood_trapped"
+  ],
+  "title": "safeguarding_disability en 4",
+  "tags": [
+    "synthetic",
+    "system_1",
+    "en",
+    "safeguarding_disability",
+    "multi_label",
+    "hard_negative",
+    "missing_people"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Som Ruenjai. Disability in the household, he can walk. We only need water."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, or is water inside the rooms?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "He can walk today. We need drinking water."
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district are you calling from?"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "We are in Sung Men District, Phrae, near Placeholder Soi 8."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people are with you?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "I have not counted the household yet."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-safeguarding-disability-04-en",
+    "caller_id_hash": "synthetic:syn-safeguarding-disability-04",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Som Ruenjai. Disability in the household, he can walk. We only need water."
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, or is water inside the rooms?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "He can walk today. We need drinking water."
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district are you calling from?"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "We are in Sung Men District, Phrae, near Placeholder Soi 8."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people are with you?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "I have not counted the household yet."
+      }
+    ],
+    "fields": {
+      "location": "Sung Men District, Phrae",
+      "location_confidence": 0.92,
+      "people_count": null,
+      "vulnerable": [
+        "disability"
+      ],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "water"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T10:54:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_1",
+    "priority": "P3",
+    "route": "welfare_distribution",
+    "needs": [
+      "water"
+    ],
+    "requires_human": false,
+    "missing_evidence": [
+      "people_count"
+    ],
+    "acceptable_next_questions": [
+      "How many people are with you?"
+    ],
+    "labels": [
+      "niems_black_not_a_patient",
+      "safeguarding_disability"
+    ],
+    "action": "ask_next_question"
+  },
+  "notes": "Synthetic safeguarding_disability. Colour black. Household size was not said. Route welfare_distribution on system_1."
+}

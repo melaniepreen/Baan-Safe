@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import random
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -392,6 +393,26 @@ def base_building(**kwargs) -> dict:
     return {key: value for key, value in building.items() if value is not None}
 
 
+_THAI_SCRIPT = re.compile(r"[\u0e00-\u0e7f]")
+
+
+def place_label(building_id: str, fallback_th: str, fallback_en: str) -> tuple[str, str]:
+    """Romanised name for this plot.
+
+    ui/sim/data/places.json keeps the Lampang, Phrae, Nan, and Phayao catalog.
+    A Thai label from that catalog is not drawn on the Sukhumvit block.
+    """
+    path = ROOT / "ui" / "sim" / "data" / "places.json"
+    if not path.is_file():
+        return fallback_th, fallback_en
+    label = (json.loads(path.read_text(encoding="utf-8")).get("labels") or {}).get(building_id) or {}
+    name_th = label.get("name_th") or fallback_th
+    name_en = label.get("name_en") or fallback_en
+    if _THAI_SCRIPT.search(name_th) or _THAI_SCRIPT.search(name_en):
+        return fallback_th, fallback_en
+    return name_th, name_en
+
+
 def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[dict]:
     def res(resource_id: str) -> str:
         if resource_id not in resources:
@@ -402,8 +423,8 @@ def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[di
         base_building(
             id="bldg-school",
             kind="school",
-            name_th="School",
-            name_en="School",
+            name_th=place_label("bldg-school", "School", "School")[0],
+            name_en=place_label("bldg-school", "School", "School")[1],
             x=238,
             y=92,
             w=122,
@@ -417,8 +438,8 @@ def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[di
         base_building(
             id="bldg-tower-white",
             kind="concrete",
-            name_th="White apartment block",
-            name_en="White apartment block",
+            name_th=place_label("bldg-tower-white", "White apartment block", "White apartment block")[0],
+            name_en=place_label("bldg-tower-white", "White apartment block", "White apartment block")[1],
             x=436,
             y=22,
             w=26,
@@ -432,8 +453,8 @@ def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[di
         base_building(
             id="bldg-tower-pink",
             kind="concrete",
-            name_th="Pink apartment block",
-            name_en="Pink apartment block",
+            name_th=place_label("bldg-tower-pink", "Pink apartment block", "Pink apartment block")[0],
+            name_en=place_label("bldg-tower-pink", "Pink apartment block", "Pink apartment block")[1],
             x=58,
             y=18,
             w=24,
@@ -529,8 +550,8 @@ def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[di
         base_building(
             id="bldg-sala",
             kind="temple",
-            name_th="Sala",
-            name_en="Sala",
+            name_th=place_label("bldg-sala", "Sala", "Sala")[0],
+            name_en=place_label("bldg-sala", "Sala", "Sala")[1],
             x=150,
             y=360,
             w=16,

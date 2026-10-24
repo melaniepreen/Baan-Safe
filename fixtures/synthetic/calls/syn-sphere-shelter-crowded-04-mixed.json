@@ -1,0 +1,139 @@
+{
+  "id": "syn-sphere-shelter-crowded-04-mixed",
+  "group_id": "syn-sphere-shelter-crowded-04",
+  "lang": "mixed",
+  "primary_label": "sphere_shelter_crowded",
+  "colour": "black",
+  "labels": [
+    "niems_black_not_a_patient",
+    "sphere_shelter_crowded"
+  ],
+  "hard_negatives": [
+    "flood_trapped"
+  ],
+  "title": "sphere_shelter_crowded mixed 4",
+  "tags": [
+    "synthetic",
+    "system_1",
+    "mixed",
+    "sphere_shelter_crowded",
+    "multi_label",
+    "hard_negative",
+    "missing_people"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Wila Khlong. Crowded shelter. ขอที่พักคืนนี้"
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "ไม่มีใครบาดเจ็บ. We only need shelter."
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district คะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอเมืองลำปาง, Mueang Lampang District, Lampang, near Placeholder Soi 5."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people, มีกี่คน?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "ยังไม่ได้นับ, I have not counted yet."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-sphere-shelter-crowded-04-mixed",
+    "caller_id_hash": "synthetic:syn-sphere-shelter-crowded-04",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Wila Khlong. Crowded shelter. ขอที่พักคืนนี้"
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "ไม่มีใครบาดเจ็บ. We only need shelter."
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district คะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอเมืองลำปาง, Mueang Lampang District, Lampang, near Placeholder Soi 5."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people, มีกี่คน?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "ยังไม่ได้นับ, I have not counted yet."
+      }
+    ],
+    "fields": {
+      "location": "Mueang Lampang District, Lampang",
+      "location_confidence": 0.92,
+      "people_count": null,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "shelter"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T10:11:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_1",
+    "priority": "P3",
+    "route": "shelter_placement",
+    "needs": [
+      "shelter"
+    ],
+    "requires_human": false,
+    "missing_evidence": [
+      "people_count"
+    ],
+    "acceptable_next_questions": [
+      "How many people are with you?"
+    ],
+    "labels": [
+      "niems_black_not_a_patient",
+      "sphere_shelter_crowded"
+    ],
+    "action": "ask_next_question"
+  },
+  "notes": "Synthetic sphere_shelter_crowded. Colour black. Household size was not said. Route shelter_placement on system_1."
+}

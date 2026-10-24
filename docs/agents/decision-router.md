@@ -3,6 +3,7 @@ title: Decision router
 tags: [router, merge, next-action, dispatch]
 files:
   - router/merge.py
+  - router/ledger.py
   - gateway/route.py
   - config/escalation.yaml
 ---
@@ -14,15 +15,17 @@ The Decision Router turns one system's outcome into the next action and, when di
 ## Key files
 
 - `router/merge.py` — `merge(case, outcome, extra_notes=(), resources=None) -> RouterDecision`. Owner: Moly.
+- `router/ledger.py` — in-process reservation ledger: `reserve`, `reserved_by_others`, `holds`, `release_case`, `reset`. Nothing is written to disk; reservations reset on restart.
 - `gateway/route.py` — calls `router.merge.merge` and traces `router.merge ran`.
 - `contracts/models.py` — `RouterDecision`, `NextAction`, `Dispatch` (CR-003).
-- `mocks/resources.json` — fictional resource snapshot (`load_resources()`).
+- `mocks/resources.json` — fictional resource snapshot (`load_resources()`). Router tests keep this default.
+- `mocks/loader.py` `load_dispatch_resources()` — fictional units plus public shelters, hospitals, and ferry terminals from `data/snapshots/places.json`. The gateway passes this snapshot. Real units are listed first.
 
 ## Interfaces/contracts
 
 - `NextAction`: `ask_next_question`, `create_provisional_dispatch`, `escalate_to_supervisor`, `finalize_case`, `request_more_evidence`.
 - Next-action order, first match wins: `supervisor_escalation` route or `safeguarding` flag → escalate; `aid_caseworker` → escalate; `outcome.escalate` → escalate; `duplicate_merge` → finalize; `missing_evidence`, `next_question`, or no `fields.location` → ask next question; `information_only` → finalize; otherwise → `create_provisional_dispatch`.
-- Dispatch fan-out (only for `create_provisional_dispatch`): rescue→boat, medical→ambulance, water/food→welfare_point, shelter/evacuation→shelter. Same-district units win (district name inside `fields.location`, case-insensitive), else first available anywhere, else `unfilled` with `resource_id` None and a note. Stock is never decremented.
+- Dispatch fan-out (only for `create_provisional_dispatch`): rescue→boat, medical→ambulance, water/food→welfare_point, shelter/evacuation→shelter. A unit this case already holds for that need wins (idempotent re-decision), then same-district units (district name inside `fields.location`, case-insensitive), then first with `available - reserved_by_others > 0`, else `unfilled` with `resource_id` None and a note. Every `merge` call releases the case's reservations that are no longer in its dispatches. Stock is reserved in-process only; the ledger resets on restart.
 - `requires_human` = outcome's, or `supervisor_escalation`/`aid_caseworker` route, or `safeguarding` flag, or any unfilled dispatch. `final_priority`/`final_route` echo the outcome.
 - `RouterDecision` carries `final_priority`, `final_route`, `source_outcomes` (length 1), `policy_notes`, `dispatches`.
 
@@ -42,7 +45,7 @@ The Decision Router turns one system's outcome into the next action and, when di
 
 - Putting priority logic in the router. It echoes the selected system's outcome.
 - Treating Sapling's `requires_human` as `Outcome.escalate`. Escalation to System 2 and a human handoff are different fields.
-- Reserving or decrementing `mocks/resources.json`. Dispatches are provisional only.
+- Treating a provisional dispatch as durable. Reservations live in `router/ledger.py` memory and are lost on restart.
 - `needs` not in the kind map (power, information, aid_payment) produce no dispatch.
 
 ## Open TODO_HUMAN keys

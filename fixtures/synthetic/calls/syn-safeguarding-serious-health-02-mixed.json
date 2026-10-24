@@ -1,0 +1,135 @@
+{
+  "id": "syn-safeguarding-serious-health-02-mixed",
+  "group_id": "syn-safeguarding-serious-health-02",
+  "lang": "mixed",
+  "primary_label": "safeguarding_serious_health",
+  "colour": "yellow",
+  "labels": [
+    "niems_yellow_urgent",
+    "safeguarding_serious_health"
+  ],
+  "hard_negatives": [
+    "flood_trapped",
+    "niems_not_conscious_or_breathing"
+  ],
+  "title": "safeguarding_serious_health mixed 2",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "mixed",
+    "safeguarding_serious_health",
+    "multi_label",
+    "hard_negative"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Wila Khlong. พ่อล้างไต, father is on dialysis. He is conscious."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "A person must decide. ยังรู้สึกตัว"
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district คะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอสอง, Song District, Phrae, near Placeholder Soi 7."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people, มีกี่คน?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสามคน, three of us."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-safeguarding-serious-health-02-mixed",
+    "caller_id_hash": "synthetic:syn-safeguarding-serious-health-02",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Wila Khlong. พ่อล้างไต, father is on dialysis. He is conscious."
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "A person must decide. ยังรู้สึกตัว"
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district คะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอสอง, Song District, Phrae, near Placeholder Soi 7."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people, มีกี่คน?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสามคน, three of us."
+      }
+    ],
+    "fields": {
+      "location": "Song District, Phrae",
+      "location_confidence": 0.92,
+      "people_count": 3,
+      "vulnerable": [],
+      "medical": true,
+      "danger": [],
+      "needs": [
+        "medical"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T11:05:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P2",
+    "route": "medical_response",
+    "needs": [
+      "medical"
+    ],
+    "requires_human": true,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_yellow_urgent",
+      "safeguarding_serious_health"
+    ],
+    "action": "create_provisional_dispatch"
+  },
+  "notes": "Synthetic safeguarding_serious_health. Colour yellow. Route medical_response on system_2."
+}

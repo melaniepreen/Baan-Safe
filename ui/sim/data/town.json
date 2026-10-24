@@ -4658,7 +4658,12 @@
       "expected_priority": "P3",
       "expected_system": "system_1",
       "expected_route": "duplicate_merge",
-      "memory": []
+      "memory": [
+        {
+          "kind": "similar_case",
+          "summary": "Open case F08 from the same synthetic household: drinking water, Song District, Phrae. Not yet delivered."
+        }
+      ]
     },
     {
       "id": "F10",

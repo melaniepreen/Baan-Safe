@@ -1,0 +1,136 @@
+{
+  "id": "syn-safeguarding-disability-02-th",
+  "group_id": "syn-safeguarding-disability-02",
+  "lang": "th",
+  "primary_label": "safeguarding_disability",
+  "colour": "black",
+  "labels": [
+    "niems_black_not_a_patient",
+    "safeguarding_disability"
+  ],
+  "hard_negatives": [
+    "niems_red_critical"
+  ],
+  "title": "safeguarding_disability th 2",
+  "tags": [
+    "synthetic",
+    "system_1",
+    "th",
+    "safeguarding_disability",
+    "multi_label",
+    "hard_negative"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "ดิฉัน นที ท้องถิ่น มีคนพิการที่เดินได้ ต้องการน้ำดื่ม"
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "วันนี้เดินได้ ขอรับน้ำดื่ม"
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "โทรจากอำเภออะไรคะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอแม่ทะ จังหวัดลำปาง ใกล้ซอยตัวอย่าง 6 ค่ะ"
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "มีกี่คนคะ"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสองคนค่ะ"
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-safeguarding-disability-02-th",
+    "caller_id_hash": "synthetic:syn-safeguarding-disability-02",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "ดิฉัน นที ท้องถิ่น มีคนพิการที่เดินได้ ต้องการน้ำดื่ม"
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "วันนี้เดินได้ ขอรับน้ำดื่ม"
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "โทรจากอำเภออะไรคะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอแม่ทะ จังหวัดลำปาง ใกล้ซอยตัวอย่าง 6 ค่ะ"
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "มีกี่คนคะ"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสองคนค่ะ"
+      }
+    ],
+    "fields": {
+      "location": "Mae Tha District, Lampang",
+      "location_confidence": 0.92,
+      "people_count": 2,
+      "vulnerable": [
+        "disability"
+      ],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "water"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T10:49:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_1",
+    "priority": "P3",
+    "route": "welfare_distribution",
+    "needs": [
+      "water"
+    ],
+    "requires_human": false,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_black_not_a_patient",
+      "safeguarding_disability"
+    ],
+    "action": "create_provisional_dispatch"
+  },
+  "notes": "Synthetic safeguarding_disability. Colour black. Route welfare_distribution on system_1."
+}

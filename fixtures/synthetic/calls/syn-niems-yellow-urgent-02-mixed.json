@@ -1,0 +1,135 @@
+{
+  "id": "syn-niems-yellow-urgent-02-mixed",
+  "group_id": "syn-niems-yellow-urgent-02",
+  "lang": "mixed",
+  "primary_label": "niems_yellow_urgent",
+  "colour": "yellow",
+  "labels": [
+    "niems_yellow_urgent",
+    "safeguarding_serious_health"
+  ],
+  "hard_negatives": [
+    "niems_red_critical",
+    "niems_not_conscious_or_breathing"
+  ],
+  "title": "niems_yellow_urgent mixed 2",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "mixed",
+    "niems_yellow_urgent",
+    "multi_label",
+    "hard_negative"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Natee Thongtin. พ่อหอบ and wheezing. He is conscious and talking."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "Urgent. ไม่หมดสติ"
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district คะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอแม่ทะ, Mae Tha District, Lampang, near Placeholder Soi 5."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people, มีกี่คน?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสี่คน, four of us."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-niems-yellow-urgent-02-mixed",
+    "caller_id_hash": "synthetic:syn-niems-yellow-urgent-02",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Natee Thongtin. พ่อหอบ and wheezing. He is conscious and talking."
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "Urgent. ไม่หมดสติ"
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district คะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอแม่ทะ, Mae Tha District, Lampang, near Placeholder Soi 5."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people, มีกี่คน?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสี่คน, four of us."
+      }
+    ],
+    "fields": {
+      "location": "Mae Tha District, Lampang",
+      "location_confidence": 0.92,
+      "people_count": 4,
+      "vulnerable": [],
+      "medical": true,
+      "danger": [],
+      "needs": [
+        "medical"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T08:20:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P2",
+    "route": "medical_response",
+    "needs": [
+      "medical"
+    ],
+    "requires_human": true,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_yellow_urgent",
+      "safeguarding_serious_health"
+    ],
+    "action": "create_provisional_dispatch"
+  },
+  "notes": "Synthetic niems_yellow_urgent. Colour yellow. Route medical_response on system_2."
+}

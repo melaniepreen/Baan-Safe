@@ -78,6 +78,70 @@ def load_resources() -> ResourcesSnapshot:
     return ResourcesSnapshot.model_validate(_read_json(MOCKS / "resources.json"))
 
 
+def load_dispatch_resources() -> ResourcesSnapshot:
+    """Fictional units plus public shelters and hospitals from the place snapshot.
+
+    Real units are listed first, so a same-district public facility wins.
+    ``load_resources()`` stays the fictional file the router tests pin.
+    """
+    base = load_resources()
+    try:
+        from ingest.snapshots import read_snapshot
+
+        places = (read_snapshot("places") or {}).get("places") or []
+    except (OSError, json.JSONDecodeError):
+        return base
+    shelters = []
+    ambulances = []
+    boats = []
+    for place in places:
+        unit = _place_unit(place)
+        if unit is None:
+            continue
+        if unit.kind == "shelter":
+            shelters.append(unit)
+        elif unit.kind == "ambulance":
+            ambulances.append(unit)
+        elif unit.kind == "boat":
+            boats.append(unit)
+    return ResourcesSnapshot(
+        boats=[*boats, *base.boats],
+        ambulances=[*ambulances, *base.ambulances],
+        shelters=[*shelters, *base.shelters],
+        welfare_points=list(base.welfare_points),
+    )
+
+
+def _place_unit(place: dict) -> ResourceUnit | None:
+    kind = place.get("kind")
+    mapped = {
+        "hospital": "ambulance",
+        "school": "shelter",
+        "temple": "shelter",
+        "place_of_worship": "shelter",
+        "boat_rental": "boat",
+        "ferry_terminal": "boat",
+    }.get(kind)
+    if mapped is None:
+        return None
+    name = str(place.get("name") or "").strip()
+    district = str(place.get("district") or "").strip()
+    osm_type = str(place.get("osm_type") or "osm")
+    osm_id = place.get("osm_id")
+    if not name or not district or osm_id is None:
+        return None
+    status = "open" if mapped == "shelter" else "available"
+    return ResourceUnit(
+        id=f"{mapped}-{osm_type}-{osm_id}",
+        kind=mapped,
+        name=name,
+        district=district,
+        capacity=None,
+        available=1,
+        status=status,
+    )
+
+
 def correction_pairs() -> list[tuple[str, str]]:
     index_path = ROOT / "fixtures" / "index.json"
     if not index_path.exists():

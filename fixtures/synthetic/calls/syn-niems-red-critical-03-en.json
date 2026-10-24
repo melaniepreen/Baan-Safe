@@ -1,0 +1,138 @@
+{
+  "id": "syn-niems-red-critical-03-en",
+  "group_id": "syn-niems-red-critical-03",
+  "lang": "en",
+  "primary_label": "niems_red_critical",
+  "colour": "red",
+  "labels": [
+    "niems_red_critical",
+    "niems_not_conscious_or_breathing",
+    "safeguarding_serious_health"
+  ],
+  "hard_negatives": [
+    "flood_trapped"
+  ],
+  "title": "niems_red_critical en 3",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "en",
+    "niems_red_critical",
+    "multi_label",
+    "hard_negative"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Chala Bansuan. He uses oxygen and is unconscious. The floor is dry."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, or is water inside the rooms?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "Please hurry. This is a life-threatening emergency."
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district are you calling from?"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "We are in Mae Tha District, Lampang, near Placeholder Soi 5."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people are with you?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "Four of us."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-niems-red-critical-03-en",
+    "caller_id_hash": "synthetic:syn-niems-red-critical-03",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Chala Bansuan. He uses oxygen and is unconscious. The floor is dry."
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, or is water inside the rooms?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "Please hurry. This is a life-threatening emergency."
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district are you calling from?"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "We are in Mae Tha District, Lampang, near Placeholder Soi 5."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people are with you?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "Four of us."
+      }
+    ],
+    "fields": {
+      "location": "Mae Tha District, Lampang",
+      "location_confidence": 0.92,
+      "people_count": 4,
+      "vulnerable": [
+        "oxygen_dependent"
+      ],
+      "medical": true,
+      "danger": [],
+      "needs": [
+        "medical"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T08:06:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P1",
+    "route": "medical_response",
+    "needs": [
+      "medical"
+    ],
+    "requires_human": true,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_red_critical",
+      "niems_not_conscious_or_breathing",
+      "safeguarding_serious_health"
+    ],
+    "action": "create_provisional_dispatch"
+  },
+  "notes": "Synthetic niems_red_critical. Colour red. Route medical_response on system_2."
+}

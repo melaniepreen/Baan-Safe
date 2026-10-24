@@ -4,27 +4,52 @@ Flood and disaster call-triage scaffold. Mubit governs memory, policy, and trace
 
 Sapling is [MubitLabs/banyan-sapling](https://huggingface.co/MubitLabs/banyan-sapling), the Apache-2.0 23B verifier (research preview). It takes a policy, evidence, and a claim, and returns `supported`, `violation`, `missing`, `contradicted`, or `unsure`, with probabilities. `supported` lets the proposed action stand. `violation` blocks it. `unsure`, `missing`, and `contradicted` hand the case to a human. The input limit is 16,384 tokens. It does not run on System 1. `system2.use_banyan_sapling` is true for those two checks. Hosting, the GPU, and Thai handling stay `TODO_HUMAN`. Tests use the stub client and do not load a GPU.
 
-Solid edges are the stub request in `gateway/route.py`. Dashed nodes are in the tree and are not called on `POST /triage`.
+Solid edges run on `POST /cases/{id}/turns` with `use_stubs=True`. Dashed nodes are not called on that request. Graduation may tag `complex_situation` and add a `graduated-*` recommendation before the field precheck. That sets no priority and does not move a pattern into System 1. `router/ledger.py` reserves stock in this process only. The places snapshot joins the dispatch list on every turn. The gazetteer snapshot is read when extract runs. Open-Meteo and RID are read only when SQLite enrichment is on, and those flags do not change priority. Country packs are not loaded. `system1.decide` replaces the stub file only when `S1_IMPL=real` or `use_stubs=False`.
 
 ```mermaid
 flowchart TD
   classDef unwired stroke-dasharray: 5 5
-  sim["ui/sim or POST /triage"] --> gw["Mubit gateway stub"]
+  phone["ui/sim phone"] --> turns["POST /cases/{id}/turns"]
+  turns --> gw["gateway.handle, stubs on"]
+  gw --> extract["extract if fields empty"]
   gw --> enrich["enrich: sqlite or off"]
-  gw --> mem["memory adapter mock"]
+  gw --> mem["memory mock files"]
   mem -.-> mm["memory.mubit raises"]:::unwired
-  gw --> pick{"fixture expected.system"}
-  pick -.-> chooser["route_chooser TODO"]:::unwired
-  pick -->|system_1| s1["S1 stub outcome"]
-  pick -->|system_2| s2["S2 stub outcome"]
-  s1 --> copy["copy into RouterDecision"]
-  s2 --> copy
-  copy -.-> merge["router.merge raises"]:::unwired
-  s1 -.-> d1["system1.decide raises"]:::unwired
-  s2 -.-> d2["system2.decide"]:::unwired
-  d2 -.-> orch["orchestrate raises"]:::unwired
-  d2 -.-> sap["Sapling gate, client stub"]:::unwired
-  orch -.-> llm["llm/client.py + openai_client.py"]:::unwired
+  mem --> grad["graduation to System 2"]
+  grad --> pick{"field precheck"}
+  pick -->|no trigger| s1["S1 stub file"]
+  pick -->|any trigger| s2["S2 stub file"]
+  s1 --> merge["router.merge + process ledger"]
+  s2 --> merge
+  snap["committed snapshots"] --> places["places → dispatch units"]
+  places --> merge
+  snap -.-> extract
+  snap -.-> enrich
+  merge --> out["RouterDecision + dispatches"]
+  s1 -.-> rules["system1.decide if S1_IMPL=real"]
+  rules -.-> merge
+  s2 -.-> s2d["system2.decide raises"]:::unwired
+  s2d -.-> sap["Sapling gate, client stub"]:::unwired
+  s2d -.-> llm["Mubit LLM clients, model TODO"]:::unwired
+  packs["country packs, not loaded"]:::unwired
+```
+
+The training path is separate. `fixtures/synthetic` feeds a SetFit row export and a Laya JSONL export. `laya-train` skips unless `LAYA_TRAIN=1` and a GPU or Modal task is present. Held-out eval does not load those weights. `EVAL_LEARNING_SET=synthetic` scores the same call set and still does not promote.
+
+```mermaid
+flowchart LR
+  classDef unwired stroke-dasharray: 5 5
+  corrections[Corrections] --> log[Event log]
+  coach[Coach] --> log
+  sim[Simulator] --> log
+  log --> export[export-training]
+  export -.-> ft["Modal fine-tune, model TODO"]:::unwired
+  synth["fixtures/synthetic"] --> setfit["SetFit rows"]
+  synth --> laya["Laya JSONL"]
+  laya -.-> ltrain["laya-train, skips"]:::unwired
+  eval["Held-out eval, no promotion"]
+  ft -.->|"weights not loaded"| eval
+  synth -.->|"EVAL_LEARNING_SET=synthetic"| eval
 ```
 
 This tree is Phase 0 plus a Phase 1 API. **System 2 decision logic is not implemented. System 1 is rules-only: keyword extraction plus a deterministic needs table.** Callers, households, and transcripts are synthetic. Real district names and public flood polygons are used only to anchor scenarios.

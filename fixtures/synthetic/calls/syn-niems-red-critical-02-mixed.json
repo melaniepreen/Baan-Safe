@@ -1,0 +1,139 @@
+{
+  "id": "syn-niems-red-critical-02-mixed",
+  "group_id": "syn-niems-red-critical-02",
+  "lang": "mixed",
+  "primary_label": "niems_red_critical",
+  "colour": "red",
+  "labels": [
+    "niems_red_critical",
+    "flood_trapped",
+    "flood_water_depth",
+    "safeguarding_serious_health"
+  ],
+  "hard_negatives": [],
+  "title": "niems_red_critical mixed 2",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "mixed",
+    "niems_red_critical",
+    "multi_label"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Kwan Sainam. เลือดออก and the water is inside the house. We are trapped. เราติดอยู่"
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "ช่วยด้วย. This is life-threatening."
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district คะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอเมืองลำปาง, Mueang Lampang District, Lampang, near Placeholder Soi 4."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people, มีกี่คน?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสามคน, three of us."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-niems-red-critical-02-mixed",
+    "caller_id_hash": "synthetic:syn-niems-red-critical-02",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Kwan Sainam. เลือดออก and the water is inside the house. We are trapped. เราติดอยู่"
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "ช่วยด้วย. This is life-threatening."
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district คะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอเมืองลำปาง, Mueang Lampang District, Lampang, near Placeholder Soi 4."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people, มีกี่คน?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสามคน, three of us."
+      }
+    ],
+    "fields": {
+      "location": "Mueang Lampang District, Lampang",
+      "location_confidence": 0.92,
+      "people_count": 3,
+      "vulnerable": [],
+      "medical": true,
+      "danger": [
+        "rising_water"
+      ],
+      "needs": [
+        "rescue",
+        "medical"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T08:05:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P1",
+    "route": "rescue_coordination",
+    "needs": [
+      "rescue",
+      "medical"
+    ],
+    "requires_human": true,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_red_critical",
+      "flood_trapped",
+      "flood_water_depth",
+      "safeguarding_serious_health"
+    ],
+    "action": "create_provisional_dispatch"
+  },
+  "notes": "Synthetic niems_red_critical. Colour red. Rescue is system_2 rescue_coordination. Route rescue_coordination on system_2."
+}

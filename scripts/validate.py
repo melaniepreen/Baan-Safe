@@ -62,6 +62,7 @@ DECIDED = {
     "llm.provider_route": "mubit",
     "gateway.route_chooser": "field precheck",
     "system1.extraction_method": "rules-only",
+    "correction_loop.graduation_threshold": 2,
 }
 
 

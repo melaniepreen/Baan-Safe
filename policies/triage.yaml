@@ -1,7 +1,8 @@
 # Emergency triage. The five colour names are from a 2013 NIEM slide that
-# cites the กพฉ announcement. The phone-triage prose is from a Khon Kaen
-# Hospital case study of criteria-based dispatch. Flood water depth and a
-# trapped-person colour are not in either document.
+# cites the กพฉ announcement. The announcement text is the Royal Gazette
+# PDF cited below. The phone-triage prose is from a Khon Kaen Hospital
+# case study of criteria-based dispatch. International flood-safety rules
+# are in flood.yaml. This file does not assign a 1669 colour to floodwater.
 
 license_niem: &niem_license >
   Slides hosted by NSTDA, "National Institute for Emergency Medicine (NIEM)
@@ -22,6 +23,19 @@ license_kkh: &kkh_license >
 
 niem: &niem_url https://www.nstda.or.th/nac/2013/download/presentation/Set4/NT-106-02/04Pairoj.pdf
 kkh: &kkh_url https://www.kkh.go.th/wp-content/uploads/2023/09/EMS-KKH-2023_eBook-2.pdf
+gazette: &gazette_url https://www.ratchakitcha.soc.go.th/DATA/PDF/2554/E/131/32.PDF
+
+license_gazette: &gazette_license >
+  Royal Gazette, volume 128, special part 131 ง, pages 32-35, 4 November
+  B.E. 2554. ประกาศคณะกรรมการการแพทย์ฉุกเฉิน เรื่อง หลักเกณฑ์การประเมินเพื่อคัดแยกระดับความฉุกเฉินและมาตรฐานการปฏิบัติการฉุกเฉิน
+  พ.ศ. 2554. Retrieved 24 October 2026. A plain download returned HTTP 403.
+  The PDF text was read on that date from the same URL. Official announcement.
+  Thai Copyright Act B.E. 2537 section 7 excludes regulations, announcements
+  and orders of state agencies from copyright. Confirm that reading before
+  reuse beyond this corpus. The date is kept as the gazette prints it. It is
+  not converted into a Gregorian ISO date.
+  https://www.ratchakitcha.soc.go.th/DATA/PDF/2554/E/131/32.PDF
+
 retrieved: &triage_date "2026-10-24"
 
 rules:
@@ -113,21 +127,36 @@ rules:
     locator: "NIEM slide, page 18 of the NSTDA PDF."
 
   - id: NIEMS-ANNOUNCEMENT-2554
-    status: unverified
+    status: verified
     topic: triage
     checks: [triage]
     text_en: >
-      TODO_HUMAN. The slides cite ประกาศ กพฉ. หลักเกณฑ์การประเมินเพื่อคัดแยกระดับความฉุกเฉินและมาตรฐานการปฏิบัติการฉุกเฉิน พ.ศ. 2554.
-      The announcement PDF was not retrieved. Do not treat the slide, or a
-      hospital case study, as the announcement's symptom lists or time targets.
-    text_th: ""
-    source_url: *niem_url
-    source_excerpt: >
-      The NSTDA PDF names the 2554 กพฉ announcement on pages 7 and 19. The
-      announcement text itself is not in this corpus.
+      The Royal Gazette PDF is the ประกาศคณะกรรมการการแพทย์ฉุกเฉิน of
+      B.E. 2554 on emergency-level assessment and emergency-operation
+      standards. Clause 4 names five levels. The critical level is a person
+      with a sudden injury or illness that threatens life, who has a high
+      chance of dying if they do not receive immediate medical care for
+      breathing, circulation, or the nervous system. Its symbol is red.
+      The urgent level's symbol is yellow. The non-severe level's symbol
+      is green. A general patient uses white. Another public-health user
+      uses black. Clause 5 says the critical level receives emergency care
+      immediately, and the urgent level is handled after the critical level,
+      with advanced care โดยเร็ว. Clauses 1 to 8 do not print a minute
+      target, a water depth, or a boat rule. The running header says
+      คัดแยกระดับความฉุกเฉิน. Clause 1, as extracted, says คัดแยกผู้ป่วยฉุกเฉิน.
+      That difference is left as extracted. Damaged words in the gazette
+      extract are not repaired and are not quoted.
+    text_th: "ผู้ป่วยฉุกเฉินวิกฤต ได้แก่ บุคคลซึ่งได้รับบาดเจ็บหรือมีอาการป่วยกะทันหันซึ่งมีภาวะคุกคามต่อชีวิต ซึ่งหากไม่ได้รับปฏิบัติการแพทย์ทันทีเพื่อแก้ไขระบบการหายใจ ระบบไหลเวียนเลือด หรือระบบประสาทแล้ว ผู้ป่วยจะมีโอกาสเสียชีวิตได้สูง ให้ใช้สัญลักษณ์ “สีแดง” สำหรับผู้ป่วยฉุกเฉินวิกฤต จัดให้ผู้ป่วยฉุกเฉินวิกฤตตามข้อ ๔ (๑) ได้รับการปฏิบัติการฉุกเฉินทันที ผู้ป่วยฉุกเฉินเร่งด่วน ได้แก่ บุคคลที่ได้รับบาดเจ็บหรือมีอาการป่วยซึ่งมีภาวะเฉียบพลันมากหรือเจ็บปวดรุนแรงอันจำเป็นต้องได้รับปฏิบัติการแพทย์อย่างรีบด่วน ให้ใช้สัญลักษณ์ “สีเหลือง” สำหรับผู้ป่วยฉุกเฉินเร่งด่วน จัดให้ผู้ป่วยฉุกเฉินเร่งด่วนตามข้อ ๔ (๒) ได้รับการปฏิบัติการฉุกเฉินถัดจากผู้ป่วยฉุกเฉินวิกฤตตามข้อ ๔ (๑) และจัดให้ได้รับปฏิบัติการแพทย์ขั้นสูงโดยเร็ว ผู้ป่วยฉุกเฉินไม่รุนแรง ได้แก่ บุคคลซึ่งได้รับบาดเจ็บหรือมีอาการป่วยซึ่งมีภาวะเฉียบพลันไม่รุนแรง ให้ใช้สัญลักษณ์ “สีขาว” สำหรับผู้ป่วยทั่วไป ให้ใช้สัญลักษณ์ “สีดำ” สำหรับผู้รับบริการสาธารณสุขอื่น"
+    source_url: *gazette_url
+    source_excerpt: "ผู้ป่วยฉุกเฉินวิกฤต ได้แก่ บุคคลซึ่งได้รับบาดเจ็บหรือมีอาการป่วยกะทันหันซึ่งมีภาวะคุกคามต่อชีวิต ซึ่งหากไม่ได้รับปฏิบัติการแพทย์ทันทีเพื่อแก้ไขระบบการหายใจ ระบบไหลเวียนเลือด หรือระบบประสาทแล้ว ผู้ป่วยจะมีโอกาสเสียชีวิตได้สูง ให้ใช้สัญลักษณ์ “สีแดง” สำหรับผู้ป่วยฉุกเฉินวิกฤต จัดให้ผู้ป่วยฉุกเฉินวิกฤตตามข้อ ๔ (๑) ได้รับการปฏิบัติการฉุกเฉินทันที"
     retrieved: *triage_date
-    license_note: *niem_license
-    locator: "Gap. The announcement was not retrieved."
+    license_note: *gazette_license
+    locator: "Royal Gazette, volume 128, special part 131 ง, pages 32-35, clauses 4 and 5. 4 November B.E. 2554."
+    caveat: >
+      A plain download of the gazette URL returned HTTP 403. The text was
+      read from that URL on 24 October 2026. Words the extract damaged,
+      including the clause after "เสียชีวิตได้สูง" and the green symbol
+      line, are not quoted.
 
   - id: CBD-FIVE-CODES
     status: verified
@@ -232,54 +261,45 @@ rules:
     topic: triage
     checks: [triage]
     text_en: >
-      TODO_HUMAN. The case study's response-time table did not extract as a
-      stable sentence. No minute target is stored. Do not use a remembered
-      dispatch interval as policy.
-    text_th: ""
-    source_url: *kkh_url
-    source_excerpt: >
-      Table 3, "Triage categories for EMS dispatch", was present. Its time
-      cells were not stable enough to quote. No minute figure is stored.
+      TODO_HUMAN. Team assumption: do not store a dispatch minute target.
+      Rationale: the retrieved B.E. 2554 announcement, clause 5, says the
+      critical level receives emergency care immediately and the urgent
+      level is handled after it, with advanced care โดยเร็ว. It does not
+      print a minute figure. The Khon Kaen Hospital response-time table was
+      not quoted. Its cells were not a stable sentence in the first extract,
+      and the ebook URL returned HTTP 403 when this gap was checked again
+      on 24 October 2026.
+    text_th: "จัดให้ผู้ป่วยฉุกเฉินวิกฤตตามข้อ ๔ (๑) ได้รับการปฏิบัติการฉุกเฉินทันที จัดให้ผู้ป่วยฉุกเฉินเร่งด่วนตามข้อ ๔ (๒) ได้รับการปฏิบัติการฉุกเฉินถัดจากผู้ป่วยฉุกเฉินวิกฤตตามข้อ ๔ (๑) และจัดให้ได้รับปฏิบัติการแพทย์ขั้นสูงโดยเร็ว"
+    source_url: *gazette_url
+    source_excerpt: "จัดให้ผู้ป่วยฉุกเฉินวิกฤตตามข้อ ๔ (๑) ได้รับการปฏิบัติการฉุกเฉินทันที จัดให้ผู้ป่วยฉุกเฉินเร่งด่วนตามข้อ ๔ (๒) ได้รับการปฏิบัติการฉุกเฉินถัดจากผู้ป่วยฉุกเฉินวิกฤตตามข้อ ๔ (๑) และจัดให้ได้รับปฏิบัติการแพทย์ขั้นสูงโดยเร็ว"
     retrieved: *triage_date
-    license_note: *kkh_license
-    locator: "Khon Kaen Hospital EMS ebook, Table 3. Gap."
-
-  - id: FLOOD-WATER-DEPTH
-    status: unverified
-    topic: triage
-    checks: [triage]
-    text_en: >
-      TODO_HUMAN. No flood water-depth threshold was retrieved from NIEMS,
-      the 1669 material above, or the Sphere handbook. Do not use a depth in
-      centimetres, a knee, a waist, or a chest as a dispatch rule until a
-      human attaches a source.
-    text_th: ""
-    source_url: TODO_HUMAN
-    source_excerpt: >
-      No source excerpt. A depth threshold was not found in the documents
-      retrieved for this corpus.
-    retrieved: *triage_date
-    license_note: >
-      No source was retrieved, so there is no licence in a threshold. Do not
-      invent one. ReliefWeb and DDPM were not used.
-    locator: "Gap."
+    license_note: *gazette_license
+    locator: "Royal Gazette, volume 128, special part 131 ง, page 34, clause 5. The minute target is the gap."
+    caveat: >
+      Team assumption. The announcement orders the levels. It does not
+      number the minutes. Do not fill that gap from memory.
 
   - id: FLOOD-TRAPPED-DISPATCH
-    status: unverified
+    status: verified
     topic: triage
     checks: [triage, safeguarding]
     text_en: >
-      TODO_HUMAN. No retrieved rule maps a person trapped by floodwater to a
-      1669 colour, a time target, or a priority above a welfare request.
-      Do not invent that mapping. Consciousness, breathing, and the red
-      "immediate" row remain the retrieved medical signals.
-    text_th: ""
-    source_url: TODO_HUMAN
-    source_excerpt: >
-      No source excerpt. A trapped-person dispatch rule was not found in the
-      documents retrieved for this corpus.
+      The B.E. 2554 announcement does not map a person trapped by floodwater
+      to a 1669 colour, a minute target, or a priority above a welfare
+      request. Its red level is the clinical definition quoted here: a
+      sudden injury or illness that threatens life unless breathing,
+      circulation, or the nervous system receives immediate medical care.
+      Clause 5 says that level receives emergency care immediately. Clauses
+      1 to 8 do not mention floodwater, a trapped person, or a boat.
+      Consciousness and breathing remain the retrieved medical signals.
+      International pages about being trapped are in flood.yaml. They are
+      not a 1669 colour.
+    text_th: "ผู้ป่วยฉุกเฉินวิกฤต ได้แก่ บุคคลซึ่งได้รับบาดเจ็บหรือมีอาการป่วยกะทันหันซึ่งมีภาวะคุกคามต่อชีวิต ซึ่งหากไม่ได้รับปฏิบัติการแพทย์ทันทีเพื่อแก้ไขระบบการหายใจ ระบบไหลเวียนเลือด หรือระบบประสาทแล้ว ผู้ป่วยจะมีโอกาสเสียชีวิตได้สูง ให้ใช้สัญลักษณ์ “สีแดง” สำหรับผู้ป่วยฉุกเฉินวิกฤต จัดให้ผู้ป่วยฉุกเฉินวิกฤตตามข้อ ๔ (๑) ได้รับการปฏิบัติการฉุกเฉินทันที"
+    source_url: *gazette_url
+    source_excerpt: "ผู้ป่วยฉุกเฉินวิกฤต ได้แก่ บุคคลซึ่งได้รับบาดเจ็บหรือมีอาการป่วยกะทันหันซึ่งมีภาวะคุกคามต่อชีวิต ซึ่งหากไม่ได้รับปฏิบัติการแพทย์ทันทีเพื่อแก้ไขระบบการหายใจ ระบบไหลเวียนเลือด หรือระบบประสาทแล้ว ผู้ป่วยจะมีโอกาสเสียชีวิตได้สูง ให้ใช้สัญลักษณ์ “สีแดง” สำหรับผู้ป่วยฉุกเฉินวิกฤต"
     retrieved: *triage_date
-    license_note: >
-      No source was retrieved, so there is no licence in a mapping. Do not
-      invent one. ReliefWeb and DDPM were not used.
-    locator: "Gap."
+    license_note: *gazette_license
+    locator: "Royal Gazette, volume 128, special part 131 ง, pages 34-35, clauses 4 and 5. Silence on floodwater is the point of this rule."
+    caveat: >
+      This rule records what the announcement says and what it does not say.
+      It does not invent a colour for a person trapped by floodwater.

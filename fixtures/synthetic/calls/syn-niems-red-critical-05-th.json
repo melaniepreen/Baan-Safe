@@ -1,0 +1,150 @@
+{
+  "id": "syn-niems-red-critical-05-th",
+  "group_id": "syn-niems-red-critical-05",
+  "lang": "th",
+  "primary_label": "niems_red_critical",
+  "colour": "red",
+  "labels": [
+    "niems_red_critical",
+    "niems_not_conscious_or_breathing",
+    "safeguarding_older_person",
+    "safeguarding_child",
+    "flood_trapped",
+    "flood_water_depth"
+  ],
+  "hard_negatives": [],
+  "title": "niems_red_critical th 5",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "th",
+    "niems_red_critical",
+    "calm_critical",
+    "multi_label",
+    "demo"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "ดิฉันพูดช้าๆ ค่ะ ยายหายใจไม่ออก"
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "ยายไม่รู้สึกตัว หลานอยู่บนหลังคา ออกมาไม่ได้ น้ำท่วมเข้ามาในบ้าน"
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "โทรจากอำเภออะไรคะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอสูงเม่น จังหวัดแพร่ ใกล้ซอยตัวอย่าง 7 ค่ะ"
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "มีกี่คนคะ"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสี่คนค่ะ ยาย ดิฉัน และหลานสองคน"
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-niems-red-critical-05-th",
+    "caller_id_hash": "synthetic:syn-niems-red-critical-05",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "ดิฉันพูดช้าๆ ค่ะ ยายหายใจไม่ออก"
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "ยายไม่รู้สึกตัว หลานอยู่บนหลังคา ออกมาไม่ได้ น้ำท่วมเข้ามาในบ้าน"
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "โทรจากอำเภออะไรคะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอสูงเม่น จังหวัดแพร่ ใกล้ซอยตัวอย่าง 7 ค่ะ"
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "มีกี่คนคะ"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสี่คนค่ะ ยาย ดิฉัน และหลานสองคน"
+      }
+    ],
+    "fields": {
+      "location": "Sung Men District, Phrae",
+      "location_confidence": 0.92,
+      "people_count": 4,
+      "vulnerable": [
+        "elderly",
+        "child"
+      ],
+      "medical": true,
+      "danger": [
+        "rising_water"
+      ],
+      "needs": [
+        "rescue",
+        "medical"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [
+      "safeguarding"
+    ],
+    "resources": {},
+    "received_at": "2026-10-24T08:13:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P1",
+    "route": "rescue_coordination",
+    "needs": [
+      "rescue",
+      "medical"
+    ],
+    "requires_human": true,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_red_critical",
+      "niems_not_conscious_or_breathing",
+      "safeguarding_older_person",
+      "safeguarding_child",
+      "flood_trapped",
+      "flood_water_depth"
+    ],
+    "action": "escalate_to_supervisor"
+  },
+  "notes": "Synthetic niems_red_critical. Colour red. Calm delivery with a critical fact. Rescue is system_2 rescue_coordination. Route rescue_coordination on system_2."
+}

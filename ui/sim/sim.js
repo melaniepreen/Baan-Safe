@@ -1879,7 +1879,7 @@ function applyTemplate(text, bag) {
 
 function thresholdValue() {
   const node = document.getElementById("threshold");
-  const fallback = (eventsFile && eventsFile.confidence_threshold) || 0.75;
+  const fallback = (eventsFile && eventsFile.confidence_threshold) || 0.8;
   const value = node ? Number(node.value) : fallback;
   if (!Number.isFinite(value)) return fallback;
   return Math.min(1, Math.max(0, value));
@@ -2945,8 +2945,21 @@ function bindChrome() {
   });
 }
 
+function applyPublicPlaces(townBody, placeBody) {
+  const labels = (placeBody && placeBody.labels) || {};
+  const thai = /[\u0e00-\u0e7f]/;
+  for (const building of townBody.buildings || []) {
+    const label = labels[building.id];
+    if (!label || !label.name_en) continue;
+    if (building.fixture_id || building.resource_id || building.id === "bldg-temple") continue;
+    if (thai.test(label.name_th || "") || thai.test(label.name_en || "")) continue;
+    building.name_th = label.name_en;
+    building.name_en = label.name_en;
+  }
+}
+
 async function main() {
-  const [townBody, streetBody, floodBody, responseBody, eventBody, promptBody, ruleBody, replyBody] = await Promise.all([
+  const [townBody, streetBody, floodBody, responseBody, eventBody, promptBody, ruleBody, replyBody, placeBody] = await Promise.all([
     getJson("data/town.json"),
     getJson("data/streets.json"),
     getJson("data/flood.json"),
@@ -2955,8 +2968,10 @@ async function main() {
     getJson("data/prompts.json"),
     getJson("data/rulebook.json"),
     getJson("data/replies.json"),
+    getJson("data/places.json"),
   ]);
   town = townBody;
+  applyPublicPlaces(town, placeBody);
   streets = streetBody.streets;
   flood = floodBody;
   responses = responseBody;

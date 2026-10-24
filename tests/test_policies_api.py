@@ -104,6 +104,25 @@ def test_one_rule_keeps_the_printed_meal_ceiling(client):
     assert missing.status_code == 404
 
 
+def test_flood_rules_are_served(client):
+    listed = client.get("/policies", params={"domain": "triage", "jurisdiction": "intl"})
+    assert listed.status_code == 200
+    ids = {row["rule_id"] for row in listed.json()["rules"]}
+    assert "FLOOD-WATER-DEPTH" in ids
+    assert "EA-FLOOD-WARNINGS" in ids
+    assert "UK-BOAT-TEAMS" in ids
+    depth = client.get("/policies/FLOOD-WATER-DEPTH").json()["rule"]
+    assert depth["verified"] is True
+    assert depth["jurisdiction"] == "intl"
+    assert "6 inches" in depth["source_excerpt"]
+    health = client.get("/policies/CDC-FLOOD-HEALTH").json()["rule"]
+    assert health["domain"] == "safeguarding"
+    assert "Leptospirosis (not common)" in health["source_excerpt"]
+    gap = client.get("/policies/FLOOD-BOAT-ORDER").json()["rule"]
+    assert gap["verified"] is False
+    assert "Team assumption" in gap["text"]
+
+
 def test_labels_endpoint_matches_system1_reader(client):
     response = client.get("/policies/labels", params={"lang": "th"})
     assert response.status_code == 200
