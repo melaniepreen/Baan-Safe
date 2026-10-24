@@ -4,20 +4,27 @@ Flood and disaster call-triage scaffold. Mubit governs memory, policy, and trace
 
 Sapling is [MubitLabs/banyan-sapling](https://huggingface.co/MubitLabs/banyan-sapling), the Apache-2.0 23B verifier (research preview). It takes a policy, evidence, and a claim, and returns `supported`, `violation`, `missing`, `contradicted`, or `unsure`, with probabilities. `supported` lets the proposed action stand. `violation` blocks it. `unsure`, `missing`, and `contradicted` hand the case to a human. The input limit is 16,384 tokens. It does not run on System 1. `system2.use_banyan_sapling` is true for those two checks. Hosting, the GPU, and Thai handling stay `TODO_HUMAN`. Tests use the stub client and do not load a GPU.
 
+Solid edges are the stub request in `gateway/route.py`. Dashed nodes are in the tree and are not called on `POST /triage`.
+
 ```mermaid
 flowchart TD
-  gateway[Mubit gateway]
-  gateway -->|routine low risk| system1[System 1 fast path]
-  gateway -->|ambiguous or high risk| reason[System 2 reasoning]
-  reason --> stake{Aid eligibility or denial?}
-  stake -->|no| router[Decision router]
-  stake -->|yes| sapling[Banyan Sapling]
-  sapling -->|supported| router
-  sapling -->|violation| block[Block the action]
-  sapling -->|unsure, missing, or contradicted| human[Human handoff]
-  block --> router
-  human --> router
-  system1 --> router
+  classDef unwired stroke-dasharray: 5 5
+  sim["ui/sim or POST /triage"] --> gw["Mubit gateway stub"]
+  gw --> enrich["enrich: sqlite or off"]
+  gw --> mem["memory adapter mock"]
+  mem -.-> mm["memory.mubit raises"]:::unwired
+  gw --> pick{"fixture expected.system"}
+  pick -.-> chooser["route_chooser TODO"]:::unwired
+  pick -->|system_1| s1["S1 stub outcome"]
+  pick -->|system_2| s2["S2 stub outcome"]
+  s1 --> copy["copy into RouterDecision"]
+  s2 --> copy
+  copy -.-> merge["router.merge raises"]:::unwired
+  s1 -.-> d1["system1.decide raises"]:::unwired
+  s2 -.-> d2["system2.decide"]:::unwired
+  d2 -.-> orch["orchestrate raises"]:::unwired
+  d2 -.-> sap["Sapling gate, client stub"]:::unwired
+  orch -.-> llm["llm/client.py + openai_client.py"]:::unwired
 ```
 
 This tree is Phase 0 plus a Phase 1 API. **System 1 and System 2 decision logic are not implemented.** Callers, households, and transcripts are synthetic. Real district names and public flood polygons are used only to anchor scenarios.

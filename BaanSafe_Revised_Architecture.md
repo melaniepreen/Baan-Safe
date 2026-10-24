@@ -13,34 +13,43 @@ Key corrections:
 - The Decision Router merges the System 1 or System 2 outcome, applies final policy and safeguarding, requires human review when needed, and returns one of `ask_next_question`, `create_provisional_dispatch`, `escalate_to_supervisor`, `finalize_case`, or `request_more_evidence`.
 - Every System 1 outcome and every System 2 outcome is recorded separately. Humans keep authority over denials, safeguarding exceptions, and irreversible actions.
 
-Flow: Caller → live speech-to-text → Call Agent → Mubit Gateway (memory retrieval, policy pre-check, route) → System 1 (simple, clear, low-risk) or System 2 (ambiguous or high-risk, Nemotron, then Sapling when the claim is aid eligibility or a denial) → Decision Router → Call Agent (next question, update case, or provisional dispatch).
+Target flow: Caller → live speech-to-text → Call Agent → Mubit Gateway (memory retrieval, policy pre-check, route) → System 1 (simple, clear, low-risk) or System 2 (ambiguous or high-risk, Nemotron, then Sapling when the claim is aid eligibility or a denial) → Decision Router → Call Agent (next question, update case, or provisional dispatch).
+
+The diagram is `gateway/route.py` as it runs. Solid edges are that request. A dashed node is in the tree and is not called on it. `llm/client.py` and `llm/openai_client.py` accept only a Mubit host (`llm.provider_route` is `mubit`, including the compat OpenRouter prefix). The orchestrator does not reach them while `system2.orchestrator_model` is `TODO_HUMAN`. `GET /policies` serves the local corpus on its own. Aid routes return 501. Modal apps refuse to start while their model and GPU values are `TODO_HUMAN`.
 
 ```mermaid
 flowchart TD
-  caller[Caller] --> agent[Call agent]
-  agent --> gateway[Mubit gateway]
-  gateway -->|routine low risk| system1[System 1]
-  gateway -->|ambiguous or high risk| reason[System 2 reasoning]
-  reason --> stake{Aid eligibility or denial?}
-  stake -->|no| router[Decision router]
-  stake -->|yes| sapling[Banyan Sapling]
-  sapling -->|supported: action stands| router
-  sapling -->|violation: block| router
-  sapling -->|unsure, missing, contradicted: human| router
-  system1 --> router
-  router --> agent
+  classDef unwired stroke-dasharray: 5 5
+  sim["ui/sim or POST /triage"] --> gw["Mubit gateway stub"]
+  gw --> enrich["enrich: sqlite or off"]
+  gw --> mem["memory adapter mock"]
+  mem -.-> mm["memory.mubit raises"]:::unwired
+  gw --> pick{"fixture expected.system"}
+  pick -.-> chooser["route_chooser TODO"]:::unwired
+  pick -->|system_1| s1["S1 stub outcome"]
+  pick -->|system_2| s2["S2 stub outcome"]
+  s1 --> copy["copy into RouterDecision"]
+  s2 --> copy
+  copy -.-> merge["router.merge raises"]:::unwired
+  s1 -.-> d1["system1.decide raises"]:::unwired
+  s2 -.-> d2["system2.decide"]:::unwired
+  d2 -.-> orch["orchestrate raises"]:::unwired
+  d2 -.-> sap["Sapling gate, client stub"]:::unwired
+  orch -.-> llm["llm/client.py + openai_client.py"]:::unwired
 ```
 
-Training is a separate path from that call. Operator corrections, coach notes, and simulator outcomes append one `TrainingEvent` each. `make export-training` reads the log. The fine-tune job takes one dataset per task. Held-out eval splits on `group_id` and filters `source`.
+Training is a separate path from that call. Operator corrections, coach notes, and simulator outcomes append one `TrainingEvent` each. `make export-training` reads the log. The fine-tune job takes one dataset per task and does not start while its base model is `TODO_HUMAN`. Held-out eval splits on `group_id` and filters `source`. It scores stub arms and does not load fine-tune weights.
 
 ```mermaid
 flowchart LR
+  classDef unwired stroke-dasharray: 5 5
   corrections[Corrections] --> log[Event log]
   coach[Coach] --> log
   sim[Simulator] --> log
   log --> export[export-training]
-  export --> finetune[Per-task fine-tune]
-  finetune --> eval[Eval]
+  export -.-> ft["Fine-tune, model TODO"]:::unwired
+  eval["Held-out eval, no promotion"]
+  ft -.->|"weights not loaded"| eval
 ```
 
 `ui/correct.js` posts a human correction with `task` and `input_ref` already filled. `sim/coach.py` appends `source=coach` and `source=sim`. The log is `training/events` via `training/log.py`. `training/export.py` writes `s1`, `s2`, `sapling`, and `prefs`, each with a manifest. `infra/modal/finetune_job.py` trains `s1_triage` with SetFit and the other tasks with LoRA. `eval/learning` scores held-out groups: arm C keeps `source=human`, and `C_coach` also keeps `source=coach`. Nothing in this path promotes a weight into System 1.
