@@ -8,6 +8,7 @@ from eval.learning.arms import ARMS, feedback_rows, score_variant, write_feedbac
 from eval.learning.cases import GROUPS, group_by_id, variants
 from eval.learning.loop import SeedScore, close_loop, freeze_gate
 from eval.learning.metrics import score_arm
+from eval.latte.section import external_section
 from eval.learning.report import render
 from eval.learning.split import SEEDS, split_groups
 from paths import ROOT
@@ -78,7 +79,13 @@ def run(out_dir: Path | None = None, version_id: str = CANDIDATE_VERSION) -> dic
 
     decision = close_loop(version_id, current_scores, candidate_scores)
     decision["freeze_mubit_auto_adapters"] = freeze_note
-    text = render(rendered, decision, current_scores, candidate_scores)
+    text = render(
+        rendered,
+        decision,
+        current_scores,
+        candidate_scores,
+        external=external_section(out),
+    )
     path = out / "learning.md"
     path.write_text(text, encoding="utf-8")
     return {

@@ -1,7 +1,7 @@
 PYTHON ?= python3
 export PYTHONPATH := .
 
-.PHONY: validate test replay-stubs demo-stub demo-correction-loop eval-learning serve ingest ingest-refresh data-report \
+.PHONY: validate test replay-stubs demo-stub demo-correction-loop eval-learning latte-bench serve ingest ingest-refresh data-report \
 	modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune docker-build docker-run
 
 IMAGE ?= baansafe-api:local
@@ -24,6 +24,12 @@ demo-correction-loop:
 
 eval-learning:
 	$(PYTHON) -m eval.learning
+
+# Free mode replays the calibrated reference and exits. No API call.
+# LATTE_SERVE=1 starts `bun run dev` in the submodule (Try without an API).
+# LATTE_LIVE=1 is that UI with Mubit gateway env required. Keys are not printed.
+latte-bench:
+	$(PYTHON) -m eval.latte
 
 serve:
 	$(PYTHON) -m uvicorn api.main:app --host 0.0.0.0 --port 8000

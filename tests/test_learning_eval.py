@@ -74,6 +74,8 @@ def test_learning_eval_smoke(tmp_path):
         assert name in text
     assert "learning_eval.promotion" in text
     assert "learning_eval.freeze_mubit_auto_adapters" in text
+    assert "External sanity check: does the model learn from feedback" in text
+    assert "latte_bench.license_confirmation" in text
     assert "TODO_HUMAN" in text
     assert result["promoted"] is False
     for secret in ("sk-", "api_key", "API_KEY", "Bearer ", "mbt_"):
