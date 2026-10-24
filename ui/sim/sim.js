@@ -6,6 +6,7 @@
 
    Houses, streets, flood polygons, and routes come from ./data.
 */
+import { mountCorrectForm } from "../correct.js";
 import { Application, Container, Graphics, Text } from "./vendor/pixi.min.mjs";
 
 const STATUSES = ["clear", "at_risk", "flooded", "needs_help", "evacuated"];
@@ -35,7 +36,15 @@ let nodeById = {};
 let selected = null;
 let floodAlpha = 0.82;
 let activeRoutes = new Set();
-let live = { health: null, resources: null, context: null, triage: null, triageError: null };
+let live = {
+  health: null,
+  resources: null,
+  context: null,
+  triage: null,
+  triageError: null,
+  labels: null,
+  correctionNote: null,
+};
 
 let app;
 let world;
@@ -910,11 +919,13 @@ function renderPanel() {
     run.addEventListener("click", () => runTriage(building.fixture_id));
     panel.append(run);
     const callOnBuilding = town.calls.find((call) => call.building_id === building.id && live.triage && live.triage.forId === call.id);
-    if (live.triage && (live.triage.forId === building.fixture_id || callOnBuilding)) {
+    const triageId = callOnBuilding ? callOnBuilding.id : building.fixture_id;
+    if (live.triage && live.triage.forId === triageId && live.triage.caseState) {
       const decision = live.triage.decision;
       panel.append(el("p", null, "Router: " + decision.next_action + " · " + decision.final_priority + " · " + decision.final_route));
       const source = decision.source_outcomes && decision.source_outcomes[0];
       if (source) panel.append(el("p", "muted", source.reason));
+      mountCorrection(panel, triageId);
     } else if (live.triageError && live.triageError.forId === building.fixture_id) {
       panel.append(el("p", "error", live.triageError.message));
     }
@@ -987,8 +998,39 @@ async function loadContext(district) {
   }
 }
 
+function labelNames() {
+  const names = {};
+  for (const row of (live.labels && live.labels.labels) || []) {
+    if (row && row.id) names[row.id] = row.label || row.id;
+  }
+  return names;
+}
+
+function mountCorrection(panel, fixtureId) {
+  if (!live.triage || live.triage.forId !== fixtureId || !live.triage.caseState) return;
+  const host = el("div");
+  panel.append(host);
+  const note = live.correctionNote && live.correctionNote.forId === fixtureId ? live.correctionNote : null;
+  mountCorrectForm(host, {
+    caseState: live.triage.caseState,
+    decision: live.triage.decision,
+    fixtureId,
+    policyVersion: (live.labels && live.labels.version) || "",
+    labelNames: labelNames(),
+    note,
+    onResult: (result) => {
+      live.correctionNote = { forId: fixtureId, ok: result.ok, text: result.text };
+      if (result.decision && live.triage && live.triage.forId === fixtureId) {
+        live.triage = { ...live.triage, decision: result.decision };
+      }
+      if (result.ok) renderPanel();
+    },
+  });
+}
+
 async function runTriage(fixtureId) {
   live.triageError = null;
+  live.correctionNote = null;
   try {
     const fixture = await getJson("/fixtures/" + fixtureId);
     const decision = await getJson("/triage", {
@@ -996,7 +1038,7 @@ async function runTriage(fixtureId) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(fixture.case_state),
     });
-    live.triage = { forId: fixtureId, decision };
+    live.triage = { forId: fixtureId, decision, caseState: fixture.case_state };
   } catch (error) {
     live.triage = null;
     live.triageError = { forId: fixtureId, message: error.message };
@@ -1014,6 +1056,11 @@ async function loadLive() {
     live.resources = await getJson("/resources");
   } catch (error) {
     live.resources = null;
+  }
+  try {
+    live.labels = await getJson("/policies/labels");
+  } catch (error) {
+    live.labels = null;
   }
   await loadContext("Mueang Phrae District");
   renderPanel();
@@ -1191,7 +1238,8 @@ async function runCall(call) {
       body: JSON.stringify(fixture.case_state),
     });
     callResults.set(call.id, decision);
-    live.triage = { forId: call.id, decision };
+    live.triage = { forId: call.id, decision, caseState: fixture.case_state };
+    live.correctionNote = null;
     showReadout(call, decision, null);
     node.classList.remove("busy");
     node.classList.add("done");

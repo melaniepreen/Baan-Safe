@@ -1,0 +1,55 @@
+.correct-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.correct-form h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.correct-auto,
+.correct-status {
+  margin: 0;
+  font-size: 12px;
+}
+
+.correct-facts {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  gap: 2px 8px;
+  margin: 0;
+  font-size: 12px;
+}
+
+.correct-facts dt {
+  margin: 0;
+  color: inherit;
+  opacity: 0.7;
+}
+
+.correct-facts dd {
+  margin: 0;
+}
+
+.correct-field {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.correct-form select,
+.correct-form textarea {
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+
+.correct-error {
+  color: #ff8d7a;
+}

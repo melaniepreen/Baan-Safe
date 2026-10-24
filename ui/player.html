@@ -3,11 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <title>BaanSafe transcript player</title>
+  <link rel="stylesheet" href="correct.css" />
   <style>
     body { font-family: sans-serif; margin: 2rem; max-width: 42rem; }
     .caller { color: #0b3d91; }
     .operator { color: #444; }
     li { margin: 0.4rem 0; }
+    #correct { margin-top: 1.5rem; }
   </style>
 </head>
 <body>
@@ -16,10 +18,21 @@
   <label>Fixture <input id="fid" value="F01" /></label>
   <button id="play" type="button">Play</button>
   <ol id="log"></ol>
-  <script>
-    document.getElementById("play").addEventListener("click", () => {
+  <section id="correct" aria-label="Correct this"></section>
+  <script type="module">
+    import { mountCorrectForm } from "./correct.js";
+
+    async function getJson(url, options) {
+      const response = await fetch(url, options);
+      if (!response.ok) throw new Error(url + " returned " + response.status);
+      return response.json();
+    }
+
+    document.getElementById("play").addEventListener("click", async () => {
       const log = document.getElementById("log");
+      const host = document.getElementById("correct");
       log.innerHTML = "";
+      host.replaceChildren();
       const id = document.getElementById("fid").value.trim();
       const source = new EventSource(`/fixtures/${encodeURIComponent(id)}/stream?pace=1`);
       source.addEventListener("turn", (event) => {
@@ -31,6 +44,31 @@
       });
       source.addEventListener("done", () => source.close());
       source.onerror = () => source.close();
+      try {
+        const fixture = await getJson("/fixtures/" + encodeURIComponent(id));
+        const decision = await getJson("/triage", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(fixture.case_state),
+        });
+        let labels = null;
+        try {
+          labels = await getJson("/policies/labels");
+        } catch (error) {
+          labels = null;
+        }
+        const names = {};
+        for (const row of (labels && labels.labels) || []) names[row.id] = row.label || row.id;
+        mountCorrectForm(host, {
+          caseState: fixture.case_state,
+          decision,
+          fixtureId: id,
+          policyVersion: (labels && labels.version) || "",
+          labelNames: names,
+        });
+      } catch (error) {
+        host.textContent = error.message;
+      }
     });
   </script>
 </body>
