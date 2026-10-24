@@ -179,6 +179,12 @@ SYNTHETIC=1 make export-training
 ---
 
 ## Housekeeping
+
+- **Markdown cleanup is approved but not done.**
+  - Untrack and gitignore `MORNING_REPORT.md`, `research/DEMO_PLAN.md`, and `docs/agents/INDEX.md`.
+  - Move `BaanSafe_Revised_Architecture.md` to `docs/architecture.md`, `OWNERSHIP.md` to `docs/OWNERSHIP.md`, and `research/` to `docs/research/`, then update every reference.
+  - Add `.vscode/` and `*.log` to `.gitignore`.
+  - Point the Cursor refresh agent at `docs/architecture.md` afterwards.
 - The Cursor Agent refreshes `docs/PRD.md` after pushes, at most every 30 minutes. Rebase before a push.
 - Several agents have worked in this folder at once. Check `git status` and `git stash list` before starting.
 - The local `.env` has `S1_IMPL=real`. Restart `make serve` after changing it.
