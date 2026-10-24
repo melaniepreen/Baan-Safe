@@ -254,3 +254,31 @@ def test_medical_new_keywords_and_negation():
     )
     assert fields.medical is False
     assert Need.medical not in fields.needs
+
+
+def _location(text: str) -> tuple[str | None, float | None]:
+    fields, _flags = extract(_turns(("caller", text)))
+    return fields.location, fields.location_confidence
+
+
+def test_bare_multi_word_district_matches_the_gazetteer():
+    assert _location("We are in Khlong Toei, water rising.") == (
+        "Khlong Toei District, Bangkok Province",
+        0.85,
+    )
+
+
+def test_watthana_alias_matches_the_hdx_spelling():
+    assert _location("We are in Watthana.") == ("Vadhana District, Bangkok Province", 0.85)
+    assert _location("Thawi Watthana, near the canal.")[0] == (
+        "Thawi Watthana District, Bangkok Province"
+    )
+
+
+def test_bare_names_that_read_as_english_do_not_match():
+    assert _location("It is hot and the water has been here a long time.") == (None, None)
+    assert _location("I would rather than to wait.") == (None, None)
+
+
+def test_bare_name_in_two_provinces_stays_low_confidence():
+    assert _location("We are in Chom Thong.")[1] == 0.6

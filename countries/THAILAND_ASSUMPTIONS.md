@@ -23,9 +23,9 @@ Police **191** and fire **199** are not in this count. They are not in the runti
 12. Some farm caps are in rai. No conversion is stored. `policies/mof_relief.yaml:596`.
 13. Prototype pages format a baht sign. Those figures are simulated. `frontend-prototype/v3/index.html:274`. Do not copy one into a pack.
 14. The fast path is English-only. `system1/extract.py:3`.
-15. Tokens are `[a-z']+`, so Thai script cannot match. `system1/extract.py:20`.
-16. The only Thai place word in the water patterns is `soi`. `system1/extract.py:118`.
-17. Counts and confirmations are English number words and yes/yeah/correct. `system1/extract.py:180`, `system1/extract.py:204`.
+15. Tokens are `[a-z']+`, so Thai script cannot match. `system1/extract.py:22`.
+16. The only Thai place word in the water patterns is `soi`. `system1/extract.py:120`.
+17. Counts and confirmations are English number words and yes/yeah/correct. `system1/extract.py:210`, `system1/extract.py:234`.
 18. Policy languages are `en` and `th` only. `policies/schema.py:9`.
 19. A training language is `th`, `en`, or `mixed`. `contracts/training.py:28`.
 20. Thai text is detected as the Unicode block U+0E00–U+0E7F. `policies/sources/local_yaml.py:46`.
@@ -39,7 +39,7 @@ Police **191** and fire **199** are not in this count. They are not in the runti
 
 26. The gazetteer is OSM `admin_level` 6 inside `ISO3166-2=TH-{code}`. Tambon (`admin_level` 8) is not stored. `ingest/admin_districts.py:51`.
 27. Eight province codes and English names are hardcoded (Chiang Mai through Songkhla). `config/ingest.yaml:42`, `ingest/admin_districts.py:26`.
-28. A hit is formatted `Name, Province`, and the suffix ` Province` is stripped when matching. `system1/extract.py:337`.
+28. A hit is formatted `Name, Province`, and the suffix ` Province` is stripped when matching. `system1/extract.py:413`.
 29. Enrichment matches `name_th` as well as `name_en`. The column exists on both district tables. `enrich/context.py:93`, `ingest/db.py:74`.
 30. Phone redaction is `+66` or a leading `0`. `scripts/validate.py:28`, `ingest/textutil.py:9`.
 31. A 13-digit run is a national id. The token PromptPay is banned in fixtures. `scripts/validate.py:29`.

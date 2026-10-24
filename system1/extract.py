@@ -179,6 +179,34 @@ ALONE_PHRASES = (
 
 MINIMISING_VULNERABLE = {"child", "elderly", "immobile"}
 
+# A bare English district name (no "District") matches only when it has two
+# or more words and they are not all common English, so "Mae Mo" matches but
+# "Hot", "Long", and "Than To" ("rather than to") do not.
+COMMON_ENGLISH = {
+    "a", "an", "the", "in", "on", "at", "to", "of", "and", "or", "is", "it",
+    "be", "as", "by", "up", "so", "no", "go", "do", "me", "he", "we", "us",
+    "than", "then", "that", "this", "with", "for", "from", "not", "but",
+    "hot", "long", "song", "man", "him", "sing", "wang",
+}
+
+# Spellings callers use for gazetteer names (HDX COD-AB `name_en`). Each
+# alias also matches bare.
+DISTRICT_ALIASES = {
+    "Watthana": "Vadhana",
+    "Sathorn": "Sathon",
+    "Pathumwan": "Pathum Wan",
+    "Klong Toey": "Khlong Toei",
+    "Khlong Toey": "Khlong Toei",
+    "Ladprao": "Lat Phrao",
+    "Lat Prao": "Lat Phrao",
+    "Phayathai": "Phaya Thai",
+    "Huay Kwang": "Huai Khwang",
+    "Bangrak": "Bang Rak",
+    "Thonburi": "Thon Buri",
+    "Don Muang": "Don Mueang",
+    "Jatujak": "Chatuchak",
+}
+
 NUMBER_WORDS = {
     "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
     "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
@@ -334,11 +362,23 @@ def _district_entries(
         if province and not str(province).endswith("Province"):
             province = f"{province} Province"
         add(canonical, canonical, province, False)
+        bare = row.get("name_en") or ""
+        if _bare_name_ok(bare):
+            add(bare, canonical, province, False)
+        for alias, target in DISTRICT_ALIASES.items():
+            if target == bare:
+                add(alias, canonical, province, False)
+                add(f"{alias} District", canonical, province, False)
         thai = row.get("name_th")
         add(thai, canonical, province, True)
         if thai and not str(thai).startswith("อำเภอ"):
             add(f"อำเภอ{thai}", canonical, province, True)
     return entries
+
+
+def _bare_name_ok(name: str) -> bool:
+    words = name.lower().split()
+    return len(words) >= 2 and not all(word in COMMON_ENGLISH for word in words)
 
 
 def _name_hit(match: str, text: str, thai: bool) -> bool:

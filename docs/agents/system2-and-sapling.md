@@ -15,7 +15,7 @@ Nemotron reasons. Sapling then checks System 2 aid-eligibility and denial claims
 ## Key files
 
 - `system2/decide.py` — `orchestrate(case, handoff, recommendation)`, then `verify_before_router`. Owner: Melanie.
-- `system2/orchestrator.py` — prompts Nemotron, parses one JSON object into `reasoned_recommendation`, falls back to a safe `system2_unavailable` outcome on timeout, HTTP error, empty content, or parse/enum failure. `use_completer(fn)` swaps the model call for tests and the RL loop. The call sends `reasoning={"enabled": false}` and `max_tokens=700`: the model otherwise spends its whole budget on `<think>`.
+- `system2/orchestrator.py` — prompts Nemotron, parses one JSON object into `reasoned_recommendation`, falls back to a safe `system2_unavailable` outcome on timeout, HTTP error, empty content, or parse/enum failure. The fallback reason names the HTTP status (429 is marked rate limited). The fallback is P1 when the case has a life-safety trigger — `medical` or `oxygen_dependent` cite `NIEMS-ANNOUNCEMENT-2554` (Red: life threat to breathing, circulation, or the nervous system); `need:rescue` or `immobile` cite the P1 definition in `config/priorities.yaml`, because the announcement assigns no colour to being trapped — and P2 otherwise. `use_completer(fn)` swaps the model call for tests and the RL loop. The call sends `reasoning={"enabled": false}` and `max_tokens=700`: the model otherwise spends its whole budget on `<think>`.
 - `system2/sapling.py` — scope, verdict application.
 - `system2/sapling_client.py` — stub client. `SAPLING_IMPL=live` refuses before any socket.
 - `mocks/sapling_stub/` — `S01`–`S05`.

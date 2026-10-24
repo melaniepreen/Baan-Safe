@@ -67,6 +67,16 @@ def use_completer(fn: Completer) -> Iterator[None]:
 
 
 _AID_FLAGS = {"safeguarding", "aid_exception", "aid_eligibility", "aid_denial"}
+
+# Outage priority. A System 2 fallback is P1 when the case carries a
+# life-safety trigger, cited per trigger. NIEMS 2554 Red is a life threat to
+# breathing, circulation, or the nervous system. The announcement assigns no
+# colour to being trapped, so rescue and immobile cite the P1 definition in
+# config/priorities.yaml instead.
+_NIEMS_RED = "NIEMS-ANNOUNCEMENT-2554"
+_P1_DEFINITION = "config/priorities.yaml P1"
+_LIFE_SAFETY_VULNERABLE = {"oxygen_dependent": _NIEMS_RED, "immobile": _P1_DEFINITION}
+_LIFE_SAFETY_NEEDS = {Need.medical: _NIEMS_RED, Need.rescue: _P1_DEFINITION}
 _THINK = re.compile(r"<think>.*?</think>", re.DOTALL)
 _OBJECT = re.compile(r"\{.*\}", re.DOTALL)
 
@@ -110,24 +120,48 @@ def orchestrate(
         )
         outcome = _outcome_from_reply(reply, latency_ms)
     except (httpx.HTTPError, ValueError, KeyError, TypeError) as exc:
-        return _unavailable(exc, latency_ms())
+        return _unavailable(exc, latency_ms(), case)
     return _post_rules(case, outcome)
 
 
-def _unavailable(exc: Exception, latency_ms: int) -> Outcome:
+def _life_safety(case: CaseState) -> list[tuple[str, str]]:
+    """(trigger, citation) pairs that make an outage P1."""
+    fields = case.fields
+    found: list[tuple[str, str]] = []
+    if fields.medical:
+        found.append(("medical", _NIEMS_RED))
+    for name, cite in _LIFE_SAFETY_VULNERABLE.items():
+        if name in fields.vulnerable:
+            found.append((name, cite))
+    for need, cite in _LIFE_SAFETY_NEEDS.items():
+        if need in fields.needs and not (need is Need.medical and fields.medical):
+            found.append((f"need:{need.value}", cite))
+    return found
+
+
+def _unavailable(exc: Exception, latency_ms: int, case: CaseState) -> Outcome:
     cause = type(exc).__name__
     if isinstance(exc, httpx.HTTPStatusError):
         cause += f" {exc.response.status_code}"
         if exc.response.status_code == 429:
             cause += " (rate limited)"
+    reason = f"System 2 unavailable: {cause}."
+    life_safety = _life_safety(case)
+    if life_safety:
+        cites = sorted({cite for _trigger, cite in life_safety})
+        reason += (
+            " P1 for life-safety trigger "
+            + ", ".join(trigger for trigger, _cite in life_safety)
+            + " [" + "; ".join(cites) + "]."
+        )
     return Outcome(
         system=System.system_2,
         outcome="escalate",
-        priority=Priority.P2,
+        priority=Priority.P1 if life_safety else Priority.P2,
         needs=[],
         route=Route.supervisor_escalation,
         confidence=0.0,
-        reason=f"System 2 unavailable: {cause}.",
+        reason=reason,
         reasoning=None,
         missing_evidence=["system2_unavailable"],
         next_question=None,

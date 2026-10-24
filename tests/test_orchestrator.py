@@ -64,6 +64,35 @@ def test_timeout_falls_back():
     assert "TimeoutException" in outcome.reason
 
 
+def _down(*a, **k):
+    raise httpx.TimeoutException("slow")
+
+
+def test_outage_is_p1_for_breathing_risk_citing_niems():
+    with use_completer(_down):
+        outcome = orchestrate(load_case("F10"))
+    assert outcome.priority is Priority.P1
+    assert "oxygen_dependent" in outcome.reason
+    assert "NIEMS-ANNOUNCEMENT-2554" in outcome.reason
+
+
+def test_outage_is_p1_for_rescue_citing_the_p1_definition():
+    with use_completer(_down):
+        outcome = orchestrate(load_case("F12"))
+    assert outcome.priority is Priority.P1
+    assert "need:rescue" in outcome.reason
+    assert "config/priorities.yaml P1" in outcome.reason
+    assert "NIEMS" not in outcome.reason
+
+
+def test_outage_without_life_safety_trigger_stays_p2():
+    with use_completer(_down):
+        outcome = orchestrate(load_case("F13"))
+    assert outcome.priority is Priority.P2
+    assert "P1" not in outcome.reason
+    assert outcome.requires_human is True
+
+
 def test_rate_limit_names_the_status():
     def limited(*a, **k):
         request = httpx.Request("POST", "https://api.mubit.ai/compat/openrouter/v1/chat/completions")

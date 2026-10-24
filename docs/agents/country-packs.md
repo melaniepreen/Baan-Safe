@@ -48,9 +48,9 @@ The inventory below has **49** Thailand-specific assumptions. Each row is one ha
 | 12 | Some farm caps are in rai. No conversion is stored. | `policies/mof_relief.yaml:596` |
 | 13 | Prototype pages format a baht sign. Those figures are simulated. | `frontend-prototype/v3/index.html:274` |
 | 14 | The fast path is English-only. | `system1/extract.py:4` |
-| 15 | Tokens are `[a-z']+`, so Thai script cannot match. | `system1/extract.py:20` |
-| 16 | The only Thai place word in the water patterns is `soi`. | `system1/extract.py:118` |
-| 17 | Counts and confirmations are English number words and yes/yeah/correct. | `system1/extract.py:180`, `system1/extract.py:204` |
+| 15 | Tokens are `[a-z']+`, so Thai script cannot match. | `system1/extract.py:22` |
+| 16 | The only Thai place word in the water patterns is `soi`. | `system1/extract.py:120` |
+| 17 | Counts and confirmations are English number words and yes/yeah/correct. | `system1/extract.py:210`, `system1/extract.py:234` |
 | 18 | Policy languages are `en` and `th` only. | `policies/schema.py:9` |
 | 19 | A training language is `th`, `en`, or `mixed`. | `contracts/training.py:28` |
 | 20 | Thai text is detected as the Unicode block U+0E00–U+0E7F. | `policies/sources/local_yaml.py:46` |
@@ -61,7 +61,7 @@ The inventory below has **49** Thailand-specific assumptions. Each row is one ha
 | 25 | One `group_id` keeps the Thai and English of the same call together. | `docs/agents/training-schema.md:35` |
 | 26 | The gazetteer is OSM `admin_level` 6 inside `ISO3166-2=TH-{code}`. Tambon (`admin_level` 8) is not stored. | `ingest/admin_districts.py:51` |
 | 27 | Eight province codes and English names are hardcoded (Chiang Mai through Songkhla). | `config/ingest.yaml:42`, `ingest/admin_districts.py:26` |
-| 28 | A hit is formatted `Name, Province`, and the suffix ` Province` is stripped when matching. | `system1/extract.py:337` |
+| 28 | A hit is formatted `Name, Province`, and the suffix ` Province` is stripped when matching. | `system1/extract.py:413` |
 | 29 | Enrichment matches `name_th` as well as `name_en`. The column exists on both district tables. | `enrich/context.py:93`, `ingest/db.py:74` |
 | 30 | Phone redaction is `+66` or a leading `0`. | `scripts/validate.py:28`, `ingest/textutil.py:9` |
 | 31 | A 13-digit run is a national id. The token PromptPay is banned in fixtures. | `scripts/validate.py:29` |
@@ -185,7 +185,7 @@ For after the hackathon. The list is the smallest set of code changes that would
 The first five are the ones to do before any other country can affect a call.
 
 1. **No country on the request path.** `config/settings.py:20` reads only `config/<name>`. `gateway/route.py:201` calls `extract` with the transcript and no country. `contracts/models.py:203` has a district label and no country. Add an optional country code with default `th`, and a loader that is not called until a later step. Effort: small for the dormant loader, medium to thread it through the gateway. Risk: medium on the hot path, high if the contract field is required. Leave the field off the contract until a human accepts a schema change.
-2. **Extractor, language, and gazetteer.** `system1/extract.py:20` keeps Latin tokens, `:279` reads `admin_districts`, and `:337` builds `Name, Province`. A pack-driven phrase list has to reproduce today's English table on the current fixtures before it accepts another language. Effort: medium. Risk: high. Fixture labels move if a phrase shifts.
+2. **Extractor, language, and gazetteer.** `system1/extract.py:22` keeps Latin tokens, `:341` reads `admin_districts`, and `:413` builds `Name, Province`. A pack-driven phrase list has to reproduce today's English table on the current fixtures before it accepts another language. Effort: medium. Risk: high. Fixture labels move if a phrase shifts.
 3. **Ingest providers, clock, and admin level.** The Thailand clients are `ingest/open_meteo.py:26` (`Asia/Bangkok`), `ingest/gistda.py:22`, `ingest/thaiwater.py:21`, `ingest/gdacs.py:25` (`country=THA`), `ingest/hdx.py:86` (`thailand flood`), `ingest/admin_districts.py:51` (`TH-{code}` and `admin_level` 6), and `config/ingest.yaml:42` (eight province codes). A registry should call today's functions for `th` and refuse a national URL that is `unverified`. Effort: large. Risk: high. These clients write SQLite and honour robots rules.
 4. **Policy jurisdiction, languages, and the file list.** `policies/schema.py:8` allows only `TH` and `intl`. `policies/schema.py:9` allows only `en` and `th`. `policies/sources/local_yaml.py:35` maps jurisdiction by filename. `policies/corpus.py:20` lists five files, including `flood.yaml`. Add a country by a new adapter pointed at `countries/<iso2>/policy-pack.yaml`. Do not move the Thailand YAML. The corpus hash is the file bytes. Effort: medium. Risk: high.
 5. **Personal-data scanners.** `scripts/validate.py:28` and `ingest/textutil.py:9` know `+66` and a leading `0`. `scripts/validate.py:29` treats 13 digits as an id. A new pattern is added beside the Thai one, not instead of it. Effort: small. Risk: medium. A looser pattern lets a real number through. A narrower one misses a Thai number.

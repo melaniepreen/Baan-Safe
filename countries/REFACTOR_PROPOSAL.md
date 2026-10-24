@@ -24,9 +24,9 @@ Later: an optional country code, default `th`, and a loader that nothing calls u
 
 Effort: medium. Risk: high. Fixture labels move if a phrase shifts.
 
-- `system1/extract.py:20` keeps Latin tokens.
-- `system1/extract.py:279` reads `admin_districts`.
-- `system1/extract.py:337` builds `Name, Province`.
+- `system1/extract.py:22` keeps Latin tokens.
+- `system1/extract.py:341` reads `admin_districts`.
+- `system1/extract.py:413` builds `Name, Province`.
 
 A pack-driven phrase list has to reproduce today's English table on the current fixtures before it accepts another language.
 
