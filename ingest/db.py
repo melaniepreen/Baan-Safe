@@ -1,4 +1,8 @@
-"""SQLite storage for normalised public hazard data. Not the production database."""
+"""SQLite storage for normalised public hazard data. Not the production database.
+
+Build cache for `make ingest` only. Runtime reads the committed files in
+data/processed through ingest/store.py.
+"""
 
 from __future__ import annotations
 
@@ -14,7 +18,7 @@ def _default_db_path() -> Path:
     raw = os.environ.get("BAANSAFE_DB_PATH", "").strip()
     if raw:
         return Path(raw)
-    return ROOT / "data" / "processed" / "baansafe.sqlite"
+    return ROOT / "data" / "raw" / "ingest.sqlite"
 
 
 DB_PATH = _default_db_path()
@@ -149,7 +153,3 @@ def set_status(
             """,
             (source, fetched_at, row_count, status, detail),
         )
-
-
-def db_exists() -> bool:
-    return DB_PATH.exists()

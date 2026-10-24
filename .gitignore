@@ -13,3 +13,4 @@ eval/out/
 var/
 *.egg-info/
 .DS_Store
+*.sqlite

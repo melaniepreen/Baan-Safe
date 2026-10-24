@@ -331,29 +331,15 @@ def _district_entries(
         seen.add(key)
         entries.append((match, canonical, province, thai))
 
-    from ingest.db import DB_PATH, connect
+    from ingest import store
     from ingest.snapshots import read_snapshot
 
-    if DB_PATH.exists():
-        with connect() as conn:
-            try:
-                rows = conn.execute(
-                    "SELECT name_en, name_th, province FROM admin_districts"
-                ).fetchall()
-            except Exception:  # noqa: BLE001 — a missing table means no gazetteer
-                rows = []
-            for row in rows:
-                add(row["name_en"], row["name_en"], row["province"], False)
-                add(row["name_th"], row["name_en"], row["province"], True)
-            try:
-                rows = conn.execute(
-                    "SELECT name_en, name_th, province FROM districts"
-                ).fetchall()
-            except Exception:  # noqa: BLE001
-                rows = []
-            for row in rows:
-                add(row["name_en"], row["name_en"], row["province"], False)
-                add(row["name_th"], row["name_en"], row["province"], True)
+    for row in store.rows("admin_districts"):
+        add(row["name_en"], row["name_en"], row["province"], False)
+        add(row["name_th"], row["name_en"], row["province"], True)
+    for row in store.rows("districts"):
+        add(row["name_en"], row["name_en"], row["province"], False)
+        add(row["name_th"], row["name_en"], row["province"], True)
     for row in (read_snapshot("gazetteer") or {}).get("districts") or []:
         canonical = row.get("name_en") or ""
         if canonical and not canonical.endswith("District"):

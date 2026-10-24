@@ -123,7 +123,7 @@ def test_policy_pin_dir_and_db_path_follow_env(monkeypatch, tmp_path):
     monkeypatch.setenv("POLICY_PIN_DIR", str(tmp_path / "from-env"))
     assert PolicyService(pin_dir=explicit).pin_dir == explicit
     assert PolicyService().pin_dir == tmp_path / "from-env"
-    assert _default_db_path() == ROOT / "data" / "processed" / "baansafe.sqlite"
+    assert _default_db_path() == ROOT / "data" / "raw" / "ingest.sqlite"
     monkeypatch.setenv("BAANSAFE_DB_PATH", str(tmp_path / "demo.sqlite"))
     assert _default_db_path() == tmp_path / "demo.sqlite"
 
@@ -152,6 +152,7 @@ def test_gateway_app_builds_stub_asgi_without_secrets(monkeypatch):
     assert gateway.STUB_ENV["ENRICH_IMPL"] == "off"
     assert gateway.STUB_ENV["TRACE_PATH"].startswith("/data/")
     assert gateway.STUB_ENV["POLICY_PIN_DIR"].startswith("/data/")
+    assert "BAANSAFE_DB_PATH" not in gateway.STUB_ENV
     assert "HF_TOKEN" not in gateway.image_env()
     assert "STT_UPSTREAM" not in gateway.image_env()
     from pathlib import Path

@@ -16,7 +16,6 @@ Runtime writes go to the `baansafe-demo` volume at `/data`.
 from __future__ import annotations
 
 import os
-import shutil
 import sys
 from pathlib import Path
 
@@ -71,7 +70,6 @@ STUB_ENV = {
     "MOCK_CORRECTIONS_PATH": f"{DATA_MOUNT}/corrections.jsonl",
     "TRAINING_EVENTS_PATH": f"{DATA_MOUNT}/events.jsonl",
     "POLICY_PIN_DIR": f"{DATA_MOUNT}/policy-pins",
-    "BAANSAFE_DB_PATH": f"{DATA_MOUNT}/baansafe.sqlite",
 }
 
 
@@ -127,25 +125,10 @@ demo_data = modal.Volume.from_name(DEMO_VOLUME, create_if_missing=True)
 
 
 def prepare_runtime_files() -> None:
-    """Put the bundled sqlite on the volume before the app opens it."""
+    """Create the volume mount and policy-pins dir. The JSON data ships in the image."""
     mount = Path(DATA_MOUNT)
     mount.mkdir(parents=True, exist_ok=True)
     (mount / "policy-pins").mkdir(parents=True, exist_ok=True)
-    target = Path(STUB_ENV["BAANSAFE_DB_PATH"])
-    bundled = next(
-        (
-            candidate
-            for candidate in (
-                repo_root() / "data" / "processed" / "baansafe.sqlite",
-                Path(REMOTE_ROOT) / "data" / "processed" / "baansafe.sqlite",
-            )
-            if candidate.is_file()
-        ),
-        None,
-    )
-    if bundled is not None and not target.exists():
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(bundled, target)
 
 
 def _mount_routes(api: FastAPI) -> None:
@@ -193,7 +176,6 @@ def hosting() -> dict:
                 "TRAINING_EVENTS_PATH", STUB_ENV["TRAINING_EVENTS_PATH"]
             ),
             "POLICY_PIN_DIR": os.environ.get("POLICY_PIN_DIR", STUB_ENV["POLICY_PIN_DIR"]),
-            "BAANSAFE_DB_PATH": os.environ.get("BAANSAFE_DB_PATH", STUB_ENV["BAANSAFE_DB_PATH"]),
         },
         "note": (
             "Triage uses the stub gateway. "

@@ -9,7 +9,7 @@ One call goes through these parts in order. `gateway/route.py` `handle` is the e
 | Part | Where | State |
 |---|---|---|
 | Extraction | `system1/extract.py` | Runs only when a case arrives with empty fields. English keyword rules, the 108-district gazetteer (`admin_districts`), caller-confirmed operator facts. Thai matches district names only. |
-| Enrichment | `enrich/context.py`, `data/snapshots/` | Adds flood, rain, and reservoir flags from SQLite and the public snapshots. Flags never change priority or route. |
+| Enrichment | `enrich/context.py`, `data/snapshots/` | Adds flood, rain, and reservoir flags from data/processed and the public snapshots. Flags never change priority or route. |
 | Memory | `memory/adapter.py` | `MEMORY_IMPL=mock` reads `mocks/memory_context/`. `memory/mubit.py` raises. |
 | Graduation to System 2 | `gateway/graduation.py` | `correction_loop.escalation_threshold` 2. Two human `s1_triage` corrections with a high-risk label on one field pattern tag it `complex_situation` and send it to System 2 with a recommendation. Never sets a priority. `make demo-graduation`. |
 | Route chooser | `gateway/chooser.py`, `config/escalation.yaml` | `field precheck`. `routing.yaml` is `mode: cascade`: a System 1 escalate hands the same turn to System 2. |
@@ -77,7 +77,7 @@ Owners stay as in `OWNERSHIP.md`. Contracts are `v0.3-contracts`.
     - `mocks/resources.json`: 4 fictional units.
     - `ui/sim/data/town.json` `resources`: the same 4 ids under new names.
     - `data/snapshots/places.json`: OpenStreetMap units that dispatch uses. `ui/sim/data/places.json` is a label copy.
-    - The `infrastructure` table: 4,218 OpenStreetMap facilities that only enrichment reads.
+    - The `facilities.geojson` file: 4,218 OpenStreetMap facilities that only enrichment reads.
 
 ### Scraped and unused
 

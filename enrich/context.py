@@ -6,8 +6,8 @@ from shapely.geometry import Point
 from shapely.ops import nearest_points
 
 from config.settings import load_yaml
-from ingest.db import DB_PATH, connect, db_exists
-from ingest.geo import haversine_km, loads
+from ingest import store
+from ingest.geo import haversine_km
 from ingest.snapshots import read_snapshot
 
 EXTENT_1D = {"1d", "1", "1-day", "1day"}
@@ -43,67 +43,63 @@ def location_context(
         "distance_to_live_flood_m": None,
         "regional_reservoirs": None,
     }
-    if not db_exists():
+    if not store.available():
         return result
-    with connect() as conn:
-        result["data_freshness"] = {
-            row["source"]: row["fetched_at"]
-            for row in conn.execute("SELECT source, fetched_at FROM source_status")
-        }
-        matched = _match_district(conn, district)
-        if lat is None or lon is None:
-            if matched is not None:
-                lat = matched["lat"]
-                lon = matched["lon"]
+    result["data_freshness"] = {
+        r["source"]: r["fetched_at"] for r in store.rows("source_status")
+    }
+    matched = _match_district(district)
+    if lat is None or lon is None:
         if matched is not None:
-            result["matched_district"] = matched["name_en"]
-            result["matched_province"] = matched["province"]
-        if lat is None or lon is None:
-            return result
-        result["point"] = {"lat": lat, "lon": lon}
-        windows, observed = _windows_containing(conn, lat, lon)
-        result["in_observed_event_extent"] = observed
-        result["in_flood_extent_1d"] = bool(windows & EXTENT_1D)
-        result["in_flood_extent_7d"] = bool(windows & (EXTENT_1D | EXTENT_3D | EXTENT_7D))
-        result["in_flood_extent_30d"] = bool(
-            windows & (EXTENT_1D | EXTENT_3D | EXTENT_7D | EXTENT_30D)
+            lat = matched["lat"]
+            lon = matched["lon"]
+    if matched is not None:
+        result["matched_district"] = matched["name_en"]
+        result["matched_province"] = matched["province"]
+    if lat is None or lon is None:
+        return result
+    result["point"] = {"lat": lat, "lon": lon}
+    windows, observed = _windows_containing(lat, lon)
+    result["in_observed_event_extent"] = observed
+    result["in_flood_extent_1d"] = bool(windows & EXTENT_1D)
+    result["in_flood_extent_7d"] = bool(windows & (EXTENT_1D | EXTENT_3D | EXTENT_7D))
+    result["in_flood_extent_30d"] = bool(
+        windows & (EXTENT_1D | EXTENT_3D | EXTENT_7D | EXTENT_30D)
+    )
+    result["in_flood_risk_layer"] = "flood_risk_layer" in windows
+    result["repeat_flood_area"] = _repeat_contains(lat, lon)
+    buffer_m = float((load_yaml("escalation.yaml").get("enrichment_flags") or {}).get("near_flood_buffer_m", 500))
+    near, distance_m = within_flood_buffer(lat, lon, _live_geometries(), buffer_m)
+    result["near_flood_extent"] = near
+    result["distance_to_live_flood_m"] = distance_m
+    location_id = matched["location_id"] if matched is not None else None
+    if location_id:
+        # A ThaiWater gauge is a measured 24-hour total. The Open-Meteo
+        # archive is the fallback when no gauge was matched to this district.
+        gauge = _latest_rain(location_id, "thaiwater-rain-24h")
+        result["rainfall_last_24h_mm"] = (
+            gauge
+            if gauge is not None
+            else _latest_rain(location_id, "open-meteo-archive")
         )
-        result["in_flood_risk_layer"] = "flood_risk_layer" in windows
-        result["repeat_flood_area"] = _repeat_contains(conn, lat, lon)
-        buffer_m = float((load_yaml("escalation.yaml").get("enrichment_flags") or {}).get("near_flood_buffer_m", 500))
-        near, distance_m = within_flood_buffer(lat, lon, _live_geometries(conn), buffer_m)
-        result["near_flood_extent"] = near
-        result["distance_to_live_flood_m"] = distance_m
-        location_id = matched["location_id"] if matched is not None else None
-        if location_id:
-            # A ThaiWater gauge is a measured 24-hour total. The Open-Meteo
-            # archive is the fallback when no gauge was matched to this district.
-            gauge = _latest_rain(conn, location_id, "thaiwater-rain-24h")
-            result["rainfall_last_24h_mm"] = (
-                gauge
-                if gauge is not None
-                else _latest_rain(conn, location_id, "open-meteo-archive")
-            )
-            result["rainfall_forecast_24h_mm"] = _latest_rain(
-                conn, location_id, "open-meteo-forecast", newest=False
-            )
-        district_name = matched["name_en"] if matched is not None else None
-        archive_mm, forecast_mm = _snapshot_rain(district_name)
-        if result["rainfall_last_24h_mm"] is None:
-            result["rainfall_last_24h_mm"] = archive_mm
-        if result["rainfall_forecast_24h_mm"] is None:
-            result["rainfall_forecast_24h_mm"] = forecast_mm
-        province = matched["province"] if matched is not None else None
-        result["regional_reservoirs"] = _regional_reservoirs(province)
-        result["nearest_hospitals"] = _nearest(conn, lat, lon, HOSPITAL_TYPES, 3)
-        result["candidate_shelters"] = _nearest(conn, lat, lon, SHELTER_TYPES, 3)
+        result["rainfall_forecast_24h_mm"] = _latest_rain(
+            location_id, "open-meteo-forecast", newest=False
+        )
+    district_name = matched["name_en"] if matched is not None else None
+    archive_mm, forecast_mm = _snapshot_rain(district_name)
+    if result["rainfall_last_24h_mm"] is None:
+        result["rainfall_last_24h_mm"] = archive_mm
+    if result["rainfall_forecast_24h_mm"] is None:
+        result["rainfall_forecast_24h_mm"] = forecast_mm
+    province = matched["province"] if matched is not None else None
+    result["regional_reservoirs"] = _regional_reservoirs(province)
+    result["nearest_hospitals"] = _nearest(lat, lon, HOSPITAL_TYPES, 3)
+    result["candidate_shelters"] = _nearest(lat, lon, SHELTER_TYPES, 3)
     return result
 
 
-def _match_district(conn, text: str | None):
-    rows = conn.execute(
-        "SELECT location_id, name_en, name_th, lat, lon, province FROM districts"
-    ).fetchall()
+def _match_district(text: str | None):
+    rows = store.rows("districts")
     if not text:
         return None
     low = text.lower()
@@ -141,17 +137,16 @@ def within_flood_buffer(lat: float, lon: float, geometries, buffer_m: float) -> 
     return best <= buffer_m, round(best, 1)
 
 
-def _live_geometries(conn):
+def _live_geometries():
     live = EXTENT_1D | EXTENT_3D | EXTENT_7D | EXTENT_30D
     geoms = []
-    for row in conn.execute("SELECT duration_window, geometry FROM flood_extent"):
-        window = str(row["duration_window"] or "")
+    for props, geom in store.flood_shapes():
+        if props.get("layer") != "flood_extent":
+            continue
+        window = str(props.get("duration_window") or "")
         if window.lower() not in live and window not in live:
             continue
-        try:
-            geoms.append(loads(row["geometry"]))
-        except Exception:
-            continue
+        geoms.append(geom)
     return geoms
 
 
@@ -181,17 +176,15 @@ def _regional_reservoirs(province: str | None) -> dict | None:
     return {"date": payload.get("date"), "scope": payload.get("scope"), "dams": dams}
 
 
-def _windows_containing(conn, lat: float, lon: float) -> tuple[set[str], bool]:
+def _windows_containing(lat: float, lon: float) -> tuple[set[str], bool]:
     point = Point(lon, lat)
     found: set[str] = set()
     observed = False
     live = EXTENT_1D | EXTENT_3D | EXTENT_7D | EXTENT_30D
-    for row in conn.execute("SELECT duration_window, geometry FROM flood_extent"):
-        window = str(row["duration_window"] or "")
-        try:
-            geom = loads(row["geometry"])
-        except Exception:
+    for props, geom in store.flood_shapes():
+        if props.get("layer") != "flood_extent":
             continue
+        window = str(props.get("duration_window") or "")
         if not geom.contains(point):
             continue
         if window == "flood_risk_layer" or window.lower() in live:
@@ -201,49 +194,40 @@ def _windows_containing(conn, lat: float, lon: float) -> tuple[set[str], bool]:
     return found, observed
 
 
-def _repeat_contains(conn, lat: float, lon: float) -> bool:
+def _repeat_contains(lat: float, lon: float) -> bool:
     point = Point(lon, lat)
-    for row in conn.execute("SELECT geometry FROM repeat_flood"):
-        if loads(row["geometry"]).contains(point):
+    for props, geom in store.flood_shapes():
+        if props.get("layer") == "repeat_flood" and geom.contains(point):
             return True
     return False
 
 
-def _latest_rain(conn, location_id: str, source: str, newest: bool = True) -> float | None:
-    order = "DESC" if newest else "ASC"
-    row = conn.execute(
-        f"""
-        SELECT rainfall_mm FROM weather_observation
-        WHERE location_id = ? AND source = ? AND rainfall_mm IS NOT NULL
-        ORDER BY timestamp {order}
-        LIMIT 1
-        """,
-        (location_id, source),
-    ).fetchone()
-    if row is None:
-        return None
-    return row["rainfall_mm"]
+def _latest_rain(location_id: str, source: str, newest: bool = True) -> float | None:
+    best = None
+    for row in store.rows("weather_observation"):
+        if (
+            row.get("location_id") == location_id
+            and row.get("source") == source
+            and row.get("rainfall_mm") is not None
+        ):
+            stamp = str(row.get("timestamp") or "")
+            if best is None or (stamp > best[0] if newest else stamp < best[0]):
+                best = (stamp, row["rainfall_mm"])
+    return None if best is None else best[1]
 
 
-def _nearest(conn, lat: float, lon: float, types: set[str], limit: int) -> list[dict]:
-    placeholders = ",".join("?" for _ in types)
-    rows = conn.execute(
-        f"""
-        SELECT osm_id, type, name, accessibility_flag, lat, lon
-        FROM infrastructure
-        WHERE type IN ({placeholders}) AND lat IS NOT NULL AND lon IS NOT NULL
-        """,
-        tuple(types),
-    ).fetchall()
+def _nearest(lat: float, lon: float, types: set[str], limit: int) -> list[dict]:
     ranked = []
-    for row in rows:
+    for row in store.facilities():
+        if row.get("type") not in types or row.get("lat") is None or row.get("lon") is None:
+            continue
         distance = haversine_km(lat, lon, row["lat"], row["lon"])
         ranked.append(
             {
-                "osm_id": row["osm_id"],
-                "name": row["name"],
-                "type": row["type"],
-                "accessibility_flag": row["accessibility_flag"],
+                "osm_id": row.get("osm_id"),
+                "name": row.get("name"),
+                "type": row.get("type"),
+                "accessibility_flag": row.get("accessibility_flag"),
                 "distance_km": round(distance, 3),
             }
         )
@@ -252,11 +236,6 @@ def _nearest(conn, lat: float, lon: float, types: set[str], limit: int) -> list[
 
 
 def sample_districts(limit: int = 3) -> list[str]:
-    if not DB_PATH.exists():
+    if not store.available():
         return []
-    with connect() as conn:
-        rows = conn.execute(
-            "SELECT name_en FROM districts ORDER BY name_en LIMIT ?",
-            (limit,),
-        ).fetchall()
-    return [row["name_en"] for row in rows]
+    return sorted(row["name_en"] for row in store.rows("districts"))[:limit]

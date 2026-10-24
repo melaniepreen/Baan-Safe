@@ -10,3 +10,4 @@ eval/out
 traces.jsonl
 *.egg-info
 **/.DS_Store
+*.sqlite

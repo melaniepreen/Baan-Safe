@@ -17,7 +17,7 @@ from contracts.models import (
     Route,
     System,
 )
-from ingest.db import DB_PATH, connect
+from ingest import store
 from mocks.loader import ResourcesSnapshot
 from paths import ROOT
 
@@ -287,22 +287,28 @@ def check_pairs(index: dict) -> None:
             fail(f"{right} memory must contain a correction sourced from {left}")
 
 
-def check_database() -> None:
-    if not DB_PATH.exists():
-        fail("data/processed/baansafe.sqlite is missing")
-        return
-    with connect() as conn:
-        summaries = conn.execute("SELECT summary FROM disaster_report").fetchall()
-        for row in summaries:
-            text = row["summary"] or ""
-            if len(text) > 400:
-                fail("disaster_report.summary is too long to be a short summary")
-            check_text("disaster_report.summary", text)
-        for row in conn.execute("SELECT name FROM infrastructure"):
-            check_text("infrastructure.name", row["name"] or "")
-        columns = [row[1] for row in conn.execute("PRAGMA table_info(disaster_report)")]
-        if "body" in columns:
-            fail("disaster_report has a body column")
+def check_data() -> None:
+    data_dir = ROOT / "data" / "processed"
+    for name in (
+        "districts.json",
+        "admin_districts.json",
+        "weather_observation.json",
+        "disaster_report.json",
+        "source_status.json",
+        "flood.geojson",
+        "facilities.geojson",
+    ):
+        if not (data_dir / name).exists():
+            fail(f"data/processed/{name} is missing")
+    for row in store.rows("disaster_report"):
+        if "body" in row:
+            fail("disaster_report has a body key")
+        text = row.get("summary") or ""
+        if len(text) > 400:
+            fail("disaster_report.summary is too long to be a short summary")
+        check_text("disaster_report.summary", text)
+    for row in store.facilities():
+        check_text("infrastructure.name", row.get("name") or "")
 
 
 def check_counts(payloads: list[dict]) -> None:
@@ -375,7 +381,7 @@ def main() -> int:
         except Exception as exc:  # noqa: BLE001
             fail(f"resources.json: {exc}")
     check_counts(payloads)
-    check_database()
+    check_data()
     check_agent_docs()
     # Medical policy and vague-location failure are present somewhere.
     medical = False

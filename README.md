@@ -22,9 +22,9 @@ flowchart TD
   end
 
   subgraph L2["2 · Mubit gateway — gateway/route.py · routes, traces every stage to traces.jsonl, never reasons"]
-    places_db[("SQLite districts<br/>gazetteer snapshot")]:::store
+    places_db[("districts.json · admin_districts.json<br/>gazetteer snapshot")]:::store
     extract["Extract — system1/extract.py<br/>runs when a case arrives without fields<br/>needs · people · danger · location confidence"]
-    geo_db[("SQLite weather · flood extent · 4,218 facilities<br/>Open-Meteo and RID snapshots")]:::store
+    geo_db[("weather_observation.json · flood.geojson<br/>facilities.geojson: 4,218 facilities<br/>Open-Meteo and RID snapshots")]:::store
     enrich["Enrich — enrich/context.py<br/>rain · reservoirs · flood polygons<br/>nearest hospitals and shelters<br/>flags only, never changes priority"]
     memory["Memory — memory/adapter.py<br/>similar cases · past corrections<br/>mock files"]
     mmem["Mubit memory<br/>memory/mubit.py raises"]:::unwired
@@ -180,7 +180,7 @@ LLM calls go through `llm/client.py` / `llm/openai_client.py`. `llm.provider_rou
 
 ## Data
 
-Public sources and row counts are in `data/SOURCES.md`. Raw responses are gitignored under `data/raw/`. SQLite is the overnight store. The production database is `TODO_HUMAN` in `config/decisions.yaml`.
+Public sources and row counts are in `data/SOURCES.md`. Raw responses are gitignored under `data/raw/`. Committed JSON in `data/processed/` is what the runtime reads; `make ingest` rebuilds it through a gitignored SQLite build cache at `data/raw/ingest.sqlite`. The production database is `TODO_HUMAN` in `config/decisions.yaml`.
 
 ## Infra
 

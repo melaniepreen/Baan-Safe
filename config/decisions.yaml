@@ -37,7 +37,7 @@ ui:
   framework: TODO_HUMAN
 data:
   demo_event: TODO_HUMAN             # which flood event / provinces anchor the demo
-  production_db: TODO_HUMAN          # SQLite is used tonight
+  production_db: TODO_HUMAN          # committed JSON in data/processed tonight
 correction_loop:
   graduation_threshold: 2            # decided: matching S2 decisions before a pattern graduates to a System 1 rule (RL loop, eval/rl/); P1 and complex patterns become recommendations instead
   escalation_threshold: 2            # decided: distinct human-corrected cases before a pattern escalates to System 2 as complex_situation (gateway/graduation.py; never into System 1)

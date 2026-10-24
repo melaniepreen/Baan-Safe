@@ -388,21 +388,15 @@ def _search_points() -> list[dict]:
 
 
 def _district_coords() -> list[tuple[str, str, float, float]]:
-    try:
-        from ingest.db import DB_PATH, connect
+    from ingest import store
 
-        if DB_PATH.exists():
-            with connect() as conn:
-                rows = conn.execute(
-                    "SELECT name_en, province, lat, lon FROM admin_districts"
-                ).fetchall()
-            return [
-                (row["name_en"], row["province"] or "", row["lat"], row["lon"])
-                for row in rows
-                if row["lat"] is not None and row["lon"] is not None
-            ]
-    except Exception:  # noqa: BLE001 — snapshot centres still work
-        pass
+    rows = [
+        (row["name_en"], row["province"] or "", row["lat"], row["lon"])
+        for row in store.rows("admin_districts")
+        if row["lat"] is not None and row["lon"] is not None
+    ]
+    if rows:
+        return rows
     payload = read_snapshot("gazetteer") or {}
     coords = []
     for row in payload.get("districts") or []:

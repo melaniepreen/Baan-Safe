@@ -6,7 +6,7 @@ import os
 
 from fastapi import HTTPException
 
-from ingest.db import db_exists
+from ingest import store
 
 
 def _value(name: str, default: str) -> str:
@@ -29,7 +29,7 @@ def enrich_impl() -> str:
     raw = os.environ.get("ENRICH_IMPL", "").strip().lower()
     if raw:
         return raw
-    return "data" if db_exists() else "off"
+    return "data" if store.available() else "off"
 
 
 def impl_snapshot() -> dict[str, str]:

@@ -211,11 +211,11 @@ def _extract(case: CaseState) -> None:
 
 
 def _enrich(case: CaseState) -> None:
-    from ingest.db import db_exists
+    from ingest import store
 
     mode = os.environ.get("ENRICH_IMPL", "").strip().lower()
     if not mode:
-        mode = "data" if db_exists() else "off"
+        mode = "data" if store.available() else "off"
     if mode == "off":
         return
     ctx = location_context(case.fields.location, None, None)

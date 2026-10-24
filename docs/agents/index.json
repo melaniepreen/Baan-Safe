@@ -157,15 +157,18 @@
     {
       "path": "docs/agents/data-ingest.md",
       "title": "Data ingest",
-      "summary": "Public sources into SQLite. ReliefWeb sends no request. DDPM was not added.",
+      "summary": "Public sources into committed JSON; SQLite is the ingest build cache. ReliefWeb sends no request. DDPM was not added.",
       "keywords": [
         "ingest",
         "sqlite",
+        "json",
         "reliefweb",
         "ddpm"
       ],
       "files": [
         "ingest/__main__.py",
+        "ingest/store.py",
+        "ingest/export.py",
         "ingest/reliefweb.py",
         "data/SOURCES.md"
       ]

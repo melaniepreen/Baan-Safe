@@ -38,7 +38,7 @@ from eval.replay import replay
 from fixtures.load import all_ids, list_entries, load_case, load_fixture
 from config.settings import DecisionRequired
 from gateway.route import handle
-from ingest.db import DB_PATH, connect
+from ingest import store
 from memory.adapter import retrieve, store_correction
 from training.log import append_event
 from mocks.loader import (
@@ -164,16 +164,13 @@ def execute(case: CaseState) -> RouterDecision:
 @router.get("/health", response_model=Health)
 def health() -> Health:
     freshness: dict[str, Any] = {}
-    if DB_PATH.exists():
-        with connect() as conn:
-            for row in conn.execute(
-                "SELECT source, fetched_at, row_count, status FROM source_status"
-            ):
-                freshness[row["source"]] = {
-                    "fetched_at": row["fetched_at"],
-                    "row_count": row["row_count"],
-                    "status": row["status"],
-                }
+    if store.available():
+        for row in store.rows("source_status"):
+            freshness[row["source"]] = {
+                "fetched_at": row["fetched_at"],
+                "row_count": row["row_count"],
+                "status": row["status"],
+            }
     return Health(status="ok", impl=impl_snapshot(), data_freshness=freshness)
 
 
