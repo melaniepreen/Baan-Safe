@@ -8,7 +8,7 @@ BaanSafe is a flood call-triage scaffold for a synthetic Thai flood. A call is t
 
 Demo story, as the town page runs it (`ui/sim/`, `make serve`, `http://127.0.0.1:8000/ui/sim/`):
 
-- The picture is a placeholder block. `data.demo_event` is `TODO_HUMAN`. Household districts are the fixture districts (Lampang, Phrae, Nan, Phayao). Street names in `ui/sim/data/streets.json` are marked placeholder.
+- The picture is a placeholder block. `data.demo_event` is `TODO_HUMAN`. Household districts are the fixture districts (Lampang, Phrae, Nan, Phayao). Street names in `ui/sim/data/streets.json` are marked placeholder. `ui/sim/data/places.json` labels four buildings with OpenStreetMap names from those provinces.
 - The phone sends a line by matching it to one of 20 fixture ids (`ui/sim/data/town.json` `calls`, same order as `fixtures/index.json`), then `POST /cases` with that `fixture_id` and `POST /cases/{id}/turns` with the typed or spoken text.
 - The gateway returns a `RouterDecision`. `final_priority` lights the house (P1 red, P2 amber, P3 yellow, P4 blue). The phone speaks a scripted line from `ui/sim/data/replies.json`, not a live operator.
 - The right-hand feed plays `ui/sim/data/sim_events.json`. Every card is badged simulated. `confidence_threshold` is 0.8, the same number as `system_1_min_confidence`. The accept/reject story is still the page's scores, not `source_outcomes[0].system`.
@@ -17,7 +17,8 @@ Demo story, as the town page runs it (`ui/sim/`, `make serve`, `http://127.0.0.1
 
 Scope that is in the tree tonight:
 
-- Gateway: keyword-extract when fields are empty, enrich, mock memory, graduation (`complex_situation` when a pattern has enough human corrections), field precheck, one stub outcome, `router.merge`. `router/ledger.py` reserves stock in this process only.
+- Gateway: keyword-extract when fields are empty, enrich, mock memory, graduation (`complex_situation` when a pattern has enough human corrections), field precheck, one stub outcome, `router.merge`. `router/ledger.py` reserves stock in this process only. `GET /resources` lists OpenStreetMap places ahead of the fictional units.
+- `fixtures/synthetic` has 240 calls. `make export-laya` writes Laya JSONL. `make laya-train` skips unless `LAYA_TRAIN=1` and a GPU or a Modal task is present. Country packs under `countries/` are not imported.
 - System 1 rules (`system1/extract.py`, `system1/decide.py`) when `S1_IMPL=real` or `use_stubs=False`. The API default is `use_stubs=True`, so a normal `/turns` call still uses the stub outcome file.
 - System 2, Sapling's live client, aid eligibility, aid exceptions, and the Mubit memory client still raise or return HTTP 501.
 - Integration named in `OWNERSHIP.md`: `S1_IMPL=real`, `S2_IMPL=real`, and `MEMORY_IMPL=mubit` together. Contracts stay frozen at `v0.3-contracts` until then. CR-003 (`Dispatch`, `RouterDecision.dispatches`) is tagged `v0.3-contracts`.
@@ -30,12 +31,12 @@ Scope that is in the tree tonight:
 |---|---|---|---|
 | Gateway turn | Moly | live | `gateway/route.py` `handle` |
 | Field precheck | Moly | live. Decided value `field precheck` | `gateway/chooser.py`, `config/escalation.yaml` |
-| Keyword extract | Moly | live. English phrase and regex families, plus caller-confirmed operator facts. A matched district is `District, Province`. An ambiguous name gets confidence 0.6, which the precheck sends to System 2. Skipped when the case already has fields and `keyword_extraction` is absent | `system1/extract.py`, `ingest/admin_districts.py` |
+| Keyword extract | Moly | live. English phrase and regex families, plus caller-confirmed operator facts. District names match Thai and English. A matched district is `District, Province`. An ambiguous name gets confidence 0.6, which the precheck sends to System 2. Skipped when the case already has fields and `keyword_extraction` is absent | `system1/extract.py`, `data/snapshots/gazetteer.json` |
 | System 1 decide | Moly | live rules. Default request uses the stub file instead | `system1/decide.py`, `mocks/s1_stub/` |
 | Aid eligibility | Melanie | stub. `check` raises. `GET /aid/eligibility` is 501 | `system1/aid_eligibility.py` |
-| Router merge | Moly | live. Always called from `handle`. Provisional dispatches reserve stock in this process | `router/merge.py`, `router/ledger.py` |
+| Router merge | Moly | live. Always called from `handle`. Provisional dispatches reserve stock in this process. With no district match, the first usable unit wins, and OpenStreetMap units are listed first | `router/merge.py`, `router/ledger.py`, `mocks/loader.py` |
 | Auth | Moly | TODO_HUMAN. A note is recorded. The request is not rejected | `gateway/auth.py` |
-| Enrichment | shared | live when SQLite exists, else off | `enrich/context.py`, `ingest/db.py` |
+| Enrichment | shared | live when SQLite exists, else off. `GET /context` always returns `matched_province`, `near_flood_extent`, `distance_to_live_flood_m`, and `regional_reservoirs`. Those flags do not change priority | `enrich/context.py`, `gateway/route.py`, `api/routes/endpoints.py` |
 | Policy pre-check | Moly | live notes only. Does not change priority | `gateway/policy.py` |
 | Memory mock | Melanie | live for fixture ids | `memory/adapter.py`, `mocks/memory_context/` |
 | Mubit memory client | Melanie | stub. Raises. Three keys are TODO_HUMAN | `memory/mubit.py` |
@@ -47,7 +48,7 @@ Scope that is in the tree tonight:
 | Policy corpus | Melanie | live `GET/POST /policies`. `flood.yaml` is in the loaded corpus. Packs under `countries/` are not imported. `policies.authoritative_set` is TODO_HUMAN | `policies/service.py`, `policies/corpus.py`, `api/routes/policies.py` |
 | Town phone and feed | `OWNERSHIP.md` lists `ui/` as Moly. The phone, feed, and rulebook are what the demo consumes | live page. Feed and vehicle picture are simulated | `ui/sim/sim.js`, `ui/sim/data/` |
 | Correct this | Moly | live post of a v1 correction | `ui/correct.js`, `ui/player.html` |
-| Training log and export | shared log, Melanie eval | live append and export. Fine-tune refuses a TODO_HUMAN base model | `training/log.py`, `training/export.py`, `infra/modal/finetune_job.py` |
+| Training log and export | shared log, Melanie eval | live append and export. `fixtures/synthetic` also exports SetFit rows and Laya JSONL. `laya-train` skips without `LAYA_TRAIN=1`. The Modal fine-tune still refuses a TODO_HUMAN base model and does not read the synthetic rows | `training/log.py`, `training/export.py`, `training/synthetic_export.py`, `training/laya_export.py`, `scripts/laya_train.py` |
 | Held-out eval | Melanie | stub scoreboard. Does not load weights. Promotion stays false | `eval/learning/` |
 | Extract eval | Moly rules, shared fixtures | live comparison of extract vs hand-filled fields. Writes `eval/out/extract.md` | `eval/extract_eval.py` |
 | Caller sim | Melanie | scripted path is live. Model backend is TODO_HUMAN | `sim/env.py`, `sim/coach.py` |
@@ -60,11 +61,16 @@ Models are Pydantic v2 with `extra=forbid`. JSON Schema copies are `contracts/sc
 
 ### Must provide
 
-- To match CR-003, Moly provides `Dispatch` and `RouterDecision.dispatches`. The tag is `v0.3-contracts`. Contracts stay frozen there until the 19:00 integration. Melanie's town must show the router's reserved `resource_id` rather than picking its own unit. `ui/sim/sim.js` still does not read `dispatches`.
+- To match CR-003, Moly provides `Dispatch` and `RouterDecision.dispatches`. The tag is `v0.3-contracts`. Contracts stay frozen there until the 19:00 integration. Melanie's town must show the router's reserved `resource_id` rather than picking its own unit. The drawn units are the ids in `mocks/resources.json` (`boat-fictional-01`, `amb-fictional-01`, `shelter-fictional-01`, `welfare-fictional-01`). `ui/sim/sim.js` still does not read `dispatches`.
+- To match `GET /context`, Moly returns `matched_province`, `near_flood_extent`, `distance_to_live_flood_m`, and `regional_reservoirs` on every response. While enrichment is off those values stay null or false, plus `"enrich": "off"`.
+- To match `GET /resources`, the body keeps `boats`, `ambulances`, `shelters`, and `welfare_points`. Boats, ambulances, and shelters now include OpenStreetMap units with `id` `{kind}-{osm_type}-{osm_id}` and `capacity` null, listed before the fictional units. Welfare points stay the fictional file.
+- `near_flood_extent` is a data flag only. It is not in `route_to_system_2_if_any`, and it never changes priority.
+- System 1 matches Thai district names as well as English. A Thai hit uses the gazetteer snapshot, and SQLite `name_th` when that database exists. Phrase families for needs, danger, and vulnerability stay English.
+- Country packs under `countries/` are documents only. Nothing there is imported. Thailand stays the demo.
 - To match graduation, System 2 treats the `complex_situation` flag and the `graduated-*` correction `MemoryItem` as recommendations only. The summary says the rule sets no priority. Graduation never moves a pattern into System 1.
 - To match the router, Melanie must return exactly one `Outcome` with `system` `system_2`. A Sapling `violation` must surface as `requires_human`, as the `route`, or as `missing_evidence`. `merge` does not read a `sapling_verdict` string.
 - To match the chooser, both sides must keep the flag strings `safeguarding`, `conflicting_evidence`, `aid_exception`, and `complex_situation`, and the `ExtractedFields` names (`location`, `location_confidence`, `people_count`, `vulnerable`, `medical`, `danger`, `needs`), stable.
-- To match extract, Moly keeps it English-only. Caller turns count, plus an operator question the caller confirms with yes, yeah, correct, or that's right. Those confirmed facts count for `vulnerable`, `people_count`, and `danger` only. `F15` is still misrouted: the child is only in an operator turn, and the caller does not confirm it.
+- To match extract, Moly keeps the phrase families English-only and matches district names in Thai and English. Caller turns count, plus an operator question the caller confirms with yes, yeah, correct, or that's right. Those confirmed facts count for `vulnerable`, `people_count`, and `danger` only. `F15` is still misrouted: the child is only in an operator turn, and the caller does not confirm it.
 - `system2.orchestrator_model` and `system2.max_latency_ms` are `TODO_HUMAN` and block Melanie. `orchestrate` raises before Sapling and before `llm.complete`.
 - On #6 and #7, `ui/sim/README.md` and `ui/sim/sim.js` still say `gateway.route_chooser` is `TODO_HUMAN`. On main the decided value is `field precheck`.
 
@@ -84,7 +90,7 @@ Minimal turn:
 { "t_ms": 1000, "speaker": "caller", "text": "Our rice is finished." }
 ```
 
-Mismatch: open item 5. `demoChoose` and `ui/sim/README.md` still say `gateway.route_chooser` is `TODO_HUMAN`. The decided value is `field precheck`. The phone posts `fixture_id`, so extract and the chooser never see the spoken text.
+Mismatch: open item 6. `demoChoose` and `ui/sim/README.md` still say `gateway.route_chooser` is `TODO_HUMAN`. The decided value is `field precheck`. The phone posts `fixture_id`, so extract and the chooser never see the spoken text.
 
 ### 3.2 Extracted fields to the chooser and to System 1
 
@@ -102,9 +108,11 @@ Chooser triggers (`config/escalation.yaml` `route_to_system_2_if_any`), any one 
 - `policy_flags` contains `safeguarding`, `conflicting_evidence`, `aid_exception`, or `complex_situation`
 - `needs` contains `rescue`, `medical`, or `aid_payment`
 
+`near_flood_extent`, `heavy_rain_forecast`, `heavy_rain_observed`, `in_active_flood_extent`, and `repeat_flood_area` are not in that list. The gateway attaches them as data flags. They do not change priority or the route.
+
 `extract` reads caller turns, plus an operator question the next caller sentence confirms (`yes`, `yeah`, `correct`, or `that's right`). Confirmed operator text counts for `vulnerable`, `people_count`, and `danger` only, never for needs or flags. A negator in the three words before a match drops it. Aid phrases and minimising phrases are exempt: "we cannot get the payment" and "not eligible" stay aid signals. Suggested flags are `conflicting_evidence` (minimising language plus danger, rescue, medical, or a child, elderly person, or immobile person), `safeguarding` (a child and an alone-phrase), and `aid_exception` (an aid phrase plus a refusal). Water at a door, step, or inside a room, or in the street, adds danger `rising_water`. That also adds need `rescue` when a child, elderly person, immobile person, or oxygen-dependent person was extracted, or when the water is at the building and evacuation was not already a need. "bus shelter" is not a shelter need.
 
-To match the chooser, Melanie must leave those field names and flag strings as they are when she builds a non-fixture case. Moly must keep `extract` English-only. A confirmed operator question counts for `vulnerable`, `people_count`, and `danger` only. `system1.extraction_method` is `rules-only`. `system1.extraction_model` stays `TODO_HUMAN` and the rules do not read it.
+To match the chooser, Melanie must leave those field names and flag strings as they are when she builds a non-fixture case. Moly must keep the phrase families English-only. District names match Thai and English. A confirmed operator question counts for `vulnerable`, `people_count`, and `danger` only. `system1.extraction_method` is `rules-only`. `system1.extraction_model` stays `TODO_HUMAN` and the rules do not read it.
 
 Minimal fields the fast path can accept:
 
@@ -120,7 +128,7 @@ Minimal fields the fast path can accept:
 }
 ```
 
-Mismatch: `make extract-eval` scores extract against hand-filled fixture fields, and again against the scripted sim callers. An unsafe answer is a case whose true fields go to System 2 while the extracted fields get a System 1 answer with `requires_human` false. Fixture cases on the phone never take the extract path. `F15` is still misrouted for that reason: hand fields include `vulnerable: child`, the word "child" is only in an operator turn ("I can hear a child crying"), and caller text says "They are upset" and "invented bus shelter". Open item 6: `G01`–`G04` are labelled `expected.system` `system_1` with need `rescue`, and `config/escalation.yaml` routes `rescue` to System 2. Town `calls[].expected_system` is the fixture label, not the chooser's result.
+Mismatch: `make extract-eval` scores extract against hand-filled fixture fields, and again against the scripted sim callers. An unsafe answer is a case whose true fields go to System 2 while the extracted fields get a System 1 answer with `requires_human` false. Fixture cases on the phone never take the extract path. `F15` is still misrouted for that reason: hand fields include `vulnerable: child`, the word "child" is only in an operator turn ("I can hear a child crying"), and caller text says "They are upset" and "invented bus shelter". Open item 7: `G01`–`G04` are labelled `expected.system` `system_1` with need `rescue`, and `config/escalation.yaml` routes `rescue` to System 2. Town `calls[].expected_system` is the fixture label, not the chooser's result.
 
 ### 3.3 Memory items to System 1 and the router
 
@@ -184,7 +192,7 @@ Minimal System 1 outcome:
 
 `merge` next action, first match: `supervisor_escalation` or policy flag `safeguarding` → `escalate_to_supervisor`; `aid_caseworker` → `escalate_to_supervisor`; `escalate` → `escalate_to_supervisor`; `duplicate_merge` → `finalize_case`; any `missing_evidence`, a `next_question`, or no `fields.location` → `ask_next_question`; `information_only` → `finalize_case`; else `create_provisional_dispatch`.
 
-Dispatch fan-out only for that last action, one `Dispatch` per mapped need: `rescue`→`boat`, `medical`→`ambulance`, `water` and `food`→`welfare_point`, `shelter` and `evacuation`→`shelter`. `power`, `information`, and `aid_payment` produce none. A unit this case already holds wins, else a same-district unit (district name contained in `fields.location`), else the first usable unit, else `status=unfilled` and `resource_id` null. Usable means `mocks/resources.json` `available` minus reservations other cases hold in `router/ledger.py`. The JSON file is not rewritten. Holds live in this process and reset on restart.
+Dispatch fan-out only for that last action, one `Dispatch` per mapped need: `rescue`→`boat`, `medical`→`ambulance`, `water` and `food`→`welfare_point`, `shelter` and `evacuation`→`shelter`. `power`, `information`, and `aid_payment` produce none. The turn uses `load_dispatch_resources()`: OpenStreetMap boats, ambulances, and shelters from `data/snapshots/places.json`, then the fictional units in `mocks/resources.json`. Welfare points are fictional only. A unit this case already holds wins, else a same-district unit (district name contained in `fields.location`), else the first usable unit, else `status=unfilled` and `resource_id` null. Usable means `available` minus reservations other cases hold in `router/ledger.py`. Neither JSON file is rewritten. Holds live in this process and reset on restart. With no district match, that first usable unit is an OpenStreetMap unit when the kind has one. Open item 3.
 
 `Dispatch` required: `need`, `resource_kind` (`boat`, `ambulance`, `shelter`, `welfare_point`), `status` (`provisional` or `unfilled`). Optional: `resource_id`, `same_district` (default false), `note`.
 
@@ -205,7 +213,7 @@ The phone reads these fields and no others for the reply, the light, and the fee
 
 `operatorReply` uses `final_priority`, `final_route`, `source_outcomes[0].needs`, `source_outcomes[0].next_question`, and `requires_human`. The vehicle comes from `ui/sim/data/rulebook.json` (`matchRule`), which looks at `final_priority`, `final_route`, outcome `needs`, the typed text, and whether the building's `water_m` is at least 0.25. The rulebook file says it is a draft and not repo policy.
 
-To match the phone, Moly must keep those `RouterDecision` and `Outcome` fields populated on every turn, including stub turns. `source_outcomes` must have one entry. Melanie must keep reading `final_priority` for the house light. CR-003 is tagged `v0.3-contracts`. Melanie's town must show the router's reserved `resource_id`. `sim.js` still does not read `dispatches`, `resource_id`, or `resource_kind`.
+To match the phone, Moly must keep those `RouterDecision` and `Outcome` fields populated on every turn, including stub turns. `source_outcomes` must have one entry. Melanie must keep reading `final_priority` for the house light. CR-003 is tagged `v0.3-contracts`. Melanie's town must show the router's reserved `resource_id`, and that id has to be one the block can draw. The placed ids are the four fictional ids in `mocks/resources.json`. `sim.js` still does not read `dispatches`, `resource_id`, or `resource_kind`. An OpenStreetMap id is not on the block.
 
 Minimal decision the phone can render:
 
@@ -242,7 +250,7 @@ Minimal decision the phone can render:
 }
 ```
 
-Mismatch: open item 1 below. The feed's ACCEPTED/REJECTED verdict comes from `sim_events.json` scores. `confidence_threshold` is now 0.8, matching `system_1_min_confidence`. `learning.promote_after` is still 3, and the copy says the fast path can take the call. That is not `source_outcomes[0].system`, and it is not graduation. It can say ACCEPTED while that system is `system_2`, or the reverse. Sapling cards use a simulated `verdict` (`supported`, `violation`, `missing`, `unsure`). The gateway does not add `sapling_verdict` on the stub path. `contradicted` is a real Sapling label and is not one of the simulated card verdicts. There is no `GET /cases/{id}/events` stream. `BaanSafeSim.attachLiveFeed` is the unused hook.
+Mismatch: open item 4 below. The feed's ACCEPTED/REJECTED verdict comes from `sim_events.json` scores. `confidence_threshold` is now 0.8, matching `system_1_min_confidence`. `learning.promote_after` is still 3, and the copy says the fast path can take the call. That is not `source_outcomes[0].system`, and it is not graduation. It can say ACCEPTED while that system is `system_2`, or the reverse. Sapling cards use a simulated `verdict` (`supported`, `violation`, `missing`, `unsure`). The gateway does not add `sapling_verdict` on the stub path. `contradicted` is a real Sapling label and is not one of the simulated card verdicts. There is no `GET /cases/{id}/events` stream. `BaanSafeSim.attachLiveFeed` is the unused hook.
 
 ### 3.6 Corrections to memory and to a MemoryRecord
 
@@ -342,23 +350,35 @@ To match the router, Melanie must return exactly one `Outcome` with `system` `sy
 
 Today this boundary does not run on a request. `system2.orchestrator_model` and `system2.max_latency_ms` are `TODO_HUMAN` and block Melanie: `orchestrate` raises on them before `llm.complete` and before Sapling. `S2_IMPL=real` surfaces that as HTTP 501.
 
+### 3.9 Context and resources
+
+Producer: Moly `enrich.context.location_context` and `mocks.loader.load_dispatch_resources`. Consumer: `GET /context` and `GET /resources`. The town does not call either endpoint. `ui/sim/data/places.json` is a label file written from the same place snapshot.
+
+`GET /context` query: optional `district`, `lat`, `lon`. The body is the `location_context` dict. New keys on every response: `matched_province` (str or null), `near_flood_extent` (bool), `distance_to_live_flood_m` (number or null), `regional_reservoirs` (object or null). `regional_reservoirs`, when set, is `{date, scope, dams}` for Lampang, Phrae, Nan, or Phayao. When `ENRICH_IMPL` is off, or no SQLite file exists, the handler returns that dict at the empty defaults and adds `"enrich": "off"`. There is no SQLite file in the tree, so a normal request takes that path. Open-Meteo and RID snapshots are read only inside the SQLite path.
+
+`GET /resources` returns `ResourcesSnapshot`: `boats`, `ambulances`, `shelters`, `welfare_points`. Each unit has `id`, `kind`, `name`, `district`, `capacity`, `available`, `status`. An OpenStreetMap unit has `capacity` null, `available` 1, and `id` `{kind}-{osm_type}-{osm_id}` (`shelter-way-679376537` is the shape). Hospitals map to `ambulance`, schools and temples to `shelter`, boat rentals and ferry terminals to `boat`.
+
+To match the block, Moly must put a `resource_id` from `mocks/resources.json` on a dispatch the sim is expected to draw. Melanie must not invent a unit id. Country packs do not change either endpoint.
+
 ## 4. Open items
 
-These are conflicts on `ae01643`. They are not decisions in `config/decisions.yaml`.
+These are conflicts on `9489cf3` (`7c506d7` plus the diagram note). They are not decisions in `config/decisions.yaml`.
 
-1. **The town learning story still promotes into System 1.** `ui/sim/data/sim_events.json` `learning.promote_after` is 3. `ui/sim/README.md` and `ui/sim/patterns.js` say that after that many repeats the fast path can take the call. `correction_loop.graduation_threshold` is 2, and `gateway/graduation.py` sends the pattern to System 2 as `complex_situation`. It never moves a pattern into System 1. `confidence_threshold` in the same file is 0.8, which now matches `system_1_min_confidence`. Melanie should align the promote-after story with graduation. The ACCEPTED/REJECTED badge is still the page scores, not `source_outcomes[0].system`.
-2. **`town.json` edits versus a rebuild.** On main, `calls` `F08` has `expected_route` `welfare_distribution` and `F09` has a `similar_case` memory summary. `ui/sim/build_town.py` on main copies `expected_route` from the fixture and `memory` `kind` plus `summary` from `mocks/memory_context/`. #6's `ui/sim/data/town.json` already has `F09` `memory` as `[]` while `F08` is `welfare_distribution`. Whether the next `build_town.py` run on that branch drops main's F09 line is unverified. This note did not run the script.
-3. **Stock holds do not survive a second container.** `router/ledger.py` keeps reservations in a process dict. They reset on restart and are not written to disk. #7 hosts the API as one Modal ASGI app and says cases stay in memory until the container scales down. Several containers would each hold their own stock. Recommendation: pin that app to one container, or persist the holds. This note does not pick which.
-4. **#6 and #7 are 10 commits behind `main`.** `origin/cursor/town-visuals-1370` (#6, https://github.com/melaniepreen/Baan-Safe/pull/6) and `origin/cursor/modal-gateway-1370` (#7, https://github.com/melaniepreen/Baan-Safe/pull/7, stacked on #6) both lack `11e0859`, `aa3adde`, `52d3123`, `e5db4c7`, `0679725`, `26b74a1`, `2ecbfc3`, `cc020d4`, `45ba930`, and `ae01643`. They need updating and a test run before merging.
-5. **Phone chooser text is stale, and spoken text never reaches extract.** On main, and in the README and `sim.js` text on #6 and #7, `gateway.route_chooser` is still described as `TODO_HUMAN`. The decided value is `field precheck`. `runPlaceCall` posts `fixture_id`, so extract and the chooser never see the spoken sentence. Recommendation: Melanie sends the free text as a case with no fields. `POST /cases` already accepts a `transcript` with `fixture_id` and `fields` omitted. Extract runs on the following `POST /cases/{id}/turns`, or on `POST /triage`.
-6. **`G01`–`G04` labels still say System 1.** Each fixture `expected.system` is `system_1` with need `rescue`. The precheck routes `rescue` to System 2. `mocks/s2_stub/G01.json` through `G04.json` are the stub outcomes that path loads. `G01.json`'s reason still says the threshold is unset. The threshold is 2. Recommendation: relabel the fixtures, or change their need. This note does not do either.
+1. **#6 cannot merge.** `origin/cursor/town-visuals-1370` is `31078af` (https://github.com/melaniepreen/Baan-Safe/pull/6). A merge with `main` conflicts in `ui/sim/README.md`, `ui/sim/build_town.py`, and `ui/sim/data/town.json`. `ui/sim/sim.js` changed on both sides and git auto-merged it; this note did not review that merge. Both #6 and #7 are 15 commits behind `main`. Proposed fix: Melanie merges `main`, keeps #6's town, and regenerates `town.json`. This note did not run that rebuild. #7 (https://github.com/melaniepreen/Baan-Safe/pull/7) is still `43aa7ca`. Its merge-base with #6 is `00954b1`, so it does not contain `31078af`.
+2. **The demo place is two maps.** #6 draws Sukhumvit, Watthana. `places.json` and the committed snapshots cover Lampang, Phrae, Nan, and Phayao. `data.demo_event` is `TODO_HUMAN`. A person has to pick one. This note does not.
+3. **A call with no district match can reserve a unit the sim cannot draw.** `load_dispatch_resources` lists OpenStreetMap units first. `router/merge.py` then takes `units[0]`. That id looks like `shelter-way-{osm_id}` and is not in `mocks/resources.json`. The block only places `boat-fictional-01`, `amb-fictional-01`, `shelter-fictional-01`, and `welfare-fictional-01`. Proposed fix: list the fictional units first, or make the fallback skip OpenStreetMap units. This note does not pick which.
+4. **The town learning story still promotes into System 1.** `ui/sim/data/sim_events.json` `learning.promote_after` is 3. `ui/sim/README.md` and `ui/sim/patterns.js` say that after that many repeats the fast path can take the call. `correction_loop.graduation_threshold` is 2, and graduation sends the pattern to System 2. It never moves a pattern into System 1. `confidence_threshold` is 0.8. Melanie should align the promote-after story with graduation.
+5. **Stock holds do not survive a second container.** `router/ledger.py` keeps reservations in a process dict. They reset on restart and are not written to disk. #7 says cases stay in memory until the container scales down. Several containers would each hold their own stock. Recommendation: pin that app to one container, or persist the holds. This note does not pick which.
+6. **Phone chooser text is stale, and spoken text never reaches extract.** On main, and in the README and `sim.js` text on #6 and #7, `gateway.route_chooser` is still described as `TODO_HUMAN`. The decided value is `field precheck`. `runPlaceCall` posts `fixture_id`, so extract and the chooser never see the spoken sentence. Recommendation: Melanie sends the free text as a case with no fields. `POST /cases` already accepts a `transcript` with `fixture_id` and `fields` omitted. Extract runs on the following `POST /cases/{id}/turns`, or on `POST /triage`.
+7. **`G01`–`G04` labels still say System 1.** Each fixture `expected.system` is `system_1` with need `rescue`. The precheck routes `rescue` to System 2. `mocks/s2_stub/G01.json` through `G04.json` are the stub outcomes that path loads. `G01.json`'s reason still says the threshold is unset. The threshold is 2. Recommendation: relabel the fixtures, or change their need. This note does not do either.
 
 ## 5. Decide before 19:00 integration
 
 `OWNERSHIP.md` names the integration as `S1_IMPL=real`, `S2_IMPL=real`, and `MEMORY_IMPL=mubit` together. Contracts stay frozen at `v0.3-contracts` until then. This list does not pick the remaining choice.
 
-- Free text versus fixture ids on the phone. Today the phone posts a fixture id. `POST /cases` already accepts a transcript and empty fields (open item 5).
-- The town showing `dispatches` is no longer an open choice. Melanie shows the router's reserved `resource_id` (must-provide). `sim.js` does not read it yet.
+- Free text versus fixture ids on the phone. Today the phone posts a fixture id. `POST /cases` already accepts a transcript and empty fields (open item 6).
+- Which place the picture is. `data.demo_event` is `TODO_HUMAN` (open item 2). #6 draws Sukhumvit. The snapshots are Lampang, Phrae, Nan, and Phayao.
+- The town showing `dispatches` is no longer an open choice. Melanie shows the router's reserved `resource_id`, and that id is one of the four in `mocks/resources.json` (open item 3). `sim.js` does not read `dispatches` yet.
 
 ## 6. Open decisions
 
@@ -390,3 +410,4 @@ These leaves are `TODO_HUMAN` in `config/decisions.yaml`. Decided leaves, not op
 - 2026-10-24 `52d3123` — Open items for the stale phone chooser, `G01`–`G04`, the `4f9e631` overlap with Melanie's sim and `F08`, and the simulated feed. Must-provide lines for CR-003, one System 2 `Outcome`, stable flags, English extract, and the two System 2 TODOs. Diagrams unchanged.
 - 2026-10-24 `26b74a1` — District gazetteer, caller-confirmed facts, G stubs, in-process stock holds, and graduation to System 2 (`complex_situation`, threshold 2). CR-003 is `v0.3-contracts`. Open items for the town's promote-after story, the `town.json` rebuild, and the ledger across containers.
 - 2026-10-24 `ae01643` — `flood.yaml` joins the loaded corpus. Depth figures are not a 1669 colour and do not change the chooser or System 1. Country packs under `countries/` stay unloaded. #6 and #7 are 10 commits behind this SHA. The call diagram is still the `26b74a1` path.
+- 2026-10-24 `7c506d7` — Public snapshots, `near_flood_extent`, `GET /context` fields, Thai district names, and OpenStreetMap units on `GET /resources`. 240 synthetic calls and the Laya export. Country packs stay unloaded. #6 at `31078af` conflicts with main. The call diagram was already updated in `9489cf3` and is not redrawn here.
