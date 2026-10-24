@@ -57,6 +57,14 @@ Scope that is in the tree tonight:
 
 Models are Pydantic v2 with `extra=forbid`. JSON Schema copies are `contracts/schemas/*.json`. Required fields below are the schema `required` arrays.
 
+### Must provide
+
+- To match CR-003, Moly provides `Dispatch` and `RouterDecision.dispatches`. The change is accepted in `contracts/CHANGE_REQUESTS.md` and the tag is pending. Melanie's `ui/sim/sim.js` does not read `dispatches`.
+- To match the router, Melanie must return exactly one `Outcome` with `system` `system_2`. A Sapling `violation` must surface as `requires_human`, as the `route`, or as `missing_evidence`. `merge` does not read a `sapling_verdict` string.
+- To match the chooser, both sides must keep the flag strings `safeguarding`, `conflicting_evidence`, and `aid_exception`, and the `ExtractedFields` names (`location`, `location_confidence`, `people_count`, `vulnerable`, `medical`, `danger`, `needs`), stable.
+- To match extract, Moly keeps it English-only and limited to caller turns. `F15` is still misrouted: the child is only in an operator turn.
+- `system2.orchestrator_model` and `system2.max_latency_ms` are `TODO_HUMAN` and block Melanie. `orchestrate` raises before Sapling and before `llm.complete`.
+
 ### 3.1 Phone turn to the gateway
 
 Producer: the town phone (`ui/sim/sim.js` `runPlaceCall`). Consumer: Moly's `gateway.route.handle` via `api/routes/endpoints.py` `execute` (`use_stubs=True`).
@@ -73,7 +81,7 @@ Minimal turn:
 { "t_ms": 1000, "speaker": "caller", "text": "Our rice is finished." }
 ```
 
-Mismatch: `ui/sim/sim.js` and `ui/sim/README.md` still say `gateway.route_chooser` is `TODO_HUMAN`. The decided value is `field precheck`, and `gateway/chooser.py` runs for every case, including fixtures. The page still maps free text onto a fixture id. Fixture cases already have hand-filled `fields` and no `keyword_extraction` flag, so `gateway/route.py` `_extract` does not run, and the new sentence is not what the chooser sees.
+Mismatch: open item 1. `demoChoose` and `ui/sim/README.md` still say `gateway.route_chooser` is `TODO_HUMAN`. The decided value is `field precheck`. The phone posts `fixture_id`, so extract and the chooser never see the spoken text.
 
 ### 3.2 Extracted fields to the chooser and to System 1
 
@@ -109,7 +117,7 @@ Minimal fields the fast path can accept:
 }
 ```
 
-Mismatch: `make extract-eval` scores extract against hand-filled fixture fields, and again against the scripted sim callers. An unsafe answer is a case whose true fields go to System 2 while the extracted fields get a System 1 answer with `requires_human` false. Fixture cases on the phone never take the extract path, so the demo does not show that score. `F15` hand fields include `vulnerable: child`, but the word "child" is only in an operator turn ("I can hear a child crying"). Caller text says "They are upset" and "invented bus shelter", which extract does not treat as a child or a shelter need. Graduation fixtures `G01`–`G04` are labelled `expected.system` `system_1` with need `rescue`. The precheck routes `rescue` to System 2. The town labels are not that set. Town `calls[].expected_system` is the fixture label, not the chooser's result.
+Mismatch: `make extract-eval` scores extract against hand-filled fixture fields, and again against the scripted sim callers. An unsafe answer is a case whose true fields go to System 2 while the extracted fields get a System 1 answer with `requires_human` false. Fixture cases on the phone never take the extract path. `F15` is still misrouted for that reason: hand fields include `vulnerable: child`, the word "child" is only in an operator turn ("I can hear a child crying"), and caller text says "They are upset" and "invented bus shelter". Open item 2: `G01`–`G04` are labelled `expected.system` `system_1` with need `rescue`, and `config/escalation.yaml` routes `rescue` to System 2. Town `calls[].expected_system` is the fixture label, not the chooser's result.
 
 ### 3.3 Memory items to System 1 and the router
 
@@ -194,7 +202,7 @@ The phone reads these fields and no others for the reply, the light, and the fee
 
 `operatorReply` uses `final_priority`, `final_route`, `source_outcomes[0].needs`, `source_outcomes[0].next_question`, and `requires_human`. The vehicle comes from `ui/sim/data/rulebook.json` (`matchRule`), which looks at `final_priority`, `final_route`, outcome `needs`, the typed text, and whether the building's `water_m` is at least 0.25. The rulebook file says it is a draft and not repo policy.
 
-To match the phone, Moly must keep those `RouterDecision` and `Outcome` fields populated on every turn, including stub turns. `source_outcomes` must have one entry. Melanie must keep reading `final_priority` for the house light. She must treat `dispatches` as absent from the picture until she reads them: `sim.js` never reads `dispatches`, `resource_id`, or `resource_kind`.
+To match the phone, Moly must keep those `RouterDecision` and `Outcome` fields populated on every turn, including stub turns. `source_outcomes` must have one entry. Melanie must keep reading `final_priority` for the house light. CR-003 is accepted and the tag is pending. `sim.js` does not read `dispatches`, `resource_id`, or `resource_kind`. Whether the town should show them is on the 19:00 list.
 
 Minimal decision the phone can render:
 
@@ -231,7 +239,7 @@ Minimal decision the phone can render:
 }
 ```
 
-Mismatch: the feed's System 1 accept/reject is `sim_events.json` scores plus a page threshold of 0.75 (and pattern memory in `localStorage`). It can say ACCEPTED while `source_outcomes[0].system` is `system_2`, or the reverse. Sapling cards use a simulated `verdict` (`supported`, `violation`, `missing`, `unsure`). The gateway does not add `sapling_verdict` on the stub path. `contradicted` is a real Sapling label and is not one of the simulated card verdicts. There is no `GET /cases/{id}/events` stream. `BaanSafeSim.attachLiveFeed` is the unused hook.
+Mismatch: open item 4. The feed's ACCEPTED/REJECTED verdict comes from `sim_events.json` scores plus a page threshold of 0.75 (and pattern memory in `localStorage`), not from `source_outcomes[0].system`. It can say ACCEPTED while that system is `system_2`, or the reverse. Sapling cards use a simulated `verdict` (`supported`, `violation`, `missing`, `unsure`). The gateway does not add `sapling_verdict` on the stub path. `contradicted` is a real Sapling label and is not one of the simulated card verdicts. There is no `GET /cases/{id}/events` stream. `BaanSafeSim.attachLiveFeed` is the unused hook.
 
 ### 3.6 Corrections to memory and to a MemoryRecord
 
@@ -327,11 +335,27 @@ Producer: Melanie `system2.orchestrator.orchestrate` then `system2.sapling.verif
 
 Sapling runs only when `outcome.system` is `system_2`, `system2.use_banyan_sapling` is true, and the check is `aid_eligibility` or `denial` (`system2.sapling_scope`). `supported` leaves the outcome. `violation` sets `requires_human`, `route=supervisor_escalation`, and prefixes the reason. `unsure`, `missing`, and `contradicted` set `requires_human` and append `sapling_<verdict>` to `missing_evidence`. The committed client (`sapling.client=stub`) reads `mocks/sapling_stub/` and does not open a socket. `SAPLING_IMPL=live` raises while `sapling.hosting`, `sapling.gpu`, `sapling.model_id`, or `sapling.thai_handling` is `TODO_HUMAN`.
 
-To match the router, Melanie must return the `Outcome` from `verify_before_router` unchanged in shape. A `violation` or a human handoff has to be visible as `requires_human`, `route`, or `missing_evidence`, because `merge` does not look for a `sapling_verdict` string. Moly must keep mapping `aid_caseworker` and `supervisor_escalation` to `escalate_to_supervisor`, and must keep mapping `missing_evidence` to `ask_next_question` before any dispatch. He must not call Sapling from `system1/decide.py`.
+To match the router, Melanie must return exactly one `Outcome` with `system` `system_2`. A Sapling `violation` must surface as `requires_human`, as the `route`, or as `missing_evidence`, because `merge` does not look for a `sapling_verdict` string. The same is true of a human handoff (`unsure`, `missing`, `contradicted`). Moly must keep mapping `aid_caseworker` and `supervisor_escalation` to `escalate_to_supervisor`, and must keep mapping `missing_evidence` to `ask_next_question` before any dispatch. He must not call Sapling from `system1/decide.py`.
 
-Today this boundary does not run on a request. `orchestrate` raises on `system2.orchestrator_model` and `system2.max_latency_ms` before `llm.complete` and before Sapling. `S2_IMPL=real` surfaces that as HTTP 501.
+Today this boundary does not run on a request. `system2.orchestrator_model` and `system2.max_latency_ms` are `TODO_HUMAN` and block Melanie: `orchestrate` raises on them before `llm.complete` and before Sapling. `S2_IMPL=real` surfaces that as HTTP 501.
 
-## 4. Open decisions
+## 4. Open items
+
+These are conflicts on `52d3123`. They are not decisions in `config/decisions.yaml`.
+
+1. **Phone chooser text is stale, and spoken text never reaches extract.** `ui/sim/sim.js` `demoChoose` and `ui/sim/README.md` still say `gateway.route_chooser` is `TODO_HUMAN`. The decided value is `field precheck` (`gateway/chooser.py`). `runPlaceCall` posts `POST /cases` with `fixture_id`. Fixture cases already have hand-filled `fields` and no `keyword_extraction` flag, so `_extract` returns without reading the new sentence, and the chooser sees the fixture fields. Recommendation: Melanie sends the free text as a case with no fields. `POST /cases` already accepts that. `CreateCase` allows `transcript` with `fixture_id` and `fields` omitted (`extra` is forbidden). `create_case` then stores `fields` as an empty `ExtractedFields` and `caller_id_hash` as `synthetic:{case_id}` when the hash is omitted. A body with neither `fixture_id` nor `transcript` is HTTP 422. `POST /cases` does not call `handle`. Extract and the chooser run on the following `POST /cases/{id}/turns`, or on `POST /triage`.
+2. **`G01`–`G04` disagree with the chooser.** Each graduation fixture is labelled `expected.system` `system_1` with need `rescue`. `config/escalation.yaml` `needs_any` includes `rescue`, so the field precheck routes them to System 2. Recommendation: relabel them, or change their need. This note does not do either.
+3. **`4f9e631` edited Melanie's files.** That commit implements System 1 extract, the field precheck, and `router.merge`. It also changes `sim/env.py`, `sim/report.py`, `tests/test_sim.py`, `mocks/memory_context/F09.json`, and the `MemoryRecord` schema (`contracts/models.py`, `contracts/schemas/MemoryRecord.json`). It relabels `F08` from `duplicate_merge` to `welfare_distribution` (`F09` stays the duplicate). Melanie should pull and run `make test`.
+4. **The feed verdict is not the gateway decision.** ACCEPTED/REJECTED in `ui/sim/sim.js` comes from `ui/sim/data/sim_events.json` scores and a page threshold of 0.75 (`eventsFile.confidence_threshold`), not from `source_outcomes[0].system`. Recommendation: drive that verdict from the real decision.
+
+## 5. Decide before 19:00 integration
+
+`OWNERSHIP.md` names the integration as `S1_IMPL=real`, `S2_IMPL=real`, and `MEMORY_IMPL=mubit` together. Two choices are still open. This list does not pick them.
+
+- Free text versus fixture ids on the phone. Today the phone posts a fixture id. `POST /cases` already accepts a transcript and empty fields (open item 1).
+- Whether the town shows `dispatches`. `router.merge` fills them. `sim.js` does not read them (open item 4 is the separate feed-verdict question).
+
+## 6. Open decisions
 
 These leaves are `TODO_HUMAN` in `config/decisions.yaml`. Decided leaves, not open: `system1.extraction_method` `rules-only`, `gateway.route_chooser` `field precheck`, `system2.hosting` `openrouter via mubit gateway`, `system2.use_banyan_sapling` true, `system2.sapling_scope` `aid_eligibility,denial`, `sapling.client` `stub`, `llm.provider_route` `mubit`.
 
@@ -355,7 +379,8 @@ These leaves are `TODO_HUMAN` in `config/decisions.yaml`. Decided leaves, not op
 | `policies.authoritative_set` | Melanie. Sapling will not treat the corpus as the binding policy set. Rules still load by id. |
 | `modal.s1_gpu`, `modal.s1_model_id`, `modal.s2_gpu`, `modal.s2_model_id`, `modal.nemotron_size`, `modal.s2_quant`, `modal.finetune_gpu`, `modal.finetune_base_model`, `modal.stt_gpu`, `modal.stt_model_id` | Whoever deploys that app. The apps refuse `TODO_HUMAN`. The API process does not need them. |
 
-## 5. Changelog
+## 7. Changelog
 
 - 2026-10-24 `1e4ca79` — First PRD. Field precheck, System 1 rules, and `router.merge` are live on the default turn only as described above. System 2, the Sapling client, and Mubit memory remain stubs.
 - 2026-10-24 `11e0859` — Extractor covers water at or inside the door, immobility, a child alone, aid refusals, and minimising. Aid and minimising matches are not dropped for a negator. `F15` still hides the child in an operator turn.
+- 2026-10-24 `52d3123` — Open items for the stale phone chooser, `G01`–`G04`, the `4f9e631` overlap with Melanie's sim and `F08`, and the simulated feed. Must-provide lines for CR-003, one System 2 `Outcome`, stable flags, English extract, and the two System 2 TODOs. Diagrams unchanged.
