@@ -80,32 +80,56 @@
         {
           "id": "sap-rent",
           "fixture_id": "F17",
-          "en": "They said we cannot get the payment because we rent.",
-          "th": "เขาบอกว่าเราได้เงินช่วยเหลือไม่ได้เพราะเช่าบ้านอยู่"
+          "en": "They said we cannot get the flood relief aid because we rent.",
+          "th": "เขาบอกว่าเราได้เงินช่วยเหลือน้ำท่วมไม่ได้เพราะเช่าบ้านอยู่"
         },
         {
           "id": "sap-denied",
           "fixture_id": "F17",
-          "en": "The officer said the flood payment is denied because we rent.",
-          "th": ""
+          "en": "The officer said the flood relief aid is denied because we rent.",
+          "th": "เจ้าหน้าที่บอกว่าเงินช่วยเหลือน้ำท่วมไม่ผ่านเพราะเราเช่าบ้าน"
         },
         {
           "id": "sap-eligible",
           "fixture_id": "F17",
-          "en": "Can someone check whether our rented house is still eligible?",
-          "th": ""
+          "en": "Can someone check whether our rented house is still eligible for the flood relief aid?",
+          "th": "ช่วยตรวจได้ไหมว่าบ้านเช่าของเรายังได้เงินช่วยเหลือน้ำท่วมอยู่"
         },
         {
           "id": "sap-sister",
           "fixture_id": "F18",
-          "en": "My sister is staying with us. She is not on the payment list.",
-          "th": "พี่สาวมาอยู่ด้วย ชื่อเธอไม่อยู่ในรายชื่อเงินช่วยเหลือ"
+          "en": "My sister is staying with us. She is not on the aid list.",
+          "th": "พี่สาวมาอยู่ด้วย ชื่อเธอไม่อยู่ในรายชื่อเงินช่วยเหลือน้ำท่วม"
         },
         {
           "id": "sap-list",
           "fixture_id": "F18",
-          "en": "Please check the payment list. One person in the house was left off.",
-          "th": ""
+          "en": "Please check the aid list. One person in the house was left off the flood relief.",
+          "th": "ช่วยตรวจรายชื่อเงินช่วยเหลือน้ำท่วม มีคนในบ้านถูกตัดออก"
+        }
+      ]
+    },
+    {
+      "id": "location",
+      "label": "Landmarks",
+      "prompts": [
+        {
+          "id": "loc-temple",
+          "fixture_id": "F15",
+          "en": "I am next to a temple and surrounded by many trees, I'm on Soi Sukhumvit",
+          "th": "ฉันอยู่ข้างวัด รอบๆ มีต้นไม้เยอะ อยู่ซอยสุขุมวิท"
+        },
+        {
+          "id": "loc-chompoo",
+          "fixture_id": "F13",
+          "en": "I don't know the house number. I am near Baan Chompoo Apartment.",
+          "th": "ฉันไม่รู้บ้านเลขที่ อยู่ใกล้บ้านชมภูอพาร์ตเมนต์"
+        },
+        {
+          "id": "loc-khlong",
+          "fixture_id": "C01-a",
+          "en": "I am beside Khlong Saen Saep and I can see Wat That Thong. I don't know the house number.",
+          "th": "ฉันอยู่ริมคลองแสนแสบ และเห็นวัดธาตุทอง ไม่รู้บ้านเลขที่"
         }
       ]
     }

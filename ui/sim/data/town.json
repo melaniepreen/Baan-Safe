@@ -4753,7 +4753,7 @@
     {
       "id": "F17",
       "title": "Renter told they are not eligible",
-      "opening": "They said we cannot get the payment because we rent.",
+      "opening": "They said we cannot get the flood relief aid because we rent.",
       "building_id": "bldg-f17",
       "expected_priority": "P3",
       "expected_system": "system_2",
@@ -4763,7 +4763,7 @@
     {
       "id": "F18",
       "title": "Extra person not on the household list",
-      "opening": "My sister is staying with us. She is not on the payment list.",
+      "opening": "My sister is staying with us. She is not on the aid list.",
       "building_id": "bldg-f18",
       "expected_priority": "P3",
       "expected_system": "system_2",
@@ -17490,7 +17490,7 @@
         "member_ids": [
           "synthetic:f17"
         ],
-        "location_label": "Ban Luang District, Nan",
+        "location_label": "Soi Sukhumvit 40, Khlong Tan Nuea, Watthana",
         "people_count": 4
       },
       "fixture_id": "F17",
@@ -17504,7 +17504,7 @@
           "aid_payment"
         ],
         "requires_human": true,
-        "location": "Ban Luang District, Nan",
+        "location": "Soi Sukhumvit 40, Khlong Tan Nuea, Watthana",
         "people_count": 4,
         "vulnerable": [],
         "danger": [],
@@ -17532,7 +17532,7 @@
         "member_ids": [
           "synthetic:f18"
         ],
-        "location_label": "Chiang Muan District, Phayao",
+        "location_label": "Soi Sukhumvit 42, Khlong Tan Nuea, Watthana",
         "people_count": 5
       },
       "fixture_id": "F18",
@@ -17546,7 +17546,7 @@
           "aid_payment"
         ],
         "requires_human": true,
-        "location": "Chiang Muan District, Phayao",
+        "location": "Soi Sukhumvit 42, Khlong Tan Nuea, Watthana",
         "people_count": 5,
         "vulnerable": [],
         "danger": [],

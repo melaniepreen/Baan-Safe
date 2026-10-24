@@ -9,10 +9,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field
 
+from api.caller_ip import resolve_caller_ip, stamp_caller_ip
 from api.deps import enrich_impl, impl_snapshot, not_ready, s1_impl, s2_impl
 from api.store import StoredCase, get, put
 from contracts.models import (
@@ -66,6 +67,12 @@ class CreateCase(BaseModel):
 class CaseCreated(BaseModel):
     case: CaseState
     fixture_id: str | None = None
+
+
+class SessionStamp(BaseModel):
+    caller_ip: str
+    simulated: bool
+    note: str
 
 
 class TurnResult(BaseModel):
@@ -207,8 +214,21 @@ async def fixture_stream(fixture_id: str, pace: float = Query(default=1.0, ge=0,
     return StreamingResponse(events(), media_type="text/event-stream")
 
 
+@router.post("/session", response_model=SessionStamp)
+def open_session(request: Request) -> SessionStamp:
+    ip, simulated = resolve_caller_ip(request)
+    if simulated:
+        note = (
+            f"Caller IP recorded · {ip} · DEMO. "
+            "The request did not carry a public address, so this row uses a fixed Thai access-network stub."
+        )
+    else:
+        note = f"Caller IP recorded · {ip}"
+    return SessionStamp(caller_ip=ip, simulated=simulated, note=note)
+
+
 @router.post("/cases", response_model=CaseCreated)
-def create_case(body: CreateCase) -> CaseCreated:
+def create_case(body: CreateCase, request: Request) -> CaseCreated:
     if body.fixture_id:
         try:
             state = load_case(body.fixture_id)
@@ -217,6 +237,7 @@ def create_case(body: CreateCase) -> CaseCreated:
         existing = get(state.case_id)
         if existing is None:
             existing = put(StoredCase(state=state, fixture_id=body.fixture_id))
+        stamp_caller_ip(existing.state, request)
         _refresh_memory(existing)
         return CaseCreated(case=existing.state, fixture_id=body.fixture_id)
     if not body.transcript:
@@ -232,13 +253,15 @@ def create_case(body: CreateCase) -> CaseCreated:
         resources={},
         received_at=_now(),
     )
+    stamp_caller_ip(state, request)
     stored = put(StoredCase(state=state, fixture_id=None))
     return CaseCreated(case=stored.state, fixture_id=None)
 
 
 @router.post("/cases/{case_id}/turns", response_model=TurnResult)
-def add_turn(case_id: str, turn: TranscriptTurn) -> TurnResult:
+def add_turn(case_id: str, turn: TranscriptTurn, request: Request) -> TurnResult:
     stored = _require_case(case_id)
+    stamp_caller_ip(stored.state, request)
     if turn.t_ms < stored.state.transcript[-1].t_ms if stored.state.transcript else False:
         raise HTTPException(status_code=422, detail="t_ms must not go backwards")
     stored.state.transcript.append(turn)

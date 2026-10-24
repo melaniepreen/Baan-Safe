@@ -5,8 +5,8 @@
     {
       "id": "aid",
       "when": { "route": "aid_caseworker" },
-      "en": "I can hear that this is about a payment. A colleague will look at the notes with you. I cannot promise a payment from this call.",
-      "th": "เรื่องเงินช่วยเหลือ เจ้าหน้าที่จะตรวจให้ค่ะ โทรนี้ยังยืนยันไม่ได้"
+      "en": "I can hear that this is about flood relief aid. A colleague will look at the notes with you. I cannot promise flood relief from this call.",
+      "th": "เรื่องเงินช่วยเหลือน้ำท่วม เจ้าหน้าที่จะตรวจให้ค่ะ โทรนี้ยังยืนยันไม่ได้"
     },
     {
       "id": "boat-medical",

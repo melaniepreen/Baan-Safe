@@ -9,6 +9,8 @@
 import { mountCorrectForm } from "../correct.js";
 import { needsOperatorApproval } from "./approval.js";
 import { callSummary } from "./call_title.js";
+import { locationLine, matchLandmark, PHONE_NUMBER } from "./landmarks.js";
+import { phaseDurationMs } from "./pace.js";
 import { decidePath, PATTERN_KEY, withTop } from "./patterns.js";
 import { legsFromPath, nearestNode, walk } from "./route_walk.js";
 import { Application, Container, Graphics, Text } from "./vendor/pixi.min.mjs";
@@ -42,6 +44,10 @@ let floodLevel = 0;
 let floodMax = 1;
 let trips = [];
 let moverClock = 0;
+let pinnedBuildingId = null;
+let sessionStamp = null;
+let sessionPromise = null;
+let welcomeGeneration = 0;
 let responses = null;
 let eventsFile = null;
 let promptFile = null;
@@ -1017,15 +1023,50 @@ function pointAt(route, distance) {
   return { here, span, total };
 }
 
-function paintRoute(route, offset) {
-  const { spans } = worldSpans(route);
-  for (const span of spans) {
+function clipSpan(pts, distance) {
+  if (!pts.length) return [];
+  const out = [pts[0]];
+  let left = Math.max(0, distance);
+  for (let i = 1; i < pts.length; i++) {
+    const seg = Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+    if (left <= seg) {
+      const t = seg === 0 ? 0 : left / seg;
+      out.push({
+        x: pts[i - 1].x + (pts[i].x - pts[i - 1].x) * t,
+        y: pts[i - 1].y + (pts[i].y - pts[i - 1].y) * t,
+      });
+      return out;
+    }
+    out.push(pts[i]);
+    left -= seg;
+  }
+  return out;
+}
+
+function projectedLength(route) {
+  let len = 0;
+  for (const span of worldSpans(route).spans) {
     const projected = span.pts.map((point) => project(point.x, point.y, 0.2));
+    for (let i = 1; i < projected.length; i++) {
+      len += Math.hypot(projected[i][0] - projected[i - 1][0], projected[i][1] - projected[i - 1][1]);
+    }
+  }
+  return len;
+}
+
+function paintRoute(route, offset, reveal) {
+  const { spans } = worldSpans(route);
+  let left = reveal == null ? Infinity : Math.max(0, reveal);
+  for (const span of spans) {
+    if (left <= 0.05) break;
+    const take = Math.min(span.len, left);
+    const projected = clipSpan(span.pts, take).map((point) => project(point.x, point.y, 0.2));
     const color = span.leg.mode === "boat" ? 0x7ec8ff : YELLOW;
     if (projected.length >= 2) {
       solidPath(routeGroundG, projected, 0x07090f, 5);
       dashPath(routeGroundG, projected, color, 2.4, span.leg.mode === "boat" ? 5 : 10, 7, offset);
     }
+    left -= take;
   }
 }
 
@@ -1091,17 +1132,23 @@ function drawPulse(trip) {
   }
 }
 
-function drawTrips(offset) {
+function drawTrips() {
   if (!routeG || !routeGroundG) return;
   routeG.clear();
   routeGroundG.clear();
+  const offset = (performance.now() / 1000) * 14;
   for (const trip of trips) {
-    for (const route of trip.phases || []) paintRoute(route, offset);
+    const phases = trip.phases || [];
+    for (let i = 0; i < phases.length && i <= trip.phase; i++) {
+      const done = trip.parked || i < trip.phase;
+      const reveal = done ? worldSpans(phases[i]).total : trip.travel;
+      paintRoute(phases[i], offset, reveal);
+    }
     if (trip.kind === "pulse") {
       drawPulse(trip);
       continue;
     }
-    const route = (trip.phases || [])[trip.phase];
+    const route = phases[trip.phase];
     if (!route) continue;
     const spot = pointAt(route, trip.travel);
     if (!spot) continue;
@@ -1114,18 +1161,24 @@ function drawTrips(offset) {
   }
 }
 
-function advanceTrips(deltaMS) {
+function advanceTrips() {
   if (reduce) return;
+  const now = performance.now();
   for (const trip of trips) {
     if (trip.kind === "pulse" || trip.parked) continue;
     const route = (trip.phases || [])[trip.phase];
     if (!route) continue;
     const total = worldSpans(route).total;
-    trip.travel += deltaMS * 0.022;
-    if (trip.travel < total) continue;
+    if (!trip.phaseStarted) trip.phaseStarted = now;
+    if (!trip.phaseDuration) trip.phaseDuration = phaseDurationMs(projectedLength(route));
+    const fraction = Math.min(1, (now - trip.phaseStarted) / trip.phaseDuration);
+    trip.travel = total * fraction;
+    if (fraction < 1) continue;
     if (trip.phase < trip.phases.length - 1) {
       trip.phase += 1;
       trip.travel = 0;
+      trip.phaseStarted = now;
+      trip.phaseDuration = null;
     } else {
       trip.parked = true;
       trip.travel = total;
@@ -1148,8 +1201,9 @@ function activeDestinationId() {
 
 function outlineColorFor(id) {
   const call = activeCallId && town ? town.calls.find((item) => item.id === activeCallId) : null;
-  if (call && call.building_id === id) {
-    if (review && review.approval === "pending" && review.call && review.call.building_id === id) return PENDING_OUTLINE;
+  const target = call ? pinnedBuildingId || call.building_id : null;
+  if (call && id === target) {
+    if (review && review.approval === "pending" && review.call && review.call.id === call.id) return PENDING_OUTLINE;
     return CALLER_OUTLINE;
   }
   if (activeDestinationId() === id) return DEST_OUTLINE;
@@ -1701,7 +1755,7 @@ function showCorrection(fixtureId) {
 const KEYWORD_RULES = [
   { id: "C01-a", label: "keyword: water at the door or ground floor", test: /water at the door|ground floor/ },
   { id: "F17", label: "keyword: rent or not eligible", test: /rent|not eligible|eligib/ },
-  { id: "F18", label: "keyword: payment list", test: /payment list|sister/ },
+  { id: "F18", label: "keyword: aid list", test: /aid list|sister/ },
   { id: "F10", label: "keyword: oxygen or rising water", test: /oxygen|rising/ },
   { id: "F11", label: "keyword: immobile", test: /immobile|cannot walk|can't walk/ },
   { id: "F02", label: "keyword: food or rice", test: /\brice\b|\bfood\b|hungry/ },
@@ -1715,7 +1769,59 @@ const KEYWORD_RULES = [
 
 function setPhoneStatus(text) {
   const node = document.getElementById("phone-status");
-  if (node) node.textContent = text;
+  if (!node) return;
+  node.textContent = text;
+  node.classList.toggle("connected", text === "Connected");
+}
+
+function setComposerReady(ready) {
+  const input = document.getElementById("phone-input");
+  const send = document.querySelector("#phone-form button[type='submit']");
+  if (input) input.disabled = !ready;
+  if (send) send.disabled = !ready;
+}
+
+function framingNote() {
+  const framing = responses && responses.framing
+    ? responses.framing
+    : "Sukhumvit block in Watthana, drawn in local metres. data.demo_event is still TODO_HUMAN.";
+  return framing + " Flood rises from flood.json. Type, speak, or open Prompts. The stub gateway returns the priority, and that result lights the house. Replies are not a live model.";
+}
+
+async function ensureSession() {
+  if (sessionStamp) return sessionStamp;
+  if (!sessionPromise) {
+    setPhoneStatus("Connecting");
+    setComposerReady(false);
+    sessionPromise = postJson("/session", {})
+      .then((body) => {
+        sessionStamp = body;
+        return body;
+      })
+      .catch((error) => {
+        sessionPromise = null;
+        throw error;
+      });
+  }
+  return sessionPromise;
+}
+
+function showWelcome() {
+  const log = document.getElementById("phone-log");
+  if (!log || !sessionStamp || log.dataset.welcomed === "1") return;
+  log.dataset.welcomed = "1";
+  pushPhone(
+    "operator",
+    "You are connected to Baan-Safe. How can we help?",
+    "คุณเชื่อมต่อกับ Baan-Safe แล้ว มีอะไรให้ช่วยไหมคะ"
+  );
+  pushPhone("note", framingNote());
+  const note = document.getElementById("chooser-note");
+  if (note) note.textContent = "DEMO-ONLY chooser. It lives in this page. gateway.route_chooser is still TODO_HUMAN.";
+  const line = document.getElementById("phone-line");
+  if (line) line.textContent = "Baan-Safe · " + PHONE_NUMBER;
+  setPhoneStatus("Connected");
+  setComposerReady(true);
 }
 
 function pushPhone(kind, text, thai) {
@@ -1728,15 +1834,32 @@ function pushPhone(kind, text, thai) {
 }
 
 function greet() {
-  const framing = responses && responses.framing
-    ? responses.framing
-    : "Sukhumvit block in Watthana, drawn in local metres. data.demo_event is still TODO_HUMAN.";
-  pushPhone("note", framing + " Flood rises from flood.json. Type, speak, or open Prompts. The stub gateway returns the priority, and that result lights the house. Replies are not a live model.");
-  document.getElementById("chooser-note").textContent =
-    "DEMO-ONLY chooser. It lives in this page. gateway.route_chooser is still TODO_HUMAN.";
+  const generation = ++welcomeGeneration;
+  setPhoneStatus("Connecting");
+  setComposerReady(false);
+  ensureSession()
+    .then(() => {
+      if (generation !== welcomeGeneration || !sessionStamp) return;
+      showWelcome();
+    })
+    .catch(() => {
+      if (generation !== welcomeGeneration) return;
+      setPhoneStatus("Session unavailable");
+    });
+}
+
+function forceLandmarkPath(planned, text) {
+  const landmark = matchLandmark(text);
+  if (!landmark || !planned || !planned.path) return null;
+  planned.path.accepted = false;
+  planned.path.owner = "system_2";
+  planned.path.confidence = landmark.confidence;
+  return landmark;
 }
 
 function demoChoose(text) {
+  const landmark = matchLandmark(text);
+  if (landmark) return { fixtureId: landmark.fixtureId, how: "landmarks on the drawn block · " + landmark.landmarks };
   const q = text.toLowerCase();
   for (const rule of KEYWORD_RULES) {
     if (rule.test.test(q)) return { fixtureId: rule.id, how: rule.label };
@@ -2025,20 +2148,48 @@ function hospitalRoute(call) {
   return route;
 }
 
+function routeBetween(fromId, toId, mode) {
+  const from = buildingById(fromId);
+  const to = buildingById(toId);
+  if (!from || !to || !town.graph) return null;
+  const start = nearestNode(town.graph.nodes, town.buildings, from.x + from.w / 2, from.y + from.d / 2);
+  const goal = nearestNode(town.graph.nodes, town.buildings, to.x + to.w / 2, to.y + to.d / 2);
+  if (!start || !goal) return null;
+  const ids = walk(town.graph.edges, start.id, goal.id);
+  const legs = ids ? legsFromPath(town.graph.edges, ids, mode || "boat") : [];
+  if (!legs.length) return null;
+  return {
+    id: "pin-" + fromId + "-" + toId,
+    call_id: "pin",
+    building_id: toId,
+    base_id: fromId,
+    role: "pin",
+    legs,
+  };
+}
+
 function startTrip(call, rule) {
   trips = [];
+  const targetId = pinnedBuildingId || call.building_id;
+  const pinned = !!(pinnedBuildingId && pinnedBuildingId !== call.building_id);
   if (!rule || rule.vehicle === "none") {
     drawTrips(0);
     return;
   }
   if (rule.vehicle === "pulse") {
-    trips = [{ kind: "pulse", buildingId: call.building_id, born: performance.now(), phases: [], phase: 0, travel: 0 }];
-    const building = buildingById(call.building_id);
-    lookAt(building.x + building.w / 2, building.y + building.d / 2, 5.2);
+    trips = [{ kind: "pulse", buildingId: targetId, born: performance.now(), phases: [], phase: 0, travel: 0 }];
+    const building = buildingById(targetId);
+    if (building) lookAt(building.x + building.w / 2, building.y + building.d / 2, 5.2);
     drawTrips(moverClock);
     return;
   }
-  const outbound = town.response_routes.find((item) => item.call_id === call.id && item.role === rule.outbound);
+  let outbound = null;
+  if (pinned) {
+    if (rule.vehicle === "truck") outbound = routeBetween(targetId, "bldg-shelter", "boat");
+    else if (rule.vehicle === "van") outbound = routeBetween("bldg-welfare", targetId, "boat");
+    else outbound = routeBetween("bldg-jetty", targetId, "boat");
+  }
+  if (!outbound) outbound = town.response_routes.find((item) => item.call_id === call.id && item.role === rule.outbound);
   if (!outbound) return;
   const phases = [];
   if (rule.vehicle === "truck") {
@@ -2047,17 +2198,29 @@ function startTrip(call, rule) {
   } else if (rule.vehicle === "boat") {
     phases.push(outbound);
     if (rule.return_to === "clinic") {
-      const hospital = hospitalRoute(call);
+      const hospital = pinned ? routeBetween(targetId, "bldg-clinic", "boat") : hospitalRoute(call);
       if (hospital) phases.push(hospital);
     } else if (rule.return_to === "shelter") {
-      const evac = town.response_routes.find((item) => item.call_id === call.id && item.role === "evac");
+      const evac = pinned
+        ? routeBetween(targetId, "bldg-shelter", "boat")
+        : town.response_routes.find((item) => item.call_id === call.id && item.role === "evac");
       if (evac) phases.push(evac);
     }
   } else {
     phases.push(outbound);
   }
   const total = worldSpans(phases[0]).total;
-  trips = [{ kind: rule.vehicle, cue: boatCue(rule), phases, phase: 0, travel: reduce ? total : 0, parked: !!reduce, buildingId: call.building_id }];
+  trips = [{
+    kind: rule.vehicle,
+    cue: boatCue(rule),
+    phases,
+    phase: 0,
+    travel: reduce ? total : 0,
+    parked: !!reduce,
+    buildingId: targetId,
+    phaseStarted: null,
+    phaseDuration: null,
+  }];
   frameRoutes(phases);
   drawTrips(moverClock);
 }
@@ -2437,6 +2600,8 @@ async function playFeed(call, decision, trace, text, fast) {
   const scenario = eventsFile && eventsFile.scenarios ? eventsFile.scenarios[call.id] : null;
   const needs = (scenario && scenario.needs) || {};
   const planned = pathFor(call, decision, scenario);
+  const landmark = forceLandmarkPath(planned, text);
+  if (landmark) pinnedBuildingId = landmark.buildingId;
   const scores = planned.scores;
   const top = topScore(scores);
   const path = planned.path;
@@ -2528,13 +2693,42 @@ async function playFeed(call, decision, trace, text, fast) {
     });
   }
   if (planned.theme) rememberPattern(planned.theme, decision, path, planned.stored, planned.consistent);
+  const pinBuilding = buildingById((landmark && landmark.buildingId) || call.building_id);
+  if (pinBuilding) {
+    steps.unshift({
+      id: "location",
+      kind: "tool",
+      delay_ms: 480,
+      source: "simulated",
+      text: locationLine(pinBuilding, landmark),
+    });
+  }
+  if (landmark) {
+    steps.unshift({
+      id: "landmark-tool",
+      kind: "tool",
+      delay_ms: 480,
+      source: "simulated",
+      text: "Tool called: match landmarks in the message to the drawn block. This is not a device GPS fix.",
+    });
+  }
+  if (sessionStamp && sessionStamp.caller_ip) {
+    const simulated = !!sessionStamp.simulated;
+    steps.unshift({
+      id: "caller-ip",
+      kind: "memory",
+      delay_ms: 420,
+      source: simulated ? "simulated" : "gateway",
+      text: "Caller IP recorded · " + sessionStamp.caller_ip + (simulated ? " · DEMO" : ""),
+    });
+  }
   setFeedProgress(0, steps.length);
   for (const step of steps) {
     let headline = applyTemplate(step.text, bag).replace(/\s*Gateway reason:.*$/i, "").trim();
     if (step.kind === "operator_approval") {
       headline = "PENDING APPROVAL. " + (activeSummary ? activeSummary + ". " : "") + headline;
     }
-    if (step.kind === "memory" && path.timesBefore > 0 && planned.stored && planned.consistent) {
+    if (step.id !== "caller-ip" && step.kind === "memory" && path.timesBefore > 0 && planned.stored && planned.consistent) {
       const seen = path.timesBefore;
       headline =
         "Mubit: seen this pattern " +
@@ -2745,9 +2939,16 @@ async function runPlaceCall(text, choice, options = {}) {
   const speak = options.speak !== false;
   const spoken = String(text || "").trim();
   if (!spoken) return;
-  const match = choice || demoChoose(spoken);
+  await ensureSession();
+  if (generation !== callGeneration) return;
+  showWelcome();
+  const landmark = matchLandmark(spoken);
+  const match = landmark
+    ? { fixtureId: landmark.fixtureId, how: "landmarks on the drawn block · " + landmark.landmarks }
+    : choice || demoChoose(spoken);
   const call = town.calls.find((item) => item.id === match.fixtureId);
   if (!call) throw new Error("No fixture for " + match.fixtureId);
+  pinnedBuildingId = landmark ? landmark.buildingId : null;
   const sentence = chooserSentence(call, match.how);
   document.getElementById("chooser-note").textContent = sentence;
   activeCallId = call.id;
@@ -2765,7 +2966,7 @@ async function runPlaceCall(text, choice, options = {}) {
     const row = document.querySelector("#call-list li.active");
     if (row) row.scrollIntoView({ block: "nearest" });
     updateCallLink();
-    select(call.building_id, false);
+    select(pinnedBuildingId || call.building_id, false);
     if (document.getElementById("in-call") && !document.getElementById("in-call").hidden) {
       document.getElementById("caller-name").textContent = call.title;
     }
@@ -2800,6 +3001,8 @@ async function runPlaceCall(text, choice, options = {}) {
       showCallTitle(callSummary({ title: call.title, text: spoken }));
       const scenario = eventsFile && eventsFile.scenarios ? eventsFile.scenarios[call.id] : null;
       const planned = pathFor(call, decision, scenario);
+      const located = forceLandmarkPath(planned, spoken);
+      if (located) pinnedBuildingId = located.buildingId;
       const gated = needsOperatorApproval(decision, planned.path);
       if (gated) {
         setPhoneStatus("Awaiting operator approval");
@@ -2944,7 +3147,9 @@ function drawCallLights() {
   const caller = activeCallId ? town.calls.find((item) => item.id === activeCallId) : null;
   if (caller) {
     const pending = review && review.approval === "pending" && review.call && review.call.id === caller.id;
-    colors.set(caller.building_id, pending ? PENDING_OUTLINE : CALLER_OUTLINE);
+    const target = pinnedBuildingId || caller.building_id;
+    if (pinnedBuildingId && pinnedBuildingId !== caller.building_id) colors.delete(caller.building_id);
+    colors.set(target, pending ? PENDING_OUTLINE : CALLER_OUTLINE);
   }
   const dest = activeDestinationId();
   if (dest && (!caller || dest !== caller.building_id)) colors.set(dest, DEST_OUTLINE);
@@ -3039,6 +3244,7 @@ function resetCalls() {
   live.triage = null;
   live.correctionNote = null;
   review = null;
+  pinnedBuildingId = null;
   trips = [];
   clearApprovalChrome();
   select(null, false);
@@ -3063,7 +3269,11 @@ function resetCalls() {
   setFeedProgress(0, 0);
   renderPatterns();
   showCallTitle("");
-  document.getElementById("phone-log").replaceChildren();
+  const phoneLog = document.getElementById("phone-log");
+  if (phoneLog) {
+    phoneLog.dataset.welcomed = "";
+    phoneLog.replaceChildren();
+  }
   document.querySelectorAll("[data-priority]").forEach((button) => button.classList.remove("on"));
   const node = document.getElementById("mubit-node");
   if (node) node.classList.remove("busy", "done");
@@ -3284,6 +3494,21 @@ window.BaanSafeSim = {
   getBuilding: (id) => (town ? buildingById(id) : null),
   attachLiveFeed,
   tripCount: () => trips.length,
+  tripProgress: () => {
+    const trip = trips[0];
+    if (!trip) return null;
+    const route = (trip.phases || [])[trip.phase];
+    const total = route ? worldSpans(route).total : 0;
+    return {
+      travel: trip.travel || 0,
+      total,
+      fraction: total ? (trip.travel || 0) / total : trip.parked ? 1 : 0,
+      parked: !!trip.parked,
+      phaseDuration: trip.phaseDuration || 0,
+      buildingId: trip.buildingId || "",
+    };
+  },
+  pinnedBuilding: () => pinnedBuildingId,
   approvalPhase: () => (review ? review.approval : null),
 };
 
