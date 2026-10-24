@@ -20,6 +20,7 @@ from sim.callers import CATALOG, TRAIT_IDS, URGENCY_CUE, revelation_turns, speak
 from sim.callers.catalog import _spec
 from sim.coach import rows_for, write_jsonl
 from sim.env import run_episode
+from training.log import read_events
 
 
 def _spec_by(combo_id: str):
@@ -103,6 +104,21 @@ def test_coach_jsonl_stays_unpromoted(tmp_path):
     blob = path.read_text(encoding="utf-8")
     assert re.search(r"\b\d{13}\b", blob) is None
     assert "accepted an under-reported severity" in blob
+    events = read_events()
+    assert {event.source for event in events} == {"coach", "sim"}
+    assert all(event.schema_version == 1 for event in events)
+    assert all(event.group_id == "sim-under-nan" for event in events)
+    assert all(event.corrected_by is None for event in events)
+    assert all(event.input_ref.case_id == "SIM-sim-under-nan" for event in events)
+    sim_rows = [event for event in events if event.source == "sim"]
+    coach_rows = [event for event in events if event.source == "coach"]
+    assert len(sim_rows) == 1
+    assert sim_rows[0].weight == 0.25
+    assert sim_rows[0].output_correct.value == "flood_trapped"
+    assert {event.weight for event in coach_rows} == {0.5}
+    assert all(event.output_correct.value not in {"P1", "P2", "P3", "P4"} for event in events)
+    joined = " ".join(event.reason for event in events)
+    assert episode.turns[0].caller.private_trace not in joined
 
 
 def test_held_out_trait_arms_transfer_a_sibling_pattern():

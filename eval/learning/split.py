@@ -1,7 +1,8 @@
 """Held-out versus correction split.
 
-Assignment is by call group. Thai and English variants of one group always
-land on the same side. Seeds are fixed in advance.
+The split key is TrainingEvent.group_id. Thai, English, and paraphrases of
+one call share that id and stay on one side. Do not split on case_id or
+language. Seeds are fixed in advance.
 """
 
 from __future__ import annotations
@@ -21,13 +22,14 @@ class Split:
 
 
 def split_groups(group_ids: list[str] | tuple[str, ...], seed: int) -> Split:
-    """Shuffle group ids with this seed, then sort each side for the report.
+    """Shuffle group_id values with this seed, then sort each side for the report.
 
-    The shuffle starts from sorted ids, so the split depends on the set and
-    the seed, not on the caller's order.
+    Duplicate ids collapse first, so one group cannot land on both sides.
+    The shuffle starts from the sorted set, so the split depends on the set
+    and the seed, not on the caller's order.
     """
     rng = random.Random(seed)
-    order = sorted(group_ids)
+    order = sorted(set(group_ids))
     rng.shuffle(order)
     mid = len(order) // 2
     correction = tuple(sorted(order[:mid]))

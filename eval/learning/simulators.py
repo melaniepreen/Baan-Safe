@@ -1,8 +1,9 @@
 """Held-out caller trait combinations.
 
-The split unit is a trait combination, an unseen user simulator, in addition
-to the held-out call groups. Seeds match the rest of this package. Figures
-are the stub priority rule. No caller model is loaded.
+The split key is group_id, the same field as TrainingEvent.group_id. For
+these rows the id is the simulator combo id. A trait combination is an
+unseen user simulator, in addition to the held-out call groups. Seeds match
+the rest of this package. Figures are the stub priority rule. No caller model is loaded.
 
 Per-trait under-triage uses critical held-out combinations that carry the
 trait. None means this seed held out no such combination. None is not zero.
@@ -82,14 +83,14 @@ def _by_id() -> dict[str, CallerSpec]:
 
 
 def summarize() -> list[dict]:
-    """One entry per fixed seed. Held-out combinations only."""
+    """One entry per fixed seed. Held-out group_id values only."""
     by_id = _by_id()
-    ids = [spec.combo_id for spec in CATALOG]
+    group_ids = [spec.combo_id for spec in CATALOG]
     payload: list[dict] = []
     for seed in SEEDS:
-        split = split_groups(ids, seed)
-        correction = [by_id[combo_id] for combo_id in split.correction]
-        held = [by_id[combo_id] for combo_id in split.held_out]
+        split = split_groups(group_ids, seed)
+        correction = [by_id[group_id] for group_id in split.correction]
+        held = [by_id[group_id] for group_id in split.held_out]
         arms: dict[str, dict] = {}
         for name in ARMS:
             rows = [
@@ -147,7 +148,8 @@ def render_trait_section() -> str:
         "## Held-out caller simulators",
         "",
         "Arms are scored on held-out trait combinations, not only on held-out calls.",
-        "The combination is an unseen user simulator. The idea is from MIMESIS,",
+        "The split key is group_id. The combination is an unseen user simulator.",
+        "The idea is from MIMESIS,",
         f"arXiv:{PAPER_ID}, {PAPER_URL}. No paper source is copied. No caller model",
         "was loaded. `sim.caller_model` and `sim.caller_gpu` stay `TODO_HUMAN`.",
         "",

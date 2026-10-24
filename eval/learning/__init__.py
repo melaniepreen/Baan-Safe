@@ -1,7 +1,8 @@
 """Held-out correction scoreboard. Owner: Melanie.
 
-Stub only. A correction side and a held-out side are split by call, so Thai
-and English variants stay together. Arms are scored on the held-out side.
+Stub only. A correction side and a held-out side are split by group_id, so
+Thai and English variants stay together. Arm C can read human rows only, or
+human plus coach. Arms are scored on the held-out side.
 Seeds are fixed.
 
 The shape is a no-feedback run, a with-feedback run, and a shuffled control.

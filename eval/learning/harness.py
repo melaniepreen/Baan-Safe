@@ -1,4 +1,7 @@
-"""Run the four arms on every fixed seed and write the stub report."""
+"""Run the arms on every fixed seed and write the stub report.
+
+The split key is group_id. Arm C reads human rows. C_coach also reads coach.
+"""
 
 from __future__ import annotations
 

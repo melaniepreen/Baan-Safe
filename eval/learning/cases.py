@@ -25,6 +25,7 @@ class CallGroup:
     sapling: str
     en: str
     th: str
+    source: str = "human"
 
 
 @dataclass(frozen=True)
@@ -163,6 +164,48 @@ GROUPS: tuple[CallGroup, ...] = (
             "ผู้โทรสังเคราะห์ในอำเภอเมืองน่าน "
             "บ้านว่าง ครัวเรือนต้องการที่พักพิงคืนนี้"
         ),
+    ),
+    CallGroup(
+        group_id="call-signal-lampang",
+        pattern="signal",
+        critical=False,
+        priority="P3",
+        route="welfare_distribution",
+        action="create_provisional_dispatch",
+        base_priority="P4",
+        base_route="information_only",
+        base_action="ask_next_question",
+        sapling="n/a",
+        en=(
+            "Synthetic caller in Mueang Lampang District. "
+            "A coach marked this welfare request. Ground is dry."
+        ),
+        th=(
+            "ผู้โทรสังเคราะห์ในอำเภอเมืองลำปาง "
+            "โค้ชบันทึกคำขอสวัสดิการนี้ พื้นดินแห้ง"
+        ),
+        source="coach",
+    ),
+    CallGroup(
+        group_id="call-signal-nan",
+        pattern="signal",
+        critical=False,
+        priority="P3",
+        route="welfare_distribution",
+        action="create_provisional_dispatch",
+        base_priority="P4",
+        base_route="information_only",
+        base_action="ask_next_question",
+        sapling="n/a",
+        en=(
+            "Synthetic caller in Mueang Nan District. "
+            "A coach marked this welfare request. Ground is dry."
+        ),
+        th=(
+            "ผู้โทรสังเคราะห์ในอำเภอเมืองน่าน "
+            "โค้ชบันทึกคำขอสวัสดิการนี้ พื้นดินแห้ง"
+        ),
+        source="coach",
     ),
 )
 

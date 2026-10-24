@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import re
 
-from eval.learning.arms import arm_by_name, predict
+from dataclasses import replace
+
+from eval.learning.arms import arm_by_name, feedback_rows, predict
 from eval.learning.cases import GROUPS, group_by_id, variants
 from eval.learning.harness import run
 from eval.learning.loop import SeedScore, recommend_promotion
@@ -53,6 +55,22 @@ def test_learning_eval_smoke(tmp_path):
     assert (shuffled.priority, shuffled.route) == (base.priority, base.route)
     assert shuffled.learned is False
 
+    coach = replace(by_id["call-water-lampang"], group_id="call-water-coach", source="coach")
+    human_only = predict(arm_by_name("C"), held, [coach], seed=17)
+    with_coach = predict(arm_by_name("C_coach"), held, [coach], seed=17)
+    assert human_only.learned is False
+    assert (human_only.priority, human_only.route) == (base.priority, base.route)
+    assert with_coach.learned is True
+    assert (with_coach.priority, with_coach.route) == (held.priority, held.route)
+    human_rows = feedback_rows(arm_by_name("C"), [by_id["call-water-lampang"], coach], seed=17)
+    both_rows = feedback_rows(arm_by_name("C_coach"), [by_id["call-water-lampang"], coach], seed=17)
+    assert {row["source"] for row in human_rows} == {"human"}
+    assert {row["source"] for row in both_rows} == {"human", "coach"}
+    assert {row["group_id"] for row in both_rows} == {"call-water-lampang", "call-water-coach"}
+    collapsed = split_groups(["call-water-nan", "call-water-nan", "call-water-lampang"], 17)
+    assert set(collapsed.correction).isdisjoint(collapsed.held_out)
+    assert set(collapsed.correction) | set(collapsed.held_out) == {"call-water-nan", "call-water-lampang"}
+
     current = (SeedScore(1, 0.5, 0.2), SeedScore(2, 0.4, 0.0))
     rose_and_safer = (SeedScore(1, 0.8, 0.2), SeedScore(2, 0.9, 0.0))
     under_rose = (SeedScore(1, 0.8, 0.4), SeedScore(2, 0.9, 0.0))
@@ -70,8 +88,9 @@ def test_learning_eval_smoke(tmp_path):
         assert seed["arms"]["shuffled"].paired_accuracy == 0
     text = (tmp_path / "learning.md").read_text(encoding="utf-8")
     assert "Under-triage" in text
-    for name in ("| A |", "| B |", "| C |", "| shuffled |"):
+    for name in ("| A |", "| B |", "| C |", "| C_coach |", "| shuffled |"):
         assert name in text
+    assert "group_id" in text
     assert "learning_eval.promotion" in text
     assert "learning_eval.freeze_mubit_auto_adapters" in text
     assert "Held-out caller simulators" in text

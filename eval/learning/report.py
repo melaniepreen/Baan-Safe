@@ -45,8 +45,9 @@ def render(
         "| Arm | What the stub does |",
         "| --- | --- |",
         "| A | Base labels. No feedback. |",
-        "| B | Correction patterns in memory. Memory is non-empty. No network call. |",
-        "| C | Same pattern rule as B, read as correction JSONL. Memory stays empty. |",
+        "| B | Human correction patterns in memory. Memory is non-empty. No network call. |",
+        "| C | Human correction JSONL only. Memory stays empty. |",
+        "| C_coach | Human and coach JSONL. Sim rows stay out. Memory stays empty. |",
         "| shuffled | Correction labels are permuted. The permutation is not a matched pattern. |",
         "",
         "## Headline: under-triage of critical calls",
@@ -58,7 +59,10 @@ def render(
         "paired column is candidate minus A. For under-triage, negative is safer.",
         "",
         "Compared version: `" + str(decision["version_id"]) + "` against arm A.",
-        "The candidate column in the loop is arm C (correction JSONL, memory empty).",
+        "The held-out split is by `group_id`. Thai, English, and paraphrases of one",
+        "call stay together. The candidate in the loop is arm C, human sources",
+        "only. `C_coach` is the same rule with coach rows added. It is not the",
+        "candidate, and it does not read `source=sim`.",
         "",
     ]
     for split, scores, row_counts in splits:
@@ -70,15 +74,15 @@ def render(
                 "",
                 "Held-out groups: " + ", ".join(split.held_out) + ".",
                 "",
-                "Feedback rows written for B / C / shuffled: "
-                + " / ".join(str(row_counts[name]) for name in ("B", "C", "shuffled"))
+                "Feedback rows written for B / C / C_coach / shuffled: "
+                + " / ".join(str(row_counts[name]) for name in ("B", "C", "C_coach", "shuffled"))
                 + ". Arm A writes none. JSONL is an artifact. Scoring does not train on it.",
                 "",
                 "| Arm | Accuracy | Macro-F1 | Under-triage | Route accuracy | Safe-action rate | Sapling unsure | Accuracy − A | Under-triage − A | Repeat errors | Regressions vs A |",
                 "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
             ]
         )
-        for name in ("A", "B", "C", "shuffled"):
+        for name in ("A", "B", "C", "C_coach", "shuffled"):
             score = scores[name]
             lines.append(
                 "| {name} | {acc} | {f1} | {ut} | {route} | {safe} | {sap} | {dacc} | {dut} | {rep} | {reg} |".format(

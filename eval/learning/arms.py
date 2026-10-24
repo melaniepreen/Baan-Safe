@@ -18,6 +18,10 @@ from eval.learning.cases import CallGroup, CallVariant
 from eval.learning.metrics import ScoredRow
 
 
+HUMAN_ONLY: frozenset[str] = frozenset({"human"})
+HUMAN_AND_COACH: frozenset[str] = frozenset({"human", "coach"})
+
+
 @dataclass(frozen=True)
 class Arm:
     name: str
@@ -25,6 +29,7 @@ class Arm:
     memory_empty: bool
     learns_matched_patterns: bool
     sapling_from_memory: bool
+    sources: frozenset[str]
 
 
 @dataclass(frozen=True)
@@ -43,20 +48,31 @@ ARMS: tuple[Arm, ...] = (
         memory_empty=True,
         learns_matched_patterns=False,
         sapling_from_memory=False,
+        sources=frozenset(),
     ),
     Arm(
         name="B",
-        mechanism="corrections in Mubit memory",
+        mechanism="human corrections in Mubit memory",
         memory_empty=False,
         learns_matched_patterns=True,
         sapling_from_memory=True,
+        sources=HUMAN_ONLY,
     ),
     Arm(
         name="C",
-        mechanism="fine-tuned on correction JSONL, memory empty",
+        mechanism="fine-tuned on human correction JSONL, memory empty",
         memory_empty=True,
         learns_matched_patterns=True,
         sapling_from_memory=False,
+        sources=HUMAN_ONLY,
+    ),
+    Arm(
+        name="C_coach",
+        mechanism="fine-tuned on human and coach JSONL, memory empty",
+        memory_empty=True,
+        learns_matched_patterns=True,
+        sapling_from_memory=False,
+        sources=HUMAN_AND_COACH,
     ),
     Arm(
         name="shuffled",
@@ -64,6 +80,7 @@ ARMS: tuple[Arm, ...] = (
         memory_empty=False,
         learns_matched_patterns=False,
         sapling_from_memory=False,
+        sources=HUMAN_AND_COACH,
     ),
 )
 
@@ -75,11 +92,29 @@ def arm_by_name(name: str) -> Arm:
     raise KeyError(name)
 
 
+def visible_groups(
+    arm: Arm,
+    correction: list[CallGroup] | tuple[CallGroup, ...],
+) -> list[CallGroup]:
+    """Rows this arm may read. Arm C is human-only. C_coach adds coach.
+
+    Sim rows are in neither filter. The shuffled control may see the rows
+    and still does not treat them as a matched pattern.
+    """
+    if arm.name == "A":
+        return []
+    if arm.name == "shuffled":
+        return [group for group in correction if group.source in arm.sources]
+    if not arm.learns_matched_patterns:
+        return []
+    return [group for group in correction if group.source in arm.sources]
+
+
 def learned_patterns(arm: Arm, correction: list[CallGroup] | tuple[CallGroup, ...]) -> frozenset[str]:
-    """Patterns B or C may apply. Shuffled feedback is never a matched pattern."""
+    """Patterns B, C, or C_coach may apply. Shuffled feedback is never a matched pattern."""
     if not arm.learns_matched_patterns:
         return frozenset()
-    return frozenset(group.pattern for group in correction if group.pattern)
+    return frozenset(group.pattern for group in visible_groups(arm, correction) if group.pattern)
 
 
 def predict(
@@ -148,19 +183,21 @@ def feedback_rows(
     The shuffled arm permutes the assistant label across correction groups.
     Scoring does not read those permuted labels back as patterns.
     """
-    if arm.name == "A":
+    chosen = visible_groups(arm, correction)
+    if not chosen:
         return []
-    labels = [(group.priority, group.route, group.pattern) for group in correction]
+    labels = [(group.priority, group.route, group.pattern) for group in chosen]
     if arm.name == "shuffled":
         random.Random(seed).shuffle(labels)
     rows: list[dict] = []
-    for group, (priority, route, pattern) in zip(correction, labels):
+    for group, (priority, route, pattern) in zip(chosen, labels):
         for language, text in (("en", group.en), ("th", group.th)):
             rows.append(
                 {
                     "arm": arm.name,
                     "seed": seed,
                     "group_id": group.group_id,
+                    "source": group.source,
                     "language": language,
                     "pattern": pattern,
                     "memory_empty": arm.memory_empty,
