@@ -3,6 +3,11 @@
   "simulated": true,
   "badge": "simulated",
   "confidence_threshold": 0.75,
+  "learning": {
+    "promote_after": 3,
+    "simulated": true,
+    "life_safety_rule": "Life-safety calls stay with System 2 until an operator presses Accept. Repeats are remembered, and the fast path does not take them on its own."
+  },
   "stream": {
     "status": "not connected",
     "how": "The page plays scenarios[fixture_id].steps. To plug a real stream later, call BaanSafeSim.attachLiveFeed(source). source may be an EventSource or any object with addEventListener('step', ...). A future gateway path such as GET /cases/{case_id}/events (SSE) or a websocket can emit the same step objects with source set to gateway. Each simulated step keeps the simulated badge. A gateway step shows a gateway badge. The stub outcome is still rendered beside the sentence from POST /cases/{id}/turns."
@@ -22,6 +27,12 @@
       "fixture_id": "F01",
       "system_hint": "system_1",
       "top_need": "water",
+      "theme": {
+        "id": "drinking-water",
+        "label": "Drinking water",
+        "learns": true,
+        "life_safety": false
+      },
       "scores": {
         "P1": 0.04,
         "P2": 0.09,
@@ -94,6 +105,12 @@
       "fixture_id": "F02",
       "system_hint": "system_1",
       "top_need": "food",
+      "theme": {
+        "id": "food-ran-out",
+        "label": "Food ran out",
+        "learns": true,
+        "life_safety": false
+      },
       "scores": {
         "P1": 0.05,
         "P2": 0.11,
@@ -166,6 +183,12 @@
       "fixture_id": "F03",
       "system_hint": "system_1",
       "top_need": "shelter",
+      "theme": {
+        "id": "shelter-space",
+        "label": "Shelter space",
+        "learns": true,
+        "life_safety": false
+      },
       "scores": {
         "P1": 0.04,
         "P2": 0.1,
@@ -238,6 +261,12 @@
       "fixture_id": "F04",
       "system_hint": "system_1",
       "top_need": "power",
+      "theme": {
+        "id": "power-cut",
+        "label": "Power cut",
+        "learns": true,
+        "life_safety": false
+      },
       "scores": {
         "P1": 0.03,
         "P2": 0.08,
@@ -310,6 +339,12 @@
       "fixture_id": "F05",
       "system_hint": "system_1",
       "top_need": "information",
+      "theme": {
+        "id": "flood-news",
+        "label": "Flood news",
+        "learns": true,
+        "life_safety": false
+      },
       "scores": {
         "P1": 0.02,
         "P2": 0.04,
@@ -382,6 +417,12 @@
       "fixture_id": "F06",
       "system_hint": "system_1",
       "top_need": "evacuation",
+      "theme": {
+        "id": "lane-evacuate",
+        "label": "Lane evacuate",
+        "learns": true,
+        "life_safety": false
+      },
       "scores": {
         "P1": 0.06,
         "P2": 0.86,
@@ -454,6 +495,12 @@
       "fixture_id": "F07",
       "system_hint": "system_1",
       "top_need": "information",
+      "theme": {
+        "id": "school-open",
+        "label": "School open",
+        "learns": true,
+        "life_safety": false
+      },
       "scores": {
         "P1": 0.02,
         "P2": 0.05,
@@ -526,6 +573,12 @@
       "fixture_id": "F08",
       "system_hint": "system_1",
       "top_need": "water",
+      "theme": {
+        "id": "drinking-water",
+        "label": "Drinking water",
+        "learns": true,
+        "life_safety": false
+      },
       "scores": {
         "P1": 0.05,
         "P2": 0.08,
@@ -598,6 +651,12 @@
       "fixture_id": "F09",
       "system_hint": "system_1",
       "top_need": "water",
+      "theme": {
+        "id": "drinking-water",
+        "label": "Drinking water",
+        "learns": true,
+        "life_safety": false
+      },
       "scores": {
         "P1": 0.05,
         "P2": 0.09,
@@ -670,6 +729,12 @@
       "fixture_id": "F10",
       "system_hint": "system_2",
       "top_need": "medical",
+      "theme": {
+        "id": "trapped-oxygen",
+        "label": "Trapped, needs oxygen",
+        "learns": true,
+        "life_safety": true
+      },
       "scores": {
         "P1": 0.61,
         "P2": 0.22,
@@ -742,6 +807,12 @@
       "fixture_id": "F11",
       "system_hint": "system_2",
       "top_need": "medical",
+      "theme": {
+        "id": "cannot-leave-bed",
+        "label": "Cannot leave the bed",
+        "learns": true,
+        "life_safety": true
+      },
       "scores": {
         "P1": 0.58,
         "P2": 0.24,
@@ -814,6 +885,12 @@
       "fixture_id": "F12",
       "system_hint": "system_2",
       "top_need": "rescue",
+      "theme": {
+        "id": "water-in-lane",
+        "label": "Water in the lane",
+        "learns": true,
+        "life_safety": false
+      },
       "scores": {
         "P1": 0.46,
         "P2": 0.31,
@@ -886,6 +963,12 @@
       "fixture_id": "F13",
       "system_hint": "system_2",
       "top_need": "shelter",
+      "theme": {
+        "id": "where-to-sleep",
+        "label": "Where to sleep",
+        "learns": true,
+        "life_safety": false
+      },
       "scores": {
         "P1": 0.12,
         "P2": 0.4,
@@ -958,6 +1041,12 @@
       "fixture_id": "F14",
       "system_hint": "system_2",
       "top_need": "information",
+      "theme": {
+        "id": "says-fine",
+        "label": "Says they are fine",
+        "learns": true,
+        "life_safety": false
+      },
       "scores": {
         "P1": 0.18,
         "P2": 0.36,
@@ -1030,6 +1119,12 @@
       "fixture_id": "F15",
       "system_hint": "system_2",
       "top_need": "information",
+      "theme": {
+        "id": "road-open",
+        "label": "Road open",
+        "learns": true,
+        "life_safety": false
+      },
       "scores": {
         "P1": 0.16,
         "P2": 0.55,
@@ -1102,6 +1197,12 @@
       "fixture_id": "F16",
       "system_hint": "system_2",
       "top_need": "shelter",
+      "theme": {
+        "id": "unaccompanied-child",
+        "label": "Unaccompanied child",
+        "learns": true,
+        "life_safety": true
+      },
       "scores": {
         "P1": 0.14,
         "P2": 0.52,
@@ -1174,6 +1275,12 @@
       "fixture_id": "F17",
       "system_hint": "system_2",
       "top_need": "aid",
+      "theme": {
+        "id": "rent-payment",
+        "label": "Rent payment",
+        "learns": false,
+        "life_safety": false
+      },
       "scores": {
         "P1": 0.08,
         "P2": 0.16,
@@ -1255,6 +1362,12 @@
       "fixture_id": "F18",
       "system_hint": "system_2",
       "top_need": "aid",
+      "theme": {
+        "id": "payment-list",
+        "label": "Payment list",
+        "learns": false,
+        "life_safety": false
+      },
       "scores": {
         "P1": 0.07,
         "P2": 0.14,
@@ -1336,6 +1449,12 @@
       "fixture_id": "C01-a",
       "system_hint": "system_2",
       "top_need": "water",
+      "theme": {
+        "id": "contradictory-rescue",
+        "label": "Contradictory rescue",
+        "learns": true,
+        "life_safety": true
+      },
       "scores": {
         "P1": 0.22,
         "P2": 0.14,
@@ -1408,6 +1527,12 @@
       "fixture_id": "C01-b",
       "system_hint": "system_2",
       "top_need": "water",
+      "theme": {
+        "id": "contradictory-rescue",
+        "label": "Contradictory rescue",
+        "learns": true,
+        "life_safety": true
+      },
       "scores": {
         "P1": 0.24,
         "P2": 0.16,
@@ -1476,5 +1601,11 @@
         }
       ]
     }
+  },
+  "theme_fields": {
+    "id": "Stable pattern key. Similar fixtures share one id, so the second drinking-water call continues the first.",
+    "label": "Plain English name shown in the pattern memory widget.",
+    "learns": "False keeps the theme with System 2. Aid themes set this false. The fast path does not take them.",
+    "life_safety": "True caps System 1 under the threshold until the operator presses Accept."
   }
 }

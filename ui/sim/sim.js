@@ -7,6 +7,7 @@
    Houses, streets, flood polygons, and routes come from ./data.
 */
 import { mountCorrectForm } from "../correct.js";
+import { decidePath, PATTERN_KEY, withTop } from "./patterns.js";
 import { legsFromPath, nearestNode, walk } from "./route_walk.js";
 import { Application, Container, Graphics, Text } from "./vendor/pixi.min.mjs";
 
@@ -43,6 +44,7 @@ let responses = null;
 let eventsFile = null;
 let promptFile = null;
 let rulebook = null;
+let replies = null;
 let clinicNode = null;
 let hospitalCache = new Map();
 let review = null;
@@ -77,11 +79,29 @@ let callResults = new Map();
 let callCursor = 0;
 let callPlaying = false;
 let callToken = 0;
+let callChain = Promise.resolve();
+let callGeneration = 0;
 let activeCallId = null;
 let callLightG = null;
 
 const PRIORITY_COLOR = { P1: "#ff4b3a", P2: "#ff9f1a", P3: "#d6ff3c", P4: "#8aa0ff" };
 const PRIORITY_HEX = { P1: 0xff4b3a, P2: 0xff9f1a, P3: 0xd6ff3c, P4: 0x8aa0ff };
+const PLAIN_PRIORITY = {
+  P1: "urgent rescue",
+  P2: "evacuation",
+  P3: "welfare or shelter",
+  P4: "information",
+};
+const STEP_META = {
+  memory: { icon: "M", kicker: "Mubit" },
+  tool: { icon: "T", kicker: "Tool" },
+  system_1: { icon: "1", kicker: "System 1" },
+  handoff: { icon: "→", kicker: "Handoff" },
+  system_2: { icon: "2", kicker: "System 2 · Nemotron" },
+  sapling: { icon: "S", kicker: "Sapling" },
+  router: { icon: "R", kicker: "Decision router" },
+  rule: { icon: "D", kicker: "Dispatch" },
+};
 
 function hashId(id) {
   let h = 2166136261;
@@ -893,7 +913,7 @@ function updateMinimap() {
 
 function viewInsets() {
   const narrow = window.innerWidth <= 860;
-  return { left: narrow ? 12 : 388, right: narrow ? 16 : 432, top: 72 };
+  return { left: narrow ? 12 : 388, right: narrow ? 16 : 344, top: 72 };
 }
 
 function viewCenter() {
@@ -1116,9 +1136,12 @@ function setPhoneStatus(text) {
   if (node) node.textContent = text;
 }
 
-function pushPhone(kind, text) {
+function pushPhone(kind, text, thai) {
   const log = document.getElementById("phone-log");
-  log.append(el("div", "bubble " + kind, text));
+  const bubble = el("div", "bubble " + kind);
+  bubble.append(document.createTextNode(text));
+  if (thai) bubble.append(el("span", "th", thai));
+  log.append(bubble);
   log.scrollTop = log.scrollHeight;
 }
 
@@ -1185,34 +1208,34 @@ async function postJson(url, body) {
   return response.json();
 }
 
-function operatorLine(decision, call) {
+function replyMatches(template, ctx) {
+  const when = template.when || {};
+  if (when.priority && when.priority !== ctx.priority) return false;
+  if (when.route && when.route !== ctx.route) return false;
+  if (when.vehicle && when.vehicle !== ctx.vehicle) return false;
+  if (when.needs_any && !when.needs_any.some((need) => ctx.needs.has(need))) return false;
+  return true;
+}
+
+function operatorReply(decision, call, text) {
+  const rule = matchRule(call, decision, text);
   const source = (decision.source_outcomes && decision.source_outcomes[0]) || {};
-  const parts = [];
-  if (source.next_question) parts.push(source.next_question);
-  parts.push(
-    "Stub gateway, not a live operator. " +
-      decision.final_priority +
-      " · " +
-      String(decision.final_route).replaceAll("_", " ") +
-      " · " +
-      String(decision.next_action).replaceAll("_", " ") +
-      "."
-  );
-  if (source.reason) parts.push(String(source.reason));
-  if (decision.requires_human) parts.push("A human is required.");
-  const notes = decision.policy_notes || [];
-  const correction = notes.find((line) => String(line).toLowerCase().includes("correction"));
-  if (correction) parts.push(String(correction));
-  const memory = call.memory || [];
-  if (memory.length) {
-    parts.push(
-      "Stub memory file, separate from the gateway note: " +
-        memory.map((row) => row.kind + " — " + row.summary).join(" ")
-    );
-  } else {
-    parts.push("No stub memory line is stored for this fixture.");
-  }
-  return parts.join(" ");
+  const needs = new Set((source.needs || []).map(String));
+  const ctx = {
+    priority: decision.final_priority,
+    route: decision.final_route,
+    vehicle: rule.vehicle,
+    needs,
+  };
+  const templates = (replies && replies.templates) || [];
+  const template = templates.find((item) => replyMatches(item, ctx)) || templates[templates.length - 1];
+  const eta = rule.eta_min || (rule.vehicle === "boat" ? 12 : rule.vehicle === "truck" ? 15 : 20);
+  const bag = { eta, question: source.next_question || "" };
+  let en = template ? applyTemplate(template.en, bag) : "Thank you. I have your message. Please keep your phone with you.";
+  const th = template && template.th ? applyTemplate(template.th, bag) : "";
+  if (source.next_question) en = "I just need to check one thing with you. " + source.next_question + " " + en;
+  if (decision.requires_human) en += " A colleague will confirm this with you.";
+  return { en, th };
 }
 
 function saplingStep(decision) {
@@ -1498,9 +1521,87 @@ function renderRulebook() {
   }
 }
 
+function plainPriority(priority) {
+  return PLAIN_PRIORITY[priority] || "the same outcome";
+}
+
+function readPatterns() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(PATTERN_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function renderPatterns(rows) {
+  const list = document.getElementById("pattern-list");
+  if (!list) return;
+  const data = rows || readPatterns();
+  list.replaceChildren();
+  if (!data.length) {
+    list.append(el("li", null, "No patterns yet."));
+    return;
+  }
+  for (const row of data) {
+    const item = document.createElement("li");
+    const owner = row.owner === "system_1" ? "System 1" : "System 2";
+    let note = owner;
+    if (row.lifeSafety && !row.confirmed) note += " · needs confirm";
+    else if (row.confirmed && row.owner !== "system_1") note += " · confirmed";
+    item.append(el("span", null, row.label + " · " + row.count));
+    item.append(el("span", null, note));
+    list.append(item);
+  }
+}
+
+function writePatterns(rows) {
+  localStorage.setItem(PATTERN_KEY, JSON.stringify(rows));
+  renderPatterns(rows);
+}
+
+function rememberPattern(theme, decision, path, stored, consistent) {
+  const rows = readPatterns().filter((row) => row.id !== theme.id);
+  rows.unshift({
+    id: theme.id,
+    label: theme.label,
+    count: path.timesBefore + 1,
+    lastPriority: decision.final_priority,
+    lastRoute: decision.final_route,
+    owner: path.owner,
+    confirmed: !!(stored && stored.confirmed && consistent),
+    lifeSafety: !!theme.life_safety,
+    learns: theme.learns !== false,
+  });
+  writePatterns(rows.slice(0, 24));
+}
+
+function setFeedProgress(done, total) {
+  const bar = document.getElementById("feed-progress");
+  if (bar) bar.style.width = total ? Math.round((done / total) * 100) + "%" : "0%";
+  const count = document.getElementById("feed-count");
+  if (count) count.textContent = total ? done + " of " + total + " steps" : "";
+}
+
+function setPriorityBadge(priority) {
+  const badge = document.getElementById("priority-badge");
+  if (!badge) return;
+  if (!priority) {
+    badge.hidden = true;
+    return;
+  }
+  badge.hidden = false;
+  badge.className = "priority-badge pri-" + String(priority).toLowerCase();
+  badge.textContent = "Gateway " + priority;
+}
+
 function writePayload(call, decision, trace, text) {
   const source = (decision.source_outcomes && decision.source_outcomes[0]) || {};
   const log = document.getElementById("backend-log");
+  log.replaceChildren();
+  const details = document.createElement("details");
+  const summary = document.createElement("summary");
+  summary.textContent = "Stub payload";
   const pre = el("pre");
   pre.textContent = JSON.stringify(
     {
@@ -1522,20 +1623,104 @@ function writePayload(call, decision, trace, text) {
     null,
     2
   );
-  log.prepend(pre);
-  log.prepend(el("p", null, call.id + " · stub payload"));
+  details.append(summary, pre);
+  log.append(details);
+}
+
+function stepDetail(step, call, decision, source, bag) {
+  const lines = [];
+  if (step.fill === "flood") lines.push(floodLine(call));
+  if (step.fill === "shelter") lines.push(shelterLine(call));
+  if (step.kind === "memory" && (call.memory || []).length) {
+    lines.push("Stub memory file: " + call.memory.map((row) => row.kind + " — " + row.summary).join(" "));
+  }
+  if (step.kind === "system_1" || step.kind === "system_2" || step.kind === "router" || step.kind === "sapling" || step.kind === "handoff") {
+    lines.push("Gateway stub: " + bag.priority + " · " + bag.route + " · " + bag.next_action + ". " + (source.reason || ""));
+  }
+  if ((step.kind === "system_2" || step.kind === "handoff") && !String(step.text || "").includes("TODO_HUMAN")) {
+    lines.push("Simulated. system2.orchestrator_model is still TODO_HUMAN.");
+  }
+  if (step.kind === "rule") {
+    const pack = responses && responses.priorities ? responses.priorities[decision.final_priority] : null;
+    if (pack) {
+      lines.push("Repo policy (" + responses.policy_source + "): " + pack.policy);
+      lines.push((responses.suggestion_label || "Suggestion") + " " + pack.suggestion);
+    }
+  }
+  return lines;
+}
+
+function renderFlowCard(step, headline, details) {
+  const meta = STEP_META[step.kind] || { icon: "·", kicker: "Step" };
+  const item = el("li", "flow-card wait kind-" + (step.kind || "tool"));
+  item.append(el("span", "step-icon", meta.icon));
+  const body = el("div", "step-body");
+  const kicker = el("p", "step-kicker");
+  kicker.append(document.createTextNode(meta.kicker));
+  kicker.append(el("span", step.source === "gateway" ? "gw-badge" : "sim-badge", step.source === "gateway" ? "gateway" : "simulated"));
+  body.append(kicker, el("p", "step-headline", headline));
+  if (details.length) {
+    const fold = document.createElement("details");
+    const summary = document.createElement("summary");
+    summary.textContent = "Technical detail";
+    fold.append(summary);
+    for (const line of details) fold.append(el("p", null, line));
+    body.append(fold);
+  }
+  item.append(body);
+  return item;
+}
+
+function pathFor(call, decision, scenario) {
+  const baseScores = (scenario && scenario.scores) || {};
+  const baseTop = topScore(baseScores);
+  const theme = scenario && scenario.theme;
+  const promoteAfter = (eventsFile && eventsFile.learning && eventsFile.learning.promote_after) || 3;
+  const stored = theme ? readPatterns().find((row) => row.id === theme.id) || null : null;
+  const consistent = !stored || stored.lastPriority === decision.final_priority;
+  if (!theme) {
+    const accepted = baseTop.value >= thresholdValue();
+    return {
+      theme: null,
+      stored: null,
+      consistent: true,
+      scores: baseScores,
+      path: {
+        accepted,
+        confidence: baseTop.value,
+        owner: accepted ? "system_1" : "system_2",
+        hold: null,
+        explain: "",
+        timesBefore: 0,
+      },
+    };
+  }
+  const path = decidePath({
+    base: baseTop.value,
+    timesBefore: stored ? stored.count : 0,
+    promoteAfter,
+    threshold: thresholdValue(),
+    learns: theme.learns !== false,
+    lifeSafety: !!theme.life_safety,
+    confirmed: !!(stored && stored.confirmed && consistent),
+    consistent,
+  });
+  return { theme, stored, consistent, scores: withTop(baseScores, baseTop.key, path.confidence), path };
 }
 
 async function playFeed(call, decision, trace, text, fast) {
   const token = ++flowToken;
   const scenario = eventsFile && eventsFile.scenarios ? eventsFile.scenarios[call.id] : null;
-  const scores = (scenario && scenario.scores) || {};
   const needs = (scenario && scenario.needs) || {};
+  const planned = pathFor(call, decision, scenario);
+  const scores = planned.scores;
   const top = topScore(scores);
-  const accepted = top.value >= thresholdValue();
+  const path = planned.path;
+  const accepted = path.accepted;
   const source = (decision.source_outcomes && decision.source_outcomes[0]) || {};
   const aid = decision.final_route === "aid_caseworker" || (source.needs || []).map(String).includes("aid_payment");
   renderScores(scores, needs, accepted);
+  setPriorityBadge(decision.final_priority);
   const list = document.getElementById("flow");
   list.replaceChildren();
   for (const id of ["op-accept", "op-reject"]) {
@@ -1559,6 +1744,17 @@ async function playFeed(call, decision, trace, text, fast) {
     if (step.when === "aid" && !aid) return false;
     return true;
   });
+  if (path.explain) {
+    const at = steps.findIndex((step) => step.kind === "system_1");
+    const kind = path.hold === "aid" ? "sapling" : path.accepted ? "system_1" : "system_2";
+    steps.splice(Math.max(0, at + 1), 0, {
+      id: "pattern",
+      kind,
+      delay_ms: 640,
+      source: "simulated",
+      text: path.explain,
+    });
+  }
   const rule = matchRule(call, decision, text);
   steps.push({
     id: "rule",
@@ -1567,31 +1763,33 @@ async function playFeed(call, decision, trace, text, fast) {
     source: "simulated",
     text: "Rulebook draft " + rule.id + ": " + rule.action,
   });
+  if (planned.theme) rememberPattern(planned.theme, decision, path, planned.stored, planned.consistent);
+  setFeedProgress(0, steps.length);
   for (const step of steps) {
-    const item = el("li", "flow-step wait");
-    item.append(el("span", step.source === "gateway" ? "gw-badge" : "sim-badge", step.source === "gateway" ? "gateway" : "simulated"));
-    item.append(document.createTextNode(" " + applyTemplate(step.text, bag)));
-    if (step.fill === "flood") item.append(el("span", "gateway-line", floodLine(call)));
-    if (step.fill === "shelter") item.append(el("span", "gateway-line", shelterLine(call)));
-    if (step.kind === "system_1" || step.kind === "system_2" || step.kind === "router" || step.kind === "sapling") {
-      item.append(el("span", "gateway-line", "Gateway stub: " + bag.priority + " · " + bag.route + " · " + bag.next_action + ". " + (source.reason || "")));
+    let headline = applyTemplate(step.text, bag);
+    if (step.kind === "memory" && path.timesBefore > 0 && planned.stored && planned.consistent) {
+      const seen = path.timesBefore;
+      headline =
+        "Mubit: seen this pattern " +
+        seen +
+        " time" +
+        (seen === 1 ? "" : "s") +
+        " before, last outcome " +
+        plainPriority(planned.stored.lastPriority) +
+        ".";
     }
-    if (step.kind === "memory" && (call.memory || []).length) {
-      item.append(el("span", "gateway-line", "Stub memory file: " + call.memory.map((row) => row.kind + " — " + row.summary).join(" ")));
-    }
+    const item = renderFlowCard(step, headline, stepDetail(step, call, decision, source, bag));
     list.append(item);
     step._item = item;
   }
   writePayload(call, decision, trace, text);
-  const pack = responses && responses.priorities ? responses.priorities[decision.final_priority] : null;
-  if (pack) {
-    const log = document.getElementById("backend-log");
-    log.prepend(el("p", null, responses.suggestion_label + " " + pack.suggestion));
-    log.prepend(el("p", null, "Repo policy (" + responses.policy_source + "): " + pack.policy));
-  }
+  let shown = 0;
   for (const step of steps) {
     if (token !== flowToken) return;
-    step._item.className = "flow-step on" + (step.kind === "handoff" ? " handoff" : "") + (step.kind === "sapling" ? " stub" : "");
+    step._item.classList.remove("wait");
+    step._item.classList.add("on");
+    shown += 1;
+    setFeedProgress(shown, steps.length);
     step._item.scrollIntoView({ block: "nearest" });
     const delay = reduce ? 0 : fast ? 80 : step.delay_ms || 480;
     if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
@@ -1608,7 +1806,7 @@ async function playFeed(call, decision, trace, text, fast) {
     operator: "pending",
     at: new Date().toISOString(),
   });
-  review = { call, decision, rule, entryId: entry.id };
+  review = { call, decision, rule, entryId: entry.id, themeId: planned.theme ? planned.theme.id : null };
   for (const id of ["op-accept", "op-reject"]) {
     const button = document.getElementById(id);
     if (button) button.disabled = false;
@@ -1619,10 +1817,13 @@ async function playFeed(call, decision, trace, text, fast) {
 function appendLiveStep(step) {
   const list = document.getElementById("flow");
   if (!list) return;
-  const source = step.source || "gateway";
-  const item = el("li", "flow-step on");
-  item.append(el("span", source === "gateway" ? "gw-badge" : "sim-badge", source === "gateway" ? "gateway" : "simulated"));
-  item.append(document.createTextNode(" " + (step.text || "")));
+  const item = renderFlowCard(
+    { kind: step.kind || "router", source: step.source || "gateway" },
+    step.text || "",
+    []
+  );
+  item.classList.remove("wait");
+  item.classList.add("on");
   list.append(item);
 }
 
@@ -1634,6 +1835,14 @@ function attachLiveFeed(source) {
 function acceptReview() {
   if (!review) return;
   updateDecisionLog(review.entryId, { operator: "accepted" });
+  if (review.themeId) {
+    const rows = readPatterns();
+    const row = rows.find((item) => item.id === review.themeId);
+    if (row && row.lifeSafety) {
+      row.confirmed = true;
+      writePatterns(rows);
+    }
+  }
   document.getElementById("op-accept").disabled = true;
   document.getElementById("op-reject").disabled = true;
 }
@@ -1715,7 +1924,18 @@ function tickClock() {
   node.textContent = new Date().toLocaleTimeString("en-GB", { timeZone: "Europe/London", hour: "2-digit", minute: "2-digit" });
 }
 
-async function placeCall(text, choice, options = {}) {
+function placeCall(text, choice, options = {}) {
+  const generation = callGeneration;
+  const job = callChain.catch(() => {}).then(async () => {
+    if (generation !== callGeneration) return;
+    return runPlaceCall(text, choice, options);
+  });
+  callChain = job;
+  return job;
+}
+
+async function runPlaceCall(text, choice, options = {}) {
+  const generation = callGeneration;
   const speak = options.speak !== false;
   const spoken = String(text || "").trim();
   if (!spoken) return;
@@ -1753,6 +1973,7 @@ async function placeCall(text, choice, options = {}) {
       speaker: "caller",
       text: spoken,
     });
+    if (generation !== callGeneration) return;
     const decision = turned.decision;
     callResults.set(call.id, decision);
     caseStates.set(call.id, turned.case);
@@ -1766,7 +1987,9 @@ async function placeCall(text, choice, options = {}) {
     node.classList.remove("busy");
     node.classList.add("done");
     if (speak) {
-      pushPhone("operator", operatorLine(decision, call));
+      const reply = operatorReply(decision, call, spoken);
+      pushPhone("operator", reply.en, reply.th);
+      pushPhone("note", "Scripted reply, not a live operator.");
       await playFeed(call, decision, trace, spoken, callPlaying);
     }
   } catch (error) {
@@ -2040,6 +2263,7 @@ function resetCalls() {
   callPlaying = false;
   callToken += 1;
   flowToken += 1;
+  callGeneration += 1;
   callCursor = 0;
   callResults = new Map();
   activeCallId = null;
@@ -2066,6 +2290,9 @@ function resetCalls() {
   syncPlayButton();
   document.getElementById("flow").replaceChildren();
   document.getElementById("backend-log").replaceChildren();
+  setPriorityBadge(null);
+  setFeedProgress(0, 0);
+  renderPatterns();
   document.getElementById("phone-log").replaceChildren();
   document.querySelectorAll("[data-priority]").forEach((button) => button.classList.remove("on"));
   const node = document.getElementById("mubit-node");
@@ -2118,16 +2345,13 @@ function bindChrome() {
   }
   document.getElementById("op-accept").addEventListener("click", acceptReview);
   document.getElementById("op-reject").addEventListener("click", rejectReview);
-  document.getElementById("log-export").addEventListener("click", () => {
-    const blob = new Blob([JSON.stringify(readLog(), null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "baansafe-decision-log.json";
-    link.click();
-    URL.revokeObjectURL(url);
-  });
   document.getElementById("log-clear").addEventListener("click", () => writeLog([]));
+  document.getElementById("pattern-reset").addEventListener("click", () => writePatterns([]));
+  const patternRule = document.getElementById("pattern-rule");
+  if (patternRule && eventsFile && eventsFile.learning && eventsFile.learning.life_safety_rule) {
+    patternRule.textContent = eventsFile.learning.life_safety_rule;
+  }
+  renderPatterns();
   const threshold = document.getElementById("threshold");
   if (eventsFile && eventsFile.confidence_threshold != null) threshold.value = String(eventsFile.confidence_threshold);
   renderPrompts();
@@ -2190,7 +2414,7 @@ function bindChrome() {
 }
 
 async function main() {
-  const [townBody, streetBody, floodBody, responseBody, eventBody, promptBody, ruleBody] = await Promise.all([
+  const [townBody, streetBody, floodBody, responseBody, eventBody, promptBody, ruleBody, replyBody] = await Promise.all([
     getJson("data/town.json"),
     getJson("data/streets.json"),
     getJson("data/flood.json"),
@@ -2198,6 +2422,7 @@ async function main() {
     getJson("data/sim_events.json"),
     getJson("data/prompts.json"),
     getJson("data/rulebook.json"),
+    getJson("data/replies.json"),
   ]);
   town = townBody;
   streets = streetBody.streets;
@@ -2206,6 +2431,7 @@ async function main() {
   eventsFile = eventBody;
   promptFile = promptBody;
   rulebook = ruleBody;
+  replies = replyBody;
   floodMax = Math.max(...flood.features.map((feature) => feature.properties.depth_m));
   if (reduce) floodLevel = floodMax;
   streetById = Object.fromEntries(streets.map((street) => [street.id, street]));

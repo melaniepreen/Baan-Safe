@@ -74,51 +74,62 @@
     <g id="link-dots"></g>
   </svg>
 
-  <aside id="backend" aria-label="Backend path">
-    <p class="kicker">Backend</p>
-    <h1>This call</h1>
-    <label class="threshold">Confidence threshold
-      <input id="threshold" type="number" min="0" max="1" step="0.01" value="0.75" />
-    </label>
-    <div id="scores"></div>
-    <div class="operator-actions">
-      <button type="button" id="op-accept" disabled>Accept</button>
-      <button type="button" id="op-reject" disabled>Reject</button>
-    </div>
-    <ol id="flow"></ol>
-    <div id="priority-legend" class="legend"></div>
-    <h2>Rulebook</h2>
-    <p id="rulebook-label" class="demo-note"></p>
-    <table id="rulebook"><tbody></tbody></table>
-    <h2>Decision log</h2>
-    <div class="wordmark-actions">
-      <button type="button" id="log-export">Export JSON</button>
-      <button type="button" id="log-clear">Clear log</button>
-    </div>
-    <ol id="decision-log"></ol>
-    <div id="backend-log"></div>
-    <div id="correct-host"></div>
-    <p class="loading" id="loading">Loading town data…</p>
-  </aside>
+  <div id="side-stack">
+    <section class="block-map" aria-label="Block map">
+      <div class="map-head">
+        <p class="kicker">Block map</p>
+        <span id="cam-note">Camera fixed</span>
+      </div>
+      <canvas id="minimap" width="320" height="72"></canvas>
+      <div class="legend">
+        <span><i class="swatch roof-red"></i>red</span>
+        <span><i class="swatch roof-blue"></i>blue</span>
+        <span><i class="swatch roof-grey"></i>grey</span>
+        <span><i class="swatch roof-pink"></i>school</span>
+        <span><i class="swatch roof-brown"></i>wood</span>
+        <span><i class="swatch accent"></i>route</span>
+      </div>
+      <p id="graph-stat" class="stat"></p>
+      <p id="flood-note" class="stat">Flood from flood.json. Street names are placeholders.</p>
+    </section>
 
-  <section class="block-map" aria-label="Block map">
-    <div class="map-head">
-      <p class="kicker">Block map</p>
-      <span id="cam-note">Camera fixed</span>
-    </div>
-    <canvas id="minimap" width="220" height="132"></canvas>
-    <p id="flood-note" class="stat">Flood rises to the depths in flood.json.</p>
-    <div class="legend">
-      <span><i class="swatch roof-red"></i>red</span>
-      <span><i class="swatch roof-blue"></i>blue</span>
-      <span><i class="swatch roof-grey"></i>grey</span>
-      <span><i class="swatch roof-pink"></i>school</span>
-      <span><i class="swatch roof-brown"></i>wood</span>
-      <span><i class="swatch accent"></i>route</span>
-    </div>
-    <p id="graph-stat" class="stat"></p>
-    <p class="stat">Street names are placeholders.</p>
-  </section>
+    <aside id="backend" aria-label="Backend path">
+      <div class="feed-head">
+        <div>
+          <p class="kicker">Backend</p>
+          <h1>This call</h1>
+        </div>
+        <span id="priority-badge" class="priority-badge" hidden>Gateway</span>
+      </div>
+      <div class="feed-meter" aria-hidden="true"><div id="feed-progress"></div></div>
+      <p id="feed-count" class="muted"></p>
+      <label class="threshold">Confidence threshold
+        <input id="threshold" type="number" min="0" max="1" step="0.01" value="0.75" />
+      </label>
+      <div id="scores"></div>
+      <div class="operator-actions">
+        <button type="button" id="op-accept" disabled>Accept</button>
+        <button type="button" id="op-reject" disabled>Reject</button>
+      </div>
+      <ol id="flow"></ol>
+      <div id="priority-legend" class="legend"></div>
+      <h2>Pattern memory <span class="sim-badge">simulated</span></h2>
+      <p id="pattern-rule" class="demo-note">Repeats of the same theme raise the fast-path score. Life-safety stays with System 2 until Accept.</p>
+      <ol id="pattern-list"></ol>
+      <button type="button" id="pattern-reset">Reset patterns</button>
+      <h2>Rulebook</h2>
+      <p id="rulebook-label" class="demo-note"></p>
+      <table id="rulebook"><tbody></tbody></table>
+      <h2>Decision log</h2>
+      <div class="wordmark-actions">
+        <button type="button" id="log-clear">Clear log</button>
+      </div>
+      <ol id="decision-log"></ol>
+      <div id="backend-log"></div>
+      <div id="correct-host"></div>
+      <p class="loading" id="loading">Loading town data…</p>
+    </aside>
+  </div>
 
   <script type="module" src="sim.js"></script>
 </body>
