@@ -31,7 +31,7 @@ flowchart TD
   pick -->|no trigger| s1["S1 stub file"]
   pick -->|any trigger| s2["S2 stub file"]
   s1 -->|"S1 escalate, cascade"| s2
-  ov["RL overlay if RL_OVERLAY"] -.-> pick
+  ov["eval/rl overlay if RL_OVERLAY"] -.-> pick
   s1 --> merge["router.merge + process ledger"]
   s2 --> merge
   snap["committed snapshots"] --> places["places → dispatch units"]
@@ -39,12 +39,14 @@ flowchart TD
   snap -.-> extract
   snap -.-> enrich
   merge --> out["RouterDecision + dispatches"]
+  out -.-> hold["town holds S2 or cascade"]
   s1 -.-> rules["system1.decide if S1_IMPL=real"]
   rules -.-> merge
   s2 -.-> s2d["system2.decide if S2_IMPL=real"]
   s2d -.-> sap["Sapling gate, client stub"]:::unwired
-  s2d -.-> llm["Mubit LLM client, Nemotron"]:::unwired
+  s2d -.-> llm["Nemotron nano, life-safety outage P1"]:::unwired
   packs["country packs, not loaded"]:::unwired
+  modal["Modal gateway_app, stubs"]:::unwired
 ```
 
 Training is a separate path from that call. Operator corrections, coach notes, and simulator outcomes append one `TrainingEvent` each. `make export-training` reads the log. `fixtures/synthetic` is a seeded flood-call set. `training/synthetic_export.py` writes SetFit rows from it (`SYNTHETIC=1` on that make target). `training/laya_export.py` writes Laya JSONL. `scripts/laya_train.py` skips unless `LAYA_TRAIN=1`, a GPU or a Modal task is present, and `laya-train` is on `PATH`. The Modal fine-tune job takes one event-log dataset per task and does not start while its base model is `TODO_HUMAN`. It does not read the synthetic rows. Held-out eval splits on `group_id` and filters `source`. It scores stub arms and does not load fine-tune weights. `EVAL_LEARNING_SET=synthetic` scores that call set on its committed group split and still does not promote.
@@ -92,7 +94,7 @@ The API process is the same code in three hosts: `make serve` on a laptop, `dock
 flowchart LR
   classDef unwired stroke-dasharray: 5 5
   subgraph browser["Browser"]
-    phone["ui/sim phone + town"]
+    phone["ui/sim town, Accept gate"]
     correct["ui/correct.js Reject"]
   end
   subgraph api["API process: make serve, Docker, or Modal gateway_app"]

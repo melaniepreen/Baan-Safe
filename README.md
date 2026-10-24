@@ -20,7 +20,7 @@ flowchart TD
   pick -->|no trigger| s1["S1 stub file"]
   pick -->|any trigger| s2["S2 stub file"]
   s1 -->|"S1 escalate, cascade"| s2
-  ov["RL overlay if RL_OVERLAY"] -.-> pick
+  ov["eval/rl overlay if RL_OVERLAY"] -.-> pick
   s1 --> merge["router.merge + process ledger"]
   s2 --> merge
   snap["committed snapshots"] --> places["places → dispatch units"]
@@ -28,12 +28,14 @@ flowchart TD
   snap -.-> extract
   snap -.-> enrich
   merge --> out["RouterDecision + dispatches"]
+  out -.-> hold["town holds S2 or cascade"]
   s1 -.-> rules["system1.decide if S1_IMPL=real"]
   rules -.-> merge
   s2 -.-> s2d["system2.decide if S2_IMPL=real"]
   s2d -.-> sap["Sapling gate, client stub"]:::unwired
-  s2d -.-> llm["Mubit LLM client, Nemotron"]:::unwired
+  s2d -.-> llm["Nemotron nano, life-safety outage P1"]:::unwired
   packs["country packs, not loaded"]:::unwired
+  modal["Modal gateway_app, stubs"]:::unwired
 ```
 
 The training path is separate. `fixtures/synthetic` feeds a SetFit row export and a Laya JSONL export. `laya-train` skips unless `LAYA_TRAIN=1` and a GPU or Modal task is present. Held-out eval does not load those weights. `EVAL_LEARNING_SET=synthetic` scores the same call set and still does not promote.
