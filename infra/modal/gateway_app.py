@@ -3,16 +3,18 @@
 One `*.modal.run` URL serves the town (`/ui/sim/`), triage, cases, and
 `POST /stt/transcribe`. The image installs `requirements.txt` and mounts this
 repo at `/opt/baansafe`. System 1 and enrichment run without secrets
-(`S1_IMPL=real`, `ENRICH_IMPL` auto via `ingest.store`). System 2, memory,
-and Sapling stay stub/mock. No Modal secret is attached, so Nemotron is
-never called.
+(`S1_IMPL=real`, `ENRICH_IMPL` auto via `ingest.store`). The `baansafe-mubit`
+Modal secret is attached so System 2 can call Nemotron through Mubit when
+`MUBIT_API_KEY` and `MUBIT_BASE_URL` are present (`S2_IMPL=real`). Without
+those credentials, S2 stays stub. Secret values are never in git or STUB_ENV.
 
 `STT_UPSTREAM`, when it is an http(s) URL at deploy time, forwards speech
 uploads to `{STT_UPSTREAM}/transcribe`. `S1_UPSTREAM`, `S2_UPSTREAM`, and
 `SAPLING_UPSTREAM` are recorded on `GET /hosting` and do not replace
 gateway outcomes: those apps do not return a gateway Outcome.
 
-Runtime writes go to the `baansafe-demo` volume at `/data`.
+Runtime writes (including TRACE_PATH for gateway/S1/S2/router stages) go
+to the `baansafe-demo` volume at `/data`.
 """
 
 from __future__ import annotations
@@ -52,6 +54,7 @@ def _repo_on_path() -> None:
 _repo_on_path()
 
 from infra.modal.common import repo_root  # noqa: E402
+from infra.modal.runtime import mubit_secret  # noqa: E402
 
 APP_NAME = "baansafe-gateway"
 DATA_MOUNT = "/data"
@@ -60,7 +63,7 @@ REMOTE_ROOT = "/opt/baansafe"
 UPSTREAM_ENV_NAMES = ("S1_UPSTREAM", "S2_UPSTREAM", "SAPLING_UPSTREAM", "STT_UPSTREAM")
 
 # Demo switches and writable paths. Nothing here is a secret.
-# S1 + enrich need no key. S2 stays stub (no mubit_secret attached).
+# S1 + enrich need no key. S2 image default is stub; runtime promotes with Mubit.
 STUB_ENV = {
     "PYTHONPATH": REMOTE_ROOT,
     "PYTHONUNBUFFERED": "1",
@@ -87,13 +90,39 @@ def http_upstream(name: str) -> str:
     return ""
 
 
+def mubit_credentials_present() -> bool:
+    """True when both values Modal injects from baansafe-mubit are non-empty."""
+    key = os.environ.get("MUBIT_API_KEY", "").strip()
+    base = os.environ.get("MUBIT_BASE_URL", "").strip()
+    return bool(key) and bool(base)
+
+
+def apply_runtime_impl() -> None:
+    """Promote S2 to real when Mubit credentials exist; otherwise keep stub.
+
+    Deploy-time S2_IMPL=real is honored only when credentials are present.
+    Without credentials, S2 is forced to stub. TRACE_PATH stays the volume path.
+    """
+    override = os.environ.get("S2_IMPL", "").strip().lower()
+    if mubit_credentials_present():
+        if override in {"", "stub", "real"}:
+            os.environ["S2_IMPL"] = "real"
+    else:
+        os.environ["S2_IMPL"] = "stub"
+
+
 def image_env() -> dict[str, str]:
     """Demo env, plus any upstream URLs exported in the shell that runs deploy.
 
     Empty STUB_ENV values (ENRICH_IMPL auto) are omitted so the process
     matches local serve: unset → data if store.available() else off.
+    Deploy-time S2_IMPL=real|stub is copied when set; runtime still gates
+    on Mubit credentials via apply_runtime_impl().
     """
     env = {key: value for key, value in STUB_ENV.items() if value != ""}
+    deploy_s2 = os.environ.get("S2_IMPL", "").strip().lower()
+    if deploy_s2 in {"real", "stub"}:
+        env["S2_IMPL"] = deploy_s2
     for name in UPSTREAM_ENV_NAMES:
         value = http_upstream(name)
         if value:
@@ -182,6 +211,35 @@ def _backends_label(impl: dict[str, str]) -> str:
     return "stub"
 
 
+def _hosting_note(impl: dict[str, str]) -> str:
+    has_secrets = mubit_credentials_present()
+    s2 = impl.get("S2_IMPL", "stub")
+    if has_secrets and s2 == "real":
+        s2_line = (
+            "System 2 is real: Nemotron via Mubit (S2_IMPL=real). "
+            "TRACE_PATH on the demo volume records gateway/system stages."
+        )
+    elif has_secrets:
+        s2_line = (
+            "Mubit credentials are present but S2_IMPL is not real; "
+            "System 2 stays stub."
+        )
+    else:
+        s2_line = (
+            "System 2 stays stub until baansafe-mubit injects "
+            "MUBIT_API_KEY and MUBIT_BASE_URL."
+        )
+    return (
+        "LLM via Mubit only. "
+        "System 1 runs the rules path (S1_IMPL=real). "
+        "Enrichment reads shipped JSON via ingest.store (no secret). "
+        f"{s2_line} "
+        "Memory and Sapling stay mock/stub. "
+        "S1_UPSTREAM, S2_UPSTREAM, and SAPLING_UPSTREAM do not replace gateway outcomes. "
+        "STT_UPSTREAM forwards POST /stt/transcribe and invents no words."
+    )
+
+
 def hosting() -> dict:
     impl = {
         "S1_IMPL": os.environ.get("S1_IMPL", STUB_ENV["S1_IMPL"]),
@@ -190,17 +248,10 @@ def hosting() -> dict:
         "SAPLING_IMPL": os.environ.get("SAPLING_IMPL", STUB_ENV["SAPLING_IMPL"]),
         "ENRICH_IMPL": _enrich_impl_label(),
     }
-    note = (
-        "System 1 runs the rules path (S1_IMPL=real). "
-        "Enrichment reads shipped JSON via ingest.store (no secret). "
-        "System 2, memory, and Sapling stay stub/mock; no mubit_secret attached. "
-        "S1_UPSTREAM, S2_UPSTREAM, and SAPLING_UPSTREAM do not replace gateway outcomes. "
-        "STT_UPSTREAM forwards POST /stt/transcribe and invents no words."
-    )
     return {
         "app": APP_NAME,
         "backends": _backends_label(impl),
-        "secrets": False,
+        "secrets": mubit_credentials_present(),
         "impl": impl,
         "upstreams": {name: bool(http_upstream(name)) for name in UPSTREAM_ENV_NAMES},
         "writes": {
@@ -213,7 +264,7 @@ def hosting() -> dict:
             ),
             "POLICY_PIN_DIR": os.environ.get("POLICY_PIN_DIR", STUB_ENV["POLICY_PIN_DIR"]),
         },
-        "note": note,
+        "note": _hosting_note(impl),
     }
 
 
@@ -260,6 +311,7 @@ async def transcribe(request: Request) -> dict:
 @app.function(
     image=image,
     cpu=1.0,
+    secrets=[mubit_secret()],
     volumes={DATA_MOUNT: demo_data},
     scaledown_window=120,
     timeout=120,
@@ -268,4 +320,5 @@ async def transcribe(request: Request) -> dict:
 @modal.asgi_app()
 def web():
     prepare_runtime_files()
+    apply_runtime_impl()
     return build_asgi()

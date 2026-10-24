@@ -29,7 +29,8 @@ Score System 1 / System 2 outcomes in a reward loop. A System 1 escalate cascade
 - `Overlay` schema `baansafe.rl_overlay.v1`: `graduation_threshold`, `graduated`, `recommendations`, `demoted`. Narrow signatures promote; coarse signatures demote. A narrow signature is the coarse signature plus `|text=` + a 12-char hash of caller content tokens (stopwords, number words, and location tokens excluded).
 - `run.json` schema `baansafe.rl_run.v1`: per-epoch summaries, per-episode rows, events, the final overlay, training counts, notes.
 - Cascade: `source_outcomes = [deciding outcome, *prior]`, so `[0]` is always the deciding system.
-- S2 modes: `live` calls Mubit through `llm.complete` with a 2/4/8 s 429 backoff and caches replies; `replay` reads the cache only and a miss counts as a fallback; `fake` replays authored truth and is for tests.
+- S2 modes: `live` calls Mubit only through `llm.complete` (no OpenRouter client) with pacing and 429 backoff, caches replies in `s2_cache.jsonl`; `replay` reads the cache only and a miss counts as a System 2 fallback (no invented host, no socket); `fake` replays authored truth and is for tests.
+- Each live Mubit POST and each cache hit emits TraceEvent stage `mubit_chat` (model, `latency_ms`, `case_id`, notes `status=ok|http_*|cache_hit`). Live miss → real Mubit hop; hit → `status=cache_hit` `host=rl_s2_cache` `latency_ms=0`. Never logs API keys. `run.json` records `model` and a `mubit` summary; `GET /metrics` surfaces `mubit_chat` counts including `cache_hit_count`.
 - Learner events: `graduate`, `recommend`, `demote`, recorded once per signature.
 
 ## Invariants
@@ -38,14 +39,14 @@ Score System 1 / System 2 outcomes in a reward loop. A System 1 escalate cascade
 - P1 and complex outcomes (requires_human, supervisor or aid route, aid need, or a safeguarding/aid flag) never graduate — they become recommendations passed back to System 2.
 - Direct System 2 routes (hard trigger or demotion) never graduate.
 - The bandit never routes; it only records pick vs actual.
-- `eval/out/` is gitignored. No test or run hits the network without `--s2 live`.
+- `eval/out/` is gitignored. No test or run hits the network without `--s2 live`. Prefer mocked unit tests; do not run live `make rl-loop` unless Mubit keys are set.
 
 ## How to test
 
 - `python -m eval.rl --s2 fake --epochs 3` — road-info and cold-hall graduate, quiet-grandmother and upstairs-water recommend, weak-grandfather-water demotes, aid never graduates.
-- `make rl-loop` (live) and `make rl-loop-replay` (cache only).
-- `tests/test_rl_loop.py`, `tests/test_cascade.py`, `tests/test_overlay.py`, `tests/test_orchestrator.py`.
-- `GET /rl/run` on `make serve`.
+- `make rl-loop-replay` (cache only, no network). `make rl-loop` only with Mubit env.
+- `tests/test_rl_loop.py` (fake + mocked live/replay traces), `tests/test_cascade.py`, `tests/test_overlay.py`, `tests/test_orchestrator.py`.
+- `GET /rl/run` and `GET /metrics` on `make serve`.
 
 ## Common pitfalls
 
@@ -54,6 +55,7 @@ Score System 1 / System 2 outcomes in a reward loop. A System 1 escalate cascade
 - Expecting unmatched-needs escalations to graduate. Graduated rules apply only where System 1 escalates for no needs or low confidence.
 - Assuming the fake completer is a model. It replays authored truth; it measures loop plumbing, not reasoning.
 - Setting `RL_OVERLAY` globally in tests. It is process state cached by mtime; unset it or pass `overlay=` explicitly.
+- Treating a replay miss as a Mubit hop. It is a fallback; traces stay silent for that miss.
 
 ## Open TODO_HUMAN keys
 

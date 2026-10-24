@@ -1,6 +1,7 @@
 """Modal config, JSONL planning, and the VRAM fit check. No GPU and no Modal token."""
 
 import json
+import os
 
 import pytest
 
@@ -128,7 +129,7 @@ def test_policy_pin_dir_and_db_path_follow_env(monkeypatch, tmp_path):
     assert _default_db_path() == tmp_path / "demo.sqlite"
 
 
-def test_gateway_app_builds_demo_asgi_without_secrets(monkeypatch):
+def test_gateway_app_builds_demo_asgi_with_mubit_secret_slot(monkeypatch):
     pytest.importorskip("modal")
     for name in (
         "S1_UPSTREAM",
@@ -139,6 +140,8 @@ def test_gateway_app_builds_demo_asgi_without_secrets(monkeypatch):
         "STT_MODEL_ID",
         "S1_GPU",
         "S1_MODEL_ID",
+        "S2_IMPL",
+        "MUBIT_API_KEY",
     ):
         monkeypatch.delenv(name, raising=False)
     import sys
@@ -152,6 +155,8 @@ def test_gateway_app_builds_demo_asgi_without_secrets(monkeypatch):
     assert gateway.STUB_ENV["SAPLING_IMPL"] == "stub"
     assert gateway.STUB_ENV["ENRICH_IMPL"] == ""
     assert "ENRICH_IMPL" not in gateway.image_env()
+    assert "MUBIT_API_KEY" not in gateway.image_env()
+    assert "MUBIT_BASE_URL" not in gateway.image_env()
     assert gateway.image_env()["S1_IMPL"] == "real"
     assert gateway.image_env()["S2_IMPL"] == "stub"
     assert gateway.STUB_ENV["TRACE_PATH"].startswith("/data/")
@@ -161,8 +166,11 @@ def test_gateway_app_builds_demo_asgi_without_secrets(monkeypatch):
     assert "STT_UPSTREAM" not in gateway.image_env()
     from pathlib import Path
 
+    from infra.modal.common import MUBIT_SECRET_NAME
+
     spec = gateway.web._spec_
-    assert list(spec.secrets) == []
+    assert len(list(spec.secrets)) == 1
+    assert spec.secrets[0].name == MUBIT_SECRET_NAME
     assert spec.gpus is None
     assert spec.cpu == 1.0
     assert set(spec.volumes) == {"/data"}
@@ -175,6 +183,10 @@ def test_gateway_app_builds_demo_asgi_without_secrets(monkeypatch):
     for key in ("S1_IMPL", "S2_IMPL", "MEMORY_IMPL", "SAPLING_IMPL"):
         monkeypatch.setenv(key, gateway.STUB_ENV[key])
     monkeypatch.delenv("ENRICH_IMPL", raising=False)
+    monkeypatch.delenv("MUBIT_API_KEY", raising=False)
+    gateway.apply_runtime_impl()
+    assert os.environ["S2_IMPL"] == "stub"
+    assert gateway.mubit_credentials_present() is False
 
     from fastapi.testclient import TestClient
 
@@ -195,8 +207,10 @@ def test_gateway_app_builds_demo_asgi_without_secrets(monkeypatch):
         assert body["secrets"] is False
         assert body["impl"]["S1_IMPL"] == "real"
         assert body["impl"]["S2_IMPL"] == "stub"
+        assert "LLM via Mubit only" in body["note"]
         assert "stub gateway" not in body["note"].lower()
         assert "System 1" in body["note"]
+        assert body["writes"]["TRACE_PATH"]
         assert body["upstreams"] == {
             "S1_UPSTREAM": False,
             "S2_UPSTREAM": False,
@@ -222,6 +236,40 @@ def test_gateway_app_builds_demo_asgi_without_secrets(monkeypatch):
         triaged = client.post("/triage", json=created.json()["case"])
         assert triaged.status_code == 200
 
+
+def test_gateway_s2_real_when_mubit_credentials_present(monkeypatch):
+    pytest.importorskip("modal")
+    import infra.modal.gateway_app as gateway
+
+    monkeypatch.setenv("S1_IMPL", "real")
+    monkeypatch.setenv("S2_IMPL", "stub")
+    monkeypatch.setenv("MUBIT_API_KEY", "test-key-not-real")
+    monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai")
+    assert gateway.mubit_credentials_present() is True
+    gateway.apply_runtime_impl()
+    assert os.environ["S2_IMPL"] == "real"
+    body = gateway.hosting()
+    assert body["secrets"] is True
+    assert body["backends"] == "live"
+    assert body["impl"]["S2_IMPL"] == "real"
+    assert "LLM via Mubit only" in body["note"]
+    assert "test-key-not-real" not in body["note"]
+    assert "traces" in body["writes"]["TRACE_PATH"]
+
+    monkeypatch.delenv("MUBIT_API_KEY", raising=False)
+    gateway.apply_runtime_impl()
+    assert os.environ["S2_IMPL"] == "stub"
+    assert gateway.hosting()["secrets"] is False
+    assert gateway.hosting()["backends"] == "s1-real"
+
+
+def test_mubit_secret_requires_key_and_base_url():
+    pytest.importorskip("modal")
+    from infra.modal.common import MUBIT_SECRET_NAME
+    from infra.modal.runtime import mubit_secret
+
+    secret = mubit_secret()
+    assert secret.name == MUBIT_SECRET_NAME
 
 
 def test_stt_upstream_forwards_and_invents_nothing(monkeypatch):

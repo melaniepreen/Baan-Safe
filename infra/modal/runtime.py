@@ -21,7 +21,11 @@ def hf_secret() -> modal.Secret:
 
 
 def mubit_secret() -> modal.Secret:
-    return modal.Secret.from_name(MUBIT_SECRET_NAME, required_keys=["MUBIT_API_KEY"])
+    """baansafe-mubit. llm/client.py needs both key and base URL."""
+    return modal.Secret.from_name(
+        MUBIT_SECRET_NAME,
+        required_keys=["MUBIT_API_KEY", "MUBIT_BASE_URL"],
+    )
 
 
 def hf_cache() -> modal.Volume:

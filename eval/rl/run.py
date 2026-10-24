@@ -4,6 +4,10 @@ Off the live path. Episodes per epoch: every theme variant, fixtures
 F01-F18, C01-a/b, G01-G04 (truth = expected), and the sim CATALOG callers
 turn by turn like sim/env.py but with use_stubs=False, scoring only the
 final turn. A seeded shuffle orders episodes inside each epoch.
+
+Live S2 calls go only through `llm.complete` (Mubit). Cache hits emit the
+same TraceEvent stage `mubit_chat` with `status=cache_hit`. Replay never
+opens a socket; a miss raises and scores as a System 2 fallback.
 """
 
 from __future__ import annotations
@@ -111,10 +115,13 @@ def run(
             epoch_rows.append(_epoch_summary(epoch, rows))
     save_overlay(learner.overlay, out / "overlay.json")
     training = _export(events_path, out)
+    model = require_decision("system2.orchestrator_model")
+    mubit = _mubit_trace_summary(s2, model)
     payload = {
         "schema": RUN_SCHEMA,
         "s2": s2,
-        "model": require_decision("system2.orchestrator_model"),
+        "model": model,
+        "mubit": mubit,
         "seed": seed,
         "epochs": epoch_rows,
         "episodes": episode_rows,
@@ -123,6 +130,8 @@ def run(
         "final_overlay": learner.overlay.to_dict(),
         "training": training,
         "notes": [
+            "Live S2 calls go only through Mubit (llm.complete); no OpenRouter client.",
+            "Replay cache misses score as System 2 fallbacks; they do not invent a host.",
             "P1 and complex patterns never graduate; they become recommendations.",
             "The shadow bandit never routes.",
             "Fine-tune is blocked on modal.finetune_base_model.",
@@ -309,10 +318,14 @@ def _completer_for(mode: str, out: Path) -> Callable:
     if mode == "replay":
         cache = _read_cache(cache_path)
 
-        def replay(messages, model=None, **_kwargs):
+        def replay(messages, model=None, **kwargs):
             key = _cache_key(model, messages)
+            case_id = _case_id_from(kwargs, messages)
             if key not in cache:
+                # Miss → ValueError → orchestrator system2_unavailable fallback.
+                # Do not invent a non-Mubit hop or open a socket.
                 raise ValueError("s2 cache miss")
+            _emit_rl_cache_hit(case_id=case_id, model=model)
             return cache[key]
 
         return replay
@@ -326,7 +339,9 @@ def _completer_for(mode: str, out: Path) -> Callable:
 
     def live(messages, model=None, **kwargs):
         key = _cache_key(model, messages)
+        case_id = _case_id_from(kwargs, messages)
         if key in cache:
+            _emit_rl_cache_hit(case_id=case_id, model=model)
             return cache[key]
         # Free-tier pacing: at least 4 s between real calls, then 5/15/30 s
         # 429 backoff. A 429 answer is never written to the cache.
@@ -335,13 +350,15 @@ def _completer_for(mode: str, out: Path) -> Callable:
             time.sleep(wait)
         delay = 0.0
         last: Exception | None = None
+        call_kwargs = {**kwargs, "case_id": case_id}
         for attempt in range(3):
             if delay:
                 time.sleep(delay)
             last_call["at"] = time.monotonic()
             live_calls["count"] += 1
             try:
-                reply = complete(messages, model=model, **kwargs)
+                # Only Mubit: complete() emits mubit_chat (status=ok|http_*).
+                reply = complete(messages, model=model, **call_kwargs)
             except Exception as exc:  # noqa: BLE001 — retry only rate limits
                 if "429" not in str(exc):
                     raise
@@ -357,6 +374,69 @@ def _completer_for(mode: str, out: Path) -> Callable:
 
     live.calls = live_calls
     return live
+
+
+def _case_id_from(kwargs: dict, messages) -> str:
+    raw = kwargs.get("case_id")
+    if raw:
+        return str(raw)
+    try:
+        payload = json.loads(messages[1]["content"])
+        case_id = payload.get("case_id")
+        if case_id:
+            return str(case_id)
+    except Exception:  # noqa: BLE001 — missing payload is fine
+        pass
+    return "rl"
+
+
+def _emit_rl_cache_hit(*, case_id: str, model: str | None) -> None:
+    """Trace a cache hit without opening a Mubit socket. Never logs a key."""
+    from llm.client import emit_mubit_chat_trace
+
+    emit_mubit_chat_trace(
+        case_id=case_id or "rl",
+        model=model,
+        latency_ms=0,
+        status="cache_hit",
+        host="rl_s2_cache",
+    )
+
+
+def _mubit_trace_summary(s2: str, model: str) -> dict:
+    """Summarize mubit_chat rows written during this run for run.json / UI."""
+    from trace import read_traces
+
+    events = [e for e in read_traces() if e.stage == "mubit_chat"]
+    live_ok = 0
+    cache_hits = 0
+    errors = 0
+    latencies: list[int] = []
+    for event in events:
+        notes = event.notes or ""
+        latencies.append(event.latency_ms)
+        if "status=cache_hit" in notes:
+            cache_hits += 1
+        elif "status=ok" in notes:
+            live_ok += 1
+        else:
+            errors += 1
+    if s2 == "live":
+        via = "api.mubit.ai"
+    elif s2 == "replay":
+        via = "rl_s2_cache"
+    else:
+        via = "fake"
+    avg = round(sum(latencies) / len(latencies), 1) if latencies else None
+    return {
+        "via": via,
+        "model": model,
+        "mubit_chat_count": len(events),
+        "live_ok": live_ok,
+        "cache_hits": cache_hits,
+        "errors": errors,
+        "avg_latency_ms": avg,
+    }
 
 
 def _cache_key(model: str | None, messages) -> str:
@@ -425,10 +505,18 @@ def _fake_completer() -> Callable:
 
 def _markdown(payload: dict) -> str:
     lines = ["# RL loop run", ""]
+    mubit = payload.get("mubit") or {}
     lines.append(
-        f"s2={payload['s2']} seed={payload['seed']} "
+        f"s2={payload['s2']} model={payload.get('model')} "
+        f"via={mubit.get('via')} seed={payload['seed']} "
         f"episodes/epoch={payload['epochs'][-1]['episodes'] if payload['epochs'] else 0}"
     )
+    if mubit:
+        lines.append(
+            f"mubit_chat: live_ok={mubit.get('live_ok')} "
+            f"cache_hits={mubit.get('cache_hits')} errors={mubit.get('errors')} "
+            f"avg_latency_ms={mubit.get('avg_latency_ms')}"
+        )
     lines.append("")
     for epoch in payload["epochs"]:
         lines.append(
