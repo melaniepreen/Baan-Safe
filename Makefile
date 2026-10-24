@@ -2,7 +2,7 @@ PYTHON ?= python3
 export PYTHONPATH := .
 
 .PHONY: validate test replay-stubs demo-stub demo-correction-loop serve ingest ingest-refresh data-report \
-	modal-deploy-s1 modal-deploy-s2 modal-deploy-stt modal-finetune docker-build docker-run
+	modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune docker-build docker-run
 
 IMAGE ?= baansafe-api:local
 DATASET ?= eval/out/sft.jsonl
@@ -39,6 +39,9 @@ modal-deploy-s1:
 
 modal-deploy-s2:
 	$(PYTHON) -m modal deploy -m infra.modal.s2_app
+
+modal-deploy-sapling:
+	$(PYTHON) -m modal deploy -m infra.modal.sapling_app
 
 modal-deploy-stt:
 	$(PYTHON) -m modal deploy -m infra.modal.stt_app

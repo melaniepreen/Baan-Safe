@@ -60,7 +60,7 @@ The correction loop serves the first track directly and the second track's score
 - Own beat 3. Run `make demo-correction-loop` until the narration is one minute.
 - Aid caseworker: `GET /aid/eligibility` and `POST /aid/exceptions` return 501 and must not approve a payment. A real check can return `needs_human`. It cannot return an amount.
 - Memory: `memory/mubit.py` is the client to fill once `memory.mubit_project` and the key exist. Keep the adapter. Do not put a retrieval call back in front of the gateway.
-- Nemotron: `system2/orchestrator.py` raises before any network while the System 2 decisions are unset. When they are set, the only call is `llm.complete`. Do not add a second HTTP client.
+- Nemotron: `system2/orchestrator.py` raises before any network while its model, hosting, and latency budget are unset. `use_banyan_sapling` is already true. When the orchestrator returns, `decide()` runs the Sapling verifier on aid-eligibility and denial outcomes. The committed client is the stub. `SAPLING_IMPL=live` refuses while hosting, the GPU, the model id, or Thai handling is unset, and it does not open a socket. Chat completions stay on `llm.complete`.
 - Eval: extend `eval/compare.py` when you have a real before and after. Leave cost null until a human sets a price.
 
 ### 19:00 integration

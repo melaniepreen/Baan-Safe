@@ -18,7 +18,7 @@ v1, v2, and v3 were iterated in place. Each keeps its reference style and adds t
 Each light variation shows the same simulated machine, arranged differently:
 
 - Mubit gateway: auth (scheme still `TODO_HUMAN`, request not rejected), memory hits, policy flag, exclusive route, audit line.
-- System 1 is deterministic and spends no tokens. System 2 is the Nemotron orchestrator stub, with plan / tools / outcome spans. Only one of them runs.
+- System 1 is deterministic and spends no tokens. System 2 is the Nemotron orchestrator stub, with plan / tools / outcome spans. Only one of them runs. Aid-eligibility and denial checks on that System 2 path are the Sapling step in the architecture. This prototype does not call the model.
 - Decision router returns one next action. `merge()` is not called.
 - Budgets: simulated Thai central fund, DDPM reserve, Lampang, Phrae, Nan, and Phayao envelopes, plus NGO, public, and corporate donations. The solver moves money across shelter, boats, medical, food, and cash. It stops on budget caps, the simulated ฿9,000 household rule, eligibility unset (the F17/F18 pattern), boat and crew caps, closed roads, and time-to-reach.
 - Relearning runs on a timer: operator correction, memory write, JSONL row, LoRA job stub, version `stub-N`, replay of accuracy, latency, and cost. Every fourth version drifts. The 0.90 line is a demo mark. `graduation_threshold` stays `TODO_HUMAN` and nothing is promoted into System 1.

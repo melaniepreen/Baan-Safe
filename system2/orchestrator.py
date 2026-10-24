@@ -1,9 +1,13 @@
 """Nemotron orchestrator interface. Owner: Melanie.
 
 Nemotron is the System 2 orchestrator. It is not part of Mubit. When a human
-has set the System 2 decisions, this function would call llm.complete, which
-only talks to Mubit. While those decisions are TODO_HUMAN it raises first and
-does not call the network. It does not build an Outcome.
+has set the remaining System 2 decisions, this function would call llm.complete,
+which only talks to Mubit. While those decisions are TODO_HUMAN it raises first
+and does not call the network. It does not build an Outcome.
+
+use_banyan_sapling is already true. The verifier does not run here. decide()
+runs it on the outcome this function returns, and the gateway then builds the
+Decision Router result.
 """
 
 from __future__ import annotations

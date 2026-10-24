@@ -1,0 +1,10 @@
+{
+  "id": "S03",
+  "check": "aid_eligibility",
+  "policy": "Eligibility for the flood assistance review requires the synthetic household to be on the district list and the district to be on the flood list.",
+  "evidence": "The district Ban Luang is on the flood list. The list entry for synthetic household H-204 was not retrieved.",
+  "claim": "Synthetic household H-204 is eligible for the flood assistance review.",
+  "expected_verdict": "missing",
+  "expected_action": "human_handoff",
+  "notes": "Stub label. The household list entry is absent, so the claim is missing information."
+}

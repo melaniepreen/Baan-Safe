@@ -6,6 +6,7 @@ import json
 
 from contracts.models import CaseState, Outcome
 from eval.replay import replay
+from eval.sapling_replay import replay_sapling_stubs
 from fixtures.load import all_ids, load_fixture
 from mocks.loader import has_s2_stub, load_s1_stub, load_s2_stub
 
@@ -29,7 +30,12 @@ def main() -> int:
             s2_ids.append(fixture_id)
     s1_report = replay(_s1, s1_ids)
     s2_report = replay(_s2, s2_ids)
-    payload = {"system_1_stubs": s1_report, "system_2_stubs": s2_report}
+    sapling_report = replay_sapling_stubs()
+    payload = {
+        "system_1_stubs": s1_report,
+        "system_2_stubs": s2_report,
+        "sapling_stubs": sapling_report,
+    }
     print(json.dumps(payload, indent=2))
     ok = (
         s1_report["n"] > 0
@@ -40,6 +46,10 @@ def main() -> int:
         and s2_report["priority_accuracy"] == 1
         and s2_report["route_accuracy"] == 1
         and s2_report["system_accuracy"] == 1
+        and sapling_report["n"] == 5
+        and sapling_report["verdict_accuracy"] == 1
+        and sapling_report["action_accuracy"] == 1
+        and all(row["stub"] for row in sapling_report["rows"])
     )
     return 0 if ok else 1
 

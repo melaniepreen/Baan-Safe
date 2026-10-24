@@ -1,13 +1,22 @@
 # Every value starts as TODO_HUMAN. Code reading these must fail loudly if unset.
 # Humans fill these in. Do not resolve them in code.
+# scripts/validate.py allowlists only the decisions a human has already made:
+# system2.use_banyan_sapling, system2.sapling_scope, and sapling.client.
 system1:
   extraction_method: TODO_HUMAN      # rules-only | small model | hybrid
   extraction_model: TODO_HUMAN       # only if a model is used
 system2:
   orchestrator_model: TODO_HUMAN     # Nemotron variant/size
   hosting: TODO_HUMAN                # via Mubit gateway / self-hosted / provider
-  use_banyan_sapling: TODO_HUMAN     # true | false, and for which checks
+  use_banyan_sapling: true           # decided: verifier on, for sapling_scope only
+  sapling_scope: aid_eligibility,denial
   max_latency_ms: TODO_HUMAN
+sapling:
+  hosting: TODO_HUMAN                # mubit gateway or self-hosted; Mubit stays the hop; unconfirmed that Mubit can route to a self-hosted endpoint
+  gpu: TODO_HUMAN                    # L40S on Modal, or A6000 self-hosted; 48GB class
+  thai_handling: TODO_HUMAN          # translate to English first, or send Thai; the card's evaluated language is English
+  model_id: TODO_HUMAN               # published checkpoint is MubitLabs/banyan-sapling; unset so the Modal app refuses
+  client: stub                       # stub | live. stub does not load a GPU
 gateway:
   route_chooser: TODO_HUMAN          # how a live (non-fixture) case picks system_1 or system_2
   auth: TODO_HUMAN                   # auth scheme in front of the Mubit gateway
@@ -29,7 +38,7 @@ correction_loop:
   graduation_threshold: TODO_HUMAN   # corrections before an S2 pattern becomes an S1 rule
 # Modal hosting. These do not replace system1.* or system2.*.
 # Apps read the environment variable first and refuse while the value is TODO_HUMAN.
-# Leave these as TODO_HUMAN in git: scripts/validate.py rejects any other committed value.
+# Leave this block as TODO_HUMAN in git. scripts/validate.py rejects any other value here.
 # Set the matching environment variable at deploy time. See infra/HARDWARE.md.
 modal:
   s1_gpu: TODO_HUMAN                 # cpu | T4 | L4

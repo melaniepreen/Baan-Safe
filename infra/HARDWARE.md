@@ -128,6 +128,24 @@ A single A100-80GB also holds 49B fp8 (49.21 GiB). Three L4s are slightly cheape
 
 **Speech.** Optional. `research/MODELS.md` names Thonburian Whisper and Typhoon2-Audio. OpenAI's model table lists Whisper large at 1550M parameters ([whisper README](https://github.com/openai/whisper#available-models-and-languages)), which is 2.89 GiB at 2 bytes per parameter. That fits a T4 and a CPU. Confirm the checkpoint you put in `STT_MODEL_ID`. The endpoint's default language is `th` and the request can override it.
 
+## Banyan Sapling
+
+`MubitLabs/banyan-sapling` is the verifier System 2 runs on aid-eligibility and denial claims. The card, read 24 October 2026, lists 23,042,164,740 stored parameters, a BF16 checkpoint of about 46 GB on disk, an input limit of 16,384 tokens, and English as the evaluated language. The reference runtime in that card is an H200. CPU and quantized inference are outside that runtime. The architecture is a pruned Qwen3-MoE with a custom verification head, so the serving app is `infra/modal/sapling_app.py` and not the vLLM app.
+
+`infra/modal/vram.py` applies the same weight and KV formula. Attention shape is the card's `config.json`: 48 layers, 4 KV heads, head dim 128. The forward pass generates no tokens. KV is still charged for the prompt.
+
+| | BF16 |
+|---|---:|
+| Weights | 42.92 GiB |
+| KV at 16,384 tokens | 1.50 GiB |
+| Reserve | 2.00 GiB |
+| Weights + KV + reserve | 46.42 GiB |
+| Slack on a 48 GiB board | 1.58 GiB |
+
+That slack is under the 4 GiB bar used for the Nemotron rows. Activations for the custom head were not measured here. The team named a 48GB-class board: Modal's string is `L40S` (48 GB, 0.000542 USD/second, 1.9512 USD/hour at the rate above). An NVIDIA RTX A6000 is the same 48 GB class for a self-hosted machine. A6000 is not a Modal GPU string, it has no row in the pricing table, and `require_sapling_gpu` refuses to pass it to Modal. Export `SAPLING_GPU=L40S` for the Modal app. A larger Modal board (`A100-80GB`, `H100`, `H200`) also passes the size check. A T4, L4, A10, or 40 GB A100 does not.
+
+`sapling.gpu` and `sapling.model_id` stay `TODO_HUMAN` in git. The app reads those keys, or `SAPLING_GPU` and `SAPLING_MODEL_ID`, and exits while either is unset. The published id to export is `MubitLabs/banyan-sapling`. The base image is still the CUDA 12.9 image the System 2 app uses. The checkpoint's `runtime_versions.json` records CUDA 13.0 and torch 2.14.1. Align the base image before a real deploy. The pip pins in the scaffold are the versions from that file.
+
 ## Cold start
 
 The pricing FAQ says Modal spins a container up in 1–2 seconds, and that this is the container rather than a model load. The first deploy also builds the image. A later start reuses it.
@@ -136,10 +154,12 @@ Weight download is the Hub `usedStorage` of the checkpoint (about 2 bytes per bf
 
 vLLM then loads the weights and, unless `--enforce-eager` is set, captures CUDA graphs. This repo defaults to eager. No load time was measured here. The GPU guide says asking for more than two GPUs on one container usually waits longer for a machine.
 
-The web endpoints wait up to 20 minutes (System 1 and speech) or 30 minutes (System 2) for the port to open, which covers a cold weight load. After the last request they stay up for 120 seconds and then scale to zero.
+The web endpoints wait up to 20 minutes (System 1 and speech) or 30 minutes (System 2 and Sapling) for the port to open, which covers a cold weight load. After the last request they stay up for 120 seconds and then scale to zero.
 
 ## What the apps refuse
 
 `infra/modal/s2_app.py` and the fine-tune app call the same fit check at import. A 70B bf16 checkpoint on a T4 exits before any download. fp8 on a T4 exits for the same reason. An unknown checkpoint id prints a warning and continues, because this table does not cover every Nemotron repo.
 
-Deploy still needs a human to export `S2_GPU`, `S2_MODEL_ID`, `NEMOTRON_SIZE`, and `S2_QUANT` (and the matching variables for the other apps). The yaml values stay `TODO_HUMAN` so `make validate` keeps passing.
+`infra/modal/sapling_app.py` refuses while `sapling.model_id` or `sapling.gpu` is unset. It also refuses a GPU below 48 GB, and it refuses `A6000` because that board is not a Modal string. The in-process client stays on the stub until `sapling.hosting` is set, and even then it does not open a socket until someone confirms Mubit can route to the endpoint.
+
+Deploy still needs a human to export `S2_GPU`, `S2_MODEL_ID`, `NEMOTRON_SIZE`, and `S2_QUANT` (and the matching variables for the other apps, including `SAPLING_GPU` and `SAPLING_MODEL_ID`). Those yaml values stay `TODO_HUMAN`. `make validate` allowlists the three Sapling decisions that are already set and rejects every other committed value.
