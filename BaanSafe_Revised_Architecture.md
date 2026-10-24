@@ -15,7 +15,7 @@ Key corrections:
 
 Target flow: Caller → live speech-to-text → Call Agent → Mubit Gateway (memory retrieval, policy pre-check, route) → System 1 (simple, clear, low-risk) or System 2 (ambiguous or high-risk, Nemotron, then Sapling when the claim is aid eligibility or a denial) → Decision Router → Call Agent (next question, update case, or provisional dispatch).
 
-The diagram is `gateway/route.py` on the default request (`use_stubs=True`). Solid edges run. A dashed node is not called on that request. After mock memory, `gateway/graduation.py` may tag `complex_situation` and add a `graduated-*` recommendation. That sets no priority and does not move a pattern into System 1. The field precheck in `gateway/chooser.py` picks the system. `router/merge.py` builds the `RouterDecision` and `router/ledger.py` reserves stock in this process only. `system1/decide.py` runs only when `S1_IMPL=real` or `use_stubs=False`, and then it replaces the stub file. `llm/client.py` and `llm/openai_client.py` accept only a Mubit host (`llm.provider_route` is `mubit`, including the compat OpenRouter prefix). The orchestrator does not reach them while `system2.orchestrator_model` is `TODO_HUMAN`. `GET /policies` serves the local corpus on its own. Aid routes return 501. Modal apps refuse to start while their model and GPU values are `TODO_HUMAN`.
+The diagram is `gateway/route.py` on the default request (`use_stubs=True`). Solid edges run. A dashed node is not called on that request. After mock memory, `gateway/graduation.py` may tag `complex_situation` and add a `graduated-*` recommendation. That sets no priority and does not move a pattern into System 1. The field precheck in `gateway/chooser.py` picks the system. `router/merge.py` builds the `RouterDecision` and `router/ledger.py` reserves stock in this process only. `load_dispatch_resources` reads `data/snapshots/places.json` on that request and lists public shelters, hospitals, and boat points ahead of the fictional units. Extract reads `data/snapshots/gazetteer.json` only when it runs. Enrichment reads the Open-Meteo and RID snapshots only when SQLite is present, and those flags do not change `final_priority`. GISTDA, TMD, and geoBoundaries stay in `data/snapshots` and are not read on the turn. `countries/` is not imported. `system1/decide.py` runs only when `S1_IMPL=real` or `use_stubs=False`, and then it replaces the stub file. `llm/client.py` and `llm/openai_client.py` accept only a Mubit host (`llm.provider_route` is `mubit`, including the compat OpenRouter prefix). The orchestrator does not reach them while `system2.orchestrator_model` is `TODO_HUMAN`. `GET /policies` serves the local corpus on its own. Aid routes return 501. Modal apps refuse to start while their model and GPU values are `TODO_HUMAN`.
 
 ```mermaid
 flowchart TD
@@ -32,15 +32,20 @@ flowchart TD
   pick -->|any trigger| s2["S2 stub file"]
   s1 --> merge["router.merge + process ledger"]
   s2 --> merge
+  snap["committed snapshots"] --> places["places → dispatch units"]
+  places --> merge
+  snap -.-> extract
+  snap -.-> enrich
   merge --> out["RouterDecision + dispatches"]
   s1 -.-> rules["system1.decide if S1_IMPL=real"]
   rules -.-> merge
   s2 -.-> s2d["system2.decide raises"]:::unwired
   s2d -.-> sap["Sapling gate, client stub"]:::unwired
   s2d -.-> llm["Mubit LLM clients, model TODO"]:::unwired
+  packs["country packs, not loaded"]:::unwired
 ```
 
-Training is a separate path from that call. Operator corrections, coach notes, and simulator outcomes append one `TrainingEvent` each. `make export-training` reads the log. The fine-tune job takes one dataset per task and does not start while its base model is `TODO_HUMAN`. Held-out eval splits on `group_id` and filters `source`. It scores stub arms and does not load fine-tune weights.
+Training is a separate path from that call. Operator corrections, coach notes, and simulator outcomes append one `TrainingEvent` each. `make export-training` reads the log. `fixtures/synthetic` is a seeded flood-call set. `training/synthetic_export.py` writes SetFit rows from it (`SYNTHETIC=1` on that make target). `training/laya_export.py` writes Laya JSONL. `scripts/laya_train.py` skips unless `LAYA_TRAIN=1`, a GPU or a Modal task is present, and `laya-train` is on `PATH`. The Modal fine-tune job takes one event-log dataset per task and does not start while its base model is `TODO_HUMAN`. It does not read the synthetic rows. Held-out eval splits on `group_id` and filters `source`. It scores stub arms and does not load fine-tune weights. `EVAL_LEARNING_SET=synthetic` scores that call set on its committed group split and still does not promote.
 
 ```mermaid
 flowchart LR
@@ -49,9 +54,13 @@ flowchart LR
   coach[Coach] --> log
   sim[Simulator] --> log
   log --> export[export-training]
-  export -.-> ft["Fine-tune, model TODO"]:::unwired
+  export -.-> ft["Modal fine-tune, model TODO"]:::unwired
+  synth["fixtures/synthetic"] --> setfit["SetFit rows"]
+  synth --> laya["Laya JSONL"]
+  laya -.-> ltrain["laya-train, skips"]:::unwired
   eval["Held-out eval, no promotion"]
   ft -.->|"weights not loaded"| eval
+  synth -.->|"EVAL_LEARNING_SET=synthetic"| eval
 ```
 
 `ui/correct.js` posts a human correction with `task` and `input_ref` already filled. `sim/coach.py` appends `source=coach` and `source=sim`. The log is `training/events` via `training/log.py`. `training/export.py` writes `s1`, `s2`, `sapling`, and `prefs`, each with a manifest. `infra/modal/finetune_job.py` trains `s1_triage` with SetFit and the other tasks with LoRA. `eval/learning` scores held-out groups: arm C keeps `source=human`, and `C_coach` also keeps `source=coach`. Nothing in this path promotes a weight into System 1.
