@@ -128,6 +128,28 @@ def test_embedded_fixture_summaries_match_the_fixture_files():
         assert household["people_count"] == fields["people_count"]
 
 
+def test_twenty_calls_link_fixtures_to_buildings():
+    town = _load("town.json")
+    index = json.loads((ROOT / "fixtures" / "index.json").read_text(encoding="utf-8"))
+    expected_ids = [row["id"] for row in index["scenarios"]]
+    assert [call["id"] for call in town["calls"]] == expected_ids
+    assert len(town["calls"]) == 20
+    buildings = {building["id"]: building for building in town["buildings"]}
+    priorities = set()
+    for call in town["calls"]:
+        assert call["building_id"] in buildings
+        fixture = json.loads((ROOT / "fixtures" / "scenarios" / f"{call['id']}.json").read_text(encoding="utf-8"))
+        opening = next(turn["text"] for turn in fixture["transcript_stream"] if turn["speaker"] == "caller")
+        assert call["opening"] == opening
+        assert call["expected_priority"] == fixture["expected"]["priority"]
+        assert call["expected_route"] == fixture["expected"]["route"]
+        priorities.add(call["expected_priority"])
+    assert priorities == {"P1", "P2", "P3", "P4"}
+    page = (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
+    assert 'id="calls-play"' in page
+    assert "Mubit" in page
+
+
 def test_renderer_is_pixi_and_vendored():
     page = (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
     source = (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")

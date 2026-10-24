@@ -92,7 +92,16 @@ def fixture_summary(fixture_id: str) -> dict:
         "vulnerable": fields.get("vulnerable") or [],
         "danger": fields.get("danger") or [],
         "needs": fields.get("needs") or [],
+        "opening": next(
+            (turn["text"] for turn in body["transcript_stream"] if turn["speaker"] == "caller"),
+            body["title"],
+        ),
     }
+
+
+def scenario_ids() -> list[str]:
+    index = json.loads((ROOT / "fixtures" / "index.json").read_text(encoding="utf-8"))
+    return [row["id"] for row in index["scenarios"]]
 
 
 def household(fixture_id: str, summary: dict) -> dict:
@@ -536,6 +545,17 @@ def landmarks(resources: dict[str, dict], summaries: dict[str, dict]) -> list[di
     ]
 
 
+def water_status(x: float, y: float, w: float, d: float, floors: int, flood: dict) -> tuple[str, float]:
+    water = depth_at(x + w / 2, y + d / 2, flood["features"])
+    if water >= 0.75 and floors == 1:
+        status = "flooded"
+    elif water >= 0.25:
+        status = "at_risk"
+    else:
+        status = "clear"
+    return status, water
+
+
 def fixture_house(
     building_id: str,
     fixture_id: str,
@@ -551,6 +571,7 @@ def fixture_house(
     floors: int,
 ) -> dict:
     summary = summaries[fixture_id]
+    stored = {key: value for key, value in summary.items() if key != "opening"}
     return base_building(
         id=building_id,
         kind="house",
@@ -564,11 +585,86 @@ def fixture_house(
         street_id=street_id,
         household=household(fixture_id, summary),
         fixture_id=fixture_id,
-        fixture=summary,
+        fixture=stored,
         sim_status=status,
         water_m=water_m,
         landmark=True,
     )
+
+
+def place_remaining(summaries: dict[str, dict], flood: dict) -> list[dict]:
+    """Houses for the scenario calls that are not already a landmark.
+
+    F07 is the school question, F16 is the shelter volunteer, and F09 is the
+    same household as F08. Those three attach to buildings that already exist.
+    """
+    specs = [
+        ("F02", 90, 24, "soi-chamlong-bon", "red", 1),
+        ("F03", 300, 22, "soi-chamlong-bon", "blue", 1),
+        ("F05", 372, 22, "soi-chamlong-fai", "grey", 1),
+        ("F11", 88, 252, "soi-chamlong-khlong", "blue", 1),
+        ("F13", 188, 22, "soi-chamlong-wat-fa", "grey", 1),
+        ("F14", 70, 338, "soi-chamlong-lang", "red", 1),
+        ("F15", 250, 348, "soi-chamlong-talat", "grey", 2),
+        ("F17", 368, 236, "soi-chamlong-ho-nuea", "red", 2),
+        ("F18", 456, 236, "soi-chamlong-fai", "blue", 1),
+        ("C01-a", 188, 248, "soi-chamlong-wat-fa", "red", 1),
+        ("C01-b", 368, 348, "soi-chamlong-lang", "grey", 1),
+    ]
+    houses = []
+    for fixture_id, x, y, street_id, roof, floors in specs:
+        status, water = water_status(x, y, 10, 11, floors, flood)
+        houses.append(
+            fixture_house(
+                f"bldg-{fixture_id.lower()}",
+                fixture_id,
+                summaries,
+                x,
+                y,
+                10,
+                11,
+                street_id,
+                status,
+                water,
+                roof,
+                floors,
+            )
+        )
+    return houses
+
+
+def attach_call(building: dict, fixture_id: str, summaries: dict[str, dict]) -> None:
+    summary = summaries[fixture_id]
+    building["fixture_id"] = fixture_id
+    building["fixture"] = {key: value for key, value in summary.items() if key != "opening"}
+    building["household"] = household(fixture_id, summary)
+    building["landmark"] = True
+
+
+def build_calls(ids: list[str], summaries: dict[str, dict], buildings: list[dict]) -> list[dict]:
+    by_fixture: dict[str, str] = {}
+    for building in buildings:
+        if building.get("fixture_id"):
+            by_fixture[building["fixture_id"]] = building["id"]
+        for extra in building.get("also_fixture_ids") or []:
+            by_fixture[extra] = building["id"]
+    calls = []
+    for fixture_id in ids:
+        summary = summaries[fixture_id]
+        if fixture_id not in by_fixture:
+            raise SystemExit(f"no building for call {fixture_id}")
+        calls.append(
+            {
+                "id": fixture_id,
+                "title": summary["title"],
+                "opening": summary["opening"],
+                "building_id": by_fixture[fixture_id],
+                "expected_priority": summary["expected_priority"],
+                "expected_system": summary["expected_system"],
+                "expected_route": summary["expected_route"],
+            }
+        )
+    return calls
 
 
 def fill_houses(rng: random.Random, reserved: list[dict], flood: dict, trees: list[dict]) -> list[dict]:
@@ -1049,7 +1145,8 @@ def build_routes(graph: dict, buildings: dict[str, dict]) -> list[dict]:
 
 def main() -> None:
     rng = random.Random(1370)
-    summaries = {fixture_id: fixture_summary(fixture_id) for fixture_id in ("F01", "F04", "F06", "F08", "F10", "F12")}
+    ids = scenario_ids()
+    summaries = {fixture_id: fixture_summary(fixture_id) for fixture_id in ids}
     resources = {row["resource_id"]: row for row in load_resources()}
     streets = build_streets()
     flood = build_flood()
@@ -1057,6 +1154,15 @@ def main() -> None:
     for building in special:
         if building["id"] == "bldg-f08":
             building["also_fixture_ids"] = ["F09"]
+        if building["id"] == "bldg-school":
+            attach_call(building, "F07", summaries)
+        if building["id"] == "bldg-shelter":
+            attach_call(building, "F16", summaries)
+    special.extend(place_remaining(summaries, flood))
+    for index, left in enumerate(special):
+        for right in special[index + 1 :]:
+            if boxes_overlap(left, right, 0.4):
+                raise SystemExit(f"call buildings overlap: {left['id']} and {right['id']}")
     reserved = [dict(row) for row in special]
     reserved.append({"id": "temple-grounds", "x": 144, "y": 324, "w": 78, "d": 70})
     trees = hand_trees()
@@ -1093,6 +1199,7 @@ def main() -> None:
         "resources": list(resources.values()),
         "graph": graph,
         "routes": routes,
+        "calls": build_calls(ids, summaries, buildings),
         "buildings": buildings,
         "trees": trees,
     }

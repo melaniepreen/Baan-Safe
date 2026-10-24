@@ -222,12 +222,99 @@ input[type="range"] { width: 100%; accent-color: var(--yellow); }
 
 .stat { margin: 8px 0 0; color: var(--muted); font-size: 11px; }
 
+#calls {
+  position: fixed;
+  z-index: 3;
+  top: 78px;
+  left: 16px;
+  width: 300px;
+  bottom: 248px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+
+#call-list { list-style: none; margin: 8px 0 0; padding: 0; overflow: auto; min-height: 0; }
+#call-list li { margin: 4px 0; }
+#call-list button { display: block; width: 100%; text-align: left; border-radius: 10px; }
+#call-list li.active button { border-color: var(--yellow); }
+.call-id { color: var(--yellow); font-size: 11px; letter-spacing: 0.04em; }
+.call-title { display: block; font-size: 13px; }
+.call-msg { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; line-height: 1.35; }
+.call-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  color: #15180c;
+  font-size: 11px;
+}
+
+.mubit-readout {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+}
+.mubit-readout .msg { margin: 0 0 6px; }
+.hops { margin: 0; padding-left: 16px; }
+.hops li { margin: 2px 0; }
+.hops .mubit { color: var(--yellow); }
+
+#mubit-node {
+  position: fixed;
+  z-index: 4;
+  top: 16px;
+  left: calc(50% - 20px);
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #121722;
+  border: 1px solid var(--yellow);
+  color: var(--yellow);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+#mubit-node.busy { background: var(--yellow); color: var(--ink-on-yellow); }
+
+#call-link {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+#link-to-mubit, #link-to-house {
+  fill: none;
+  stroke: var(--yellow);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+#link-to-mubit { stroke-dasharray: 6 6; }
+
+.pri-p1 { background: #ff4b3a; }
+.pri-p2 { background: #ff9f1a; }
+.pri-p3 { background: #d6ff3c; }
+.pri-p4 { background: #8aa0ff; }
+
 @media (max-width: 860px) {
   #inspector {
     top: auto;
     bottom: 8px;
-    max-height: 42vh;
+    max-height: 32vh;
   }
   .block-map { display: none; }
+  #calls {
+    top: auto;
+    bottom: 34vh;
+    width: calc(100% - 24px);
+    height: 26vh;
+  }
+  #mubit-node { top: 60px; left: auto; right: 16px; }
   .wordmark { max-width: calc(100% - 24px); }
 }

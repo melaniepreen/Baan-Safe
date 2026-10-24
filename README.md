@@ -53,7 +53,7 @@ make data-report    # rewrite data/SOURCES.md
 
 `make` uses `python3` unless you pass `PYTHON=.venv/bin/python`.
 
-The town simulation is static files in `ui/sim/`. `make serve` mounts them at [http://127.0.0.1:8000/ui/sim/](http://127.0.0.1:8000/ui/sim/). It is a fixed isometric view (PixiJS, no GPU vendor requirement). How it sits on the contracts is `ui/sim/README.md`.
+The town simulation is static files in `ui/sim/`. `make serve` mounts them at [http://127.0.0.1:8000/ui/sim/](http://127.0.0.1:8000/ui/sim/). It is a fixed isometric view (PixiJS, no GPU vendor requirement). `Play 20 calls` sends each scripted fixture through `POST /triage` and lights the house with the priority the gateway returns. How it sits on the contracts is `ui/sim/README.md`.
 
 ## API switches
 

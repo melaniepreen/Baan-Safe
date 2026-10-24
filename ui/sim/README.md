@@ -48,4 +48,6 @@ Street names are in `data/streets.json`. Every name is marked placeholder (`à¸ˆà
 
 Click a block to read it. The status buttons mark that household in the page. `Run gateway triage` loads the fixture and `POST`s its `case_state` to `/triage`. The router answer is whatever the stub gateway returns. It does not write the household status.
 
+`Play 20 calls` walks `fixtures/index.json` in order. Each step is `GET /fixtures/{id}` then `POST /triage`, which is the Mubit gateway. The line on the picture runs from the call to the Mubit chip to the house. The house lights in the priority the gateway returns: P1 red, P2 amber, P3 yellow, P4 blue. `Step` sends one call. `Reset` clears the lights. F09 is the same house as F08. F07 lights the school. F16 lights the shelter. The other calls have their own blocks.
+
 `F06` walks to the fictional north hall (`shelter_placement`). `F10` is the boat run from the jetty (`rescue_coordination`). Both are on when the page opens.

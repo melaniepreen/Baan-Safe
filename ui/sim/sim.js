@@ -47,6 +47,15 @@ let markerG;
 let didDrag = false;
 let drag = null;
 let labels = [];
+let callResults = new Map();
+let callCursor = 0;
+let callPlaying = false;
+let callToken = 0;
+let activeCallId = null;
+let callLightG = null;
+
+const PRIORITY_COLOR = { P1: "#ff4b3a", P2: "#ff9f1a", P3: "#d6ff3c", P4: "#8aa0ff" };
+const PRIORITY_HEX = { P1: 0xff4b3a, P2: 0xff9f1a, P3: 0xd6ff3c, P4: 0x8aa0ff };
 
 function hashId(id) {
   let h = 2166136261;
@@ -640,8 +649,12 @@ function buildScene() {
   world.addChild(markerG);
   drawMarkers();
   buildLabels();
+  callLightG = new Graphics();
+  callLightG.eventMode = "none";
+  world.addChild(callLightG);
   drawRoutes(0);
   drawSelection();
+  drawCallLights();
 }
 
 function screenToWorld(sx, sy) {
@@ -677,11 +690,12 @@ function updateMinimap() {
     const [mx, my] = map(building.x, building.y);
     ctx.fillRect(mx, my, Math.max(1.2, building.w * sx), Math.max(1.2, building.d * sy));
   }
+  const inset = viewInsets();
   const corners = [
-    [0, 0],
-    [app.screen.width - 348, 0],
-    [app.screen.width - 348, app.screen.height - 20],
-    [0, app.screen.height - 20],
+    [inset.left, inset.top],
+    [app.screen.width - inset.right, inset.top],
+    [app.screen.width - inset.right, app.screen.height - 20],
+    [inset.left, app.screen.height - 20],
   ].map(([x, y]) => screenToWorld(x, y));
   ctx.save();
   ctx.beginPath();
@@ -708,13 +722,24 @@ function updateMinimap() {
   ctx.restore();
 }
 
+function viewInsets() {
+  const narrow = window.innerWidth <= 860;
+  return { left: narrow ? 12 : 330, right: narrow ? 16 : 360, top: 72 };
+}
+
+function viewCenter() {
+  const inset = viewInsets();
+  return [(inset.left + app.screen.width - inset.right) / 2, app.screen.height / 2];
+}
+
 function lookAt(x, y, zoom) {
   const point = project(x, y, 0);
   world.scale.set(zoom);
-  const shift = Math.min(160, app.screen.width * 0.12);
-  world.position.set(app.screen.width / 2 - shift - point[0] * zoom, app.screen.height / 2 - point[1] * zoom);
+  const [cx, cy] = viewCenter();
+  world.position.set(cx - point[0] * zoom, cy - point[1] * zoom);
   syncLabelScale();
   updateMinimap();
+  updateCallLink();
 }
 
 function fitTown() {
@@ -730,14 +755,17 @@ function fitTown() {
   const maxX = Math.max(...corners.map((point) => point[0]));
   const minY = Math.min(...corners.map((point) => point[1]));
   const maxY = Math.max(...corners.map((point) => point[1]));
-  const zoom = Math.min((app.screen.width - 420) / (maxX - minX), (app.screen.height - 90) / (maxY - minY));
-  world.scale.set(Math.max(0.2, zoom));
-  world.position.set(
-    (app.screen.width - 300) / 2 - ((minX + maxX) / 2) * world.scale.x,
-    app.screen.height / 2 - ((minY + maxY) / 2) * world.scale.y
+  const inset = viewInsets();
+  const zoom = Math.min(
+    (app.screen.width - inset.left - inset.right) / (maxX - minX),
+    (app.screen.height - 90) / (maxY - minY)
   );
+  world.scale.set(Math.max(0.2, zoom));
+  const [cx, cy] = viewCenter();
+  world.position.set(cx - ((minX + maxX) / 2) * world.scale.x, cy - ((minY + maxY) / 2) * world.scale.y);
   syncLabelScale();
   updateMinimap();
+  updateCallLink();
 }
 
 function zoomAt(factor) {
@@ -749,6 +777,7 @@ function zoomAt(factor) {
   world.position.set(mx - local.x * next, my - local.y * next);
   syncLabelScale();
   updateMinimap();
+  updateCallLink();
 }
 
 function buildingById(id) {
@@ -880,7 +909,8 @@ function renderPanel() {
     run.type = "button";
     run.addEventListener("click", () => runTriage(building.fixture_id));
     panel.append(run);
-    if (live.triage && live.triage.forId === building.fixture_id) {
+    const callOnBuilding = town.calls.find((call) => call.building_id === building.id && live.triage && live.triage.forId === call.id);
+    if (live.triage && (live.triage.forId === building.fixture_id || callOnBuilding)) {
       const decision = live.triage.decision;
       panel.append(el("p", null, "Router: " + decision.next_action + " · " + decision.final_priority + " · " + decision.final_route));
       const source = decision.source_outcomes && decision.source_outcomes[0];
@@ -995,12 +1025,242 @@ function syncRouteChecks() {
   });
 }
 
+function houseScreen(building) {
+  const local = project(building.x + building.w / 2, building.y + building.d * 0.45, 2.4);
+  const rect = app.canvas.getBoundingClientRect();
+  return {
+    x: rect.left + world.x + local[0] * world.scale.x,
+    y: rect.top + world.y + local[1] * world.scale.y,
+  };
+}
+
+function drawCallLights() {
+  if (!callLightG) return;
+  callLightG.clear();
+  const lit = new Map();
+  for (const call of town.calls) {
+    const decision = callResults.get(call.id);
+    if (decision) lit.set(call.building_id, decision.final_priority);
+  }
+  for (const [id, priority] of lit) {
+    const building = buildingById(id);
+    const color = PRIORITY_HEX[priority] || YELLOW;
+    const center = project(building.x + building.w / 2, building.y + building.d * 0.72, 0.25);
+    const rx = Math.max(8, Math.max(building.w, building.d) * 0.72);
+    callLightG.ellipse(center[0], center[1], rx, rx * 0.42).stroke({ color, width: 1.7 });
+    const beacon = project(building.x + building.w / 2, building.y + building.d * 0.15, building.floors * 3.3 + 2.8);
+    callLightG.circle(beacon[0], beacon[1], 2.4).fill({ color });
+  }
+}
+
+function curve(fromX, fromY, toX, toY) {
+  const midX = (fromX + toX) / 2;
+  return `M ${fromX} ${fromY} C ${midX} ${fromY}, ${midX} ${toY}, ${toX} ${toY}`;
+}
+
+function updateCallLink() {
+  const toMubit = document.getElementById("link-to-mubit");
+  const toHouse = document.getElementById("link-to-house");
+  const dots = document.getElementById("link-dots");
+  if (!toMubit || !town || !app) return;
+  dots.replaceChildren();
+  const node = document.getElementById("mubit-node").getBoundingClientRect();
+  const mx = node.left + node.width / 2;
+  const my = node.top + node.height / 2;
+  const card = document.querySelector("#call-list li.active");
+  if (card && activeCallId) {
+    const rect = card.getBoundingClientRect();
+    toMubit.setAttribute("d", curve(rect.right, rect.top + rect.height / 2, mx, my));
+  } else {
+    toMubit.setAttribute("d", "");
+  }
+  const call = town.calls.find((item) => item.id === activeCallId);
+  const decision = activeCallId ? callResults.get(activeCallId) : null;
+  if (call) {
+    const point = houseScreen(buildingById(call.building_id));
+    toHouse.setAttribute("d", curve(mx, my, point.x, point.y));
+    toHouse.setAttribute("stroke", decision ? PRIORITY_COLOR[decision.final_priority] : "#d6ff3c");
+  } else {
+    toHouse.setAttribute("d", "");
+  }
+  const lit = new Map();
+  for (const item of town.calls) {
+    const answer = callResults.get(item.id);
+    if (answer) lit.set(item.building_id, answer.final_priority);
+  }
+  for (const [id, priority] of lit) {
+    const point = houseScreen(buildingById(id));
+    const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    dot.setAttribute("cx", String(point.x));
+    dot.setAttribute("cy", String(point.y));
+    dot.setAttribute("r", id === (call && call.building_id) ? "8" : "5");
+    dot.setAttribute("fill", PRIORITY_COLOR[priority]);
+    dot.setAttribute("stroke", "#07090f");
+    dot.setAttribute("stroke-width", "1.5");
+    dots.append(dot);
+  }
+}
+
+function renderCallLegend() {
+  const box = document.getElementById("priority-legend");
+  box.replaceChildren();
+  for (const priority of ["P1", "P2", "P3", "P4"]) {
+    const answered = [...callResults.values()].filter((decision) => decision.final_priority === priority).length;
+    const labelled = town.calls.filter((call) => call.expected_priority === priority).length;
+    const span = el("span");
+    const swatch = el("i", "swatch pri-" + priority.toLowerCase());
+    span.append(swatch, document.createTextNode(" " + priority + " " + answered + "/" + labelled));
+    box.append(span);
+  }
+}
+
+function renderCallList() {
+  const list = document.getElementById("call-list");
+  list.replaceChildren();
+  for (const call of town.calls) {
+    const item = el("li");
+    item.dataset.call = call.id;
+    if (call.id === activeCallId) item.classList.add("active");
+    const button = document.createElement("button");
+    button.type = "button";
+    const head = el("span", "call-id", call.id + " · " + call.title);
+    const decision = callResults.get(call.id);
+    if (decision) {
+      const badge = el("span", "call-badge pri-" + decision.final_priority.toLowerCase(), decision.final_priority);
+      head.append(badge);
+    }
+    button.append(head, el("span", "call-msg", call.opening));
+    button.addEventListener("click", () => {
+      callPlaying = false;
+      syncPlayButton();
+      const index = town.calls.findIndex((item) => item.id === call.id);
+      if (index === callCursor) callCursor += 1;
+      runCall(call);
+    });
+    item.append(button);
+    list.append(item);
+  }
+  renderCallLegend();
+}
+
+function showReadout(call, decision, error) {
+  const box = document.getElementById("mubit-readout");
+  box.replaceChildren();
+  box.append(el("p", "msg", call.opening));
+  const hops = el("ol", "hops");
+  hops.append(el("li", null, "Call " + call.id));
+  hops.append(el("li", null, "GET /fixtures/" + call.id));
+  hops.append(el("li", null, "POST /triage"));
+  hops.append(el("li", "mubit", "Mubit gateway"));
+  if (decision) {
+    const source = decision.source_outcomes && decision.source_outcomes[0];
+    hops.append(el("li", null, source ? String(source.system).replaceAll("_", " ") : "system"));
+    hops.append(el("li", null, decision.final_priority + " · " + decision.final_route));
+    hops.append(el("li", null, String(decision.next_action).replaceAll("_", " ")));
+    const note = (decision.policy_notes || []).find((line) => String(line).toLowerCase().includes("mubit"));
+    if (note) box.append(el("p", "muted", note));
+  } else if (error) {
+    hops.append(el("li", "error", error));
+  } else {
+    hops.append(el("li", "muted", "Sending"));
+  }
+  box.append(hops);
+}
+
+function syncPlayButton() {
+  const button = document.getElementById("calls-play");
+  button.textContent = callPlaying ? "Pause" : "Play 20 calls";
+}
+
+async function runCall(call) {
+  activeCallId = call.id;
+  renderCallList();
+  const row = document.querySelector("#call-list li.active");
+  if (row) row.scrollIntoView({ block: "nearest" });
+  const node = document.getElementById("mubit-node");
+  node.classList.add("busy");
+  node.classList.remove("done");
+  showReadout(call, null, null);
+  updateCallLink();
+  select(call.building_id, false);
+  try {
+    const fixture = await getJson("/fixtures/" + encodeURIComponent(call.id));
+    const decision = await getJson("/triage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(fixture.case_state),
+    });
+    callResults.set(call.id, decision);
+    live.triage = { forId: call.id, decision };
+    showReadout(call, decision, null);
+    node.classList.remove("busy");
+    node.classList.add("done");
+  } catch (error) {
+    callResults.delete(call.id);
+    showReadout(call, null, error.message);
+    node.classList.remove("busy");
+  }
+  drawCallLights();
+  renderCallList();
+  updateCallLink();
+  renderPanel();
+}
+
+async function playCalls() {
+  if (callPlaying) {
+    callPlaying = false;
+    syncPlayButton();
+    return;
+  }
+  callPlaying = true;
+  const token = ++callToken;
+  syncPlayButton();
+  fitTown();
+  while (callPlaying && token === callToken && callCursor < town.calls.length) {
+    const call = town.calls[callCursor];
+    callCursor += 1;
+    await runCall(call);
+    if (!callPlaying || token !== callToken) break;
+    await new Promise((resolve) => setTimeout(resolve, 650));
+  }
+  if (token === callToken) callPlaying = false;
+  syncPlayButton();
+}
+
+function resetCalls() {
+  callPlaying = false;
+  callToken += 1;
+  callCursor = 0;
+  callResults = new Map();
+  activeCallId = null;
+  live.triage = null;
+  const node = document.getElementById("mubit-node");
+  node.classList.remove("busy", "done");
+  document.getElementById("mubit-readout").replaceChildren();
+  drawCallLights();
+  renderCallList();
+  updateCallLink();
+  syncPlayButton();
+  renderPanel();
+}
+
 function bindChrome() {
   document.getElementById("flood-opacity").addEventListener("input", (event) => {
     floodAlpha = Number(event.target.value) / 100;
     if (floodG) floodG.alpha = floodAlpha;
   });
   document.getElementById("view-fit").addEventListener("click", fitTown);
+  document.getElementById("calls-play").addEventListener("click", () => playCalls());
+  document.getElementById("calls-step").addEventListener("click", () => {
+    callPlaying = false;
+    syncPlayButton();
+    if (callCursor >= town.calls.length) return;
+    const call = town.calls[callCursor];
+    callCursor += 1;
+    runCall(call);
+  });
+  document.getElementById("calls-reset").addEventListener("click", resetCalls);
+  renderCallList();
   document.getElementById("view-dispatch").addEventListener("click", () => {
     const camera = town.meta.camera;
     lookAt(camera.look_at[0], camera.look_at[1], camera.zoom_px_per_m);
@@ -1034,6 +1294,7 @@ function bindChrome() {
     if (dx * dx + dy * dy > 16) didDrag = true;
     world.position.set(drag.ox + dx, drag.oy + dy);
     updateMinimap();
+    updateCallLink();
   });
   app.stage.on("pointerup", () => {
     drag = null;
@@ -1055,6 +1316,7 @@ function bindChrome() {
       world.position.set(mx - local.x * next, my - local.y * next);
       syncLabelScale();
       updateMinimap();
+      updateCallLink();
     },
     { passive: false }
   );
@@ -1120,6 +1382,7 @@ async function main() {
     offset += ticker.deltaMS * 0.04;
     drawRoutes(offset);
     markerG.alpha = 0.55 + 0.45 * Math.sin(ticker.lastTime / 260);
+    if (callLightG) callLightG.alpha = 0.72 + 0.28 * Math.sin(ticker.lastTime / 280);
   });
   loadLive();
 }

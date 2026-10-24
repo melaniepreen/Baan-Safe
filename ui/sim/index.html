@@ -17,6 +17,25 @@
     </div>
   </header>
 
+  <aside id="calls" aria-label="Simulated calls">
+    <p class="kicker">20 calls</p>
+    <div class="wordmark-actions">
+      <button type="button" id="calls-play">Play 20 calls</button>
+      <button type="button" id="calls-step">Step</button>
+      <button type="button" id="calls-reset">Reset</button>
+    </div>
+    <div id="priority-legend" class="legend"></div>
+    <div id="mubit-readout" class="mubit-readout"></div>
+    <ol id="call-list"></ol>
+  </aside>
+
+  <div id="mubit-node">Mubit</div>
+  <svg id="call-link" aria-hidden="true">
+    <path id="link-to-mubit"></path>
+    <path id="link-to-house"></path>
+    <g id="link-dots"></g>
+  </svg>
+
   <aside id="inspector" aria-live="polite">
     <p class="kicker">Inspect</p>
     <h1>Household</h1>
