@@ -62,6 +62,20 @@ DECIDED = {
 }
 
 
+def check_agent_docs() -> None:
+    import importlib.util
+
+    path = ROOT / "scripts" / "check_agents.py"
+    spec = importlib.util.spec_from_file_location("check_agents", path)
+    if spec is None or spec.loader is None:
+        fail("scripts/check_agents.py could not be loaded")
+        return
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    for message in module.check(ROOT):
+        fail(message)
+
+
 def check_decisions() -> None:
     for path, value in iter_decision_leaves():
         if path in DECIDED:
@@ -355,6 +369,7 @@ def main() -> int:
             fail(f"resources.json: {exc}")
     check_counts(payloads)
     check_database()
+    check_agent_docs()
     # Medical policy and vague-location failure are present somewhere.
     medical = False
     prior = False

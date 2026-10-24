@@ -1,0 +1,81 @@
+{
+  "docs": [
+    {
+      "path": "docs/agents/gateway-and-llm-client.md",
+      "title": "Gateway and LLM client",
+      "summary": "Exclusive System 1 or System 2 route, memory adapter, and the Mubit-only chat client.",
+      "keywords": ["gateway", "mubit", "llm", "routing", "memory", "auth"],
+      "files": ["gateway/route.py", "llm/client.py", "memory/adapter.py"]
+    },
+    {
+      "path": "docs/agents/system1.md",
+      "title": "System 1",
+      "summary": "Fast-path stubs: triage decide() raises, and aid eligibility does not approve a payment.",
+      "keywords": ["system1", "triage", "aid"],
+      "files": ["system1/decide.py", "system1/aid_eligibility.py"]
+    },
+    {
+      "path": "docs/agents/system2-and-sapling.md",
+      "title": "System 2 and Sapling",
+      "summary": "Nemotron orchestrator stub, then the Sapling verifier on aid eligibility and denial.",
+      "keywords": ["system2", "nemotron", "sapling", "verifier"],
+      "files": ["system2/decide.py", "system2/sapling.py", "system2/sapling_client.py"]
+    },
+    {
+      "path": "docs/agents/policies-api.md",
+      "title": "Policies and aid API",
+      "summary": "Aid HTTP stubs return 501. Escalation rules are listed and not evaluated by the gateway.",
+      "keywords": ["aid", "eligibility", "exceptions", "escalation"],
+      "files": ["api/routes/endpoints.py", "config/escalation.yaml"]
+    },
+    {
+      "path": "docs/agents/decision-router.md",
+      "title": "Decision router",
+      "summary": "merge() raises. The stub gateway copies one outcome and does not call it.",
+      "keywords": ["router", "merge", "next-action"],
+      "files": ["router/merge.py", "gateway/route.py"]
+    },
+    {
+      "path": "docs/agents/correction-loop-and-evals.md",
+      "title": "Correction loop and evals",
+      "summary": "Stub correction loop, held-out learning scoreboard, and latte-bench by reference.",
+      "keywords": ["eval", "correction", "learning", "latte"],
+      "files": ["eval/correction_loop.py", "eval/learning/harness.py", "eval/LATTE.md"]
+    },
+    {
+      "path": "docs/agents/data-ingest.md",
+      "title": "Data ingest",
+      "summary": "Public sources into SQLite. ReliefWeb sends no request. DDPM was not added.",
+      "keywords": ["ingest", "sqlite", "reliefweb", "ddpm"],
+      "files": ["ingest/__main__.py", "ingest/reliefweb.py", "data/SOURCES.md"]
+    },
+    {
+      "path": "docs/agents/modal-infra.md",
+      "title": "Modal infra",
+      "summary": "Modal apps refuse while GPU and model ids are TODO_HUMAN. No secrets in git.",
+      "keywords": ["modal", "gpu", "deploy", "sapling"],
+      "files": ["infra/modal/common.py", "infra/HARDWARE.md"]
+    },
+    {
+      "path": "docs/agents/config-and-decisions.md",
+      "title": "Config and decisions",
+      "summary": "decisions.yaml fails loud on TODO_HUMAN. Four leaves are allowlisted in DECIDED.",
+      "keywords": ["config", "decisions", "todo-human"],
+      "files": ["config/decisions.yaml", "config/settings.py", "scripts/validate.py"]
+    },
+    {
+      "path": "docs/agents/testing.md",
+      "title": "Testing",
+      "summary": "make test is pytest. make validate scans fixtures, decisions, stubs, and these docs.",
+      "keywords": ["pytest", "validate", "replay"],
+      "files": ["Makefile", "scripts/validate.py", "scripts/check_agents.py"]
+    },
+    {
+      "path": "docs/agents/frontend.md",
+      "title": "Frontend",
+      "summary": "ui/transcript_player.py plays fixtures. frontend-prototype/ is static and left alone.",
+      "keywords": ["ui", "frontend-prototype", "transcript"],
+      "files": ["ui/transcript_player.py", "frontend-prototype/README.md"]
+    }
+  ]
+}
