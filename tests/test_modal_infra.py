@@ -128,7 +128,7 @@ def test_policy_pin_dir_and_db_path_follow_env(monkeypatch, tmp_path):
     assert _default_db_path() == tmp_path / "demo.sqlite"
 
 
-def test_gateway_app_builds_stub_asgi_without_secrets(monkeypatch):
+def test_gateway_app_builds_demo_asgi_without_secrets(monkeypatch):
     pytest.importorskip("modal")
     for name in (
         "S1_UPSTREAM",
@@ -146,10 +146,14 @@ def test_gateway_app_builds_stub_asgi_without_secrets(monkeypatch):
     sys.modules.pop("infra.modal.gateway_app", None)
     import infra.modal.gateway_app as gateway
 
-    assert gateway.STUB_ENV["S1_IMPL"] == "stub"
+    assert gateway.STUB_ENV["S1_IMPL"] == "real"
     assert gateway.STUB_ENV["S2_IMPL"] == "stub"
+    assert gateway.STUB_ENV["MEMORY_IMPL"] == "mock"
     assert gateway.STUB_ENV["SAPLING_IMPL"] == "stub"
-    assert gateway.STUB_ENV["ENRICH_IMPL"] == "off"
+    assert gateway.STUB_ENV["ENRICH_IMPL"] == ""
+    assert "ENRICH_IMPL" not in gateway.image_env()
+    assert gateway.image_env()["S1_IMPL"] == "real"
+    assert gateway.image_env()["S2_IMPL"] == "stub"
     assert gateway.STUB_ENV["TRACE_PATH"].startswith("/data/")
     assert gateway.STUB_ENV["POLICY_PIN_DIR"].startswith("/data/")
     assert "BAANSAFE_DB_PATH" not in gateway.STUB_ENV
@@ -168,21 +172,31 @@ def test_gateway_app_builds_stub_asgi_without_secrets(monkeypatch):
     assert gateway._ignore(Path("ui/sim/index.html")) is False
     assert gateway._ignore(Path("api/main.py")) is False
 
+    for key in ("S1_IMPL", "S2_IMPL", "MEMORY_IMPL", "SAPLING_IMPL"):
+        monkeypatch.setenv(key, gateway.STUB_ENV[key])
+    monkeypatch.delenv("ENRICH_IMPL", raising=False)
+
     from fastapi.testclient import TestClient
 
     api = gateway.build_asgi()
     with TestClient(api) as client:
         health = client.get("/health")
         assert health.status_code == 200
-        assert health.json()["impl"]["S1_IMPL"] == "stub"
+        assert health.json()["impl"]["S1_IMPL"] == "real"
+        assert health.json()["impl"]["S2_IMPL"] == "stub"
+        assert health.json()["impl"]["ENRICH_IMPL"] in {"data", "off"}
         page = client.get("/ui/sim/")
         assert page.status_code == 200
         assert "Baan-Safe" in page.text
         hosting = client.get("/hosting")
         assert hosting.status_code == 200
         body = hosting.json()
-        assert body["backends"] == "stub"
+        assert body["backends"] == "s1-real"
         assert body["secrets"] is False
+        assert body["impl"]["S1_IMPL"] == "real"
+        assert body["impl"]["S2_IMPL"] == "stub"
+        assert "stub gateway" not in body["note"].lower()
+        assert "System 1" in body["note"]
         assert body["upstreams"] == {
             "S1_UPSTREAM": False,
             "S2_UPSTREAM": False,
@@ -207,6 +221,7 @@ def test_gateway_app_builds_stub_asgi_without_secrets(monkeypatch):
         assert turned.status_code == 200
         triaged = client.post("/triage", json=created.json()["case"])
         assert triaged.status_code == 200
+
 
 
 def test_stt_upstream_forwards_and_invents_nothing(monkeypatch):
