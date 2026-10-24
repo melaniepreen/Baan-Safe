@@ -11,9 +11,12 @@
   <div id="scene"></div>
 
   <header class="wordmark">
-    <p class="kicker">Baan-Safe / Bangkok flood demo</p>
+    <div class="brand-lockup">
+      <img src="assets/baansafe-logo.png" alt="Baan-Safe" />
+    </div>
     <div class="wordmark-actions">
       <button type="button" id="view-dispatch">Dispatch frame</button>
+      <button type="button" id="town-reset">Reset</button>
       <button type="button" id="view-fit">See the whole block</button>
     </div>
   </header>
@@ -67,13 +70,6 @@
     </details>
   </aside>
 
-  <div id="mubit-node">Mubit</div>
-  <svg id="call-link" aria-hidden="true">
-    <path id="link-to-mubit"></path>
-    <path id="link-to-house"></path>
-    <g id="link-dots"></g>
-  </svg>
-
   <div id="side-stack">
     <section class="block-map" aria-label="Block map">
       <div class="map-head">
@@ -99,7 +95,10 @@
           <p class="kicker">Backend</p>
           <h1>This call</h1>
         </div>
-        <span id="priority-badge" class="priority-badge" hidden>Gateway</span>
+        <div class="feed-head-actions">
+          <button type="button" id="dispatch-reset">Reset</button>
+          <span id="priority-badge" class="priority-badge" hidden>Gateway</span>
+        </div>
       </div>
       <div class="feed-meter" aria-hidden="true"><div id="feed-progress"></div></div>
       <p id="feed-count" class="muted"></p>

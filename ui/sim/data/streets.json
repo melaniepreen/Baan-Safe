@@ -3,8 +3,8 @@
   "streets": [
     {
       "id": "thanon-chamlong-nam-thuam",
-      "name_th": "ถนนจำลองน้ำท่วม",
-      "name_en": "PLACEHOLDER · Thanon Chamlong Nam Thuam",
+      "name_th": "Thanon Sukhumvit",
+      "name_en": "Thanon Sukhumvit",
       "kind": "main",
       "placeholder": true,
       "axis": "h",
@@ -26,8 +26,8 @@
     },
     {
       "id": "soi-chamlong-bon",
-      "name_th": "ซอยจำลองบน",
-      "name_en": "PLACEHOLDER · Soi Chamlong Bon",
+      "name_th": "Soi Ari",
+      "name_en": "Soi Ari",
       "kind": "soi",
       "placeholder": true,
       "axis": "h",
@@ -49,8 +49,8 @@
     },
     {
       "id": "soi-chamlong-lang",
-      "name_th": "ซอยจำลองล่าง",
-      "name_en": "PLACEHOLDER · Soi Chamlong Lang",
+      "name_th": "Thanon Rama IV",
+      "name_en": "Thanon Rama IV",
       "kind": "soi",
       "placeholder": true,
       "axis": "h",
@@ -72,8 +72,8 @@
     },
     {
       "id": "soi-chamlong-khlong",
-      "name_th": "ซอยจำลองคลอง",
-      "name_en": "PLACEHOLDER · Soi Chamlong Khlong",
+      "name_th": "Soi Nana",
+      "name_en": "Soi Nana",
       "kind": "soi",
       "placeholder": true,
       "axis": "v",
@@ -95,8 +95,8 @@
     },
     {
       "id": "soi-chamlong-wat-fa",
-      "name_th": "ซอยจำลองวัดฟ้า",
-      "name_en": "PLACEHOLDER · Soi Chamlong Wat Fa",
+      "name_th": "Soi Thong Lo",
+      "name_en": "Soi Thong Lo",
       "kind": "soi",
       "placeholder": true,
       "axis": "v",
@@ -118,8 +118,8 @@
     },
     {
       "id": "soi-chamlong-talat",
-      "name_th": "ซอยจำลองตลาด",
-      "name_en": "PLACEHOLDER · Soi Chamlong Talat",
+      "name_th": "Soi Ekkamai",
+      "name_en": "Soi Ekkamai",
       "kind": "soi",
       "placeholder": true,
       "axis": "v",
@@ -141,8 +141,8 @@
     },
     {
       "id": "soi-chamlong-ho-nuea",
-      "name_th": "ซอยจำลองหอเหนือ",
-      "name_en": "PLACEHOLDER · Soi Chamlong Ho Nuea",
+      "name_th": "Thanon Phahon Yothin",
+      "name_en": "Thanon Phahon Yothin",
       "kind": "soi",
       "placeholder": true,
       "axis": "v",
@@ -164,8 +164,8 @@
     },
     {
       "id": "soi-chamlong-fai",
-      "name_th": "ซอยจำลองสายไฟ",
-      "name_en": "PLACEHOLDER · Soi Chamlong Sai Fai",
+      "name_th": "Soi Sukhumvit 49",
+      "name_en": "Soi Sukhumvit 49",
       "kind": "soi",
       "placeholder": true,
       "axis": "v",
@@ -187,8 +187,8 @@
     },
     {
       "id": "khlong-chamlong",
-      "name_th": "คลองจำลอง",
-      "name_en": "PLACEHOLDER · Khlong Chamlong",
+      "name_th": "Khlong Saen Saep",
+      "name_en": "Khlong Saen Saep",
       "kind": "canal",
       "placeholder": true,
       "axis": "v",

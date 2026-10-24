@@ -158,6 +158,14 @@ function strokePoly(g, points, color, width) {
   g.poly(flat(points), true).stroke({ color, width, join: "round", cap: "round" });
 }
 
+function glowPoly(g, points, color, width, alpha) {
+  g.poly(flat(points), true).stroke({ color, width, alpha, join: "round", cap: "round" });
+}
+
+function mix3(a, b, t) {
+  return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+}
+
 function solidPath(g, pts, color, width) {
   if (pts.length < 2) return;
   g.moveTo(pts[0][0], pts[0][1]);
@@ -239,7 +247,285 @@ function wallPair(building) {
   return [0x2c3d6b, 0x1b2948];
 }
 
+const ROOF_BANDS = [
+  [0, 0.1, 0x9aa3b2],
+  [0.1, 0.34, 0xc23b32],
+  [0.34, 0.52, 0x1d4a38],
+  [0.52, 0.68, 0xe2a23a],
+  [0.68, 0.86, 0x1d4a38],
+  [0.86, 1, 0xc23b32],
+];
+
+function bandSlope(g, eave0, eave1, ridge0, ridge1, shade) {
+  for (const [t0, t1, color] of ROOF_BANDS) {
+    const a = mix3(eave0, ridge0, t0);
+    const b = mix3(eave1, ridge1, t0);
+    const c = mix3(eave1, ridge1, t1);
+    const d = mix3(eave0, ridge0, t1);
+    fillPoly(g, [project(a[0], a[1], a[2]), project(b[0], b[1], b[2]), project(c[0], c[1], c[2]), project(d[0], d[1], d[2])], shift(color, shade));
+  }
+}
+
+function chofa(g, eave, toward) {
+  const dx = toward[0] - eave[0];
+  const dy = toward[1] - eave[1];
+  const len = Math.hypot(dx, dy) || 1;
+  const ux = dx / len;
+  const uy = dy / len;
+  const px = -uy;
+  const py = ux;
+  const bend = [eave[0] + ux * 3.2 + px * 2.2, eave[1] + uy * 3.2 + py * 2.2];
+  const tip = [eave[0] - ux * 1.2 + px * 4.2, eave[1] - uy * 1.2 + py * 4.2];
+  g.moveTo(eave[0], eave[1]).lineTo(bend[0], bend[1]).lineTo(tip[0], tip[1]).stroke({ width: 1.45, color: 0xe2a23a, cap: "round", join: "round" });
+  g.circle(tip[0], tip[1], 1.15).fill({ color: 0xe2a23a });
+}
+
+function paintBandedGable(g, box, z1, rise, overhang) {
+  const x = box.x - overhang;
+  const y = box.y - overhang * 0.35;
+  const w = box.w + overhang * 1.45;
+  const d = box.d + overhang * 1.15;
+  const ridgeY = y + d * 0.46;
+  const ridgeZ = z1 + rise;
+  const eaveS0 = [x, y + d, z1];
+  const eaveS1 = [x + w, y + d, z1];
+  const eaveN0 = [x, y, z1];
+  const eaveN1 = [x + w, y, z1];
+  const ridge0 = [x, ridgeY, ridgeZ];
+  const ridge1 = [x + w, ridgeY, ridgeZ];
+  bandSlope(g, eaveN0, eaveN1, ridge0, ridge1, -30);
+  bandSlope(g, eaveS0, eaveS1, ridge0, ridge1, 0);
+  const south = [project(x, y + d, z1), project(x + w, y + d, z1), project(x + w, ridgeY, ridgeZ), project(x, ridgeY, ridgeZ)];
+  const north = [project(x, y, z1), project(x + w, y, z1), project(x + w, ridgeY, ridgeZ), project(x, ridgeY, ridgeZ)];
+  const east = [project(x + w, y, z1), project(x + w, y + d, z1), project(x + w, ridgeY, ridgeZ)];
+  fillPoly(g, east, 0x8e2e28);
+  const inner = [project(x + w, y + d * 0.18, z1 + rise * 0.08), project(x + w, y + d * 0.82, z1 + rise * 0.08), project(x + w, ridgeY, ridgeZ - rise * 0.08)];
+  fillPoly(g, inner, 0xe2a23a);
+  strokePoly(g, south, 0x9aa3b2, 1.15);
+  const ridgeA = project(x, ridgeY, ridgeZ);
+  const ridgeB = project(x + w, ridgeY, ridgeZ);
+  g.moveTo(ridgeA[0], ridgeA[1]).lineTo(ridgeB[0], ridgeB[1]).stroke({ width: 1.5, color: 0xe2a23a, cap: "round" });
+  chofa(g, project(x, y + d, z1), project(x, ridgeY, ridgeZ));
+  chofa(g, project(x + w, y + d, z1), project(x + w, ridgeY, ridgeZ));
+  chofa(g, project(x, y, z1), project(x, ridgeY, ridgeZ));
+  chofa(g, project(x + w, y, z1), project(x + w, ridgeY, ridgeZ));
+  chofa(g, ridgeA, project(x - 1.2, ridgeY, ridgeZ + 1.1));
+  chofa(g, ridgeB, project(x + w + 1.2, ridgeY, ridgeZ + 1.1));
+  return { south, north, east, topZ: ridgeZ, ridgeY, x, w };
+}
+
+function paintWat(g, building) {
+  const x = building.x;
+  const y = building.y;
+  const w = building.w;
+  const d = building.d;
+  const tiers = building.tiers || 3;
+  const pad = Math.min(1.1, w * 0.06);
+  const zP = 0.9;
+  const plinthS = quad(x - pad, y + d + pad, 0, x + w + pad, y + d + pad, 0, x + w + pad, y + d + pad, zP, x - pad, y + d + pad, zP);
+  const plinthE = quad(x + w + pad, y - pad, 0, x + w + pad, y + d + pad, 0, x + w + pad, y + d + pad, zP, x + w + pad, y - pad, zP);
+  const plinthTop = quad(x - pad, y - pad, zP, x + w + pad, y - pad, zP, x + w + pad, y + d + pad, zP, x - pad, y + d + pad, zP);
+  fillPoly(g, plinthE, 0xd9d3c8);
+  fillPoly(g, plinthS, 0xf7f4ee);
+  fillPoly(g, plinthTop, 0xfffaf4);
+  for (let step = 0; step < 3; step++) {
+    const sy = y + d + pad + 1.7 - step * 0.55;
+    const inset = w * 0.04 * step;
+    const sx0 = x + w * 0.26 + inset;
+    const sx1 = x + w * 0.74 - inset;
+    const z0 = (zP / 3) * step;
+    const z1s = (zP / 3) * (step + 1);
+    fillPoly(g, quad(sx0, sy, z0, sx1, sy, z0, sx1, sy, z1s, sx0, sy, z1s), step === 1 ? 0xc23b32 : 0xf3efe6);
+    fillPoly(g, quad(sx0, sy - 0.42, z1s, sx1, sy - 0.42, z1s, sx1, sy, z1s, sx0, sy, z1s), 0xfffaf4);
+  }
+  const zW = zP + Math.max(2.6, Math.min(4.4, d * 0.22));
+  const wallS = quad(x, y + d, zP, x + w, y + d, zP, x + w, y + d, zW, x, y + d, zW);
+  const wallE = quad(x + w, y, zP, x + w, y + d, zP, x + w, y + d, zW, x + w, y, zW);
+  fillPoly(g, wallE, 0xe4d9c4);
+  fillPoly(g, wallS, 0xf4efe4);
+  const bays = Math.max(2, Math.min(4, Math.round(w / 8)));
+  for (let bay = 0; bay < bays; bay++) {
+    const t0 = (bay + 0.22) / bays;
+    const t1 = (bay + 0.78) / bays;
+    const sill = zP + 0.55;
+    const head = zW - 0.55;
+    fillPoly(g, quad(x + w * t0, y + d, sill, x + w * t1, y + d, sill, x + w * t1, y + d, head, x + w * t0, y + d, head), 0xe2a23a);
+    const margin = (t1 - t0) * 0.16;
+    fillPoly(
+      g,
+      quad(x + w * (t0 + margin), y + d, sill + 0.16, x + w * (t1 - margin), y + d, sill + 0.16, x + w * (t1 - margin), y + d, head - 0.14, x + w * (t0 + margin), y + d, head - 0.14),
+      0xc23b32
+    );
+  }
+  const cols = Math.max(4, Math.min(6, Math.round(w / 5)));
+  for (let i = 0; i < cols; i++) {
+    const cx = x + (w * (i + 0.5)) / cols;
+    const cy = y + d + 0.28;
+    fillPoly(g, quad(cx - 0.32, cy, zP, cx + 0.32, cy, zP, cx + 0.32, cy, zW - 0.05, cx - 0.32, cy, zW - 0.05), 0x1d4a38);
+    fillPoly(g, quad(cx - 0.38, cy, zP + 0.12, cx + 0.38, cy, zP + 0.12, cx + 0.38, cy, zP + 0.38, cx - 0.38, cy, zP + 0.38), 0xe2a23a);
+    fillPoly(g, quad(cx - 0.38, cy, zW - 0.48, cx + 0.38, cy, zW - 0.48, cx + 0.38, cy, zW - 0.2, cx - 0.38, cy, zW - 0.2), 0xe2a23a);
+    const lamp = project(cx, cy + 0.05, zP + (zW - zP) * 0.48);
+    g.circle(lamp[0], lamp[1], 1.25).fill({ color: 0xffe08a });
+  }
+  const pedZ0 = zW - 1.2;
+  const pedZ1 = zW + 0.25;
+  const ped = [project(x + w * 0.28, y + d + 0.08, pedZ0), project(x + w * 0.72, y + d + 0.08, pedZ0), project(x + w * 0.5, y + d + 0.08, pedZ1)];
+  fillPoly(g, ped, 0xc23b32);
+  fillPoly(g, [project(x + w * 0.36, y + d + 0.1, pedZ0 + 0.22), project(x + w * 0.64, y + d + 0.1, pedZ0 + 0.22), project(x + w * 0.5, y + d + 0.1, pedZ1 - 0.16)], 0xe2a23a);
+  const rise = Math.max(1.7, d * 0.11);
+  const roofs = [];
+  let crown = null;
+  for (let i = 0; i < tiers; i++) {
+    const shrink = i * Math.min(w, d) * 0.13;
+    const box = {
+      x: x + shrink,
+      y: y + shrink * 0.55,
+      w: Math.max(4, w - shrink * 2),
+      d: Math.max(3.2, d - shrink * 1.2),
+    };
+    const z = zW + i * (rise + 0.85);
+    const parts = paintBandedGable(g, box, z, rise, 0.8);
+    if (i === 0 || i === tiers - 1) roofs.push(parts.south, parts.north, parts.east);
+    crown = parts;
+  }
+  const portico = paintBandedGable(
+    g,
+    { x: x + w * 0.22, y: y + d * 0.78, w: w * 0.56, d: Math.max(3.2, d * 0.34) },
+    zW - 0.2,
+    rise * 0.72,
+    0.4
+  );
+  if (crown) {
+    const tip = project(x + w / 2, crown.ridgeY, crown.topZ + 2.1);
+    const foot = project(x + w / 2, crown.ridgeY, crown.topZ + 0.15);
+    g.moveTo(foot[0], foot[1]).lineTo(tip[0], tip[1]).stroke({ width: 1.5, color: 0xe2a23a, cap: "round" });
+    g.circle(tip[0], tip[1], 1.7).fill({ color: 0xe2a23a });
+  }
+  return [plinthS, plinthE, wallS, wallE, portico.south, ...roofs];
+}
+
+function stiltTone(building) {
+  const name = building.stilt || ["teak", "dark", "amber"][hashId(building.id) % 3];
+  if (name === "dark") {
+    return { wall: 0x4a3428, wallE: 0x3a281e, deck: 0x5c3a28, deckShade: 0x3e291c, post: 0x3a281e, door: 0x2a1c14, roof: 0x6b4228, roofDark: 0x4a2c18, shutter: 0xc4894a };
+  }
+  if (name === "amber") {
+    return { wall: 0x8a5534, wallE: 0x6e4328, deck: 0xa86838, deckShade: 0x7a4a28, post: 0x6b4632, door: 0x4a301c, roof: 0x8a5534, roofDark: 0x6b3e24, shutter: 0xe2c08a };
+  }
+  return { wall: 0x6b4632, wallE: 0x543828, deck: 0x8a5534, deckShade: 0x6b4228, post: 0x5c3a28, door: 0x3a2418, roof: 0x7a4e30, roofDark: 0x5c3a22, shutter: 0xd7b07a };
+}
+
+function tileSlope(g, eave0, eave1, ridge0, ridge1, color, dark) {
+  const bands = 5;
+  for (let i = 0; i < bands; i++) {
+    const t0 = i / bands;
+    const t1 = (i + 1) / bands;
+    const a = mix3(eave0, ridge0, t0);
+    const b = mix3(eave1, ridge1, t0);
+    const c = mix3(eave1, ridge1, t1);
+    const d = mix3(eave0, ridge0, t1);
+    fillPoly(g, [project(a[0], a[1], a[2]), project(b[0], b[1], b[2]), project(c[0], c[1], c[2]), project(d[0], d[1], d[2])], i % 2 ? dark : color);
+  }
+}
+
+function roofFinial(g, x, y, z) {
+  const base = project(x, y, z);
+  const up = project(x, y, z + 0.9);
+  const curl = project(x, y - 0.45, z + 1.25);
+  g.moveTo(base[0], base[1]).lineTo(up[0], up[1]).lineTo(curl[0], curl[1]).stroke({ width: 1.35, color: 0xe2a23a, cap: "round", join: "round" });
+}
+
+function paintTileRoof(g, box, z1, color, dark, rise) {
+  const x = box.x;
+  const y = box.y;
+  const w = box.w;
+  const d = box.d;
+  const ridgeY = y + d * 0.42;
+  const ridgeZ = z1 + rise;
+  const eaveS0 = [x, y + d, z1];
+  const eaveS1 = [x + w, y + d, z1];
+  const eaveN0 = [x, y, z1];
+  const eaveN1 = [x + w, y, z1];
+  const ridge0 = [x, ridgeY, ridgeZ];
+  const ridge1 = [x + w, ridgeY, ridgeZ];
+  tileSlope(g, eaveN0, eaveN1, ridge0, ridge1, shift(color, -18), shift(dark, -12));
+  tileSlope(g, eaveS0, eaveS1, ridge0, ridge1, color, dark);
+  const south = [project(x, y + d, z1), project(x + w, y + d, z1), project(x + w, ridgeY, ridgeZ), project(x, ridgeY, ridgeZ)];
+  const north = [project(x, y, z1), project(x + w, y, z1), project(x + w, ridgeY, ridgeZ), project(x, ridgeY, ridgeZ)];
+  const east = [project(x + w, y, z1), project(x + w, y + d, z1), project(x + w, ridgeY, ridgeZ)];
+  fillPoly(g, east, dark);
+  strokePoly(g, south, 0x2a1c14, 1.05);
+  for (let i = 1; i <= 4; i++) {
+    const t = i / 5;
+    const a = project(x + w * t, y + d, z1);
+    const b = project(x + w * t, ridgeY, ridgeZ);
+    g.moveTo(a[0], a[1]).lineTo(b[0], b[1]).stroke({ width: 0.7, color: dark, alpha: 0.85 });
+  }
+  const ridgeA = project(x, ridgeY, ridgeZ);
+  const ridgeB = project(x + w, ridgeY, ridgeZ);
+  g.moveTo(ridgeA[0], ridgeA[1]).lineTo(ridgeB[0], ridgeB[1]).stroke({ width: 1.2, color: shift(color, 24), cap: "round" });
+  roofFinial(g, x, ridgeY, ridgeZ);
+  roofFinial(g, x + w, ridgeY, ridgeZ);
+  return [south, north, east];
+}
+
+function paintStilt(g, building) {
+  const tone = stiltTone(building);
+  const x = building.x;
+  const y = building.y;
+  const w = building.w;
+  const d = building.d;
+  const deckZ = 1.5;
+  const wallH = 2.15 + Math.min(2, building.floors) * 0.45;
+  const z1 = deckZ + wallH;
+  const posts = [
+    [x + 0.4, y + 0.35],
+    [x + w - 0.4, y + 0.35],
+    [x + 0.4, y + d + 1.15],
+    [x + w - 0.4, y + d + 1.15],
+    [x + w * 0.5, y + d + 1.15],
+  ];
+  for (const [px, py] of posts) {
+    fillPoly(g, quad(px - 0.16, py, 0, px + 0.16, py, 0, px + 0.16, py, deckZ, px - 0.16, py, deckZ), tone.post);
+  }
+  const deckS = quad(x - 0.35, y + d + 1.55, deckZ - 0.28, x + w + 0.25, y + d + 1.55, deckZ - 0.28, x + w + 0.25, y + d + 1.55, deckZ, x - 0.35, y + d + 1.55, deckZ);
+  const deckE = quad(x + w + 0.25, y - 0.25, deckZ - 0.28, x + w + 0.25, y + d + 1.55, deckZ - 0.28, x + w + 0.25, y + d + 1.55, deckZ, x + w + 0.25, y - 0.25, deckZ);
+  const deckTop = quad(x - 0.35, y - 0.25, deckZ, x + w + 0.25, y - 0.25, deckZ, x + w + 0.25, y + d + 1.55, deckZ, x - 0.35, y + d + 1.55, deckZ);
+  fillPoly(g, deckE, tone.deckShade);
+  fillPoly(g, deckS, tone.deck);
+  fillPoly(g, deckTop, shift(tone.deck, 16));
+  const wallS = quad(x + 0.2, y + d, deckZ, x + w - 0.15, y + d, deckZ, x + w - 0.15, y + d, z1, x + 0.2, y + d, z1);
+  const wallE = quad(x + w - 0.15, y + 0.2, deckZ, x + w - 0.15, y + d, deckZ, x + w - 0.15, y + d, z1, x + w - 0.15, y + 0.2, z1);
+  fillPoly(g, wallE, tone.wallE);
+  fillPoly(g, wallS, tone.wall);
+  const doorW = Math.min(1.5, w * 0.24);
+  const dx0 = x + w * 0.4;
+  fillPoly(g, quad(dx0, y + d, deckZ + 0.04, dx0 + doorW, y + d, deckZ + 0.04, dx0 + doorW, y + d, deckZ + wallH * 0.72, dx0, y + d, deckZ + wallH * 0.72), tone.door);
+  const shutter = (t0, t1) => {
+    const sill = deckZ + wallH * 0.28;
+    const head = deckZ + wallH * 0.64;
+    fillPoly(g, quad(x + w * t0, y + d, sill, x + w * t1, y + d, sill, x + w * t1, y + d, head, x + w * t0, y + d, head), tone.shutter);
+  };
+  shutter(0.1, 0.28);
+  shutter(0.66, 0.86);
+  const roof = paintTileRoof(g, { x: x - 0.45, y: y - 0.35, w: w + 0.85, d: d + 0.35 }, z1, tone.roof, tone.roofDark, Math.max(2.15, d * 0.28));
+  const leanZ0 = z1 * 0.72 + deckZ * 0.28;
+  const leanZ1 = deckZ + 0.85;
+  const lx0 = x - 0.2;
+  const lx1 = x + w + 0.15;
+  const ly0 = y + d * 0.62;
+  const ly1 = y + d + 1.6;
+  const lean = [project(lx0, ly1, leanZ1), project(lx1, ly1, leanZ1), project(lx1, ly0, leanZ0), project(lx0, ly0, leanZ0)];
+  fillPoly(g, lean, tone.roofDark);
+  strokePoly(g, lean, 0x2a1c14, 0.9);
+  const leanE = [project(lx1, ly0, leanZ0), project(lx1, ly1, leanZ1), project(lx1, ly1, deckZ + 0.2)];
+  fillPoly(g, leanE, shift(tone.roofDark, -20));
+  return [deckS, deckE, wallS, wallE, ...roof, lean];
+}
+
 function paintBuilding(g, building) {
+  if (building.kind === "temple") return paintWat(g, building);
+  if (building.kind === "stilt" || building.kind === "wood_house") return paintStilt(g, building);
   const floorH = building.kind === "concrete" || building.kind === "school" ? 3.35 : building.kind === "wood_house" || building.kind === "temple" ? 3.05 : 3.45;
   const z0 = 0.45;
   const z1 = z0 + Math.max(1, building.floors) * floorH;
@@ -374,13 +660,50 @@ function paintRoof(g, building, z1) {
   return parts;
 }
 
-function paintTree(g, tree) {
-  const radius = Math.min(tree.r, 8.5) * 0.72;
+function treeKind(tree) {
+  if (tree.kind === "banana" || tree.kind === "palm") return tree.kind;
+  return hashId(tree.id || tree.x + ":" + tree.y) % 3 === 0 ? "banana" : "palm";
+}
+
+function paintPalm(g, tree) {
+  const scale = Math.min(tree.r || 4.5, 8) / 5.2;
+  const h = 5.4 * scale + 1.2;
+  const lean = ((hashId(tree.id || "palm") % 7) - 3) * 0.15 * scale;
   const base = project(tree.x, tree.y, 0);
-  const top = project(tree.x, tree.y, 4.2);
-  g.moveTo(base[0], base[1]).lineTo(top[0], top[1]).stroke({ width: 2.2, color: 0x3a2a22, cap: "round" });
-  g.ellipse(top[0] + 1, top[1] + radius * 0.25, radius * 1.05, radius * 0.48).fill({ color: 0x143526 });
-  g.ellipse(top[0] - radius * 0.08, top[1] - radius * 0.08, radius * 0.82, radius * 0.38).fill({ color: 0x1f6a3c });
+  const mid = project(tree.x + lean * 0.45, tree.y, h * 0.55);
+  const top = project(tree.x + lean, tree.y, h);
+  g.moveTo(base[0], base[1]).lineTo(mid[0], mid[1]).lineTo(top[0], top[1]).stroke({ width: 2.2 + scale, color: 0x6b4a32, cap: "round", join: "round" });
+  for (let i = 0; i < 7; i++) {
+    const ang = (i / 7) * Math.PI * 2;
+    const dx = Math.cos(ang) * 2.5 * scale;
+    const dy = Math.sin(ang) * 1.55 * scale;
+    const tip = project(tree.x + lean + dx, tree.y + dy, h - 0.35);
+    g.moveTo(top[0], top[1]).lineTo(tip[0], tip[1]).stroke({ width: 1.6, color: i % 2 ? 0x1f6a3c : 0x143526, cap: "round" });
+  }
+}
+
+function paintBanana(g, tree) {
+  const scale = Math.min(tree.r || 4.5, 8) / 5.5;
+  const h = 3.4 * scale + 0.6;
+  const base = project(tree.x, tree.y, 0);
+  const top = project(tree.x, tree.y, h);
+  g.moveTo(base[0], base[1]).lineTo(top[0], top[1]).stroke({ width: 3.6 + scale, color: 0x3d6b32, cap: "round" });
+  const leaves = [
+    [2.5, 0.35, 0.35, 0x2f8a45],
+    [-2.3, 0.7, 0.05, 0x1f6a3c],
+    [0.35, 2.1, 0.55, 0x3aaa58],
+    [-0.5, -1.7, 0.25, 0x145c34],
+  ];
+  for (const [dx, dy, lift, color] of leaves) {
+    const tip = project(tree.x + dx * scale, tree.y + dy * scale, h + lift);
+    const mid = project(tree.x + dx * scale * 0.45, tree.y + dy * scale * 0.45, h * 0.72 + lift * 0.3);
+    g.moveTo(top[0], top[1]).lineTo(mid[0], mid[1]).lineTo(tip[0], tip[1]).stroke({ width: 3.1, color, cap: "round", join: "round" });
+  }
+}
+
+function paintTree(g, tree) {
+  if (treeKind(tree) === "banana") paintBanana(g, tree);
+  else paintPalm(g, tree);
 }
 
 function buildGround(g) {
@@ -529,10 +852,10 @@ function addLabel(text, x, y, angle, size, fill) {
   const label = new Text({
     text,
     style: {
-      fontFamily: "Noto Sans Thai, sans-serif",
+      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       fontSize: size,
       fill,
-      fontWeight: "700",
+      fontWeight: "600",
       stroke: { color: INK, width: 4 },
     },
   });
@@ -560,12 +883,12 @@ function buildLabels() {
     if (angle > Math.PI / 2 || angle < -Math.PI / 2) angle += Math.PI;
     const midX = (start[0] + end[0]) / 2;
     const midY = (start[1] + end[1]) / 2;
-    addLabel(street.name_th, midX, midY, angle, street.kind === "main" ? 16 : 13, 0xf7f8ff);
+    addLabel(street.name_en || street.name_th, midX, midY, angle, street.kind === "main" ? 15 : 12, 0xf7f8ff);
   }
   for (const building of town.buildings) {
-    if (!building.landmark || !building.name_th) continue;
+    if (!building.landmark || !(building.name_en || building.name_th)) continue;
     const point = project(building.x + building.w / 2, building.y + building.d + 1.5, 2);
-    addLabel(building.name_th, point[0], point[1], 0, building.kind === "school" || building.kind === "temple" ? 16 : 12, 0xf7f8ff);
+    addLabel(building.name_en || building.name_th, point[0], point[1], 0, building.kind === "school" || building.kind === "temple" ? 15 : 12, 0xf7f8ff);
   }
 }
 
@@ -642,31 +965,52 @@ function paintRoute(route, offset) {
   }
 }
 
-function spriteKind(kind, mode) {
-  if (mode === "boat") return "boat";
-  if (kind === "van") return "van";
-  return "truck";
+function boatCue(rule) {
+  if (!rule) return "rescue";
+  if (rule.vehicle === "van") return "supply";
+  if (rule.vehicle === "truck") return "evac";
+  if (rule.return_to === "clinic") return "medical";
+  return "rescue";
 }
 
-function drawHull(kind, screen, angle) {
+function drawBoatSprite(screen, angle, cue) {
   const c = Math.cos(angle);
   const s = Math.sin(angle);
   const p = (dx, dy) => [screen[0] + dx * c - dy * s, screen[1] + dx * s + dy * c];
-  if (kind === "boat") {
-    fillPoly(routeG, [p(11, 0), p(-8, 4.2), p(-6, 0), p(-8, -4.2)], 0xf4efe4);
-    strokePoly(routeG, [p(11, 0), p(-8, 4.2), p(-6, 0), p(-8, -4.2)], INK, 1);
+  const hull = [p(14, 0), p(7, 5.1), p(-9, 4.2), p(-12, 0), p(-9, -4.2), p(7, -5.1)];
+  fillPoly(routeG, hull, 0xf7f4ee);
+  strokePoly(routeG, hull, 0x8d95a3, 1.7);
+  const inner = [p(7.5, 0), p(4.2, 3.1), p(-6.5, 2.5), p(-8, 0), p(-6.5, -2.5), p(4.2, -3.1)];
+  fillPoly(routeG, inner, 0xc4894a);
+  const thwartA = p(-1.5, 2.15);
+  const thwartB = p(-1.5, -2.15);
+  routeG.moveTo(thwartA[0], thwartA[1]).lineTo(thwartB[0], thwartB[1]).stroke({ width: 1.6, color: 0x8a5a32, cap: "round" });
+  const thwartC = p(3.2, 2.35);
+  const thwartD = p(3.2, -2.35);
+  routeG.moveTo(thwartC[0], thwartC[1]).lineTo(thwartD[0], thwartD[1]).stroke({ width: 1.6, color: 0x8a5a32, cap: "round" });
+  const ring = p(-5.2, 0.15);
+  routeG.circle(ring[0], ring[1], 2.15).stroke({ width: 1.5, color: 0x7ec8ff });
+  if (cue === "supply") {
+    fillPoly(routeG, [p(0.6, 1.7), p(4.4, 1.7), p(4.4, -1.5), p(0.6, -1.5)], 0x8a5a32);
+    fillPoly(routeG, [p(4.6, 1.15), p(7.4, 1.15), p(7.4, -1.05), p(4.6, -1.05)], 0x6b4228);
     return;
   }
-  const body = kind === "van" ? 0xd6ff3c : 0xf0a040;
-  fillPoly(routeG, [p(8, 3.2), p(-7, 3.2), p(-7, -3.2), p(8, -3.2)], body);
-  fillPoly(routeG, [p(8, 2.4), p(3, 2.4), p(3, -2.4), p(8, -2.4)], 0x1a2030);
-  strokePoly(routeG, [p(8, 3.2), p(-7, 3.2), p(-7, -3.2), p(8, -3.2)], INK, 1);
+  if (cue === "medical" || cue === "evac") {
+    const flag = [p(-0.4, -0.6), p(-0.4, -8.2), p(5.2, -6.2), p(-0.4, -4.6)];
+    fillPoly(routeG, flag, cue === "medical" ? 0xf7f4ee : 0xf0a040);
+    strokePoly(routeG, flag, cue === "medical" ? 0xc23b32 : 0xc46a12, 0.8);
+    if (cue === "medical") {
+      const cross = p(1.5, -6.3);
+      routeG.moveTo(cross[0] - 1.7, cross[1]).lineTo(cross[0] + 1.7, cross[1]).stroke({ width: 1.35, color: 0xff3b30, cap: "round" });
+      routeG.moveTo(cross[0], cross[1] - 1.7).lineTo(cross[0], cross[1] + 1.7).stroke({ width: 1.35, color: 0xff3b30, cap: "round" });
+    }
+  }
 }
 
 function drawWake(route, distance) {
   for (let i = 1; i <= 3; i++) {
     const sample = pointAt(route, distance - i * 3.2);
-    if (!sample || sample.span.leg.mode !== "boat") continue;
+    if (!sample) continue;
     const screen = project(sample.here.x, sample.here.y, 0.4);
     routeG.ellipse(screen[0], screen[1], 7 - i, 2.4).stroke({ color: 0x9fd4ff, width: 1.2, alpha: 0.45 / i });
   }
@@ -701,9 +1045,8 @@ function drawTrips(offset) {
     const screen = project(sample.here.x, sample.here.y, 1.2);
     const prev = behind ? project(behind.here.x, behind.here.y, 1.2) : screen;
     const angle = Math.atan2(screen[1] - prev[1], screen[0] - prev[0]);
-    const drawn = spriteKind(trip.kind, sample.span.leg.mode);
-    if (drawn === "boat") drawWake(route, trip.travel);
-    drawHull(drawn, screen, angle);
+    drawWake(route, trip.travel);
+    drawBoatSprite(screen, angle, trip.cue || boatCue({ vehicle: trip.kind }));
   }
 }
 
@@ -726,16 +1069,48 @@ function advanceTrips(deltaMS) {
   }
 }
 
+const OUTLINE_HEX = { P1: 0xff3b30, P2: 0xff9f1a, P3: 0x3ddc84, P4: 0xc084fc };
+const CALLER_OUTLINE = 0xff3b30;
+const DEST_OUTLINE = 0x2f6bff;
+
+function activeDestinationId() {
+  if (!review || !review.rule) return null;
+  const rule = review.rule;
+  if (rule.return_to === "clinic" || rule.id === "p1-medical" || rule.id === "hospital-flood") return "bldg-clinic";
+  if (rule.return_to === "shelter" || rule.vehicle === "truck") return "bldg-shelter";
+  return null;
+}
+
+function outlineColorFor(id) {
+  const call = activeCallId && town ? town.calls.find((item) => item.id === activeCallId) : null;
+  if (call && call.building_id === id) return CALLER_OUTLINE;
+  if (activeDestinationId() === id) return DEST_OUTLINE;
+  if (town) {
+    for (const item of town.calls) {
+      if (item.building_id !== id) continue;
+      const decision = callResults.get(item.id);
+      if (!decision) continue;
+      return OUTLINE_HEX[decision.final_priority] || CALLER_OUTLINE;
+    }
+  }
+  return CALLER_OUTLINE;
+}
+
+function outlineBuilding(g, id, color) {
+  const record = records && records.get(id);
+  if (!record) return;
+  for (const poly of record.polys) {
+    if (!poly || poly.length < 3) continue;
+    glowPoly(g, poly, color, 7, 0.3);
+    strokePoly(g, poly, color, 1.8);
+  }
+}
+
 function drawSelection() {
+  if (!selectG) return;
   selectG.clear();
-  if (!selected || !records.has(selected)) return;
-  const record = records.get(selected);
-  const building = record.building;
-  const center = project(building.x + building.w / 2, building.y + building.d * 0.62, 0.2);
-  const rx = Math.max(11, Math.max(building.w, building.d) * 0.78);
-  selectG.ellipse(center[0], center[1], rx, rx * 0.46).fill({ color: YELLOW, alpha: 0.14 });
-  selectG.ellipse(center[0], center[1], rx, rx * 0.46).stroke({ color: YELLOW, width: 1.5 });
-  for (const poly of record.polys) strokePoly(selectG, poly, YELLOW, 1.15);
+  if (!selected || !records || !records.has(selected)) return;
+  outlineBuilding(selectG, selected, outlineColorFor(selected));
 }
 
 function drawMarkers() {
@@ -756,6 +1131,142 @@ function sortKey(building) {
   return building.x + building.y + building.w + building.d;
 }
 
+function buildSceneryBlock() {
+  const cell = 2;
+  const cols = Math.ceil(town.meta.world.width_m / cell) + 2;
+  const rows = Math.ceil(town.meta.world.depth_m / cell) + 2;
+  const grid = new Uint8Array(cols * rows);
+  const mark = (x, y) => {
+    const c = Math.floor(x / cell);
+    const r = Math.floor(y / cell);
+    if (c < 0 || r < 0 || c >= cols || r >= rows) return;
+    grid[r * cols + c] = 1;
+  };
+  const markDisk = (x, y, rad) => {
+    const r2 = rad * rad;
+    for (let yy = y - rad; yy <= y + rad; yy += cell) {
+      for (let xx = x - rad; xx <= x + rad; xx += cell) {
+        const dx = xx - x;
+        const dy = yy - y;
+        if (dx * dx + dy * dy <= r2) mark(xx, yy);
+      }
+    }
+  };
+  const markCapsule = (ax, ay, bx, by, rad) => {
+    const len = Math.hypot(bx - ax, by - ay) || 1;
+    const steps = Math.max(1, Math.ceil(len / cell));
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      markDisk(ax + (bx - ax) * t, ay + (by - ay) * t, rad);
+    }
+  };
+  for (const building of town.buildings) {
+    for (let yy = building.y - 2.2; yy <= building.y + building.d + 2.2; yy += cell) {
+      for (let xx = building.x - 2.2; xx <= building.x + building.w + 2.2; xx += cell) mark(xx, yy);
+    }
+  }
+  for (const street of streets) {
+    const [a, b] = street.points;
+    markCapsule(a[0], a[1], b[0], b[1], street.width_m / 2 + 3.2);
+  }
+  for (const edge of town.graph.edges) {
+    const a = nodeById[edge.from];
+    const b = nodeById[edge.to];
+    if (!a || !b) continue;
+    markCapsule(a.x, a.y, b.x, b.y, 3.4);
+  }
+  for (const tree of town.trees) markDisk(tree.x, tree.y, Math.min(tree.r || 4, 8) * 0.45);
+  for (const feature of flood.features) {
+    for (const hole of feature.geometry.coordinates.slice(1)) {
+      let minX = Infinity;
+      let minY = Infinity;
+      let maxX = -Infinity;
+      let maxY = -Infinity;
+      for (const point of hole) {
+        minX = Math.min(minX, point[0]);
+        minY = Math.min(minY, point[1]);
+        maxX = Math.max(maxX, point[0]);
+        maxY = Math.max(maxY, point[1]);
+      }
+      for (let yy = minY - 2; yy <= maxY + 2; yy += cell) {
+        for (let xx = minX - 2; xx <= maxX + 2; xx += cell) {
+          if (pip(xx, yy, hole)) mark(xx, yy);
+        }
+      }
+    }
+  }
+  return {
+    blocked(x, y) {
+      const c = Math.floor(x / cell);
+      const r = Math.floor(y / cell);
+      if (c < 0 || r < 0 || c >= cols || r >= rows) return true;
+      return grid[r * cols + c] === 1;
+    },
+  };
+}
+
+function ovalClear(block, px, py, rx, ry) {
+  if (block.blocked(px, py)) return false;
+  for (let i = 0; i < 8; i++) {
+    const t = (i / 8) * Math.PI * 2;
+    if (block.blocked(px + Math.cos(t) * rx, py + Math.sin(t) * ry)) return false;
+  }
+  return true;
+}
+
+function buildGroundCover(g, block) {
+  const canal = streets.find((street) => street.kind === "canal");
+  if (canal) {
+    const bank = canal.points[0][0] + canal.width_m / 2 + 4.2;
+    for (let y = 34; y < 396; y += 9) {
+      const x = bank + (hashId("bank-" + y) % 5);
+      if (block.blocked(x, y) || block.blocked(x + 3, y + 2)) continue;
+      const green = hashId("grass-" + y) % 2 ? 0x1b5a38 : 0x143f2c;
+      fillPoly(g, quad(x, y, 0.04, x + 5.2, y, 0.04, x + 5.2, y + 5.4, 0.04, x, y + 5.4, 0.04), green, 0.92);
+    }
+  }
+  let ponds = 0;
+  for (let y = 28; y < 390 && ponds < 6; y += 34) {
+    for (let x = 48; x < 500 && ponds < 6; x += 42) {
+      const h = hashId("pond-" + x + "-" + y);
+      if (h % 3 === 0) continue;
+      const px = x + (h % 15) - 7;
+      const py = y + ((h >>> 6) % 13) - 6;
+      const rx = 6 + (h % 4);
+      const ry = 4.5 + ((h >>> 4) % 3);
+      if (!ovalClear(block, px, py, rx + 1.6, ry + 1.6)) continue;
+      const ring = [];
+      for (let i = 0; i < 12; i++) {
+        const t = (i / 12) * Math.PI * 2;
+        ring.push(project(px + Math.cos(t) * rx, py + Math.sin(t) * ry, 0.12));
+      }
+      fillPoly(g, ring, 0x2f6f86, 0.9);
+      strokePoly(g, ring, 0xc7ead4, 1.05);
+      ponds += 1;
+    }
+  }
+}
+
+function extraTrees(block) {
+  const trees = [];
+  const placed = [];
+  for (let y = 20; y < 400; y += 16) {
+    for (let x = 34; x < 520; x += 18) {
+      const h = hashId("scenery-" + x + "-" + y);
+      if (h % 4 !== 0) continue;
+      const tx = x + (h % 11) - 5;
+      const ty = y + ((h >>> 8) % 11) - 5;
+      if (tx < 8 || ty < 8 || tx > 530 || ty > 410) continue;
+      if (block.blocked(tx, ty)) continue;
+      if (placed.some((point) => (point.x - tx) ** 2 + (point.y - ty) ** 2 < 144)) continue;
+      trees.push({ id: "scenery-" + x + "-" + y, x: tx, y: ty, r: 4.6, kind: h % 3 === 0 ? "banana" : "palm" });
+      placed.push({ x: tx, y: ty });
+      if (trees.length >= 48) return trees;
+    }
+  }
+  return trees;
+}
+
 function buildScene() {
   world.removeChildren();
   labels = [];
@@ -767,6 +1278,12 @@ function buildScene() {
     if (!didDrag) select(null, false);
   });
   world.addChild(ground);
+
+  const sceneryBlock = buildSceneryBlock();
+  const cover = new Graphics();
+  cover.eventMode = "none";
+  buildGroundCover(cover, sceneryBlock);
+  world.addChild(cover);
 
   const roadFills = new Graphics();
   roadFills.eventMode = "none";
@@ -811,7 +1328,7 @@ function buildScene() {
     records.set(building.id, { building, g, polys });
     objects.push({ sort: sortKey(building), g });
   }
-  for (const tree of town.trees) {
+  for (const tree of town.trees.concat(extraTrees(sceneryBlock))) {
     const g = new Graphics();
     g.eventMode = "none";
     paintTree(g, tree);
@@ -1028,6 +1545,7 @@ function select(id, center) {
   const building = id ? buildingById(id) : null;
   if (center && building) lookAt(building.x + building.w / 2, building.y + building.d / 2, Math.min(8, Math.max(world.scale.x, 7.2)));
   drawSelection();
+  drawCallLights();
 }
 
 function setStatus(householdId, status) {
@@ -1458,7 +1976,7 @@ function startTrip(call, rule) {
     phases.push(outbound);
   }
   const total = worldSpans(phases[0]).total;
-  trips = [{ kind: rule.vehicle, phases, phase: 0, travel: reduce ? total : 0, parked: !!reduce, buildingId: call.building_id }];
+  trips = [{ kind: rule.vehicle, cue: boatCue(rule), phases, phase: 0, travel: reduce ? total : 0, parked: !!reduce, buildingId: call.building_id }];
   frameRoutes(phases);
   drawTrips(moverClock);
 }
@@ -1946,8 +2464,10 @@ async function runPlaceCall(text, choice, options = {}) {
   document.getElementById("chooser-note").textContent = sentence;
   activeCallId = call.id;
   const node = document.getElementById("mubit-node");
-  node.classList.add("busy");
-  node.classList.remove("done");
+  if (node) {
+    node.classList.add("busy");
+    node.classList.remove("done");
+  }
   setPhoneStatus(call.id);
   if (speak) {
     if (options.via) pushPhone("note", "Transcript via " + options.via + ".");
@@ -1984,8 +2504,10 @@ async function runPlaceCall(text, choice, options = {}) {
     } catch (error) {
       trace = [];
     }
-    node.classList.remove("busy");
-    node.classList.add("done");
+    if (node) {
+      node.classList.remove("busy");
+      node.classList.add("done");
+    }
     if (speak) {
       const reply = operatorReply(decision, call, spoken);
       pushPhone("operator", reply.en, reply.th);
@@ -1993,7 +2515,7 @@ async function runPlaceCall(text, choice, options = {}) {
       await playFeed(call, decision, trace, spoken, callPlaying);
     }
   } catch (error) {
-    node.classList.remove("busy");
+    if (node) node.classList.remove("busy");
     if (speak) pushPhone("note", "The gateway did not answer. " + error.message);
     else throw error;
   }
@@ -2113,82 +2635,27 @@ async function stopRecord() {
   );
 }
 
-function houseScreen(building) {
-  const local = project(building.x + building.w / 2, building.y + building.d * 0.45, 2.4);
-  const rect = app.canvas.getBoundingClientRect();
-  return {
-    x: rect.left + world.x + local[0] * world.scale.x,
-    y: rect.top + world.y + local[1] * world.scale.y,
-  };
-}
-
 function drawCallLights() {
-  if (!callLightG) return;
+  if (!callLightG || !town || !records) return;
   callLightG.clear();
-  const lit = new Map();
+  const colors = new Map();
   for (const call of town.calls) {
     const decision = callResults.get(call.id);
     if (!decision) continue;
-    lit.set(call.building_id, decision.final_priority);
+    colors.set(call.building_id, OUTLINE_HEX[decision.final_priority] || CALLER_OUTLINE);
   }
-  for (const [id, priority] of lit) {
-    const building = buildingById(id);
-    const color = PRIORITY_HEX[priority] || YELLOW;
-    const center = project(building.x + building.w / 2, building.y + building.d * 0.72, 0.25);
-    const rx = Math.max(8, Math.max(building.w, building.d) * 0.72);
-    callLightG.ellipse(center[0], center[1], rx, rx * 0.42).stroke({ color, width: 1.7 });
-    const beacon = project(building.x + building.w / 2, building.y + building.d * 0.15, building.floors * 3.3 + 2.8);
-    callLightG.circle(beacon[0], beacon[1], 2.4).fill({ color });
+  const caller = activeCallId ? town.calls.find((item) => item.id === activeCallId) : null;
+  if (caller) colors.set(caller.building_id, CALLER_OUTLINE);
+  const dest = activeDestinationId();
+  if (dest && (!caller || dest !== caller.building_id)) colors.set(dest, DEST_OUTLINE);
+  for (const [id, color] of colors) {
+    if (id === selected) continue;
+    outlineBuilding(callLightG, id, color);
   }
-}
-
-function curve(fromX, fromY, toX, toY) {
-  const midX = (fromX + toX) / 2;
-  return `M ${fromX} ${fromY} C ${midX} ${fromY}, ${midX} ${toY}, ${toX} ${toY}`;
 }
 
 function updateCallLink() {
-  const toMubit = document.getElementById("link-to-mubit");
-  const toHouse = document.getElementById("link-to-house");
-  const dots = document.getElementById("link-dots");
-  if (!toMubit || !town || !app) return;
-  dots.replaceChildren();
-  const node = document.getElementById("mubit-node").getBoundingClientRect();
-  const mx = node.left + node.width / 2;
-  const my = node.top + node.height / 2;
-  const card = document.querySelector("#call-list li.active");
-  if (card && activeCallId) {
-    const rect = card.getBoundingClientRect();
-    toMubit.setAttribute("d", curve(rect.right, rect.top + rect.height / 2, mx, my));
-  } else {
-    toMubit.setAttribute("d", "");
-  }
-  const call = town.calls.find((item) => item.id === activeCallId);
-  const decision = activeCallId ? callResults.get(activeCallId) : null;
-  if (call) {
-    const point = houseScreen(buildingById(call.building_id));
-    toHouse.setAttribute("d", curve(mx, my, point.x, point.y));
-    toHouse.setAttribute("stroke", decision ? PRIORITY_COLOR[decision.final_priority] : "#d6ff3c");
-  } else {
-    toHouse.setAttribute("d", "");
-  }
-  const lit = new Map();
-  for (const item of town.calls) {
-    const answer = callResults.get(item.id);
-    if (!answer) continue;
-    lit.set(item.building_id, answer.final_priority);
-  }
-  for (const [id, priority] of lit) {
-    const point = houseScreen(buildingById(id));
-    const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    dot.setAttribute("cx", String(point.x));
-    dot.setAttribute("cy", String(point.y));
-    dot.setAttribute("r", id === (call && call.building_id) ? "8" : "5");
-    dot.setAttribute("fill", PRIORITY_COLOR[priority]);
-    dot.setAttribute("stroke", "#07090f");
-    dot.setAttribute("stroke-width", "1.5");
-    dots.append(dot);
-  }
+  // The map chip and dotted connector are gone. Mubit stays on the feed cards.
 }
 
 function renderCallLegend() {
@@ -2273,6 +2740,7 @@ function resetCalls() {
   live.correctionNote = null;
   review = null;
   trips = [];
+  select(null, false);
   const correctHost = document.getElementById("correct-host");
   if (correctHost) correctHost.replaceChildren();
   const scores = document.getElementById("scores");
@@ -2296,7 +2764,7 @@ function resetCalls() {
   document.getElementById("phone-log").replaceChildren();
   document.querySelectorAll("[data-priority]").forEach((button) => button.classList.remove("on"));
   const node = document.getElementById("mubit-node");
-  node.classList.remove("busy", "done");
+  if (node) node.classList.remove("busy", "done");
   greet();
   loadLive();
 }
@@ -2317,6 +2785,10 @@ function bindChrome() {
     placeCall(call.opening, { fixtureId: call.id, how: "scripted list, stepped" });
   });
   document.getElementById("calls-reset").addEventListener("click", resetCalls);
+  for (const id of ["town-reset", "dispatch-reset"]) {
+    const button = document.getElementById(id);
+    if (button) button.addEventListener("click", resetCalls);
+  }
   document.getElementById("phone-form").addEventListener("submit", (event) => {
     event.preventDefault();
     const input = document.getElementById("phone-input");
@@ -2441,7 +2913,7 @@ async function main() {
   try {
     await document.fonts.load('700 16px "Noto Sans Thai"');
   } catch (error) {
-    /* Labels fall back to the generic sans if the Thai face is missing. */
+    /* Thai phone replies still use Noto Sans Thai. Map labels are romanised. */
   }
   app = new Application();
   const pixiOptions = {
@@ -2480,7 +2952,9 @@ async function main() {
     drawTrips(moverClock);
     if (reduce) return;
     markerG.alpha = 0.55 + 0.45 * Math.sin(ticker.lastTime / 260);
-    if (callLightG) callLightG.alpha = 0.72 + 0.28 * Math.sin(ticker.lastTime / 280);
+    const pulse = 0.74 + 0.26 * Math.sin(ticker.lastTime / 280);
+    if (callLightG) callLightG.alpha = pulse;
+    if (selectG) selectG.alpha = pulse;
   });
   loadLive();
 }

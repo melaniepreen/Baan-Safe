@@ -19,14 +19,31 @@ def _load(name: str) -> dict:
     return json.loads((SIM / name).read_text(encoding="utf-8"))
 
 
+ROMAN_STREETS = {
+    "thanon-chamlong-nam-thuam": "Thanon Sukhumvit",
+    "soi-chamlong-bon": "Soi Ari",
+    "soi-chamlong-lang": "Thanon Rama IV",
+    "soi-chamlong-khlong": "Soi Nana",
+    "soi-chamlong-wat-fa": "Soi Thong Lo",
+    "soi-chamlong-talat": "Soi Ekkamai",
+    "soi-chamlong-ho-nuea": "Thanon Phahon Yothin",
+    "soi-chamlong-fai": "Soi Sukhumvit 49",
+    "khlong-chamlong": "Khlong Saen Saep",
+}
+THAI_SCRIPT = re.compile(r"[\u0e00-\u0e7f]")
+
+
 def test_placeholder_streets_are_labelled_and_swappable():
     body = _load("streets.json")
     assert body["streets"], "streets.json is the file to replace with real names"
+    seen = set()
     for street in body["streets"]:
         assert street["placeholder"] is True
-        assert "จำลอง" in street["name_th"]
-        assert street["name_en"].startswith("PLACEHOLDER")
+        assert street["name_th"] == street["name_en"] == ROMAN_STREETS[street["id"]]
+        assert THAI_SCRIPT.search(street["name_th"]) is None
         assert len(street["points"]) >= 2
+        seen.add(street["id"])
+    assert seen == set(ROMAN_STREETS)
 
 
 def test_buildings_match_household_contract_and_are_addressable():
@@ -148,7 +165,13 @@ def test_twenty_calls_link_fixtures_to_buildings():
     assert priorities == {"P1", "P2", "P3", "P4"}
     page = (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
     assert 'id="calls-play"' in page
-    assert "Mubit" in page
+    assert "Mubit" not in page
+    assert 'id="mubit-node"' not in page
+    assert "link-to-mubit" not in page
+    assert 'id="town-reset"' in page
+    assert 'id="dispatch-reset"' in page
+    assert 'alt="Baan-Safe"' in page
+    assert "baansafe-logo.png" in page
     assert 'id="phone"' in page
     assert 'id="phone-record"' in page
     assert 'id="backend"' in page
@@ -179,6 +202,11 @@ def test_twenty_calls_link_fixtures_to_buildings():
     assert "log-export" not in source
     assert "operatorLine" not in source
     assert "right: narrow ? 16 : 344" in source
+    assert "Mubit" in source
+    assert "paintWat" in source
+    assert "paintStilt" in source
+    assert "outlineBuilding" in source
+    assert "drawBoatSprite" in source
 
 
 def _inside(building: dict, x: float, y: float) -> bool:
@@ -310,6 +338,11 @@ def test_activity_prompts_and_rulebook_are_draft_simulations():
     assert "not repo policy" in rules["label"].lower()
     vehicles = {rule["vehicle"] for rule in rules["rules"]}
     assert {"boat", "truck", "van", "pulse", "none"} <= vehicles
+    actions = " ".join(rule["action"] for rule in rules["rules"]).lower()
+    assert "truck" not in actions
+    assert "van" not in actions
+    assert "evacuation boat" in actions
+    assert "supply boat" in actions
     blob = json.dumps({"events": events, "prompts": prompts, "rules": rules}).lower()
     assert "baht" not in blob
     assert "฿" not in blob
@@ -326,6 +359,10 @@ def test_scripted_replies_stay_in_human_language():
     spoken = "\n".join(row["en"] + "\n" + row.get("th", "") for row in templates)
     assert "Help is on the way. A rescue boat is leaving the jetty now" in spoken
     lowered = spoken.lower()
+    assert "truck" not in lowered
+    assert "van" not in lowered
+    assert "supply boat" in lowered
+    assert "evacuation boat" in lowered
     assert "baht" not in lowered
     assert "฿" not in spoken
     for banned in (
@@ -341,6 +378,22 @@ def test_scripted_replies_stay_in_human_language():
     for text in _strings({"spoken": spoken}):
         assert PHONE.search(text) is None, text
         assert NATIONAL_ID.search(text) is None, text
+
+
+def test_raised_houses_are_mixed_through_the_block():
+    town = _load("town.json")
+    houses = [building for building in town["buildings"] if building["kind"] in {"house", "stilt", "wood_house"}]
+    raised = [building for building in houses if building["kind"] in {"stilt", "wood_house"}]
+    assert houses
+    assert 1 / 3 <= len(raised) / len(houses) <= 0.5
+    variants = {building.get("stilt") for building in town["buildings"] if building["kind"] == "stilt"}
+    assert variants == {"teak", "dark", "amber"}
+    for building in town["buildings"]:
+        if building["kind"] != "stilt":
+            continue
+        assert building["roof"] == "brown"
+        assert building["wall"] == "wood"
+        assert not building.get("landmark")
 
 
 def test_town_files_do_not_look_like_personal_data():

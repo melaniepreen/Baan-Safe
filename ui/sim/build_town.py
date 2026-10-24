@@ -149,7 +149,7 @@ def street(
     return {
         "id": street_id,
         "name_th": name_th,
-        "name_en": f"PLACEHOLDER · {name_en}",
+        "name_en": name_en,
         "kind": kind,
         "placeholder": True,
         "axis": axis,
@@ -166,8 +166,8 @@ def build_streets() -> list[dict]:
     return [
         street(
             "thanon-chamlong-nam-thuam",
-            "ถนนจำลองน้ำท่วม",
-            "Thanon Chamlong Nam Thuam",
+            "Thanon Sukhumvit",
+            "Thanon Sukhumvit",
             "main",
             "h",
             H_MAIN,
@@ -175,11 +175,11 @@ def build_streets() -> list[dict]:
             524,
             16,
         ),
-        street("soi-chamlong-bon", "ซอยจำลองบน", "Soi Chamlong Bon", "soi", "h", H_BON, 56, 470, 6.5),
+        street("soi-chamlong-bon", "Soi Ari", "Soi Ari", "soi", "h", H_BON, 56, 470, 6.5),
         street(
             "soi-chamlong-lang",
-            "ซอยจำลองล่าง",
-            "Soi Chamlong Lang",
+            "Thanon Rama IV",
+            "Thanon Rama IV",
             "soi",
             "h",
             H_LANG,
@@ -189,8 +189,8 @@ def build_streets() -> list[dict]:
         ),
         street(
             "soi-chamlong-khlong",
-            "ซอยจำลองคลอง",
-            "Soi Chamlong Khlong",
+            "Soi Nana",
+            "Soi Nana",
             "soi",
             "v",
             V_KHLONG,
@@ -200,8 +200,8 @@ def build_streets() -> list[dict]:
         ),
         street(
             "soi-chamlong-wat-fa",
-            "ซอยจำลองวัดฟ้า",
-            "Soi Chamlong Wat Fa",
+            "Soi Thong Lo",
+            "Soi Thong Lo",
             "soi",
             "v",
             V_WAT,
@@ -211,8 +211,8 @@ def build_streets() -> list[dict]:
         ),
         street(
             "soi-chamlong-talat",
-            "ซอยจำลองตลาด",
-            "Soi Chamlong Talat",
+            "Soi Ekkamai",
+            "Soi Ekkamai",
             "soi",
             "v",
             V_TALAT,
@@ -222,8 +222,8 @@ def build_streets() -> list[dict]:
         ),
         street(
             "soi-chamlong-ho-nuea",
-            "ซอยจำลองหอเหนือ",
-            "Soi Chamlong Ho Nuea",
+            "Thanon Phahon Yothin",
+            "Thanon Phahon Yothin",
             "soi",
             "v",
             V_HO,
@@ -233,8 +233,8 @@ def build_streets() -> list[dict]:
         ),
         street(
             "soi-chamlong-fai",
-            "ซอยจำลองสายไฟ",
-            "Soi Chamlong Sai Fai",
+            "Soi Sukhumvit 49",
+            "Soi Sukhumvit 49",
             "soi",
             "v",
             V_FAI,
@@ -242,7 +242,7 @@ def build_streets() -> list[dict]:
             380,
             6.5,
         ),
-        street("khlong-chamlong", "คลองจำลอง", "Khlong Chamlong", "canal", "v", 22, 30, 400, 14),
+        street("khlong-chamlong", "Khlong Saen Saep", "Khlong Saen Saep", "canal", "v", 22, 30, 400, 14),
     ]
 
 
@@ -270,31 +270,31 @@ def build_flood() -> dict:
         poly(
             "haz-flood-soi-khlong",
             0.35,
-            "Water sitting in the northern section of Soi Chamlong Khlong.",
+            "Water sitting in the northern section of Soi Nana.",
             [[[V_KHLONG - 4, 40], [V_KHLONG + 4, 40], [V_KHLONG + 4, 180], [V_KHLONG - 4, 180]]],
         ),
         poly(
             "haz-flood-soi-wat-fa",
             0.35,
-            "Water sitting in the northern section of Soi Chamlong Wat Fa.",
+            "Water sitting in the northern section of Soi Thong Lo.",
             [[[V_WAT - 4.2, 36], [V_WAT + 4.2, 36], [V_WAT + 4.2, 180], [V_WAT - 4.2, 180]]],
         ),
         poly(
             "haz-flood-soi-talat",
             0.35,
-            "Water sitting in the northern section of Soi Chamlong Talat.",
+            "Water sitting in the northern section of Soi Ekkamai.",
             [[[V_TALAT - 4.2, 40], [V_TALAT + 4.2, 40], [V_TALAT + 4.2, 180], [V_TALAT - 4.2, 180]]],
         ),
         poly(
             "haz-flood-soi-fai",
             0.35,
-            "Water sitting in the northern section of Soi Chamlong Sai Fai.",
+            "Water sitting in the northern section of Soi Sukhumvit 49.",
             [[[V_FAI - 4, 48], [V_FAI + 4, 48], [V_FAI + 4, 180], [V_FAI - 4, 180]]],
         ),
         poly(
             "haz-flood-soi-bon",
             0.3,
-            "Shallow water on Soi Chamlong Bon.",
+            "Shallow water on Soi Ari.",
             [[[56, H_BON - 3.6], [470, H_BON - 3.6], [470, H_BON + 3.6], [56, H_BON + 3.6]]],
         ),
     ]
