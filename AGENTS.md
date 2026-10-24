@@ -26,8 +26,8 @@ eval/rl              reward loop: graduate, recommend, demote, shadow bandit
 3. Synthetic people only. `scripts/validate.py` rejects phones, 13-digit ids, PromptPay, passport, immigration status, and bank account.
 4. Do not fetch ReliefWeb or add DDPM as a source. `ingest/reliefweb.py` sends no request.
 5. Never commit or print secrets. `.env` is gitignored. A key in an error string is a bug.
-6. Push straight to `main`. Do not open a pull request.
-7. `make test` and `make validate` stay green.
+6. Branch off `main`, open a pull request, and merge into `main` when green. Do not push feature work straight to `main`. Delete the remote branch after merge. Prefer one focused PR per change set; rebase onto `main` before merge if the tip moved.
+7. `make test` and `make validate` stay green before merge.
 8. Do not edit `frontend-prototype/` unless the task says so.
 9. The no-stub fallback outcome (`missing_evidence == ["fixture_stub"]`) never cascades.
 
@@ -87,4 +87,4 @@ Index: `docs/agents/index.json`. Read one topic file, not the whole set.
 - `make test` and `make validate` pass.
 - No decision value outside `DECIDED`. No secrets in the diff.
 - `frontend-prototype/` unchanged unless the task asked for it.
-- The commit is on `main` and has been pushed.
+- The change is on a PR into `main` (or merged), not a lone push of feature work to `main`.
