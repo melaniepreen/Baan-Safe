@@ -93,10 +93,12 @@ One-time setup, done by a person:
 ```bash
 modal token new          # once per machine; browser login
 # Put HF_TOKEN and MUBIT_API_KEY in gitignored .env (make sync creates .env from .env.example)
-make sync                # git pull, deps, Modal check, secret sync; SYNC_PUSH=1 to push main
+make sync                # download: git pull, deps, Modal check, secret sync
+make push                # send: Modal secrets + git push main
+make push MSG='summary'  # commit local work (not .env), then push
 ```
 
-`make sync` is the shared teammate path. It does not overwrite existing `.env` values. `HF_TOKEN` and `MUBIT_API_KEY` are read from Modal secrets `baansafe-hf` / `baansafe-mubit` after sync. They are not written into the image or the repo. Optional: add `S2_SERVE_API_KEY` to `.env` and re-run `make sync` or `make modal-secrets`. Paste the same value into the Mubit console as the provider key for the self-hosted OpenAI base URL. The Modal URL is `https://<workspace>--baansafe-s2-serve.modal.run/v1`.
+`make sync` / `make push` are the shared teammate path. Sync does not overwrite existing `.env` values. `HF_TOKEN` and `MUBIT_API_KEY` are read from Modal secrets `baansafe-hf` / `baansafe-mubit` after sync. They are not written into the image or the repo. Optional: add `S2_SERVE_API_KEY` to `.env` and re-run `make sync` or `make push`. Paste the same value into the Mubit console as the provider key for the self-hosted OpenAI base URL. The Modal URL is `https://<workspace>--baansafe-s2-serve.modal.run/v1`.
 
 ```bash
 export S1_GPU=cpu

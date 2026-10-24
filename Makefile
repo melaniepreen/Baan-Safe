@@ -2,7 +2,7 @@ PYTHON ?= $(shell test -x .venv/bin/python && echo .venv/bin/python || echo pyth
 export PYTHONPATH := .
 
 .PHONY: validate test replay-stubs demo-stub demo-correction-loop eval-learning sim-eval latte-bench serve ingest ingest-refresh data-report \
-	export-training sync modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune docker-build docker-run
+	export-training sync push modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune docker-build docker-run
 
 IMAGE ?= baansafe-api:local
 DATASET ?= eval/out/sft.jsonl
@@ -50,10 +50,13 @@ data-report:
 export-training:
 	$(PYTHON) -m training.export --out "$(TRAINING_OUT)"
 
-# Teammate sync: git pull, .env bootstrap, .venv + pip (root + Modal), Modal login check,
-# secret sync when keys exist. Set SYNC_PUSH=1 to push main when ahead.
+# Teammate sync (download): git pull, .env, .venv + pip, Modal check, secrets.
 sync:
 	$(PYTHON) scripts/sync_workspace.py
+
+# Opposite of sync (send): Modal secrets + git push main. Optional MSG='...' commits first.
+push:
+	$(PYTHON) scripts/push_workspace.py
 
 # Push HF_TOKEN / MUBIT_API_KEY from gitignored .env into Modal secrets. Values are not printed.
 modal-secrets:

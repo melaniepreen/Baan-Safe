@@ -37,6 +37,7 @@ make sim-eval
 make latte-bench
 make serve
 make sync
+make push
 make modal-secrets
 make modal-deploy-s1
 make modal-deploy-s2

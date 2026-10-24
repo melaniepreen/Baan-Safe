@@ -1,6 +1,6 @@
-"""Shared teammate sync: pull, env, venv deps, Modal CLI/secrets, push readiness.
+"""Shared teammate sync (download): pull, env, venv deps, Modal CLI/secrets.
 
-Never prints secret values. Does not auto-push (set SYNC_PUSH=1 to push main).
+Never prints secret values. Use `make push` to send commits and secrets.
 Does not overwrite existing .env values. Adds missing keys from .env.example.
 Uses .venv so macOS PEP 668 does not block pip.
 """
@@ -213,8 +213,9 @@ def push_readiness() -> None:
         run(["git", "push", "origin", "main"])
         print("pushed main")
     else:
-        print("tip: make sync SYNC_PUSH=1  # push main when ahead and not behind")
-        print("tip: source .venv/bin/activate  # use the synced interpreter")
+        print("tip: make push                 # send secrets + commits (opposite of sync)")
+        print("tip: make push MSG='summary'   # commit local work, then push")
+        print("tip: source .venv/bin/activate")
 
 
 def main() -> int:

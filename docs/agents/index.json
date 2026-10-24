@@ -68,7 +68,7 @@
       "title": "Modal infra",
       "summary": "Fine-tune takes one dataset per task. s1_triage uses SetFit. Other tasks use LoRA.",
       "keywords": ["modal", "gpu", "deploy", "sapling"],
-      "files": ["infra/modal/finetune_job.py", "infra/HARDWARE.md", "scripts/sync_modal_secrets.py", "scripts/sync_workspace.py"]
+      "files": ["infra/modal/finetune_job.py", "infra/HARDWARE.md", "scripts/sync_modal_secrets.py", "scripts/sync_workspace.py", "scripts/push_workspace.py"]
     },
     {
       "path": "docs/agents/config-and-decisions.md",
