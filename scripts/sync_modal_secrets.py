@@ -2,7 +2,9 @@
 
 Reads .env (or BAANSAFE_ENV), creates/updates:
   baansafe-hf    <- HF_TOKEN
-  baansafe-mubit <- MUBIT_API_KEY and optional S2_SERVE_API_KEY
+  baansafe-mubit <- MUBIT_API_KEY, MUBIT_BASE_URL, and optional S2_SERVE_API_KEY
+
+llm/client.py refuses without both Mubit values, so both are required.
 
 OPENROUTER_API_KEY is not synced. System 2 goes through Mubit.
 """
@@ -17,7 +19,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SECRET_SPECS = (
     ("baansafe-hf", ("HF_TOKEN",), ("HF_TOKEN",)),
-    ("baansafe-mubit", ("MUBIT_API_KEY",), ("MUBIT_API_KEY", "S2_SERVE_API_KEY")),
+    (
+        "baansafe-mubit",
+        ("MUBIT_API_KEY", "MUBIT_BASE_URL"),
+        ("MUBIT_API_KEY", "MUBIT_BASE_URL", "S2_SERVE_API_KEY"),
+    ),
 )
 
 

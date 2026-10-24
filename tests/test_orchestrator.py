@@ -3,7 +3,7 @@
 import httpx
 import pytest
 
-from contracts.models import Outcome, Priority, Route, System
+from contracts.models import Need, Outcome, Priority, Route, System
 from fixtures.load import load_case
 from system2 import orchestrator
 from system2.orchestrator import orchestrate, use_completer
@@ -41,6 +41,26 @@ def test_parse_reasoned_recommendation():
     assert outcome.route is Route.rescue_coordination
     assert outcome.escalate is False
     assert "Plan:" in (outcome.reasoning or "")
+
+
+def test_scalar_list_fields_are_not_split_or_rejected():
+    # Shapes nano returned on 24 Oct 2026: a string and a bool for a list.
+    text = _reply(
+        '{"priority": "P1", "route": "rescue_coordination", "needs": "rescue", '
+        '"requires_human": true, "missing_evidence": "exact address", '
+        '"next_question": null, "confidence": 0.8, "rationale": "Trapped.", '
+        '"plan": "Send a boat."}'
+    )
+    with use_completer(lambda *a, **k: text):
+        outcome = orchestrate(load_case("F10"))
+    assert outcome.outcome == "reasoned_recommendation"
+    assert outcome.missing_evidence == ["exact address"]
+    assert outcome.needs == [Need.rescue]
+    assert "1) Send a boat." in (outcome.reasoning or "")
+    flagged = _reply(text["choices"][0]["message"]["content"].replace('"exact address"', "true"))
+    with use_completer(lambda *a, **k: flagged):
+        outcome = orchestrate(load_case("F10"))
+    assert outcome.missing_evidence == ["unspecified"]
 
 
 def test_malformed_reply_falls_back():

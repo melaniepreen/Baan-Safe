@@ -22,7 +22,7 @@ Modal apps for System 1, System 2, Sapling, speech-to-text, and a finetune job. 
 - `infra/modal/sapling_gpu.py` — allows `L40S`, `A100-80GB`, `H100`, `H100!`, `H200`. Refuses `A6000` (not a Modal GPU string), `T4`, `L4`, `A10`, `A100-40GB`.
 - `infra/modal/vram.py` — footprint tables. Not a chosen model.
 - `infra/HARDWARE.md` — prices and the sizing note.
-- `infra/modal/runtime.py` — Modal secret `baansafe-mubit`, key name `MUBIT_API_KEY`. The value is not in git.
+- `infra/modal/runtime.py` — Modal secret `baansafe-mubit`, key names `MUBIT_API_KEY` and `MUBIT_BASE_URL` (`llm/client.py` refuses without both). The value is not in git.
 - `scripts/sync_modal_secrets.py` — `make modal-secrets` from gitignored `.env`.
 - `scripts/sync_workspace.py` — `make sync` (download) for both teammates: pull, `.env`, pip, Modal, secrets, push readiness.
 - `scripts/push_workspace.py` — `make push` (send): Modal secrets + `git push` main. `MSG='...'` commits first (never `.env`).
@@ -31,7 +31,7 @@ Modal apps for System 1, System 2, Sapling, speech-to-text, and a finetune job. 
 
 - `make sync` runs `scripts/sync_workspace.py`: stash + pull (ff-only, else merge), auto-resolve conflicts via `SYNC_KEEP=local|remote|manual` (default `local`), bootstrap/merge `.env` from `.env.example` without overwriting values, create/use `.venv` and `pip install` root + Modal requirements, Modal login check, then secret sync when keys exist. Exits non-zero if conflicts remain. Does not print secrets.
 - `make push` runs `scripts/push_workspace.py`: syncs Modal secrets from `.env`, optionally commits with `MSG=...` (skips `.env` / `.venv` / `.vscode`), then pushes `main`. If behind origin, runs sync first (same conflict rules).
-- `make modal-secrets` runs `scripts/sync_modal_secrets.py`: pushes `HF_TOKEN` / `MUBIT_API_KEY` (and optional `S2_SERVE_API_KEY`) from gitignored `.env` into `baansafe-hf` / `baansafe-mubit`. Does not print values. Does not sync `OPENROUTER_API_KEY`.
+- `make modal-secrets` runs `scripts/sync_modal_secrets.py`: pushes `HF_TOKEN` / `MUBIT_API_KEY` / `MUBIT_BASE_URL` (and optional `S2_SERVE_API_KEY`) from gitignored `.env` into `baansafe-hf` / `baansafe-mubit`. Does not print values. Does not sync `OPENROUTER_API_KEY`.
 - `make modal-deploy-s1`, `modal-deploy-s2`, `modal-deploy-sapling`, `modal-deploy-stt` run `modal deploy`.
 - `make modal-finetune` runs `modal run -m infra.modal.finetune_app` with `DATASET` (default `eval/out/sft.jsonl`).
 - Sapling app reads `sapling.model_id` / `SAPLING_MODEL_ID` and `sapling.gpu` / `SAPLING_GPU`. It does not fall back to `MubitLabs/banyan-sapling`.

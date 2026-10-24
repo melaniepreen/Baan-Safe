@@ -91,7 +91,7 @@ sync:
 push:
 	$(PYTHON) scripts/push_workspace.py
 
-# Push HF_TOKEN / MUBIT_API_KEY from gitignored .env into Modal secrets. Values are not printed.
+# Push HF_TOKEN / MUBIT_API_KEY / MUBIT_BASE_URL from gitignored .env into Modal secrets. Values are not printed.
 modal-secrets:
 	$(PYTHON) scripts/sync_modal_secrets.py
 

@@ -62,7 +62,7 @@ DECIDED = {
     "llm.provider_route": "mubit",
     "gateway.route_chooser": "field precheck",
     "system1.extraction_method": "rules-only",
-    "system2.orchestrator_model": "nvidia/nemotron-3.5-lightning:free",
+    "system2.orchestrator_model": "nvidia/nemotron-3-nano-30b-a3b",
     "system2.max_latency_ms": 10000,
     "correction_loop.graduation_threshold": 2,
     "correction_loop.escalation_threshold": 2,
