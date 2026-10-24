@@ -24,7 +24,7 @@ Product choices live in `config/decisions.yaml`. Readers fail loudly while a val
 
 - `require_decision(path)` returns the value or raises `DecisionRequired`.
 - `unset_decisions(paths)` returns the paths that are missing, `None`, `""`, or `TODO_HUMAN`.
-- Allowlisted today: `system2.use_banyan_sapling` `true`, `system2.sapling_scope` `aid_eligibility,denial`, `sapling.client` `stub`, `system2.hosting` `openrouter via mubit gateway`.
+- Allowlisted today: `system2.use_banyan_sapling` `true`, `system2.sapling_scope` `aid_eligibility,denial`, `sapling.client` `stub`, `system2.hosting` `openrouter via mubit gateway`, `llm.provider_route` `mubit`.
 - A new decided value needs the yaml leaf and a matching `DECIDED` entry. Validate fails if they differ.
 
 ## Invariants
@@ -37,7 +37,7 @@ Product choices live in `config/decisions.yaml`. Readers fail loudly while a val
 ## How to test
 
 - `make validate`
-- `tests/test_architecture.py` — `llm.provider_route` still blocks `complete`.
+- `tests/test_architecture.py` — `complete` still needs `system2.orchestrator_model`; OpenAI client registers the Mubit compat prefix.
 - `tests/test_modal_infra.py` — `resolve` refuses `TODO_HUMAN`.
 
 ## Common pitfalls
@@ -49,4 +49,4 @@ Product choices live in `config/decisions.yaml`. Readers fail loudly while a val
 
 ## Open TODO_HUMAN keys
 
-All leaves except the four in `DECIDED`. The groups are `system1`, `system2` (model id and `max_latency_ms`), `sapling` (except `client`), `gateway`, `memory`, `llm`, `speech_to_text`, `ui`, `data`, `policies` (`authoritative_set`), `correction_loop`, `learning_eval`, `latte_bench`, `sim` (`caller_model`, `caller_gpu`), `modal`.
+All leaves except the five in `DECIDED`. The groups are `system1`, `system2` (model id and `max_latency_ms`), `sapling` (except `client`), `gateway`, `memory`, `llm` (`token_price_usd`), `speech_to_text`, `ui`, `data`, `policies` (`authoritative_set`), `correction_loop`, `learning_eval`, `latte_bench`, `sim` (`caller_model`, `caller_gpu`), `modal`.

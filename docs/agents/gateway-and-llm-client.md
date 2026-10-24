@@ -6,6 +6,7 @@ files:
   - gateway/auth.py
   - gateway/policy.py
   - llm/client.py
+  - llm/openai_client.py
   - memory/adapter.py
   - config/routing.yaml
 ---
@@ -21,7 +22,8 @@ One turn: enrich, retrieve memory, record a policy pre-check, route to System 1 
 - `gateway/policy.py` — `precheck_notes`. Does not read medical fields or change priority.
 - `memory/adapter.py` — `MEMORY_IMPL=mock` (default) or `mubit`.
 - `memory/mubit.py` — raises. No network client yet.
-- `llm/client.py` — `complete`. Owner: Melanie wires the call.
+- `llm/client.py` — `complete` (httpx). Owner: Melanie wires the call.
+- `llm/openai_client.py` — registered OpenAI SDK client (`MUBIT_BASE_URL` + `MUBIT_API_KEY`).
 - `config/routing.yaml` — `mode: exclusive`.
 - `api/routes/endpoints.py` — `POST /triage`, `POST /cases/{id}/turns`.
 
@@ -29,7 +31,8 @@ One turn: enrich, retrieve memory, record a policy pre-check, route to System 1 
 
 - In: `CaseState`. Out of `handle`: `RouterDecision` with one `source_outcomes` entry.
 - `choose_system` returns `system_1` or `system_2`. Fixture ids use `expected.system`. That lookup is a harness stand-in, not a product rule.
-- `complete(messages, model, max_tokens)` posts to `{MUBIT_BASE_URL}/openai/v1/chat/completions` only after the host check and `llm.provider_route`.
+- `complete(messages, model, max_tokens)` posts to the Mubit chat URL only after the host check and `llm.provider_route` (`mubit`). Compat prefix `…/compat/openrouter/v1` maps to `…/chat/completions`.
+- `make_client()` returns `OpenAI(base_url=MUBIT_BASE_URL, api_key=MUBIT_API_KEY)`.
 
 ## Invariants
 
@@ -39,13 +42,14 @@ One turn: enrich, retrieve memory, record a policy pre-check, route to System 1 
 - `router/merge.py` is not called. The trace note says so.
 - `MUBIT_BASE_URL` must be `api.mubit.ai` or a subdomain of `mubit.ai`. `openrouter.ai` is refused.
 - The client does not read `OPENROUTER_API_KEY` and does not print `MUBIT_API_KEY`.
-- A set URL still does not leave the process while `llm.provider_route` is `TODO_HUMAN`.
+- `llm.provider_route` is `mubit`. Calls still need `system2.orchestrator_model` and never print the key.
 
 ## How to test
 
 - `make test` — `tests/test_gateway_and_replay.py`, `tests/test_architecture.py`.
 - `make demo-stub` — `python -m gateway`.
 - Host refusal: `tests/test_architecture.py` (`test_llm_refuses_openrouter_and_ignores_its_key`).
+- Live smoke: `python scripts/smoke_mubit.py` with `.env` set (lists models; never prints the key).
 
 ## Common pitfalls
 
@@ -59,4 +63,4 @@ One turn: enrich, retrieve memory, record a policy pre-check, route to System 1 
 - `gateway.route_chooser`
 - `gateway.auth`
 - `memory.mubit_project`, `memory.retrieval_top_k`, `memory.token_budget`
-- `llm.provider_route`, `llm.token_price_usd`
+- `llm.token_price_usd`

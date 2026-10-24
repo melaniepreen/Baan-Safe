@@ -72,7 +72,7 @@ Stub gateway flow for `/triage` and `/cases/{id}/turns`: enrich → memory throu
 
 `GET /aid/eligibility` and `POST /aid/exceptions` return HTTP 501. They do not approve a payment.
 
-LLM calls, when a human writes them, go through `llm/client.py`. That client requires `MUBIT_BASE_URL` on a `mubit.ai` host and `MUBIT_API_KEY`, and it still refuses while `llm.provider_route` is `TODO_HUMAN`. It does not print the key.
+LLM calls go through `llm/client.py` / `llm/openai_client.py`. `llm.provider_route` is `mubit`. The OpenAI SDK base is `MUBIT_BASE_URL` (compat OpenRouter prefix) with `MUBIT_API_KEY`. It does not print the key. Chat still needs `system2.orchestrator_model`.
 
 `make demo-correction-loop` runs a synthetic correction through memory, writes an SFT/LoRA JSONL file under `eval/out/` (gitignored), registers stub model versions `stub-0` and `stub-1`, and prints quality, latency, and a null cost. It does not train weights and it does not promote a rule into System 1.
 
@@ -86,7 +86,7 @@ Public sources and row counts are in `data/SOURCES.md`. Raw responses are gitign
 
 ## Infra
 
-Modal apps live in `infra/modal/`. GPU sizes and the hourly arithmetic are in `infra/HARDWARE.md`. Model ids and GPU names stay `TODO_HUMAN` in git so the apps refuse to start until a human exports them. `make validate` allowlists four decisions a human already made: the Sapling verifier is on, its scope is aid eligibility and denial, `sapling.client` is `stub`, and `system2.hosting` is `openrouter via mubit gateway`. The Nemotron model id and size stay `TODO_HUMAN`. The LLM client still refuses any host that is not Mubit. There is no OpenRouter client.
+Modal apps live in `infra/modal/`. GPU sizes and the hourly arithmetic are in `infra/HARDWARE.md`. Model ids and GPU names stay `TODO_HUMAN` in git so the apps refuse to start until a human exports them. `make validate` allowlists decided leaves including Sapling on, `sapling.client` `stub`, `system2.hosting` `openrouter via mubit gateway`, and `llm.provider_route` `mubit`. The Nemotron model id and size stay `TODO_HUMAN`. The LLM client still refuses any host that is not Mubit. There is no OpenRouter client.
 
 One-time setup, done by a person:
 

@@ -6,9 +6,8 @@ system2.hosting is OpenRouter behind that gateway. A base of
 https://api.mubit.ai/compat/openrouter/v1 is posted to as
 {base}/chat/completions. The gateway root still maps to /openai/v1.
 This module does not read OPENROUTER_API_KEY and it does not call
-openrouter.ai. It never prints the key. llm.provider_route stays
-TODO_HUMAN until a human confirms the route, so a configured URL still
-does not leave the process.
+openrouter.ai. It never prints the key. llm.provider_route is mubit.
+A call still needs system2.orchestrator_model.
 """
 
 from __future__ import annotations

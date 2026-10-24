@@ -92,12 +92,23 @@ def test_compat_openrouter_prefix_is_the_chat_url():
         chat_completions_url("https://api.mubit.ai/openai/v1/models")
 
 
-def test_llm_does_not_call_out_while_provider_route_is_unset(monkeypatch):
-    monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai")
+def test_llm_still_needs_model_after_provider_route_is_set(monkeypatch):
+    monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai/compat/openrouter/v1")
     monkeypatch.setenv("MUBIT_API_KEY", "mbt_should_not_appear")
-    with pytest.raises(DecisionRequired, match="llm.provider_route") as caught:
+    with pytest.raises(DecisionRequired, match="orchestrator_model") as caught:
         complete([{"role": "user", "content": "synthetic"}])
     assert "mbt_should_not_appear" not in str(caught.value)
+
+
+def test_openai_client_registers_compat_prefix(monkeypatch):
+    from llm.openai_client import make_client, registered_base_url
+
+    monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai/compat/openrouter/v1")
+    monkeypatch.setenv("MUBIT_API_KEY", "mbt_should_not_appear")
+    assert registered_base_url() == "https://api.mubit.ai/compat/openrouter/v1"
+    client = make_client()
+    assert str(client.base_url).rstrip("/") == "https://api.mubit.ai/compat/openrouter/v1"
+    assert "mbt_should_not_appear" not in repr(client)
 
 
 def test_aid_stubs_return_501(client):

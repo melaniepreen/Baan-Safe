@@ -5,7 +5,7 @@
       "title": "Gateway and LLM client",
       "summary": "Exclusive System 1 or System 2 route, memory adapter, and the Mubit-only chat client.",
       "keywords": ["gateway", "mubit", "llm", "routing", "memory", "auth"],
-      "files": ["gateway/route.py", "llm/client.py", "memory/adapter.py"]
+      "files": ["gateway/route.py", "llm/client.py", "llm/openai_client.py", "memory/adapter.py"]
     },
     {
       "path": "docs/agents/system1.md",
