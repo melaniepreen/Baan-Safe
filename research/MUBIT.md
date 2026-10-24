@@ -20,7 +20,7 @@ The OpenAI-compatible prefix is `https://api.mubit.ai/openai/v1`. The same host 
 - https://docs.mubit.ai/guides/connect-openai
 - https://docs.mubit.ai/reference/api
 
-The reference describes prefixes `/openai/v1`, `/anthropic`, `/gemini`, and `/compat/{service}/v1`. Keys are minted in the console and start with `mbt_`. Provider keys stay in the console. The docs say to call from a server: the API does not offer browser CORS. `llm/client.py` only posts to `{MUBIT_BASE_URL}/openai/v1/chat/completions`, and only when the host is `api.mubit.ai` or a subdomain of `mubit.ai`.
+The reference describes prefixes `/openai/v1`, `/anthropic`, `/gemini`, and `/compat/{service}/v1`. Keys are minted in the console and start with `mbt_`. Provider keys stay in the console. The docs say to call from a server: the API does not offer browser CORS. `llm/client.py` posts to `{MUBIT_BASE_URL}/openai/v1/chat/completions` when the base is the gateway root, and to `{prefix}/chat/completions` when the base is already `/openai/v1` or `/compat/{service}/v1`. The host must be `api.mubit.ai` or a subdomain of `mubit.ai`.
 
 The docs name example model ids, including ids that look like current closed models. Those names are examples on a docs page. They are not a choice for BaanSafe. `system2.orchestrator_model` stays `TODO_HUMAN`. Options are in `research/MODELS.md`.
 

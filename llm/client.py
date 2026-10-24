@@ -2,23 +2,28 @@
 
 The client refuses to run unless MUBIT_BASE_URL and MUBIT_API_KEY are set,
 and it refuses any host that is not api.mubit.ai or a subdomain of mubit.ai.
-system2.hosting is OpenRouter behind that gateway. This module does not read
-OPENROUTER_API_KEY and it does not call openrouter.ai. It never prints the
-key. llm.provider_route stays TODO_HUMAN until a human confirms the route,
-so a configured URL still does not leave the process.
+system2.hosting is OpenRouter behind that gateway. A base of
+https://api.mubit.ai/compat/openrouter/v1 is posted to as
+{base}/chat/completions. The gateway root still maps to /openai/v1.
+This module does not read OPENROUTER_API_KEY and it does not call
+openrouter.ai. It never prints the key. llm.provider_route stays
+TODO_HUMAN until a human confirms the route, so a configured URL still
+does not leave the process.
 """
 
 from __future__ import annotations
 
 import os
+import re
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 
 import httpx
 
 from config.settings import DecisionRequired, require_decision
 
 _MUBIT_HOSTS = ("api.mubit.ai",)
+_COMPAT_V1 = re.compile(r"^/compat/[A-Za-z0-9._-]+/v1$")
 
 
 def _base_url() -> str:
@@ -39,6 +44,29 @@ def _api_key() -> str:
             "Refusing the call."
         )
     return key
+
+
+def chat_completions_url(base: str) -> str:
+    """OpenAI chat URL for a Mubit gateway root or an already-versioned prefix.
+
+    `https://api.mubit.ai` becomes `.../openai/v1/chat/completions`.
+    `https://api.mubit.ai/compat/openrouter/v1` becomes
+    `.../compat/openrouter/v1/chat/completions`. A query string is dropped.
+    """
+    parsed = urlparse(base if "://" in base else f"https://{base}")
+    path = (parsed.path or "").rstrip("/")
+    if path.endswith("/chat/completions"):
+        mapped = path
+    elif path == "":
+        mapped = "/openai/v1/chat/completions"
+    elif path == "/openai/v1" or _COMPAT_V1.match(path):
+        mapped = f"{path}/chat/completions"
+    else:
+        raise RuntimeError(
+            f"MUBIT_BASE_URL path {path!r} is not the gateway root or a "
+            "Mubit OpenAI-compatible prefix."
+        )
+    return urlunparse(parsed._replace(path=mapped, params="", query="", fragment=""))
 
 
 def _require_mubit_host(base: str) -> str:
@@ -75,7 +103,7 @@ def complete(
             "config/decisions.yaml:system2.orchestrator_model is TODO_HUMAN. "
             "A human must name the model before an LLM call."
         )
-    url = f"{base}/openai/v1/chat/completions"
+    url = chat_completions_url(base)
     response = httpx.post(
         url,
         headers={
