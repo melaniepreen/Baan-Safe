@@ -1,9 +1,9 @@
 {
   "meta": {
     "id": "synthetic-operator-block",
-    "title": "Synthetic operator block",
-    "district_anchor": "Northern fixture districts (Lampang, Phrae, Nan, Phayao). data.demo_event is still TODO_HUMAN.",
-    "disclaimer": "Not a cadastral map and not one real town. Street names are placeholders in streets.json. Household location_label stays the fixture district. Plots are local metres, not home addresses. F12's blue temple and F06's north hall are the invented landmarks from the fixtures.",
+    "title": "Placeholder block for a Bangkok flood demo",
+    "district_anchor": "Fixture households stay labelled with their district (Lampang, Phrae, Nan, Phayao). data.demo_event is still TODO_HUMAN. This picture is not a Bangkok street map.",
+    "disclaimer": "Placeholder for a Bangkok flood demo, not a cadastral map and not one real town. EOS-RS eos-rs-thailand-flood-bangkok-sep-2026 is listed in data/SOURCES.md and was not fetched. Street names are placeholders in streets.json. Household location_label stays the fixture district. Plots are local metres, not home addresses. F12's blue temple and F06's north hall are the invented landmarks from the fixtures. Access lanes are synthetic links from each call house to the nearest clear street or canal.",
     "projection": "fixed isometric 2:1. x east, y south toward the camera. z up.",
     "camera": {
       "look_at": [
@@ -425,36 +425,266 @@
       },
       {
         "id": "n064",
-        "x": 324.0,
-        "y": 220.0
+        "x": 249.4,
+        "y": 353.5
       },
       {
         "id": "n065",
-        "x": 339.5,
-        "y": 220.0
+        "x": 228.0,
+        "y": 246.75
       },
       {
         "id": "n066",
-        "x": 257.0,
-        "y": 196.0
+        "x": 192.75,
+        "y": 246.75
       },
       {
         "id": "n067",
-        "x": 257.0,
-        "y": 169.0
+        "x": 308.25,
+        "y": 72.0
       },
       {
         "id": "n068",
-        "x": 17.0,
-        "y": 194.0
+        "x": 305.25,
+        "y": 33.75
       },
       {
         "id": "n069",
+        "x": 305.25,
+        "y": 42.75
+      },
+      {
+        "id": "n070",
+        "x": 308.25,
+        "y": 42.75
+      },
+      {
+        "id": "n071",
+        "x": 363.75,
+        "y": 196.0
+      },
+      {
+        "id": "n072",
+        "x": 372.75,
+        "y": 234.75
+      },
+      {
+        "id": "n073",
+        "x": 368.25,
+        "y": 234.75
+      },
+      {
+        "id": "n074",
+        "x": 368.25,
+        "y": 221.25
+      },
+      {
+        "id": "n075",
+        "x": 363.75,
+        "y": 221.25
+      },
+      {
+        "id": "n076",
+        "x": 228.0,
+        "y": 169.0
+      },
+      {
+        "id": "n077",
+        "x": 235.4,
+        "y": 169.0
+      },
+      {
+        "id": "n078",
+        "x": 48.0,
+        "y": 231.5
+      },
+      {
+        "id": "n079",
+        "x": 59.4,
+        "y": 231.5
+      },
+      {
+        "id": "n080",
+        "x": 420.0,
+        "y": 164.0
+      },
+      {
+        "id": "n081",
+        "x": 443.4,
+        "y": 164.0
+      },
+      {
+        "id": "n082",
+        "x": 132.0,
+        "y": 27.5
+      },
+      {
+        "id": "n083",
+        "x": 147.4,
+        "y": 27.5
+      },
+      {
+        "id": "n084",
         "x": 132.0,
         "y": 234.0
       },
       {
-        "id": "n070",
+        "id": "n085",
+        "x": 141.4,
+        "y": 234.0
+      },
+      {
+        "id": "n086",
+        "x": 228.0,
+        "y": 109.0
+      },
+      {
+        "id": "n087",
+        "x": 237.4,
+        "y": 109.0
+      },
+      {
+        "id": "n088",
+        "x": 173.0,
+        "y": 312.0
+      },
+      {
+        "id": "n089",
+        "x": 173.0,
+        "y": 303.6
+      },
+      {
+        "id": "n090",
+        "x": 198.75,
+        "y": 27.75
+      },
+      {
+        "id": "n091",
+        "x": 198.75,
+        "y": 32.25
+      },
+      {
+        "id": "n092",
+        "x": 48.0,
+        "y": 343.5
+      },
+      {
+        "id": "n093",
+        "x": 69.4,
+        "y": 343.5
+      },
+      {
+        "id": "n094",
+        "x": 324.0,
+        "y": 220.0
+      },
+      {
+        "id": "n095",
+        "x": 333.4,
+        "y": 220.0
+      },
+      {
+        "id": "n096",
+        "x": 132.0,
+        "y": 257.5
+      },
+      {
+        "id": "n097",
+        "x": 98.6,
+        "y": 257.5
+      },
+      {
+        "id": "n098",
+        "x": 101.25,
+        "y": 29.25
+      },
+      {
+        "id": "n099",
+        "x": 101.25,
+        "y": 27.75
+      },
+      {
+        "id": "n100",
+        "x": 377.0,
+        "y": 72.0
+      },
+      {
+        "id": "n101",
+        "x": 377.0,
+        "y": 33.6
+      },
+      {
+        "id": "n102",
+        "x": 461.0,
+        "y": 196.0
+      },
+      {
+        "id": "n103",
+        "x": 461.0,
+        "y": 235.4
+      },
+      {
+        "id": "n104",
+        "x": 365.25,
+        "y": 312.0
+      },
+      {
+        "id": "n105",
+        "x": 372.75,
+        "y": 347.25
+      },
+      {
+        "id": "n106",
+        "x": 365.25,
+        "y": 347.25
+      },
+      {
+        "id": "n107",
+        "x": 48.0,
+        "y": 194.0
+      },
+      {
+        "id": "n108",
+        "x": 26.6,
+        "y": 194.0
+      },
+      {
+        "id": "n109",
+        "x": 132.0,
+        "y": 41.25
+      },
+      {
+        "id": "n110",
+        "x": 155.25,
+        "y": 44.25
+      },
+      {
+        "id": "n111",
+        "x": 149.25,
+        "y": 44.25
+      },
+      {
+        "id": "n112",
+        "x": 149.25,
+        "y": 41.25
+      },
+      {
+        "id": "n113",
+        "x": 339.5,
+        "y": 220.0
+      },
+      {
+        "id": "n114",
+        "x": 257.0,
+        "y": 169.0
+      },
+      {
+        "id": "n115",
+        "x": 17.0,
+        "y": 194.0
+      },
+      {
+        "id": "n116",
         "x": 147.0,
         "y": 234.0
       }
@@ -532,9 +762,9 @@
         ]
       },
       {
-        "id": "e008",
-        "from": "n033",
-        "to": "n006",
+        "id": "e007",
+        "from": "n005",
+        "to": "n033",
         "street_id": "thanon-chamlong-nam-thuam",
         "length_m": 48.0,
         "depth_m": 0.45,
@@ -544,9 +774,9 @@
         ]
       },
       {
-        "id": "e009",
-        "from": "n006",
-        "to": "n034",
+        "id": "e008",
+        "from": "n033",
+        "to": "n006",
         "street_id": "thanon-chamlong-nam-thuam",
         "length_m": 48.0,
         "depth_m": 0.45,
@@ -561,18 +791,6 @@
         "to": "n007",
         "street_id": "thanon-chamlong-nam-thuam",
         "length_m": 48.0,
-        "depth_m": 0.45,
-        "modes": [
-          "foot",
-          "boat"
-        ]
-      },
-      {
-        "id": "e011",
-        "from": "n007",
-        "to": "n035",
-        "street_id": "thanon-chamlong-nam-thuam",
-        "length_m": 52.0,
         "depth_m": 0.45,
         "modes": [
           "foot",
@@ -640,33 +858,9 @@
         ]
       },
       {
-        "id": "e017",
-        "from": "n037",
-        "to": "n038",
-        "street_id": "soi-chamlong-bon",
-        "length_m": 48.0,
-        "depth_m": 0.3,
-        "modes": [
-          "foot",
-          "boat"
-        ]
-      },
-      {
         "id": "e018",
         "from": "n038",
         "to": "n039",
-        "street_id": "soi-chamlong-bon",
-        "length_m": 48.0,
-        "depth_m": 0.3,
-        "modes": [
-          "foot",
-          "boat"
-        ]
-      },
-      {
-        "id": "e019",
-        "from": "n039",
-        "to": "n012",
         "street_id": "soi-chamlong-bon",
         "length_m": 48.0,
         "depth_m": 0.3,
@@ -693,18 +887,6 @@
         "to": "n015",
         "street_id": "soi-chamlong-lang",
         "length_m": 76.0,
-        "depth_m": 0.45,
-        "modes": [
-          "foot",
-          "boat"
-        ]
-      },
-      {
-        "id": "e022",
-        "from": "n015",
-        "to": "n040",
-        "street_id": "soi-chamlong-lang",
-        "length_m": 48.0,
         "depth_m": 0.45,
         "modes": [
           "foot",
@@ -739,18 +921,6 @@
         "id": "e025",
         "from": "n041",
         "to": "n017",
-        "street_id": "soi-chamlong-lang",
-        "length_m": 48.0,
-        "depth_m": 0.45,
-        "modes": [
-          "foot",
-          "boat"
-        ]
-      },
-      {
-        "id": "e026",
-        "from": "n017",
-        "to": "n042",
         "street_id": "soi-chamlong-lang",
         "length_m": 48.0,
         "depth_m": 0.45,
@@ -820,45 +990,9 @@
         ]
       },
       {
-        "id": "e032",
-        "from": "n045",
-        "to": "n003",
-        "street_id": "soi-chamlong-khlong",
-        "length_m": 43.0,
-        "depth_m": 0.35,
-        "modes": [
-          "foot",
-          "boat"
-        ]
-      },
-      {
-        "id": "e033",
-        "from": "n003",
-        "to": "n046",
-        "street_id": "soi-chamlong-khlong",
-        "length_m": 51.0,
-        "depth_m": 0.45,
-        "modes": [
-          "foot",
-          "boat"
-        ]
-      },
-      {
         "id": "e034",
         "from": "n046",
         "to": "n047",
-        "street_id": "soi-chamlong-khlong",
-        "length_m": 51.0,
-        "depth_m": 0.45,
-        "modes": [
-          "foot",
-          "boat"
-        ]
-      },
-      {
-        "id": "e035",
-        "from": "n047",
-        "to": "n048",
         "street_id": "soi-chamlong-khlong",
         "length_m": 51.0,
         "depth_m": 0.45,
@@ -874,18 +1008,6 @@
         "street_id": "soi-chamlong-khlong",
         "length_m": 51.0,
         "depth_m": 0.45,
-        "modes": [
-          "foot",
-          "boat"
-        ]
-      },
-      {
-        "id": "e037",
-        "from": "n022",
-        "to": "n010",
-        "street_id": "soi-chamlong-wat-fa",
-        "length_m": 48.0,
-        "depth_m": 0.35,
         "modes": [
           "foot",
           "boat"
@@ -910,18 +1032,6 @@
         "street_id": "soi-chamlong-wat-fa",
         "length_m": 62.0,
         "depth_m": 0.35,
-        "modes": [
-          "foot",
-          "boat"
-        ]
-      },
-      {
-        "id": "e041",
-        "from": "n050",
-        "to": "n015",
-        "street_id": "soi-chamlong-wat-fa",
-        "length_m": 58.0,
-        "depth_m": 0.45,
         "modes": [
           "foot",
           "boat"
@@ -956,42 +1066,6 @@
         "street_id": "soi-chamlong-talat",
         "length_m": 40.0,
         "depth_m": 0.35,
-        "modes": [
-          "foot",
-          "boat"
-        ]
-      },
-      {
-        "id": "e045",
-        "from": "n011",
-        "to": "n052",
-        "street_id": "soi-chamlong-talat",
-        "length_m": 62.0,
-        "depth_m": 0.35,
-        "modes": [
-          "foot",
-          "boat"
-        ]
-      },
-      {
-        "id": "e046",
-        "from": "n052",
-        "to": "n005",
-        "street_id": "soi-chamlong-talat",
-        "length_m": 62.0,
-        "depth_m": 0.35,
-        "modes": [
-          "foot",
-          "boat"
-        ]
-      },
-      {
-        "id": "e047",
-        "from": "n005",
-        "to": "n053",
-        "street_id": "soi-chamlong-talat",
-        "length_m": 58.0,
-        "depth_m": 0.45,
         "modes": [
           "foot",
           "boat"
@@ -1081,18 +1155,6 @@
         "id": "e056",
         "from": "n012",
         "to": "n057",
-        "street_id": "soi-chamlong-fai",
-        "length_m": 62.0,
-        "depth_m": 0.35,
-        "modes": [
-          "foot",
-          "boat"
-        ]
-      },
-      {
-        "id": "e057",
-        "from": "n057",
-        "to": "n007",
         "street_id": "soi-chamlong-fai",
         "length_m": 62.0,
         "depth_m": 0.35,
@@ -1214,20 +1276,527 @@
         ]
       },
       {
-        "id": "e067",
+        "id": "e117",
+        "from": "n064",
+        "to": "n054",
+        "street_id": "lane-bldg-f15",
+        "length_m": 21.41,
+        "depth_m": 0.9,
+        "modes": [
+          "boat"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e118",
+        "from": "n005",
+        "to": "n065",
+        "street_id": "soi-chamlong-talat",
+        "length_m": 50.75,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e119",
+        "from": "n065",
+        "to": "n053",
+        "street_id": "soi-chamlong-talat",
+        "length_m": 7.25,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e120",
+        "from": "n066",
+        "to": "n065",
+        "street_id": "lane-bldg-c01-a",
+        "length_m": 35.25,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e121",
+        "from": "n037",
+        "to": "n067",
+        "street_id": "soi-chamlong-bon",
+        "length_m": 32.25,
+        "depth_m": 0.3,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e122",
+        "from": "n067",
+        "to": "n038",
+        "street_id": "soi-chamlong-bon",
+        "length_m": 15.75,
+        "depth_m": 0.3,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e123",
+        "from": "n068",
+        "to": "n069",
+        "street_id": "lane-bldg-f03",
+        "length_m": 9.0,
+        "depth_m": 0.0,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e124",
+        "from": "n069",
+        "to": "n070",
+        "street_id": "lane-bldg-f03",
+        "length_m": 3.0,
+        "depth_m": 0.0,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e125",
+        "from": "n070",
+        "to": "n067",
+        "street_id": "lane-bldg-f03",
+        "length_m": 29.25,
+        "depth_m": 0.0,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e126",
         "from": "n006",
-        "to": "n064",
+        "to": "n071",
+        "street_id": "thanon-chamlong-nam-thuam",
+        "length_m": 39.75,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e127",
+        "from": "n071",
+        "to": "n034",
+        "street_id": "thanon-chamlong-nam-thuam",
+        "length_m": 8.25,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e128",
+        "from": "n072",
+        "to": "n073",
+        "street_id": "lane-bldg-f17",
+        "length_m": 4.5,
+        "depth_m": 0.45,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e129",
+        "from": "n073",
+        "to": "n074",
+        "street_id": "lane-bldg-f17",
+        "length_m": 13.5,
+        "depth_m": 0.45,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e130",
+        "from": "n074",
+        "to": "n075",
+        "street_id": "lane-bldg-f17",
+        "length_m": 4.5,
+        "depth_m": 0.45,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e131",
+        "from": "n075",
+        "to": "n071",
+        "street_id": "lane-bldg-f17",
+        "length_m": 25.25,
+        "depth_m": 0.45,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e132",
+        "from": "n052",
+        "to": "n076",
+        "street_id": "soi-chamlong-talat",
+        "length_m": 35.0,
+        "depth_m": 0.35,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e133",
+        "from": "n076",
+        "to": "n005",
+        "street_id": "soi-chamlong-talat",
+        "length_m": 27.0,
+        "depth_m": 0.35,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e134",
+        "from": "n077",
+        "to": "n076",
+        "street_id": "lane-bldg-shelter",
+        "length_m": 7.4,
+        "depth_m": 0.35,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e135",
+        "from": "n003",
+        "to": "n078",
+        "street_id": "soi-chamlong-khlong",
+        "length_m": 35.5,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e136",
+        "from": "n078",
+        "to": "n046",
+        "street_id": "soi-chamlong-khlong",
+        "length_m": 15.5,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e137",
+        "from": "n079",
+        "to": "n078",
+        "street_id": "lane-bldg-f08",
+        "length_m": 11.4,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e138",
+        "from": "n057",
+        "to": "n080",
+        "street_id": "soi-chamlong-fai",
+        "length_m": 30.0,
+        "depth_m": 0.35,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e139",
+        "from": "n080",
+        "to": "n007",
+        "street_id": "soi-chamlong-fai",
+        "length_m": 32.0,
+        "depth_m": 0.35,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e140",
+        "from": "n081",
+        "to": "n080",
+        "street_id": "lane-bldg-f04",
+        "length_m": 23.4,
+        "depth_m": 0.0,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e141",
+        "from": "n022",
+        "to": "n082",
+        "street_id": "soi-chamlong-wat-fa",
+        "length_m": 3.5,
+        "depth_m": 0.35,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e143",
+        "from": "n083",
+        "to": "n082",
+        "street_id": "lane-bldg-f01",
+        "length_m": 15.4,
+        "depth_m": 0.0,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e144",
+        "from": "n004",
+        "to": "n084",
+        "street_id": "soi-chamlong-wat-fa",
+        "length_m": 38.0,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e145",
+        "from": "n084",
+        "to": "n050",
+        "street_id": "soi-chamlong-wat-fa",
+        "length_m": 20.0,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e146",
+        "from": "n085",
+        "to": "n084",
+        "street_id": "lane-bldg-f10",
+        "length_m": 9.4,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e147",
+        "from": "n011",
+        "to": "n086",
+        "street_id": "soi-chamlong-talat",
+        "length_m": 37.0,
+        "depth_m": 0.35,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e148",
+        "from": "n086",
+        "to": "n052",
+        "street_id": "soi-chamlong-talat",
+        "length_m": 25.0,
+        "depth_m": 0.35,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e149",
+        "from": "n087",
+        "to": "n086",
+        "street_id": "lane-bldg-school",
+        "length_m": 9.4,
+        "depth_m": 0.0,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e150",
+        "from": "n015",
+        "to": "n088",
+        "street_id": "soi-chamlong-lang",
+        "length_m": 41.0,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e151",
+        "from": "n088",
+        "to": "n040",
+        "street_id": "soi-chamlong-lang",
+        "length_m": 7.0,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e152",
+        "from": "n089",
+        "to": "n088",
+        "street_id": "lane-bldg-f12",
+        "length_m": 8.4,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e153",
+        "from": "n090",
+        "to": "n091",
+        "street_id": "lane-bldg-f13",
+        "length_m": 4.5,
+        "depth_m": 0.0,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e154",
+        "from": "n091",
+        "to": "n024",
+        "street_id": "lane-bldg-f13",
+        "length_m": 29.25,
+        "depth_m": 0.0,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e155",
+        "from": "n047",
+        "to": "n092",
+        "street_id": "soi-chamlong-khlong",
+        "length_m": 45.5,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e156",
+        "from": "n092",
+        "to": "n048",
+        "street_id": "soi-chamlong-khlong",
+        "length_m": 5.5,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e157",
+        "from": "n093",
+        "to": "n092",
+        "street_id": "lane-bldg-f14",
+        "length_m": 21.4,
+        "depth_m": 0.9,
+        "modes": [
+          "boat"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e158",
+        "from": "n006",
+        "to": "n094",
         "street_id": "soi-chamlong-ho-nuea",
         "length_m": 24.0,
         "depth_m": 0.45,
         "modes": [
           "foot",
           "boat"
-        ]
+        ],
+        "lane": false
       },
       {
-        "id": "e068",
-        "from": "n064",
+        "id": "e159",
+        "from": "n094",
         "to": "n055",
         "street_id": "soi-chamlong-ho-nuea",
         "length_m": 34.0,
@@ -1235,57 +1804,338 @@
         "modes": [
           "foot",
           "boat"
-        ]
+        ],
+        "lane": false
       },
       {
-        "id": "e069",
-        "from": "n065",
-        "to": "n064",
-        "street_id": "soi-chamlong-ho-nuea",
-        "length_m": 15.5,
+        "id": "e160",
+        "from": "n095",
+        "to": "n094",
+        "street_id": "lane-bldg-f06",
+        "length_m": 9.4,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e161",
+        "from": "n050",
+        "to": "n096",
+        "street_id": "soi-chamlong-wat-fa",
+        "length_m": 3.5,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e162",
+        "from": "n096",
+        "to": "n015",
+        "street_id": "soi-chamlong-wat-fa",
+        "length_m": 54.5,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e163",
+        "from": "n097",
+        "to": "n096",
+        "street_id": "lane-bldg-f11",
+        "length_m": 33.4,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e164",
+        "from": "n098",
+        "to": "n099",
+        "street_id": "lane-bldg-f02",
+        "length_m": 1.5,
+        "depth_m": 0.0,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e165",
+        "from": "n099",
+        "to": "n082",
+        "street_id": "lane-bldg-f02",
+        "length_m": 30.75,
+        "depth_m": 0.0,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e166",
+        "from": "n039",
+        "to": "n100",
+        "street_id": "soi-chamlong-bon",
+        "length_m": 5.0,
+        "depth_m": 0.3,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e167",
+        "from": "n100",
+        "to": "n012",
+        "street_id": "soi-chamlong-bon",
+        "length_m": 43.0,
+        "depth_m": 0.3,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e168",
+        "from": "n101",
+        "to": "n100",
+        "street_id": "lane-bldg-f05",
+        "length_m": 38.4,
+        "depth_m": 0.0,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e169",
+        "from": "n007",
+        "to": "n102",
+        "street_id": "thanon-chamlong-nam-thuam",
+        "length_m": 41.0,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e170",
+        "from": "n102",
+        "to": "n035",
+        "street_id": "thanon-chamlong-nam-thuam",
+        "length_m": 11.0,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e171",
+        "from": "n103",
+        "to": "n102",
+        "street_id": "lane-bldg-f18",
+        "length_m": 39.4,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e172",
+        "from": "n017",
+        "to": "n104",
+        "street_id": "soi-chamlong-lang",
+        "length_m": 41.25,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e173",
+        "from": "n104",
+        "to": "n042",
+        "street_id": "soi-chamlong-lang",
+        "length_m": 6.75,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e174",
+        "from": "n105",
+        "to": "n106",
+        "street_id": "lane-bldg-c01-b",
+        "length_m": 7.5,
+        "depth_m": 0.9,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e175",
+        "from": "n106",
+        "to": "n104",
+        "street_id": "lane-bldg-c01-b",
+        "length_m": 35.25,
+        "depth_m": 0.9,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e176",
+        "from": "n045",
+        "to": "n107",
+        "street_id": "soi-chamlong-khlong",
+        "length_m": 41.0,
+        "depth_m": 0.35,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e177",
+        "from": "n107",
+        "to": "n003",
+        "street_id": "soi-chamlong-khlong",
+        "length_m": 2.0,
+        "depth_m": 0.35,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e178",
+        "from": "n108",
+        "to": "n107",
+        "street_id": "lane-bldg-jetty",
+        "length_m": 21.4,
+        "depth_m": 0.45,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e179",
+        "from": "n082",
+        "to": "n109",
+        "street_id": "soi-chamlong-wat-fa",
+        "length_m": 13.75,
+        "depth_m": 0.35,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e180",
+        "from": "n109",
+        "to": "n010",
+        "street_id": "soi-chamlong-wat-fa",
+        "length_m": 30.75,
+        "depth_m": 0.35,
+        "modes": [
+          "foot",
+          "boat"
+        ],
+        "lane": false
+      },
+      {
+        "id": "e181",
+        "from": "n110",
+        "to": "n111",
+        "street_id": "lane-bldg-welfare",
+        "length_m": 6.0,
+        "depth_m": 0.0,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e182",
+        "from": "n111",
+        "to": "n112",
+        "street_id": "lane-bldg-welfare",
+        "length_m": 3.0,
+        "depth_m": 0.0,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e183",
+        "from": "n112",
+        "to": "n109",
+        "street_id": "lane-bldg-welfare",
+        "length_m": 17.25,
+        "depth_m": 0.0,
+        "modes": [
+          "foot"
+        ],
+        "lane": true
+      },
+      {
+        "id": "e117",
+        "from": "n113",
+        "to": "n095",
+        "street_id": "lane-bldg-f06",
+        "length_m": 6.1,
         "depth_m": 0.45,
         "modes": [
           "foot"
         ]
       },
       {
-        "id": "e069",
-        "from": "n005",
-        "to": "n066",
-        "street_id": "thanon-chamlong-nam-thuam",
-        "length_m": 29.0,
-        "depth_m": 0.45,
-        "modes": [
-          "foot",
-          "boat"
-        ]
-      },
-      {
-        "id": "e070",
-        "from": "n066",
-        "to": "n033",
-        "street_id": "thanon-chamlong-nam-thuam",
-        "length_m": 19.0,
-        "depth_m": 0.45,
-        "modes": [
-          "foot",
-          "boat"
-        ]
-      },
-      {
-        "id": "e071",
-        "from": "n067",
-        "to": "n066",
-        "street_id": "thanon-chamlong-nam-thuam",
-        "length_m": 27.0,
-        "depth_m": 0.45,
+        "id": "e118",
+        "from": "n114",
+        "to": "n077",
+        "street_id": "lane-bldg-shelter",
+        "length_m": 21.6,
+        "depth_m": 0.35,
         "modes": [
           "foot"
         ]
       },
       {
-        "id": "e072",
-        "from": "n068",
+        "id": "e119",
+        "from": "n115",
         "to": "n001",
         "street_id": "thanon-chamlong-nam-thuam",
         "length_m": 2.24,
@@ -1295,35 +2145,11 @@
         ]
       },
       {
-        "id": "e072",
-        "from": "n004",
-        "to": "n069",
-        "street_id": "soi-chamlong-wat-fa",
-        "length_m": 38.0,
-        "depth_m": 0.45,
-        "modes": [
-          "foot",
-          "boat"
-        ]
-      },
-      {
-        "id": "e073",
-        "from": "n069",
-        "to": "n050",
-        "street_id": "soi-chamlong-wat-fa",
-        "length_m": 20.0,
-        "depth_m": 0.45,
-        "modes": [
-          "foot",
-          "boat"
-        ]
-      },
-      {
-        "id": "e074",
-        "from": "n070",
-        "to": "n069",
-        "street_id": "soi-chamlong-wat-fa",
-        "length_m": 15.0,
+        "id": "e120",
+        "from": "n116",
+        "to": "n085",
+        "street_id": "lane-bldg-f10",
+        "length_m": 5.6,
         "depth_m": 0.45,
         "modes": [
           "boat"
@@ -1343,17 +2169,20 @@
       "mode": "foot",
       "from_building": "bldg-f06",
       "to_building": "bldg-shelter",
-      "from_node": "n065",
-      "to_node": "n067",
+      "from_node": "n113",
+      "to_node": "n114",
       "node_ids": [
-        "n065",
-        "n064",
+        "n113",
+        "n095",
+        "n094",
         "n006",
         "n033",
-        "n066",
-        "n067"
+        "n005",
+        "n076",
+        "n077",
+        "n114"
       ],
-      "length_m": 133.5,
+      "length_m": 191.5,
       "source": "mock",
       "note": "contracts.Route is the dispatch category, not a polyline. This path is the shortest allowed walk on the synthetic graph."
     },
@@ -1369,21 +2198,2370 @@
       "mode": "boat",
       "from_building": "bldg-jetty",
       "to_building": "bldg-f10",
-      "from_node": "n068",
-      "to_node": "n070",
+      "from_node": "n115",
+      "to_node": "n116",
       "node_ids": [
-        "n068",
+        "n115",
         "n001",
         "n002",
         "n003",
         "n031",
         "n004",
-        "n069",
-        "n070"
+        "n084",
+        "n085",
+        "n116"
       ],
       "length_m": 171.24,
       "source": "mock",
       "note": "contracts.Route is the dispatch category, not a polyline. This path is the shortest allowed walk on the synthetic graph."
+    }
+  ],
+  "response_routes": [
+    {
+      "id": "resp-F01-rescue",
+      "call_id": "F01",
+      "building_id": "bldg-f01",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n031",
+            "n004",
+            "n049",
+            "n010",
+            "n109",
+            "n082"
+          ]
+        },
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n082",
+            "n083"
+          ]
+        }
+      ],
+      "length_m": 291.3,
+      "note": "Preferred boat. The drawn network changes mode along this run: boat, foot."
+    },
+    {
+      "id": "resp-F01-evac",
+      "call_id": "F01",
+      "building_id": "bldg-f01",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n083",
+            "n082",
+            "n109",
+            "n010",
+            "n036",
+            "n011",
+            "n086",
+            "n052",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 260.3,
+      "note": null
+    },
+    {
+      "id": "resp-F01-welfare",
+      "call_id": "F01",
+      "building_id": "bldg-f01",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n082",
+            "n083"
+          ]
+        }
+      ],
+      "length_m": 55.4,
+      "note": null
+    },
+    {
+      "id": "resp-F01-notice",
+      "call_id": "F01",
+      "building_id": "bldg-f01",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n011",
+            "n036",
+            "n010",
+            "n109",
+            "n082",
+            "n083"
+          ]
+        }
+      ],
+      "length_m": 202.3,
+      "note": null
+    },
+    {
+      "id": "resp-F02-rescue",
+      "call_id": "F02",
+      "building_id": "bldg-f02",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n031",
+            "n004",
+            "n049",
+            "n010",
+            "n109",
+            "n082"
+          ]
+        },
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n082",
+            "n099",
+            "n098"
+          ]
+        }
+      ],
+      "length_m": 308.15,
+      "note": "Preferred boat. The drawn network changes mode along this run: boat, foot."
+    },
+    {
+      "id": "resp-F02-evac",
+      "call_id": "F02",
+      "building_id": "bldg-f02",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n098",
+            "n099",
+            "n082",
+            "n109",
+            "n010",
+            "n036",
+            "n011",
+            "n086",
+            "n052",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 277.15,
+      "note": null
+    },
+    {
+      "id": "resp-F02-welfare",
+      "call_id": "F02",
+      "building_id": "bldg-f02",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n082",
+            "n099",
+            "n098"
+          ]
+        }
+      ],
+      "length_m": 72.25,
+      "note": null
+    },
+    {
+      "id": "resp-F02-notice",
+      "call_id": "F02",
+      "building_id": "bldg-f02",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n011",
+            "n036",
+            "n010",
+            "n109",
+            "n082",
+            "n099",
+            "n098"
+          ]
+        }
+      ],
+      "length_m": 219.15,
+      "note": null
+    },
+    {
+      "id": "resp-F03-rescue",
+      "call_id": "F03",
+      "building_id": "bldg-f03",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n031",
+            "n004",
+            "n049",
+            "n010",
+            "n036",
+            "n011",
+            "n037",
+            "n067"
+          ]
+        },
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n067",
+            "n070",
+            "n069",
+            "n068"
+          ]
+        }
+      ],
+      "length_m": 448.9,
+      "note": "Preferred boat. The drawn network changes mode along this run: boat, foot."
+    },
+    {
+      "id": "resp-F03-evac",
+      "call_id": "F03",
+      "building_id": "bldg-f03",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n068",
+            "n069",
+            "n070",
+            "n067",
+            "n037",
+            "n011",
+            "n086",
+            "n052",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 225.9,
+      "note": null
+    },
+    {
+      "id": "resp-F03-welfare",
+      "call_id": "F03",
+      "building_id": "bldg-f03",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n010",
+            "n036",
+            "n011",
+            "n037",
+            "n067",
+            "n070",
+            "n069",
+            "n068"
+          ]
+        }
+      ],
+      "length_m": 274.5,
+      "note": null
+    },
+    {
+      "id": "resp-F03-notice",
+      "call_id": "F03",
+      "building_id": "bldg-f03",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n011",
+            "n037",
+            "n067",
+            "n070",
+            "n069",
+            "n068"
+          ]
+        }
+      ],
+      "length_m": 167.9,
+      "note": null
+    },
+    {
+      "id": "resp-F04-rescue",
+      "call_id": "F04",
+      "building_id": "bldg-f04",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n031",
+            "n004",
+            "n032",
+            "n005",
+            "n033",
+            "n006",
+            "n071",
+            "n034",
+            "n007",
+            "n080"
+          ]
+        },
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n080",
+            "n081"
+          ]
+        }
+      ],
+      "length_m": 450.8,
+      "note": "Preferred boat. The drawn network changes mode along this run: boat, foot."
+    },
+    {
+      "id": "resp-F04-evac",
+      "call_id": "F04",
+      "building_id": "bldg-f04",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n081",
+            "n080",
+            "n007",
+            "n034",
+            "n071",
+            "n006",
+            "n033",
+            "n005",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 281.8,
+      "note": null
+    },
+    {
+      "id": "resp-F04-welfare",
+      "call_id": "F04",
+      "building_id": "bldg-f04",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n010",
+            "n036",
+            "n011",
+            "n037",
+            "n067",
+            "n038",
+            "n039",
+            "n100",
+            "n012",
+            "n057",
+            "n080",
+            "n081"
+          ]
+        }
+      ],
+      "length_m": 460.4,
+      "note": null
+    },
+    {
+      "id": "resp-F04-notice",
+      "call_id": "F04",
+      "building_id": "bldg-f04",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n052",
+            "n076",
+            "n005",
+            "n033",
+            "n006",
+            "n071",
+            "n034",
+            "n007",
+            "n080",
+            "n081"
+          ]
+        }
+      ],
+      "length_m": 343.8,
+      "note": null
+    },
+    {
+      "id": "resp-F05-rescue",
+      "call_id": "F05",
+      "building_id": "bldg-f05",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n031",
+            "n004",
+            "n049",
+            "n010",
+            "n036",
+            "n011",
+            "n037",
+            "n067",
+            "n038",
+            "n039",
+            "n100"
+          ]
+        },
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n100",
+            "n101"
+          ]
+        }
+      ],
+      "length_m": 514.8,
+      "note": "Preferred boat. The drawn network changes mode along this run: boat, foot."
+    },
+    {
+      "id": "resp-F05-evac",
+      "call_id": "F05",
+      "building_id": "bldg-f05",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n101",
+            "n100",
+            "n039",
+            "n038",
+            "n067",
+            "n037",
+            "n011",
+            "n086",
+            "n052",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 291.8,
+      "note": null
+    },
+    {
+      "id": "resp-F05-welfare",
+      "call_id": "F05",
+      "building_id": "bldg-f05",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n010",
+            "n036",
+            "n011",
+            "n037",
+            "n067",
+            "n038",
+            "n039",
+            "n100",
+            "n101"
+          ]
+        }
+      ],
+      "length_m": 340.4,
+      "note": null
+    },
+    {
+      "id": "resp-F05-notice",
+      "call_id": "F05",
+      "building_id": "bldg-f05",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n011",
+            "n037",
+            "n067",
+            "n038",
+            "n039",
+            "n100",
+            "n101"
+          ]
+        }
+      ],
+      "length_m": 233.8,
+      "note": null
+    },
+    {
+      "id": "resp-F06-rescue",
+      "call_id": "F06",
+      "building_id": "bldg-f06",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n031",
+            "n004",
+            "n032",
+            "n005",
+            "n033",
+            "n006",
+            "n094",
+            "n095"
+          ]
+        }
+      ],
+      "length_m": 332.8,
+      "note": null
+    },
+    {
+      "id": "resp-F06-evac",
+      "call_id": "F06",
+      "building_id": "bldg-f06",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n095",
+            "n094",
+            "n006",
+            "n033",
+            "n005",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 163.8,
+      "note": null
+    },
+    {
+      "id": "resp-F06-welfare",
+      "call_id": "F06",
+      "building_id": "bldg-f06",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n010",
+            "n049",
+            "n004",
+            "n032",
+            "n005",
+            "n033",
+            "n006",
+            "n094",
+            "n095"
+          ]
+        }
+      ],
+      "length_m": 406.4,
+      "note": null
+    },
+    {
+      "id": "resp-F06-notice",
+      "call_id": "F06",
+      "building_id": "bldg-f06",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n052",
+            "n076",
+            "n005",
+            "n033",
+            "n006",
+            "n094",
+            "n095"
+          ]
+        }
+      ],
+      "length_m": 225.8,
+      "note": null
+    },
+    {
+      "id": "resp-F07-rescue",
+      "call_id": "F07",
+      "building_id": "bldg-school",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n031",
+            "n004",
+            "n032",
+            "n005",
+            "n076",
+            "n052",
+            "n086"
+          ]
+        },
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n086",
+            "n087"
+          ]
+        }
+      ],
+      "length_m": 299.8,
+      "note": "Preferred boat. The drawn network changes mode along this run: boat, foot."
+    },
+    {
+      "id": "resp-F07-evac",
+      "call_id": "F07",
+      "building_id": "bldg-school",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n052",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 76.8,
+      "note": null
+    },
+    {
+      "id": "resp-F07-welfare",
+      "call_id": "F07",
+      "building_id": "bldg-school",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n010",
+            "n036",
+            "n011",
+            "n086",
+            "n087"
+          ]
+        }
+      ],
+      "length_m": 199.4,
+      "note": null
+    },
+    {
+      "id": "resp-F07-notice",
+      "call_id": "F07",
+      "building_id": "bldg-school",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087"
+          ]
+        }
+      ],
+      "length_m": 0.0,
+      "note": null
+    },
+    {
+      "id": "resp-F08-rescue",
+      "call_id": "F08",
+      "building_id": "bldg-f08",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n078",
+            "n079"
+          ]
+        }
+      ],
+      "length_m": 70.3,
+      "note": null
+    },
+    {
+      "id": "resp-F08-evac",
+      "call_id": "F08",
+      "building_id": "bldg-f08",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n079",
+            "n078",
+            "n003",
+            "n031",
+            "n004",
+            "n032",
+            "n005",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 261.3,
+      "note": null
+    },
+    {
+      "id": "resp-F08-welfare",
+      "call_id": "F08",
+      "building_id": "bldg-f08",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n010",
+            "n049",
+            "n004",
+            "n031",
+            "n003",
+            "n078",
+            "n079"
+          ]
+        }
+      ],
+      "length_m": 311.9,
+      "note": null
+    },
+    {
+      "id": "resp-F08-notice",
+      "call_id": "F08",
+      "building_id": "bldg-f08",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n052",
+            "n076",
+            "n005",
+            "n032",
+            "n004",
+            "n031",
+            "n003",
+            "n078",
+            "n079"
+          ]
+        }
+      ],
+      "length_m": 323.3,
+      "note": null
+    },
+    {
+      "id": "resp-F09-rescue",
+      "call_id": "F09",
+      "building_id": "bldg-f08",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n078",
+            "n079"
+          ]
+        }
+      ],
+      "length_m": 70.3,
+      "note": null
+    },
+    {
+      "id": "resp-F09-evac",
+      "call_id": "F09",
+      "building_id": "bldg-f08",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n079",
+            "n078",
+            "n003",
+            "n031",
+            "n004",
+            "n032",
+            "n005",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 261.3,
+      "note": null
+    },
+    {
+      "id": "resp-F09-welfare",
+      "call_id": "F09",
+      "building_id": "bldg-f08",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n010",
+            "n049",
+            "n004",
+            "n031",
+            "n003",
+            "n078",
+            "n079"
+          ]
+        }
+      ],
+      "length_m": 311.9,
+      "note": null
+    },
+    {
+      "id": "resp-F09-notice",
+      "call_id": "F09",
+      "building_id": "bldg-f08",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n052",
+            "n076",
+            "n005",
+            "n032",
+            "n004",
+            "n031",
+            "n003",
+            "n078",
+            "n079"
+          ]
+        }
+      ],
+      "length_m": 323.3,
+      "note": null
+    },
+    {
+      "id": "resp-F10-rescue",
+      "call_id": "F10",
+      "building_id": "bldg-f10",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n031",
+            "n004",
+            "n084",
+            "n085"
+          ]
+        }
+      ],
+      "length_m": 154.8,
+      "note": null
+    },
+    {
+      "id": "resp-F10-evac",
+      "call_id": "F10",
+      "building_id": "bldg-f10",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n085",
+            "n084",
+            "n004",
+            "n032",
+            "n005",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 177.8,
+      "note": null
+    },
+    {
+      "id": "resp-F10-welfare",
+      "call_id": "F10",
+      "building_id": "bldg-f10",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n010",
+            "n049",
+            "n004",
+            "n084",
+            "n085"
+          ]
+        }
+      ],
+      "length_m": 228.4,
+      "note": null
+    },
+    {
+      "id": "resp-F10-notice",
+      "call_id": "F10",
+      "building_id": "bldg-f10",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n052",
+            "n076",
+            "n005",
+            "n032",
+            "n004",
+            "n084",
+            "n085"
+          ]
+        }
+      ],
+      "length_m": 239.8,
+      "note": null
+    },
+    {
+      "id": "resp-F11-rescue",
+      "call_id": "F11",
+      "building_id": "bldg-f11",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n031",
+            "n004",
+            "n084",
+            "n050",
+            "n096",
+            "n097"
+          ]
+        }
+      ],
+      "length_m": 202.3,
+      "note": null
+    },
+    {
+      "id": "resp-F11-evac",
+      "call_id": "F11",
+      "building_id": "bldg-f11",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n097",
+            "n096",
+            "n050",
+            "n084",
+            "n004",
+            "n032",
+            "n005",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 225.3,
+      "note": null
+    },
+    {
+      "id": "resp-F11-welfare",
+      "call_id": "F11",
+      "building_id": "bldg-f11",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n010",
+            "n049",
+            "n004",
+            "n084",
+            "n050",
+            "n096",
+            "n097"
+          ]
+        }
+      ],
+      "length_m": 275.9,
+      "note": null
+    },
+    {
+      "id": "resp-F11-notice",
+      "call_id": "F11",
+      "building_id": "bldg-f11",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n052",
+            "n076",
+            "n005",
+            "n032",
+            "n004",
+            "n084",
+            "n050",
+            "n096",
+            "n097"
+          ]
+        }
+      ],
+      "length_m": 287.3,
+      "note": null
+    },
+    {
+      "id": "resp-F12-rescue",
+      "call_id": "F12",
+      "building_id": "bldg-f12",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n031",
+            "n004",
+            "n084",
+            "n050",
+            "n096",
+            "n015",
+            "n088",
+            "n089"
+          ]
+        }
+      ],
+      "length_m": 272.8,
+      "note": null
+    },
+    {
+      "id": "resp-F12-evac",
+      "call_id": "F12",
+      "building_id": "bldg-f12",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n089",
+            "n088",
+            "n040",
+            "n016",
+            "n053",
+            "n065",
+            "n005",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 213.8,
+      "note": null
+    },
+    {
+      "id": "resp-F12-welfare",
+      "call_id": "F12",
+      "building_id": "bldg-f12",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n010",
+            "n049",
+            "n004",
+            "n084",
+            "n050",
+            "n096",
+            "n015",
+            "n088",
+            "n089"
+          ]
+        }
+      ],
+      "length_m": 346.4,
+      "note": null
+    },
+    {
+      "id": "resp-F12-notice",
+      "call_id": "F12",
+      "building_id": "bldg-f12",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n052",
+            "n076",
+            "n005",
+            "n065",
+            "n053",
+            "n016",
+            "n040",
+            "n088",
+            "n089"
+          ]
+        }
+      ],
+      "length_m": 275.8,
+      "note": null
+    },
+    {
+      "id": "resp-F13-rescue",
+      "call_id": "F13",
+      "building_id": "bldg-f13",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n031",
+            "n004",
+            "n049",
+            "n010",
+            "n036",
+            "n011",
+            "n024"
+          ]
+        },
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n024",
+            "n091",
+            "n090"
+          ]
+        }
+      ],
+      "length_m": 401.15,
+      "note": "Preferred boat. The drawn network changes mode along this run: boat, foot."
+    },
+    {
+      "id": "resp-F13-evac",
+      "call_id": "F13",
+      "building_id": "bldg-f13",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n090",
+            "n091",
+            "n024",
+            "n011",
+            "n086",
+            "n052",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 178.15,
+      "note": null
+    },
+    {
+      "id": "resp-F13-welfare",
+      "call_id": "F13",
+      "building_id": "bldg-f13",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n010",
+            "n036",
+            "n011",
+            "n024",
+            "n091",
+            "n090"
+          ]
+        }
+      ],
+      "length_m": 226.75,
+      "note": null
+    },
+    {
+      "id": "resp-F13-notice",
+      "call_id": "F13",
+      "building_id": "bldg-f13",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n011",
+            "n024",
+            "n091",
+            "n090"
+          ]
+        }
+      ],
+      "length_m": 120.15,
+      "note": null
+    },
+    {
+      "id": "resp-F14-rescue",
+      "call_id": "F14",
+      "building_id": "bldg-f14",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n078",
+            "n046",
+            "n047",
+            "n092",
+            "n093"
+          ]
+        }
+      ],
+      "length_m": 192.3,
+      "note": null
+    },
+    {
+      "id": "resp-F14-evac",
+      "call_id": "F14",
+      "building_id": "bldg-f14",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n093",
+            "n092"
+          ]
+        },
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n092",
+            "n047",
+            "n046",
+            "n078",
+            "n003",
+            "n031",
+            "n004",
+            "n032",
+            "n005",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 383.3,
+      "note": "Preferred foot. The drawn network changes mode along this run: boat, foot."
+    },
+    {
+      "id": "resp-F14-welfare",
+      "call_id": "F14",
+      "building_id": "bldg-f14",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n010",
+            "n049",
+            "n004",
+            "n031",
+            "n003",
+            "n078",
+            "n046",
+            "n047",
+            "n092"
+          ]
+        },
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n092",
+            "n093"
+          ]
+        }
+      ],
+      "length_m": 433.9,
+      "note": "Preferred foot. The drawn network changes mode along this run: foot, boat."
+    },
+    {
+      "id": "resp-F14-notice",
+      "call_id": "F14",
+      "building_id": "bldg-f14",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n052",
+            "n076",
+            "n005",
+            "n032",
+            "n004",
+            "n031",
+            "n003",
+            "n078",
+            "n046",
+            "n047",
+            "n092"
+          ]
+        },
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n092",
+            "n093"
+          ]
+        }
+      ],
+      "length_m": 445.3,
+      "note": "Preferred foot. The drawn network changes mode along this run: foot, boat."
+    },
+    {
+      "id": "resp-F15-rescue",
+      "call_id": "F15",
+      "building_id": "bldg-f15",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n031",
+            "n004",
+            "n032",
+            "n005",
+            "n065",
+            "n053",
+            "n016",
+            "n054",
+            "n064"
+          ]
+        }
+      ],
+      "length_m": 382.81,
+      "note": null
+    },
+    {
+      "id": "resp-F15-evac",
+      "call_id": "F15",
+      "building_id": "bldg-f15",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n064",
+            "n054",
+            "n016"
+          ]
+        },
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n016",
+            "n053",
+            "n065",
+            "n005",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 213.81,
+      "note": "Preferred foot. The drawn network changes mode along this run: boat, foot."
+    },
+    {
+      "id": "resp-F15-welfare",
+      "call_id": "F15",
+      "building_id": "bldg-f15",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n010",
+            "n049",
+            "n004",
+            "n032",
+            "n005",
+            "n065",
+            "n053",
+            "n016"
+          ]
+        },
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n016",
+            "n054",
+            "n064"
+          ]
+        }
+      ],
+      "length_m": 456.41,
+      "note": "Preferred foot. The drawn network changes mode along this run: foot, boat."
+    },
+    {
+      "id": "resp-F15-notice",
+      "call_id": "F15",
+      "building_id": "bldg-f15",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n052",
+            "n076",
+            "n005",
+            "n065",
+            "n053",
+            "n016"
+          ]
+        },
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n016",
+            "n054",
+            "n064"
+          ]
+        }
+      ],
+      "length_m": 275.81,
+      "note": "Preferred foot. The drawn network changes mode along this run: foot, boat."
+    },
+    {
+      "id": "resp-F16-rescue",
+      "call_id": "F16",
+      "building_id": "bldg-shelter",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n031",
+            "n004",
+            "n032",
+            "n005",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 237.8,
+      "note": null
+    },
+    {
+      "id": "resp-F16-evac",
+      "call_id": "F16",
+      "building_id": "bldg-shelter",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 0.0,
+      "note": null
+    },
+    {
+      "id": "resp-F16-welfare",
+      "call_id": "F16",
+      "building_id": "bldg-shelter",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n010",
+            "n036",
+            "n011",
+            "n086",
+            "n052",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 257.4,
+      "note": null
+    },
+    {
+      "id": "resp-F16-notice",
+      "call_id": "F16",
+      "building_id": "bldg-shelter",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n052",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 76.8,
+      "note": null
+    },
+    {
+      "id": "resp-F17-rescue",
+      "call_id": "F17",
+      "building_id": "bldg-f17",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n031",
+            "n004",
+            "n032",
+            "n005",
+            "n033",
+            "n006",
+            "n071"
+          ]
+        },
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n071",
+            "n075",
+            "n074",
+            "n073",
+            "n072"
+          ]
+        }
+      ],
+      "length_m": 386.9,
+      "note": "Preferred boat. The drawn network changes mode along this run: boat, foot."
+    },
+    {
+      "id": "resp-F17-evac",
+      "call_id": "F17",
+      "building_id": "bldg-f17",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n072",
+            "n073",
+            "n074",
+            "n075",
+            "n071",
+            "n006",
+            "n033",
+            "n005",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 217.9,
+      "note": null
+    },
+    {
+      "id": "resp-F17-welfare",
+      "call_id": "F17",
+      "building_id": "bldg-f17",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n010",
+            "n049",
+            "n004",
+            "n032",
+            "n005",
+            "n033",
+            "n006",
+            "n071",
+            "n075",
+            "n074",
+            "n073",
+            "n072"
+          ]
+        }
+      ],
+      "length_m": 460.5,
+      "note": null
+    },
+    {
+      "id": "resp-F17-notice",
+      "call_id": "F17",
+      "building_id": "bldg-f17",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n052",
+            "n076",
+            "n005",
+            "n033",
+            "n006",
+            "n071",
+            "n075",
+            "n074",
+            "n073",
+            "n072"
+          ]
+        }
+      ],
+      "length_m": 279.9,
+      "note": null
+    },
+    {
+      "id": "resp-F18-rescue",
+      "call_id": "F18",
+      "building_id": "bldg-f18",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n031",
+            "n004",
+            "n032",
+            "n005",
+            "n033",
+            "n006",
+            "n071",
+            "n034",
+            "n007",
+            "n102",
+            "n103"
+          ]
+        }
+      ],
+      "length_m": 475.8,
+      "note": null
+    },
+    {
+      "id": "resp-F18-evac",
+      "call_id": "F18",
+      "building_id": "bldg-f18",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n103",
+            "n102",
+            "n007",
+            "n034",
+            "n071",
+            "n006",
+            "n033",
+            "n005",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 306.8,
+      "note": null
+    },
+    {
+      "id": "resp-F18-welfare",
+      "call_id": "F18",
+      "building_id": "bldg-f18",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n010",
+            "n049",
+            "n004",
+            "n032",
+            "n005",
+            "n033",
+            "n006",
+            "n071",
+            "n034",
+            "n007",
+            "n102",
+            "n103"
+          ]
+        }
+      ],
+      "length_m": 549.4,
+      "note": null
+    },
+    {
+      "id": "resp-F18-notice",
+      "call_id": "F18",
+      "building_id": "bldg-f18",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n052",
+            "n076",
+            "n005",
+            "n033",
+            "n006",
+            "n071",
+            "n034",
+            "n007",
+            "n102",
+            "n103"
+          ]
+        }
+      ],
+      "length_m": 368.8,
+      "note": null
+    },
+    {
+      "id": "resp-C01-a-rescue",
+      "call_id": "C01-a",
+      "building_id": "bldg-c01-a",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n031",
+            "n004",
+            "n032",
+            "n005",
+            "n065",
+            "n066"
+          ]
+        }
+      ],
+      "length_m": 289.4,
+      "note": null
+    },
+    {
+      "id": "resp-C01-a-evac",
+      "call_id": "C01-a",
+      "building_id": "bldg-c01-a",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n066",
+            "n065",
+            "n005",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 120.4,
+      "note": null
+    },
+    {
+      "id": "resp-C01-a-welfare",
+      "call_id": "C01-a",
+      "building_id": "bldg-c01-a",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n010",
+            "n049",
+            "n004",
+            "n032",
+            "n005",
+            "n065",
+            "n066"
+          ]
+        }
+      ],
+      "length_m": 363.0,
+      "note": null
+    },
+    {
+      "id": "resp-C01-a-notice",
+      "call_id": "C01-a",
+      "building_id": "bldg-c01-a",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n052",
+            "n076",
+            "n005",
+            "n065",
+            "n066"
+          ]
+        }
+      ],
+      "length_m": 182.4,
+      "note": null
+    },
+    {
+      "id": "resp-C01-b-rescue",
+      "call_id": "C01-b",
+      "building_id": "bldg-c01-b",
+      "base_id": "bldg-jetty",
+      "role": "rescue",
+      "prefer": "boat",
+      "contract_route": "rescue_coordination",
+      "legs": [
+        {
+          "mode": "boat",
+          "node_ids": [
+            "n108",
+            "n107",
+            "n003",
+            "n031",
+            "n004",
+            "n032",
+            "n005",
+            "n033",
+            "n006",
+            "n094",
+            "n055",
+            "n017",
+            "n104"
+          ]
+        },
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n104",
+            "n106",
+            "n105"
+          ]
+        }
+      ],
+      "length_m": 499.4,
+      "note": "Preferred boat. The drawn network changes mode along this run: boat, foot."
+    },
+    {
+      "id": "resp-C01-b-evac",
+      "call_id": "C01-b",
+      "building_id": "bldg-c01-b",
+      "base_id": "bldg-shelter",
+      "role": "evac",
+      "prefer": "foot",
+      "contract_route": "shelter_placement",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n105",
+            "n106",
+            "n104",
+            "n017",
+            "n041",
+            "n016",
+            "n053",
+            "n065",
+            "n005",
+            "n076",
+            "n077"
+          ]
+        }
+      ],
+      "length_m": 330.4,
+      "note": null
+    },
+    {
+      "id": "resp-C01-b-welfare",
+      "call_id": "C01-b",
+      "building_id": "bldg-c01-b",
+      "base_id": "bldg-welfare",
+      "role": "welfare",
+      "prefer": "foot",
+      "contract_route": "welfare_distribution",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n110",
+            "n111",
+            "n112",
+            "n109",
+            "n010",
+            "n049",
+            "n004",
+            "n032",
+            "n005",
+            "n033",
+            "n006",
+            "n094",
+            "n055",
+            "n017",
+            "n104",
+            "n106",
+            "n105"
+          ]
+        }
+      ],
+      "length_m": 573.0,
+      "note": null
+    },
+    {
+      "id": "resp-C01-b-notice",
+      "call_id": "C01-b",
+      "building_id": "bldg-c01-b",
+      "base_id": "bldg-school",
+      "role": "notice",
+      "prefer": "foot",
+      "contract_route": "information_only",
+      "legs": [
+        {
+          "mode": "foot",
+          "node_ids": [
+            "n087",
+            "n086",
+            "n052",
+            "n076",
+            "n005",
+            "n033",
+            "n006",
+            "n094",
+            "n055",
+            "n017",
+            "n104",
+            "n106",
+            "n105"
+          ]
+        }
+      ],
+      "length_m": 392.4,
+      "note": null
     }
   ],
   "calls": [
@@ -1394,7 +4572,8 @@
       "building_id": "bldg-f01",
       "expected_priority": "P3",
       "expected_system": "system_1",
-      "expected_route": "welfare_distribution"
+      "expected_route": "welfare_distribution",
+      "memory": []
     },
     {
       "id": "F02",
@@ -1403,7 +4582,13 @@
       "building_id": "bldg-f02",
       "expected_priority": "P3",
       "expected_system": "system_1",
-      "expected_route": "welfare_distribution"
+      "expected_route": "welfare_distribution",
+      "memory": [
+        {
+          "kind": "similar_case",
+          "summary": "Similar same-day food request in a known district, with no danger signs, was handled as welfare."
+        }
+      ]
     },
     {
       "id": "F03",
@@ -1412,7 +4597,8 @@
       "building_id": "bldg-f03",
       "expected_priority": "P3",
       "expected_system": "system_1",
-      "expected_route": "shelter_placement"
+      "expected_route": "shelter_placement",
+      "memory": []
     },
     {
       "id": "F04",
@@ -1421,7 +4607,8 @@
       "building_id": "bldg-f04",
       "expected_priority": "P3",
       "expected_system": "system_1",
-      "expected_route": "information_only"
+      "expected_route": "information_only",
+      "memory": []
     },
     {
       "id": "F05",
@@ -1430,7 +4617,8 @@
       "building_id": "bldg-f05",
       "expected_priority": "P4",
       "expected_system": "system_1",
-      "expected_route": "information_only"
+      "expected_route": "information_only",
+      "memory": []
     },
     {
       "id": "F06",
@@ -1439,7 +4627,8 @@
       "building_id": "bldg-f06",
       "expected_priority": "P2",
       "expected_system": "system_1",
-      "expected_route": "shelter_placement"
+      "expected_route": "shelter_placement",
+      "memory": []
     },
     {
       "id": "F07",
@@ -1448,7 +4637,8 @@
       "building_id": "bldg-school",
       "expected_priority": "P4",
       "expected_system": "system_1",
-      "expected_route": "information_only"
+      "expected_route": "information_only",
+      "memory": []
     },
     {
       "id": "F08",
@@ -1457,7 +4647,8 @@
       "building_id": "bldg-f08",
       "expected_priority": "P3",
       "expected_system": "system_1",
-      "expected_route": "duplicate_merge"
+      "expected_route": "duplicate_merge",
+      "memory": []
     },
     {
       "id": "F09",
@@ -1466,7 +4657,8 @@
       "building_id": "bldg-f08",
       "expected_priority": "P3",
       "expected_system": "system_1",
-      "expected_route": "duplicate_merge"
+      "expected_route": "duplicate_merge",
+      "memory": []
     },
     {
       "id": "F10",
@@ -1475,7 +4667,13 @@
       "building_id": "bldg-f10",
       "expected_priority": "P1",
       "expected_system": "system_2",
-      "expected_route": "rescue_coordination"
+      "expected_route": "rescue_coordination",
+      "memory": [
+        {
+          "kind": "policy",
+          "summary": "Policy note: an oxygen-dependent or immobile person with rising water is a life-safety case and needs a human."
+        }
+      ]
     },
     {
       "id": "F11",
@@ -1484,7 +4682,13 @@
       "building_id": "bldg-f11",
       "expected_priority": "P1",
       "expected_system": "system_2",
-      "expected_route": "rescue_coordination"
+      "expected_route": "rescue_coordination",
+      "memory": [
+        {
+          "kind": "policy",
+          "summary": "Policy note: an oxygen-dependent or immobile person with rising water is a life-safety case and needs a human."
+        }
+      ]
     },
     {
       "id": "F12",
@@ -1493,7 +4697,13 @@
       "building_id": "bldg-f12",
       "expected_priority": "P2",
       "expected_system": "system_2",
-      "expected_route": "rescue_coordination"
+      "expected_route": "rescue_coordination",
+      "memory": [
+        {
+          "kind": "prior_failure",
+          "summary": "A previous vague-landmark case was closed as information-only and the team could not find the household. Ask for a district before closing."
+        }
+      ]
     },
     {
       "id": "F13",
@@ -1502,7 +4712,8 @@
       "building_id": "bldg-f13",
       "expected_priority": "P3",
       "expected_system": "system_2",
-      "expected_route": "shelter_placement"
+      "expected_route": "shelter_placement",
+      "memory": []
     },
     {
       "id": "F14",
@@ -1511,7 +4722,8 @@
       "building_id": "bldg-f14",
       "expected_priority": "P2",
       "expected_system": "system_2",
-      "expected_route": "rescue_coordination"
+      "expected_route": "rescue_coordination",
+      "memory": []
     },
     {
       "id": "F15",
@@ -1520,7 +4732,8 @@
       "building_id": "bldg-f15",
       "expected_priority": "P2",
       "expected_system": "system_2",
-      "expected_route": "supervisor_escalation"
+      "expected_route": "supervisor_escalation",
+      "memory": []
     },
     {
       "id": "F16",
@@ -1529,7 +4742,8 @@
       "building_id": "bldg-shelter",
       "expected_priority": "P2",
       "expected_system": "system_2",
-      "expected_route": "supervisor_escalation"
+      "expected_route": "supervisor_escalation",
+      "memory": []
     },
     {
       "id": "F17",
@@ -1538,7 +4752,8 @@
       "building_id": "bldg-f17",
       "expected_priority": "P3",
       "expected_system": "system_2",
-      "expected_route": "aid_caseworker"
+      "expected_route": "aid_caseworker",
+      "memory": []
     },
     {
       "id": "F18",
@@ -1547,7 +4762,8 @@
       "building_id": "bldg-f18",
       "expected_priority": "P3",
       "expected_system": "system_2",
-      "expected_route": "aid_caseworker"
+      "expected_route": "aid_caseworker",
+      "memory": []
     },
     {
       "id": "C01-a",
@@ -1556,7 +4772,13 @@
       "building_id": "bldg-c01-a",
       "expected_priority": "P1",
       "expected_system": "system_2",
-      "expected_route": "rescue_coordination"
+      "expected_route": "rescue_coordination",
+      "memory": [
+        {
+          "kind": "similar_case",
+          "summary": "A similar water request was once treated as welfare. That outcome was later corrected."
+        }
+      ]
     },
     {
       "id": "C01-b",
@@ -1565,7 +4787,13 @@
       "building_id": "bldg-c01-b",
       "expected_priority": "P1",
       "expected_system": "system_2",
-      "expected_route": "rescue_coordination"
+      "expected_route": "rescue_coordination",
+      "memory": [
+        {
+          "kind": "correction",
+          "summary": "Correction from C01-a: water at the door, plus a ground-floor flat, plus an elderly resident, is P1 rescue, not P3 welfare."
+        }
+      ]
     }
   ],
   "buildings": [

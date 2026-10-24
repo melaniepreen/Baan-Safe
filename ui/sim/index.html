@@ -11,23 +11,37 @@
   <div id="scene"></div>
 
   <header class="wordmark">
-    <p class="kicker">Baan-Safe / town block</p>
+    <p class="kicker">Baan-Safe / Bangkok flood demo</p>
     <div class="wordmark-actions">
       <button type="button" id="view-dispatch">Dispatch frame</button>
       <button type="button" id="view-fit">See the whole block</button>
     </div>
   </header>
 
-  <aside id="calls" aria-label="Simulated calls">
-    <p class="kicker">20 calls</p>
-    <div class="wordmark-actions">
-      <button type="button" id="calls-play">Play 20 calls</button>
-      <button type="button" id="calls-step">Step</button>
-      <button type="button" id="calls-reset">Reset</button>
+  <aside id="phone" aria-label="Caller phone">
+    <div class="phone-top">
+      <p class="kicker">Phone</p>
+      <p id="phone-status">Idle</p>
     </div>
-    <div id="priority-legend" class="legend"></div>
-    <div id="mubit-readout" class="mubit-readout"></div>
-    <ol id="call-list"></ol>
+    <p id="chooser-note" class="demo-note">DEMO-ONLY chooser. It lives in this page. gateway.route_chooser is still TODO_HUMAN.</p>
+    <div id="presets" class="preset-row"></div>
+    <div id="phone-log" aria-live="polite"></div>
+    <div class="phone-controls">
+      <button type="button" id="phone-record">Call</button>
+      <form id="phone-form">
+        <input id="phone-input" type="text" maxlength="400" placeholder="Type what the caller says" autocomplete="off" />
+        <button type="submit">Send</button>
+      </form>
+      <div class="wordmark-actions">
+        <button type="button" id="calls-play">Play 20 calls</button>
+        <button type="button" id="calls-step">Step</button>
+        <button type="button" id="calls-reset">Reset</button>
+      </div>
+    </div>
+    <details id="scripted">
+      <summary>20 scripted calls</summary>
+      <ol id="call-list"></ol>
+    </details>
   </aside>
 
   <div id="mubit-node">Mubit</div>
@@ -37,12 +51,15 @@
     <g id="link-dots"></g>
   </svg>
 
-  <aside id="inspector" aria-live="polite">
-    <p class="kicker">Inspect</p>
-    <h1>Household</h1>
-    <div id="route-toggles" class="route-toggles"></div>
+  <aside id="backend" aria-label="Backend path">
+    <p class="kicker">Backend</p>
+    <h1>This call</h1>
+    <ol id="flow"></ol>
+    <div id="priority-actions" class="priority-actions"></div>
+    <div id="priority-legend" class="legend"></div>
+    <div id="backend-log"></div>
+    <div id="correct-host"></div>
     <p class="loading" id="loading">Loading town data…</p>
-    <div id="panel" hidden></div>
   </aside>
 
   <section class="block-map" aria-label="Block map">
@@ -51,10 +68,7 @@
       <span id="cam-note">Camera fixed</span>
     </div>
     <canvas id="minimap" width="220" height="132"></canvas>
-    <label class="slider">
-      <span>Flood</span>
-      <input id="flood-opacity" type="range" min="0" max="100" value="82" />
-    </label>
+    <p id="flood-note" class="stat">Flood rises to the depths in flood.json.</p>
     <div class="legend">
       <span><i class="swatch roof-red"></i>red</span>
       <span><i class="swatch roof-blue"></i>blue</span>

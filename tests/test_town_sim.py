@@ -148,6 +148,77 @@ def test_twenty_calls_link_fixtures_to_buildings():
     page = (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
     assert 'id="calls-play"' in page
     assert "Mubit" in page
+    assert 'id="phone"' in page
+    assert 'id="phone-record"' in page
+    assert 'id="backend"' in page
+    assert 'id="flow"' in page
+    assert 'id="inspector"' not in page
+    assert "flood-opacity" not in page
+    source = (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
+    assert "DEMO-ONLY" in source
+    assert "gateway.route_chooser" in source
+    assert "Web Speech API" in source
+    assert "/stt/transcribe" in source
+
+
+def _inside(building: dict, x: float, y: float) -> bool:
+    return building["x"] + 0.15 < x < building["x"] + building["w"] - 0.15 and building["y"] + 0.15 < y < building["y"] + building["d"] - 0.15
+
+
+def test_response_routes_stay_on_drawn_links():
+    town = _load("town.json")
+    nodes = {node["id"]: node for node in town["graph"]["nodes"]}
+    edges = town["graph"]["edges"]
+    calls = {call["id"]: call for call in town["calls"]}
+    found = {(route["call_id"], route["role"]) for route in town["response_routes"]}
+    for call_id in calls:
+        assert {(call_id, role) for role in ("rescue", "evac", "welfare", "notice")} <= found
+    for route in town["response_routes"]:
+        assert Route(route["contract_route"])
+        assert route["building_id"] == calls[route["call_id"]]["building_id"]
+        assert route["legs"]
+        for leg in route["legs"]:
+            assert leg["mode"] in {"foot", "boat", "road"}
+            nodes_on_leg = leg["node_ids"]
+            assert nodes_on_leg
+            for left, right in zip(nodes_on_leg, nodes_on_leg[1:]):
+                assert any(
+                    leg["mode"] in edge["modes"] and {edge["from"], edge["to"]} == {left, right}
+                    for edge in edges
+                ), route["id"]
+    for edge in edges:
+        if not edge.get("lane"):
+            continue
+        a, b = nodes[edge["from"]], nodes[edge["to"]]
+        steps = max(3, int(edge["length_m"] / 1.5))
+        for step in range(steps + 1):
+            t = step / steps
+            x = a["x"] + (b["x"] - a["x"]) * t
+            y = a["y"] + (b["y"] - a["y"]) * t
+            for building in town["buildings"]:
+                assert not _inside(building, x, y), (edge["id"], building["id"])
+    rescue = next(route for route in town["response_routes"] if route["call_id"] == "F10" and route["role"] == "rescue")
+    assert any(leg["mode"] == "boat" for leg in rescue["legs"])
+    welfare = next(route for route in town["response_routes"] if route["call_id"] == "F02" and route["role"] == "welfare")
+    assert any(leg["mode"] == "foot" for leg in welfare["legs"])
+
+
+def test_response_copy_separates_policy_from_suggestion():
+    body = _load("responses.json")
+    assert body["policy_source"] == "config/priorities.yaml"
+    assert "not repo policy" in body["suggestion_label"].lower() or "not repo policy" in body["suggestion_label"]
+    assert body["suggestion_source"] == "research/thai-flood-management.md"
+    blob = json.dumps(body).lower()
+    assert "baht" not in blob
+    assert "฿" not in blob
+    for priority in ("P1", "P2", "P3", "P4"):
+        row = body["priorities"][priority]
+        assert row["policy"]
+        assert row["suggestion"]
+        assert row["policy"] != row["suggestion"]
+    decisions = (ROOT / "config" / "decisions.yaml").read_text(encoding="utf-8")
+    assert "route_chooser: TODO_HUMAN" in decisions
+    assert "sapling_scope: aid_eligibility,denial" in decisions
 
 
 def test_renderer_is_pixi_and_vendored():
@@ -173,7 +244,7 @@ def _strings(value):
 
 
 def test_town_files_do_not_look_like_personal_data():
-    for name in ("town.json", "streets.json", "flood.json"):
+    for name in ("town.json", "streets.json", "flood.json", "responses.json"):
         body = _load(name)
         for text in _strings(body):
             assert PHONE.search(text) is None, text

@@ -1,5 +1,5 @@
 {
-  "note": "Not a cadastral map and not one real town. Street names are placeholders in streets.json. Household location_label stays the fixture district. Plots are local metres, not home addresses. F12's blue temple and F06's north hall are the invented landmarks from the fixtures.",
+  "note": "Placeholder for a Bangkok flood demo, not a cadastral map and not one real town. EOS-RS eos-rs-thailand-flood-bangkok-sep-2026 is listed in data/SOURCES.md and was not fetched. Street names are placeholders in streets.json. Household location_label stays the fixture district. Plots are local metres, not home addresses. F12's blue temple and F06's north hall are the invented landmarks from the fixtures. Access lanes are synthetic links from each call house to the nearest clear street or canal.",
   "streets": [
     {
       "id": "thanon-chamlong-nam-thuam",

@@ -26,6 +26,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DATA = Path(__file__).resolve().parent / "data"
 FIXTURES = ROOT / "fixtures" / "scenarios"
 MOCKS = ROOT / "mocks" / "resources.json"
+MEMORY = ROOT / "mocks" / "memory_context"
 
 # Vertical road centers (x) and horizontal road centers (y). y grows south.
 # Soi Ho Nuea exists only south of the main road so the school can be one long block.
@@ -641,6 +642,14 @@ def attach_call(building: dict, fixture_id: str, summaries: dict[str, dict]) -> 
     building["landmark"] = True
 
 
+def memory_lines(fixture_id: str) -> list[dict]:
+    path = MEMORY / f"{fixture_id}.json"
+    if not path.exists():
+        return []
+    rows = json.loads(path.read_text(encoding="utf-8"))
+    return [{"kind": row.get("kind"), "summary": row.get("summary")} for row in rows]
+
+
 def build_calls(ids: list[str], summaries: dict[str, dict], buildings: list[dict]) -> list[dict]:
     by_fixture: dict[str, str] = {}
     for building in buildings:
@@ -662,6 +671,7 @@ def build_calls(ids: list[str], summaries: dict[str, dict], buildings: list[dict
                 "expected_priority": summary["expected_priority"],
                 "expected_system": summary["expected_system"],
                 "expected_route": summary["expected_route"],
+                "memory": memory_lines(fixture_id),
             }
         )
     return calls
@@ -1024,6 +1034,7 @@ def insert_anchor(graph: dict, x: float, y: float, modes: list[str]) -> str:
                 }
             )
             serial += 1
+            graph["_edge_seq"] = serial
 
         link(a, split_id, px, py)
         link({"id": split_id, "x": r2(px), "y": r2(py)}, b["id"], b["x"], b["y"])
@@ -1092,6 +1103,434 @@ def path_length(graph: dict, node_ids: list[str]) -> float:
 
 def centroid(building: dict) -> tuple[float, float]:
     return building["x"] + building["w"] / 2, building["y"] + building["d"] / 2
+
+
+def _interior(building: dict, x: float, y: float, pad: float = 0.05) -> bool:
+    return (
+        building["x"] + pad < x < building["x"] + building["w"] - pad
+        and building["y"] + pad < y < building["y"] + building["d"] - pad
+    )
+
+
+def _hits_others(buildings: list[dict], x1: float, y1: float, x2: float, y2: float, ignore_id: str) -> bool:
+    steps = max(4, int((((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5) / 1.5))
+    for step in range(1, steps):
+        t = step / steps
+        x = x1 + (x2 - x1) * t
+        y = y1 + (y2 - y1) * t
+        for building in buildings:
+            if building["id"] == ignore_id:
+                continue
+            if _interior(building, x, y, 0.05):
+                return True
+    return False
+
+
+def _on_street(x: float, y: float, streets: list[dict], slack: float = 1.2) -> bool:
+    for street in streets:
+        half = street["width_m"] / 2 + slack
+        if street["axis"] == "h":
+            if street["start"] - 0.5 <= x <= street["end"] + 0.5 and abs(y - street["fixed"]) <= half:
+                return True
+        elif street["start"] - 0.5 <= y <= street["end"] + 0.5 and abs(x - street["fixed"]) <= half:
+            return True
+    return False
+
+
+def join_street(graph: dict, x: float, y: float) -> str:
+    """Split the nearest street edge at (x, y) and return that node. No driveway."""
+    edge, px, py = closest_on_edges(x, y, graph, {"foot", "road", "boat"})
+    by_id = {row["id"]: row for row in graph["nodes"]}
+    a = by_id[edge["from"]]
+    b = by_id[edge["to"]]
+
+    def nearest_end(node: dict) -> bool:
+        return (node["x"] - px) ** 2 + (node["y"] - py) ** 2 <= 1.0
+
+    if nearest_end(a):
+        return a["id"]
+    if nearest_end(b):
+        return b["id"]
+    split_id = f"n{len(graph['nodes']) + 1:03d}"
+    graph["nodes"].append({"id": split_id, "x": r2(px), "y": r2(py)})
+    graph["edges"] = [row for row in graph["edges"] if row["id"] != edge["id"]]
+    serial = graph.setdefault("_edge_seq", len(graph["edges"]) + 50)
+
+    def link(start: dict, end_id: str, end_x: float, end_y: float) -> None:
+        nonlocal serial
+        length = ((start["x"] - end_x) ** 2 + (start["y"] - end_y) ** 2) ** 0.5
+        if length < 0.4:
+            return
+        graph["edges"].append(
+            {
+                "id": f"e{serial:03d}",
+                "from": start["id"],
+                "to": end_id,
+                "street_id": edge["street_id"],
+                "length_m": r2(length),
+                "depth_m": edge["depth_m"],
+                "modes": list(edge["modes"]),
+                "lane": False,
+            }
+        )
+        serial += 1
+
+    link(a, split_id, px, py)
+    link({"id": split_id, "x": r2(px), "y": r2(py)}, b["id"], b["x"], b["y"])
+    graph["_edge_seq"] = serial
+    return split_id
+
+
+def _add_node(graph: dict, x: float, y: float) -> str:
+    for node in graph["nodes"]:
+        if abs(node["x"] - x) < 0.35 and abs(node["y"] - y) < 0.35:
+            return node["id"]
+    node_id = f"n{len(graph['nodes']) + 1:03d}"
+    graph["nodes"].append({"id": node_id, "x": r2(x), "y": r2(y)})
+    return node_id
+
+
+def _add_edge(graph: dict, start: str, end: str, modes: list[str], lane: bool, depth: float, street_id: str) -> None:
+    if start == end:
+        return
+    for edge in graph["edges"]:
+        if {edge["from"], edge["to"]} == {start, end}:
+            return
+    by_id = {row["id"]: row for row in graph["nodes"]}
+    a, b = by_id[start], by_id[end]
+    length = ((a["x"] - b["x"]) ** 2 + (a["y"] - b["y"]) ** 2) ** 0.5
+    if length < 0.3:
+        return
+    serial = graph.setdefault("_edge_seq", len(graph["edges"]) + 50)
+    graph["_edge_seq"] = serial + 1
+    graph["edges"].append(
+        {
+            "id": f"e{serial:03d}",
+            "from": start,
+            "to": end,
+            "street_id": street_id,
+            "length_m": r2(length),
+            "depth_m": r2(depth),
+            "modes": modes,
+            "lane": lane,
+        }
+    )
+
+
+def _straight_access(building: dict, buildings: list[dict], streets: list[dict]) -> list[tuple[float, float]] | None:
+    """A single clear segment from the frontage to a street centerline."""
+    cx, cy = centroid(building)
+    best = None
+    best_len = 1e18
+    for street in streets:
+        if street["axis"] == "h":
+            if not (street["start"] <= cx <= street["end"]):
+                continue
+            px, py = cx, street["fixed"]
+        else:
+            if not (street["start"] <= cy <= street["end"]):
+                continue
+            px, py = street["fixed"], cy
+        door_x = min(max(px, building["x"]), building["x"] + building["w"])
+        door_y = min(max(py, building["y"]), building["y"] + building["d"])
+        # Step just outside the footprint, toward the street.
+        if abs(door_y - building["y"]) < 0.08:
+            door_y -= 0.6
+        elif abs(door_y - (building["y"] + building["d"])) < 0.08:
+            door_y += 0.6
+        elif abs(door_x - building["x"]) < 0.08:
+            door_x -= 0.6
+        elif abs(door_x - (building["x"] + building["w"])) < 0.08:
+            door_x += 0.6
+        length = ((door_x - px) ** 2 + (door_y - py) ** 2) ** 0.5
+        if length < 0.8 or length > 48 or length >= best_len:
+            continue
+        if _hits_others(buildings, door_x, door_y, px, py, building["id"]):
+            continue
+        if _interior(building, (door_x + px) / 2, (door_y + py) / 2, -0.2):
+            continue
+        best = [(r2(door_x), r2(door_y)), (r2(px), r2(py))]
+        best_len = length
+    return best
+
+
+def _astar_access(building: dict, buildings: list[dict], streets: list[dict]) -> list[tuple[float, float]] | None:
+    cell = 1.5
+    cols = int(540 / cell)
+    rows = int(420 / cell)
+
+    def blocked(i: int, j: int) -> bool:
+        if i < 0 or j < 0 or i >= cols or j >= rows:
+            return True
+        x, y = (i + 0.5) * cell, (j + 0.5) * cell
+        if _on_street(x, y, streets, 0.4):
+            return False
+        for other in buildings:
+            if _interior(other, x, y, 0.02):
+                return True
+        return False
+
+    cx, cy = centroid(building)
+    starts = []
+    for x, y in (
+        (cx, building["y"] - 1.1),
+        (cx, building["y"] + building["d"] + 1.1),
+        (building["x"] - 1.1, cy),
+        (building["x"] + building["w"] + 1.1, cy),
+    ):
+        i, j = int(x / cell), int(y / cell)
+        if not blocked(i, j):
+            starts.append((i, j))
+    if not starts:
+        return None
+    import heapq
+
+    heap = []
+    prev: dict[tuple[int, int], tuple[int, int]] = {}
+    cost = {}
+    for start in starts:
+        heapq.heappush(heap, (0, start[0], start[1]))
+        cost[start] = 0
+    found = None
+    seen = 0
+    while heap and seen < 20000:
+        so_far, i, j = heapq.heappop(heap)
+        if cost.get((i, j)) != so_far:
+            continue
+        seen += 1
+        x, y = (i + 0.5) * cell, (j + 0.5) * cell
+        if _on_street(x, y, streets, 0.2) and (i, j) not in starts:
+            found = (i, j)
+            break
+        for di, dj in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            nxt = (i + di, j + dj)
+            if blocked(*nxt):
+                continue
+            nx, ny = (nxt[0] + 0.5) * cell, (nxt[1] + 0.5) * cell
+            step = 1 if _on_street(nx, ny, streets, 0.4) else 6
+            candidate = so_far + step
+            if candidate < cost.get(nxt, 1e18):
+                cost[nxt] = candidate
+                prev[nxt] = (i, j)
+                heapq.heappush(heap, (candidate, nxt[0], nxt[1]))
+    if found is None:
+        return None
+    cells = [found]
+    while cells[-1] not in starts and cells[-1] in prev:
+        cells.append(prev[cells[-1]])
+    cells.reverse()
+    points = [((i + 0.5) * cell, (j + 0.5) * cell) for i, j in cells]
+    simple = [points[0]]
+    for point in points[1:]:
+        if len(simple) >= 2:
+            ax, ay = simple[-2]
+            bx, by = simple[-1]
+            if (abs(ax - bx) < 0.2 and abs(bx - point[0]) < 0.2) or (
+                abs(ay - by) < 0.2 and abs(by - point[1]) < 0.2
+            ):
+                simple[-1] = point
+                continue
+        simple.append(point)
+    return [(r2(x), r2(y)) for x, y in simple]
+
+
+def link_building(graph: dict, building: dict, buildings: list[dict], streets: list[dict], flood: dict) -> str:
+    """Connect a frontage to the street graph. Returns the door node."""
+    cached = graph.setdefault("_doors", {})
+    if building["id"] in cached:
+        return cached[building["id"]]
+    points = _straight_access(building, buildings, streets) or _astar_access(building, buildings, streets)
+    if not points:
+        raise SystemExit(f"no clear access lane for {building['id']}")
+    street_node = join_street(graph, points[-1][0], points[-1][1])
+    door = _add_node(graph, points[0][0], points[0][1])
+    previous = door
+    street_id = "lane-" + building["id"]
+    for x, y in points[1:-1]:
+        nxt = _add_node(graph, x, y)
+        depth = depth_at((x + points[0][0]) / 2, (y + points[0][1]) / 2, flood["features"])
+        _add_edge(graph, previous, nxt, ["foot"], True, depth, street_id)
+        previous = nxt
+    end_x, end_y = points[-1]
+    by_id = {row["id"]: row for row in graph["nodes"]}
+    landing = by_id[street_node]
+    depth = depth_at((points[0][0] + end_x) / 2, (points[0][1] + end_y) / 2, flood["features"])
+    straight = len(points) == 2
+    clear = straight and not _hits_others(buildings, points[0][0], points[0][1], end_x, end_y, building["id"])
+    modes = ["foot"]
+    if depth < 0.85:
+        modes = ["foot"]
+    elif clear and depth >= 0.25:
+        modes = ["boat"]
+    else:
+        modes = ["foot"]
+    if depth >= 0.25 and clear and depth < 0.85:
+        modes = ["foot", "boat"]
+    _add_edge(graph, previous, street_node, modes, True, depth, street_id)
+    # Keep the stored door on the frontage even if the street node is the start.
+    if abs(landing["x"] - points[0][0]) < 0.4 and abs(landing["y"] - points[0][1]) < 0.4:
+        door = street_node
+    cached[building["id"]] = door
+    return door
+
+
+def _incident_modes(graph: dict, node_id: str) -> set[str]:
+    modes: set[str] = set()
+    for edge in graph["edges"]:
+        if node_id in (edge["from"], edge["to"]):
+            modes.update(edge["modes"])
+    return modes
+
+
+def _edge_mode(edge: dict, prefer: str) -> str:
+    if prefer in edge["modes"]:
+        return prefer
+    for mode in ("foot", "road", "boat"):
+        if mode in edge["modes"]:
+            return mode
+    return edge["modes"][0]
+
+
+def _multimodal(graph: dict, start: str, goal: str, prefer: str) -> list[dict] | None:
+    """Shortest path that may change mode where the drawn edge changes mode."""
+    if start == goal:
+        return [{"mode": prefer, "node_ids": [start]}]
+    import heapq
+
+    adj: dict[str, list[tuple[str, float, str]]] = {row["id"]: [] for row in graph["nodes"]}
+    for edge in graph["edges"]:
+        if not edge["modes"]:
+            continue
+        mode = _edge_mode(edge, prefer)
+        adj[edge["from"]].append((edge["to"], edge["length_m"], mode))
+        adj[edge["to"]].append((edge["from"], edge["length_m"], mode))
+    dist = {start: 0.0}
+    prev: dict[str, tuple[str, str]] = {}
+    heap = [(0.0, start)]
+    while heap:
+        so_far, current = heapq.heappop(heap)
+        if current == goal:
+            break
+        if so_far != dist.get(current):
+            continue
+        for nxt, weight, mode in adj[current]:
+            candidate = so_far + weight
+            if candidate < dist.get(nxt, 1e18):
+                dist[nxt] = candidate
+                prev[nxt] = (current, mode)
+                heapq.heappush(heap, (candidate, nxt))
+    if goal not in dist:
+        return None
+    nodes = [goal]
+    modes = []
+    while nodes[-1] != start:
+        earlier, mode = prev[nodes[-1]]
+        modes.append(mode)
+        nodes.append(earlier)
+    nodes.reverse()
+    modes.reverse()
+    legs = []
+    bucket = [nodes[0]]
+    current = modes[0] if modes else prefer
+    for node, mode in zip(nodes[1:], modes):
+        if mode != current:
+            legs.append({"mode": current, "node_ids": bucket})
+            bucket = [bucket[-1], node]
+            current = mode
+        else:
+            bucket.append(node)
+    legs.append({"mode": current, "node_ids": bucket})
+    return legs
+
+
+def _legs(graph: dict, origin: str, dest: str, prefer: str) -> tuple[list[dict], str | None]:
+    legs = _multimodal(graph, origin, dest, prefer)
+    if not legs:
+        return [], "No connected path on the drawn roads or water."
+    used = {leg["mode"] for leg in legs}
+    note = None
+    if used != {prefer}:
+        note = (
+            f"Preferred {prefer}. The drawn network changes mode along this run: "
+            + ", ".join(leg["mode"] for leg in legs)
+            + "."
+        )
+    return legs, note
+
+
+def build_response_routes(
+    graph: dict,
+    buildings: dict[str, dict],
+    calls: list[dict],
+    streets: list[dict],
+    flood: dict,
+) -> list[dict]:
+    """One drawn path per call from the depot that priority uses.
+
+    Rescue prefers the jetty by boat. Evacuation and welfare prefer foot,
+    and use a flooded street only when that street is the connected mode.
+    """
+    bases = {
+        "rescue": "bldg-jetty",
+        "evac": "bldg-shelter",
+        "welfare": "bldg-welfare",
+        "notice": "bldg-school",
+    }
+    roles = {
+        "rescue": ("bldg-jetty", "boat", "rescue_coordination"),
+        "evac": ("bldg-shelter", "foot", "shelter_placement"),
+        "welfare": ("bldg-welfare", "foot", "welfare_distribution"),
+        "notice": ("bldg-school", "foot", "information_only"),
+    }
+    all_buildings = list(buildings.values())
+    doors = {}
+    for building_id in {call["building_id"] for call in calls} | set(bases.values()):
+        doors[building_id] = link_building(graph, buildings[building_id], all_buildings, streets, flood)
+    routes = []
+    seen = set()
+    for call in calls:
+        for role, (base_id, prefer, contract) in roles.items():
+            key = (call["building_id"], role)
+            if key in seen:
+                # Second call on the same house (F09) reuses the geometry.
+                previous = next(row for row in routes if row["building_id"] == call["building_id"] and row["role"] == role)
+                routes.append({**previous, "id": f"resp-{call['id']}-{role}", "call_id": call["id"]})
+                continue
+            seen.add(key)
+            origin = doors[base_id]
+            dest = doors[call["building_id"]]
+            # Rescue and supply run from the depot to the house.
+            # Evacuation runs from the house to the shelter, which is the same street path.
+            start, goal = (dest, origin) if role == "evac" else (origin, dest)
+            legs, note = _legs(graph, start, goal, prefer)
+            if not legs:
+                raise SystemExit(f"no {role} path for {call['id']}: {note}")
+            length = 0.0
+            for leg in legs:
+                length += path_length(graph, leg["node_ids"])
+                for left, right in zip(leg["node_ids"], leg["node_ids"][1:]):
+                    if not any(
+                        leg["mode"] in edge["modes"] and {edge["from"], edge["to"]} == {left, right}
+                        for edge in graph["edges"]
+                    ):
+                        raise SystemExit(f"gap in {call['id']} {role}")
+            routes.append(
+                {
+                    "id": f"resp-{call['id']}-{role}",
+                    "call_id": call["id"],
+                    "building_id": call["building_id"],
+                    "base_id": base_id,
+                    "role": role,
+                    "prefer": prefer,
+                    "contract_route": contract,
+                    "legs": legs,
+                    "length_m": r2(length),
+                    "note": note,
+                }
+            )
+    graph.pop("_doors", None)
+    graph.pop("_edge_seq", None)
+    return routes
 
 
 def build_routes(graph: dict, buildings: dict[str, dict]) -> list[dict]:
@@ -1171,16 +1610,24 @@ def main() -> None:
     gap_trees(rng, buildings, trees)
     graph = graph_from_streets(streets, flood)
     by_building = {row["id"]: row for row in buildings}
+    calls = build_calls(ids, summaries, buildings)
+    response_routes = build_response_routes(graph, by_building, calls, streets, flood)
     routes = build_routes(graph, by_building)
     town = {
         "meta": {
             "id": "synthetic-operator-block",
-            "title": "Synthetic operator block",
-            "district_anchor": "Northern fixture districts (Lampang, Phrae, Nan, Phayao). data.demo_event is still TODO_HUMAN.",
+            "title": "Placeholder block for a Bangkok flood demo",
+            "district_anchor": (
+                "Fixture households stay labelled with their district (Lampang, Phrae, Nan, Phayao). "
+                "data.demo_event is still TODO_HUMAN. This picture is not a Bangkok street map."
+            ),
             "disclaimer": (
-                "Not a cadastral map and not one real town. Street names are placeholders in streets.json. "
-                "Household location_label stays the fixture district. Plots are local metres, not home addresses. "
-                "F12's blue temple and F06's north hall are the invented landmarks from the fixtures."
+                "Placeholder for a Bangkok flood demo, not a cadastral map and not one real town. "
+                "EOS-RS eos-rs-thailand-flood-bangkok-sep-2026 is listed in data/SOURCES.md and was not fetched. "
+                "Street names are placeholders in streets.json. Household location_label stays the fixture district. "
+                "Plots are local metres, not home addresses. "
+                "F12's blue temple and F06's north hall are the invented landmarks from the fixtures. "
+                "Access lanes are synthetic links from each call house to the nearest clear street or canal."
             ),
             "projection": "fixed isometric 2:1. x east, y south toward the camera. z up.",
             "camera": {"look_at": [186, 214], "zoom_px_per_m": 5.6},
@@ -1199,7 +1646,8 @@ def main() -> None:
         "resources": list(resources.values()),
         "graph": graph,
         "routes": routes,
-        "calls": build_calls(ids, summaries, buildings),
+        "response_routes": response_routes,
+        "calls": calls,
         "buildings": buildings,
         "trees": trees,
     }
@@ -1213,6 +1661,11 @@ def main() -> None:
     print("status", counts)
     for route in routes:
         print(route["id"], route["length_m"], "m", len(route["node_ids"]), "nodes", route["mode"])
+    missing = [route for route in response_routes if not route["legs"]]
+    print(f"response routes {len(response_routes)} missing {len(missing)}")
+    for route in response_routes:
+        if route.get("note"):
+            print(route["id"], route["note"])
 
 
 if __name__ == "__main__":
