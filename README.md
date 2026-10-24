@@ -4,7 +4,7 @@ Flood and disaster call-triage scaffold. Mubit governs memory, policy, and trace
 
 Sapling is [MubitLabs/banyan-sapling](https://huggingface.co/MubitLabs/banyan-sapling), the Apache-2.0 23B verifier (research preview). It takes a policy, evidence, and a claim, and returns `supported`, `violation`, `missing`, `contradicted`, or `unsure`, with probabilities. `supported` lets the proposed action stand. `violation` blocks it. `unsure`, `missing`, and `contradicted` hand the case to a human. The input limit is 16,384 tokens. It does not run on System 1. `system2.use_banyan_sapling` is true for those two checks. Hosting, the GPU, and Thai handling stay `TODO_HUMAN`. Tests use the stub client and do not load a GPU.
 
-Solid edges run on `POST /cases/{id}/turns` with `use_stubs=True`. Dashed nodes are not called on that request. Graduation may tag `complex_situation` and add a `graduated-*` recommendation before the field precheck. That sets no priority and does not move a pattern into System 1. `router/ledger.py` reserves stock in this process only. The places snapshot joins the dispatch list on every turn. The gazetteer snapshot is read when extract runs. Open-Meteo and RID are read only when SQLite enrichment is on, and those flags do not change priority. Country packs are not loaded. `system1.decide` replaces the stub file only when `S1_IMPL=real` or `use_stubs=False`.
+Solid edges run on `POST /cases/{id}/turns` with `use_stubs=True`. Dashed nodes are not called on that request. A System 1 escalate continues to the System 2 stub in the same turn. Human-correction graduation may tag `complex_situation` before the field precheck. That sets no priority and does not move a pattern into System 1. The RL overlay is off unless `RL_OVERLAY` is set. `router/ledger.py` reserves stock in this process only. The places snapshot joins the dispatch list on every turn. The gazetteer snapshot is read when extract runs. Open-Meteo and RID are read only when SQLite enrichment is on, and those flags do not change priority. Country packs are not loaded. `system1.decide` and `system2.decide` replace the stub file only when that system's `*_IMPL=real` or `use_stubs=False`. The Modal gateway app stays on stubs.
 
 ```mermaid
 flowchart TD
@@ -32,7 +32,7 @@ flowchart TD
   rules -.-> merge
   s2 -.-> s2d["system2.decide if S2_IMPL=real"]
   s2d -.-> sap["Sapling gate, client stub"]:::unwired
-  s2d -.-> llm["Mubit LLM client, Nemotron"]
+  s2d -.-> llm["Mubit LLM client, Nemotron"]:::unwired
   packs["country packs, not loaded"]:::unwired
 ```
 
