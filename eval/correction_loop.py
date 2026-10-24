@@ -275,7 +275,8 @@ def _print(comparison: dict, dataset: Path) -> None:
     print(f"latency_ms {latency['before']} -> {latency['after']}")
     print(f"cost_usd null ({comparison['cost_usd']['reason']})")
     print(
-        "graduation_threshold TODO_HUMAN — this run does not promote a rule into System 1"
+        f"graduation_threshold {comparison['graduation_threshold']} — "
+        "this run does not promote a rule into System 1"
     )
 
 

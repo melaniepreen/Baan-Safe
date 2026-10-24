@@ -33,9 +33,16 @@ from contracts.models import (
 from enrich.context import location_context
 from gateway.auth import status as auth_status
 from gateway.chooser import choose
+from gateway.graduation import apply as apply_graduations
 from gateway.policy import precheck_notes
 from memory.adapter import retrieve
-from mocks.loader import has_s1_stub, has_s2_stub, load_s1_stub, load_s2_stub
+from mocks.loader import (
+    has_s1_stub,
+    has_s2_stub,
+    load_dispatch_resources,
+    load_s1_stub,
+    load_s2_stub,
+)
 import router.merge
 from system1 import decide as system1
 from system1.extract import extract
@@ -48,6 +55,7 @@ def handle(case: CaseState, use_stubs: bool = True) -> RouterDecision:
     _extract(case)
     _enrich(case)
     case.memory_context = retrieve(case)
+    graduations = apply_graduations(case)
     system, triggers = _choose(case)
     notes = [auth_status(), *precheck_notes()]
     emit(
@@ -62,6 +70,11 @@ def handle(case: CaseState, use_stubs: bool = True) -> RouterDecision:
                 + f"; memory via adapter; exclusive route {system.value}"
                 + "; triggers: "
                 + (", ".join(triggers) if triggers else "none")
+                + (
+                    "; graduated: " + ", ".join(g.label for g in graduations)
+                    if graduations
+                    else ""
+                )
             ),
         )
     )
@@ -79,7 +92,7 @@ def handle(case: CaseState, use_stubs: bool = True) -> RouterDecision:
         )
     )
     router_started = _now()
-    decision = router.merge.merge(case, outcome, notes)
+    decision = router.merge.merge(case, outcome, notes, resources=load_dispatch_resources())
     emit(
         TraceEvent(
             case_id=case.case_id,
@@ -170,6 +183,9 @@ def _enrich(case: CaseState) -> None:
     observed_limit = thresholds.get("heavy_rain_observed_mm_24h")
     if observed is not None and observed_limit is not None and observed >= float(observed_limit):
         _add(flags, "heavy_rain_observed")
+    # Data flags only. final_priority stays the outcome's priority.
+    if ctx.get("near_flood_extent"):
+        _add(flags, "near_flood_extent")
     case.policy_flags = flags
 
 

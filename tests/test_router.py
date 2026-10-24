@@ -160,3 +160,38 @@ def test_p1_with_missing_evidence_asks_first():
     decision = merge(_case(needs=[Need.rescue]), outcome)
     assert decision.next_action is NextAction.ask_next_question
     assert decision.dispatches == []
+
+
+def _medical_case(case_id: str, location: str = "Mueang Phrae District, Phrae") -> CaseState:
+    case = _case(location=location, needs=[Need.medical])
+    return case.model_copy(update={"case_id": case_id})
+
+
+def _medical_outcome() -> Outcome:
+    return _outcome(route=Route.medical_response, needs=[Need.medical])
+
+
+def test_second_case_gets_unfilled_when_stock_is_reserved():
+    first = merge(_medical_case("case-a"), _medical_outcome())
+    assert first.dispatches[0].status == "provisional"
+    assert first.dispatches[0].resource_id == "amb-fictional-01"
+    second = merge(_medical_case("case-b"), _medical_outcome())
+    assert second.dispatches[0].status == "unfilled"
+    assert second.requires_human is True
+
+
+def test_same_case_twice_holds_one_reservation():
+    case = _medical_case("case-a")
+    first = merge(case, _medical_outcome())
+    again = merge(case, _medical_outcome())
+    assert again.dispatches[0].resource_id == first.dispatches[0].resource_id
+    other = merge(_medical_case("case-c"), _medical_outcome())
+    assert other.dispatches[0].status == "unfilled"
+
+
+def test_redesision_without_the_need_releases_stock():
+    case = _medical_case("case-a")
+    merge(case, _medical_outcome())
+    merge(case, _outcome(route=Route.information_only, needs=[Need.information]))
+    other = merge(_medical_case("case-b"), _medical_outcome())
+    assert other.dispatches[0].status == "provisional"

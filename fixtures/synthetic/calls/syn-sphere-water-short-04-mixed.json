@@ -1,0 +1,140 @@
+{
+  "id": "syn-sphere-water-short-04-mixed",
+  "group_id": "syn-sphere-water-short-04",
+  "lang": "mixed",
+  "primary_label": "sphere_water_short",
+  "colour": "black",
+  "labels": [
+    "niems_black_not_a_patient",
+    "sphere_water_short"
+  ],
+  "hard_negatives": [
+    "niems_red_critical",
+    "flood_trapped"
+  ],
+  "title": "sphere_water_short mixed 4",
+  "tags": [
+    "synthetic",
+    "system_1",
+    "mixed",
+    "sphere_water_short",
+    "multi_label",
+    "hard_negative",
+    "missing_people"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Kwan Sainam. We only need water. ไม่มีใครบาดเจ็บ. The floor is dry."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "No. ไม่มีใครบาดเจ็บ and nobody is trapped."
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district คะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอเมืองพะเยา, Mueang Phayao District, Phayao, near Placeholder Soi 3."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people, มีกี่คน?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "ยังไม่ได้นับ, I have not counted yet."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-sphere-water-short-04-mixed",
+    "caller_id_hash": "synthetic:syn-sphere-water-short-04",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Kwan Sainam. We only need water. ไม่มีใครบาดเจ็บ. The floor is dry."
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "No. ไม่มีใครบาดเจ็บ and nobody is trapped."
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district คะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอเมืองพะเยา, Mueang Phayao District, Phayao, near Placeholder Soi 3."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people, มีกี่คน?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "ยังไม่ได้นับ, I have not counted yet."
+      }
+    ],
+    "fields": {
+      "location": "Mueang Phayao District, Phayao",
+      "location_confidence": 0.92,
+      "people_count": null,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "water"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T09:41:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_1",
+    "priority": "P3",
+    "route": "welfare_distribution",
+    "needs": [
+      "water"
+    ],
+    "requires_human": false,
+    "missing_evidence": [
+      "people_count"
+    ],
+    "acceptable_next_questions": [
+      "How many people are with you?"
+    ],
+    "labels": [
+      "niems_black_not_a_patient",
+      "sphere_water_short"
+    ],
+    "action": "ask_next_question"
+  },
+  "notes": "Synthetic sphere_water_short. Colour black. Household size was not said. Route welfare_distribution on system_1."
+}

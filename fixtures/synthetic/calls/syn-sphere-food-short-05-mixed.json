@@ -1,0 +1,137 @@
+{
+  "id": "syn-sphere-food-short-05-mixed",
+  "group_id": "syn-sphere-food-short-05",
+  "lang": "mixed",
+  "primary_label": "sphere_food_short",
+  "colour": "black",
+  "labels": [
+    "niems_black_not_a_patient",
+    "sphere_food_short"
+  ],
+  "hard_negatives": [
+    "flood_trapped",
+    "niems_red_critical",
+    "flood_water_depth"
+  ],
+  "title": "sphere_food_short mixed 5",
+  "tags": [
+    "synthetic",
+    "system_1",
+    "mixed",
+    "sphere_food_short",
+    "sarcasm",
+    "multi_label",
+    "hard_negative"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Malee Phueng. Just kidding about drowning. ไม่ได้ติดอยู่. We need food. ข้าวสารหมด"
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "The ground is dry. ประชดเท่านั้น. Nobody is hurt."
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district คะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอเมืองลำปาง, Mueang Lampang District, Lampang, near Placeholder Soi 5."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people, มีกี่คน?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีห้าคน, five of us."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-sphere-food-short-05-mixed",
+    "caller_id_hash": "synthetic:syn-sphere-food-short-05",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Malee Phueng. Just kidding about drowning. ไม่ได้ติดอยู่. We need food. ข้าวสารหมด"
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "The ground is dry. ประชดเท่านั้น. Nobody is hurt."
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district คะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอเมืองลำปาง, Mueang Lampang District, Lampang, near Placeholder Soi 5."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people, มีกี่คน?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีห้าคน, five of us."
+      }
+    ],
+    "fields": {
+      "location": "Mueang Lampang District, Lampang",
+      "location_confidence": 0.92,
+      "people_count": 5,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "food"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T09:59:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_1",
+    "priority": "P3",
+    "route": "welfare_distribution",
+    "needs": [
+      "food"
+    ],
+    "requires_human": false,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_black_not_a_patient",
+      "sphere_food_short"
+    ],
+    "action": "create_provisional_dispatch"
+  },
+  "notes": "Synthetic sphere_food_short. Colour black. Sarcasm is not the label. Route welfare_distribution on system_1."
+}

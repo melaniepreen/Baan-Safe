@@ -1,0 +1,146 @@
+{
+  "id": "syn-sphere-water-short-05-mixed",
+  "group_id": "syn-sphere-water-short-05",
+  "lang": "mixed",
+  "primary_label": "sphere_water_short",
+  "colour": "black",
+  "labels": [
+    "niems_black_not_a_patient",
+    "sphere_water_short"
+  ],
+  "hard_negatives": [
+    "niems_red_critical",
+    "niems_not_conscious_or_breathing",
+    "flood_trapped"
+  ],
+  "title": "sphere_water_short mixed 5",
+  "tags": [
+    "synthetic",
+    "system_1",
+    "mixed",
+    "sphere_water_short",
+    "duplicate",
+    "multi_label",
+    "hard_negative",
+    "duplicate"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Ploy Ngam. I called earlier. น้ำดื่มของบ้านเดิม. Nobody is hurt."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "Do not open a second case. ไม่มีใครติดอยู่"
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district คะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอหนองม่วงไข่, Nong Muang Khai District, Phrae, near Placeholder Soi 9."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people, มีกี่คน?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสี่คน, four of us."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-sphere-water-short-05-mixed",
+    "caller_id_hash": "synthetic:syn-sphere-water-short-01",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Ploy Ngam. I called earlier. น้ำดื่มของบ้านเดิม. Nobody is hurt."
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "Do not open a second case. ไม่มีใครติดอยู่"
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district คะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอหนองม่วงไข่, Nong Muang Khai District, Phrae, near Placeholder Soi 9."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people, มีกี่คน?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสี่คน, four of us."
+      }
+    ],
+    "fields": {
+      "location": "Nong Muang Khai District, Phrae",
+      "location_confidence": 0.92,
+      "people_count": 4,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "water"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T09:44:00Z"
+  },
+  "memory_context": [
+    {
+      "memory_id": "mem-syn-sphere-water-short-05-mixed",
+      "kind": "similar_case",
+      "summary": "Open case syn-sphere-water-short-01-en from the same synthetic household. Not yet delivered.",
+      "relevance": 0.95,
+      "source_case_id": "syn-sphere-water-short-01-en"
+    }
+  ],
+  "expected": {
+    "system": "system_1",
+    "priority": "P3",
+    "route": "duplicate_merge",
+    "needs": [
+      "water"
+    ],
+    "requires_human": false,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_black_not_a_patient",
+      "sphere_water_short"
+    ],
+    "action": "finalize_case"
+  },
+  "notes": "Synthetic sphere_water_short. Colour black. Repeat caller. Memory similar_case drives duplicate_merge when System 1 runs. Route duplicate_merge on system_1."
+}

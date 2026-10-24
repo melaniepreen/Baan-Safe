@@ -111,5 +111,146 @@ def test_gateway_reextracts_on_a_later_turn():
     )
     handle(case, use_stubs=True)
     assert case.fields.people_count == 4
-    assert case.fields.location == "Song District"
+    assert case.fields.location == "Song District, Phrae Province"
     assert case.fields.location_confidence == 0.85
+
+
+def test_danger_regex_families():
+    fields, _ = extract(
+        _turns(("caller", "It is reaching the doorway. Water is coming into the room.")),
+        districts=DISTRICTS,
+    )
+    assert "rising_water" in fields.danger
+
+
+def test_danger_negative():
+    fields, _ = extract(
+        _turns(("caller", "The door is open and the floor is dry. We need food.")),
+        districts=DISTRICTS,
+    )
+    assert fields.danger == []
+
+
+def test_immobile_regex_family():
+    fields, _ = extract(
+        _turns(("caller", "My neighbour is unable to stand. She cannot get out of bed.")),
+        districts=DISTRICTS,
+    )
+    assert "immobile" in fields.vulnerable
+
+
+def test_immobile_negative():
+    fields, _ = extract(
+        _turns(("caller", "Nobody is immobile. We can all walk to the road.")),
+        districts=DISTRICTS,
+    )
+    assert "immobile" not in fields.vulnerable
+
+
+def test_child_unaccompanied_flags_safeguarding():
+    _, flags = extract(
+        _turns(("caller", "A child turned up at our gate without a parent.")),
+        districts=DISTRICTS,
+    )
+    assert "safeguarding" in flags
+
+
+def test_child_with_adult_no_safeguarding():
+    _, flags = extract(
+        _turns(("caller", "My son is here with me. We need food.")),
+        districts=DISTRICTS,
+    )
+    assert "safeguarding" not in flags
+
+
+def test_aid_phrases_are_negation_exempt():
+    fields, flags = extract(
+        _turns(("caller", "They told us we cannot get the payment.")),
+        districts=DISTRICTS,
+    )
+    assert Need.aid_payment in fields.needs
+    assert "aid_exception" in flags
+
+
+def test_aid_negative():
+    fields, flags = extract(
+        _turns(("caller", "I already said the food arrived. We are fine.")),
+        districts=DISTRICTS,
+    )
+    assert Need.aid_payment not in fields.needs
+    assert "aid_exception" not in flags
+
+
+def test_minimising_with_vulnerable_flags_conflict():
+    _, flags = extract(
+        _turns(("caller", "It's nothing, do not make a fuss. My mother is elderly.")),
+        districts=DISTRICTS,
+    )
+    assert "conflicting_evidence" in flags
+
+
+def test_minimising_without_harm_no_flag():
+    _, flags = extract(
+        _turns(("caller", "It's fine. We only want to know when the power returns.")),
+        districts=DISTRICTS,
+    )
+    assert "conflicting_evidence" not in flags
+
+
+def test_rescue_inferred_from_door_water_and_elderly():
+    fields, _ = extract(
+        _turns(("caller", "The water is at the door. My grandmother is inside.")),
+        districts=DISTRICTS,
+    )
+    assert Need.rescue in fields.needs
+
+
+def test_evacuation_suppresses_rescue_without_vulnerable():
+    fields, _ = extract(
+        _turns(("caller", "The water is up to the steps. We should leave for the shelter.")),
+        districts=DISTRICTS,
+    )
+    assert Need.evacuation in fields.needs
+    assert Need.rescue not in fields.needs
+
+
+def test_people_count_new_phrasings():
+    fields, _ = extract(
+        _turns(
+            ("caller", "We are a family of six upstairs."),
+            ("caller", "There are six of us waiting."),
+        ),
+        districts=DISTRICTS,
+    )
+    assert fields.people_count == 6
+
+    fields, _ = extract(
+        _turns(("caller", "It is me and my sister in the house.")),
+        districts=DISTRICTS,
+    )
+    assert fields.people_count == 2
+
+    fields, _ = extract(
+        _turns(
+            ("operator", "How many people?"),
+            ("caller", "Four."),
+        ),
+        districts=DISTRICTS,
+    )
+    assert fields.people_count == 4
+
+
+def test_medical_new_keywords_and_negation():
+    fields, _ = extract(
+        _turns(("caller", "He is unconscious and his breathing is slow.")),
+        districts=DISTRICTS,
+    )
+    assert Need.medical in fields.needs
+    assert fields.medical is True
+
+    fields, _ = extract(
+        _turns(("caller", "No injury. Nobody is sick. We need food.")),
+        districts=DISTRICTS,
+    )
+    assert fields.medical is False
+    assert Need.medical not in fields.needs

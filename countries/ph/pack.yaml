@@ -1,0 +1,331 @@
+# Philippines, a worked example. Not the demo. Not loaded.
+# Thailand stays the default. Every hotline, API, and policy row is
+# verified against a page retrieved on 2026-10-24, or marked unverified.
+# No office trunk number is copied. Short public codes only.
+# Provider shapes: countries/TEMPLATE/providers.yaml
+
+schema_version: baansafe.country_pack.v0
+runtime: unloaded
+iso2: ph
+iso3: PHL
+name_en: Philippines
+default_demo: false
+
+locale:
+  languages:
+    - code: en
+      script: Latin
+      role: language of the PAGASA pages retrieved for this pack
+      verification:
+        status: verified
+        source_url: https://www.pagasa.dost.gov.ph/products-and-services
+        retrieved: "2026-10-24"
+        note: The products page retrieved for this pack is in English. A constitutional language article was not opened.
+    - code: fil
+      script: Latin
+      role: hypothesis language in countries/ph/system1_labels.yaml
+      verification:
+        status: unverified
+        source_url: null
+        retrieved: "2026-10-24"
+        note: >
+          Filipino sentences in the label file are drafts for this example.
+          An official-language citation was not retrieved. Do not treat them
+          as a government translation.
+  timezone:
+    iana: Asia/Manila
+    verification:
+      status: unverified
+      source_url: null
+      retrieved: "2026-10-24"
+      note: >
+        Conventional IANA name for Philippine civil time. The tz database
+        page was not opened on this pass. Do not hardcode an offset from this row.
+  currency:
+    code: PHP
+    name_en: Philippine peso
+    minor_unit: null
+    verification:
+      status: unverified
+      source_url: null
+      retrieved: "2026-10-24"
+      note: >
+        ISO 4217 catalogue was not opened. No peso amount is stored.
+        RA 10121 was read for its title, not for a payment schedule.
+  units:
+    rain: mm
+    distance: km
+    wind: null
+    temperature: null
+    verification:
+      status: unverified
+      source_url: https://www.pagasa.dost.gov.ph/information/rainfall-and-thunderstorm-warning-system
+      retrieved: "2026-10-24"
+      note: >
+        The rainfall-warning page describes flooding. It does not print a
+        unit in the text that was retrieved. Millimetre thresholds from
+        news write-ups were not copied. Open-Meteo, if used later, defaults
+        to mm and celsius. That default is not a PAGASA rule.
+  phone:
+    country_code: null
+    national_prefix: null
+    description: null
+    verification:
+      status: unverified
+      source_url: null
+      retrieved: "2026-10-24"
+      note: >
+        No numbering plan was retrieved. Do not reuse the Thailand +66
+        scanner as if it were Philippine. Do not invent a pattern.
+
+hotlines:
+  - service: other
+    name: Emergency 911 National Office
+    number: "911"
+    wired: false
+    where_it_appears: nowhere in the BaanSafe runtime
+    verification:
+      status: verified
+      source_url: https://e911.gov.ph/emergency-hotline-numbers/
+      retrieved: "2026-10-24"
+      note: >
+        A search index of this official page listed the Emergency 911
+        National Office with hotline 911. A direct fetch the same day
+        returned a bot check and not the table. Re-open the URL before
+        any dialler uses it. Trunk lines on that page are not copied.
+        Medical, fire, and disaster are not given separate short codes here.
+
+  - service: medical
+    name: null
+    number: null
+    wired: false
+    verification:
+      status: unverified
+      source_url: https://e911.gov.ph/emergency-hotline-numbers/
+      retrieved: "2026-10-24"
+      note: No medical short code distinct from 911 was confirmed.
+
+  - service: fire
+    name: Bureau of Fire Protection
+    number: null
+    wired: false
+    verification:
+      status: unverified
+      source_url: https://e911.gov.ph/emergency-hotline-numbers/
+      retrieved: "2026-10-24"
+      note: >
+        The indexed table shows trunk lines for the Bureau of Fire Protection.
+        They are not copied. No short code was confirmed.
+
+  - service: disaster
+    name: National Disaster Risk Reduction and Management Council
+    number: null
+    wired: false
+    verification:
+      status: unverified
+      source_url: https://lawphil.net/statutes/repacts/ra2010/ra_10121_2010.html
+      retrieved: "2026-10-24"
+      note: >
+        Republic Act No. 10121 creates the Council. The Act's title was
+        retrieved. A public short code for the Council was not. Office
+        numbers from news roundups were not copied.
+
+triage_scale:
+  id: pagasa-rainfall-warning-icons
+  wired_into_decide: false
+  note: >
+    This is a rainfall warning, not a medical triage scale and not the
+    NIEMS colours. The official page prints three icon rows. Colour names
+    and millimetre cuts were not in the retrieved text, so they are absent.
+    The P1–P4 column is a hypothesis. mapping_status is unverified.
+  levels:
+    - id: advisory_awareness
+      label_en: Advisory, community awareness
+      source_excerpt: Flooding is POSSIBLE in low-lying areas and near river channels.
+      baansafe_priority: P3
+      mapping_status: unverified
+      verification:
+        status: verified
+        source_url: https://www.pagasa.dost.gov.ph/information/rainfall-and-thunderstorm-warning-system
+        retrieved: "2026-10-24"
+        note: The row text is verified. The P3 guess is not in the page.
+    - id: alert_preparedness
+      label_en: Alert, community preparedness
+      source_excerpt: Flooding is THREATHENING in low-lying areas and near river channels.
+      baansafe_priority: P2
+      mapping_status: unverified
+      verification:
+        status: verified
+        source_url: https://www.pagasa.dost.gov.ph/information/rainfall-and-thunderstorm-warning-system
+        retrieved: "2026-10-24"
+        note: >
+          The page spells THREATHENING. The excerpt keeps that spelling.
+          The P2 guess is not in the page.
+    - id: emergency_response
+      label_en: Emergency, community response
+      source_excerpt: SEVERE Flooding is EXPECTED. Take necessary precautionary measures.
+      baansafe_priority: P1
+      mapping_status: unverified
+      verification:
+        status: verified
+        source_url: https://www.pagasa.dost.gov.ph/information/rainfall-and-thunderstorm-warning-system
+        retrieved: "2026-10-24"
+        note: The row text is verified. The P1 guess is not in the page.
+    - id: information
+      label_en: null
+      source_excerpt: null
+      baansafe_priority: P4
+      mapping_status: unverified
+      verification:
+        status: unverified
+        source_url: null
+        retrieved: "2026-10-24"
+        note: No fourth PAGASA rainfall icon was retrieved. P4 is the BaanSafe information priority, not a PAGASA level.
+
+admin:
+  levels:
+    - id: region
+      name_en: Region
+      osm_admin_level: 3
+      verification:
+        status: verified
+        source_url: https://wiki.openstreetmap.org/wiki/Philippines/Mapping_conventions/Local_government
+        retrieved: "2026-10-24"
+        note: OSM convention. HDX COD-AB admin 1 count is 17. The crosswalk from that count to "region" is unverified.
+    - id: province
+      name_en: Province
+      osm_admin_level: 4
+      verification:
+        status: verified
+        source_url: https://wiki.openstreetmap.org/wiki/Philippines/Mapping_conventions/Local_government
+        retrieved: "2026-10-24"
+        note: OSM convention. Highly urbanised cities are excluded from the provincial boundary on that page.
+    - id: city_or_municipality
+      name_en: City or municipality
+      osm_admin_level: 6
+      verification:
+        status: verified
+        source_url: https://wiki.openstreetmap.org/wiki/Philippines/Mapping_conventions/Local_government
+        retrieved: "2026-10-24"
+        note: >
+          OSM uses admin_level 6 for both a city and a municipality.
+          Thailand's code also requests admin_level 6, and means an amphoe.
+          The same number is not the same unit. A loader must not reuse the Thai query unchanged.
+    - id: barangay
+      name_en: Barangay
+      osm_admin_level: 10
+      verification:
+        status: verified
+        source_url: https://wiki.openstreetmap.org/wiki/Philippines/Mapping_conventions/Local_government
+        retrieved: "2026-10-24"
+        note: OSM convention. Not loaded anywhere in BaanSafe.
+  gazetteer:
+    grain: city_or_municipality
+    source: hdx-cod-ab
+    query_note: >
+      Suggested grain for a first gazetteer is the city or municipality.
+      The loaded Thai gazetteer is not this list. HDX COD-AB for the
+      Philippines is admin levels 0–4 with counts 17, 88, 1642, and 11920.
+      The page does not name those levels region, province, municipality,
+      and barangay. Do not assume the names from the counts.
+    verification:
+      status: verified
+      source_url: https://data.humdata.org/dataset/cod-ab-phl
+      retrieved: "2026-10-24"
+      note: Counts are from that dataset page. Level names beyond the OSM wiki are unverified.
+
+providers:
+  flood_extent:
+    national: null
+    global_fallback: copernicus-ems-rapid-mapping
+    verification:
+      status: unverified
+      source_url: https://www.pagasa.dost.gov.ph/products-and-services
+      retrieved: "2026-10-24"
+      note: >
+        PAGASA lists basin flood bulletins as a product. No JSON endpoint
+        was printed on the pages opened. Do not invent one. Copernicus EMS
+        rapid mapping is the global observed-extent fallback.
+
+  rain_and_forecast:
+    national:
+      id: pagasa-public-products
+      wired: false
+      verification:
+        status: verified
+        source_url: https://www.pagasa.dost.gov.ph/products-and-services
+        retrieved: "2026-10-24"
+        note: >
+          Verified as a human-readable service list: public weather forecast,
+          rainfall warning, thunderstorm alert, basin flood bulletins.
+          Not verified as an API. No path was copied.
+    global_fallback: open-meteo
+    open_meteo_timezone: Asia/Manila
+
+  river_levels:
+    national:
+      id: pagasa-flood-bulletins
+      wired: false
+      verification:
+        status: unverified
+        source_url: https://www.pagasa.dost.gov.ph/products-and-services
+        retrieved: "2026-10-24"
+        note: >
+          Flood forecasting is a named service, including telemetered basins
+          and general advisories for other basins. A machine endpoint was
+          not retrieved.
+    global_fallback: glofas
+
+  shelters_and_facilities:
+    national: null
+    global_fallback: osm-overpass
+    also: hot-export
+    verification:
+      status: verified
+      source_url: https://export.hotosm.org/v3
+      retrieved: "2026-10-24"
+      note: No national facility feed was opened. OSM and the HOT Export Tool are the fallbacks.
+
+  boundaries:
+    national: null
+    global_fallback: hdx-cod-ab
+    also: geoboundaries
+    verification:
+      status: verified
+      source_url: https://data.humdata.org/dataset/cod-ab-phl
+      retrieved: "2026-10-24"
+      note: >
+        geoBoundaries pattern, if used later, is ISO3 PHL:
+        https://www.geoboundaries.org/api/current/gbOpen/PHL/ADM1/
+        That URL was not called. The pattern is documented at
+        https://www.geoboundaries.org/api.html
+
+  stt_asr:
+    national: null
+    global_fallback: whisper
+    eval_corpus: fleurs
+    language_argument: null
+    verification:
+      status: verified
+      source_url: https://huggingface.co/datasets/google/fleurs
+      retrieved: "2026-10-24"
+      note: >
+        The FLEURS card lists Filipino in the South-East Asia group.
+        The dataset config id was not copied. Whisper is the runtime
+        fallback. The repo default language th must not be reused for
+        a Philippine call without an explicit argument.
+
+aid_policy_corpus:
+  id: ph-policy-pack
+  path: countries/ph/policy-pack.yaml
+  verification:
+    status: verified
+    source_url: https://lawphil.net/statutes/repacts/ra2010/ra_10121_2010.html
+    retrieved: "2026-10-24"
+    note: >
+      The framework citation is verified. The aid slot inside the policy
+      pack is unverified. Nothing here is in policies/corpus.py.
+
+system1_labels:
+  path: countries/ph/system1_labels.yaml
+  languages: [en, fil]

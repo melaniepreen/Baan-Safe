@@ -1,0 +1,135 @@
+{
+  "id": "syn-flood-trapped-02-mixed",
+  "group_id": "syn-flood-trapped-02",
+  "lang": "mixed",
+  "primary_label": "flood_trapped",
+  "colour": "red",
+  "labels": [
+    "niems_red_critical",
+    "flood_trapped",
+    "flood_water_depth"
+  ],
+  "hard_negatives": [],
+  "title": "flood_trapped mixed 2",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "mixed",
+    "flood_trapped",
+    "multi_label"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Som Ruenjai. We cannot get out. ติดอยู่ชั้นบน"
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "Cannot get out. ช่วยด้วย"
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district คะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอหนองม่วงไข่, Nong Muang Khai District, Phrae, near Placeholder Soi 10."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people, มีกี่คน?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสองคน, two of us."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-flood-trapped-02-mixed",
+    "caller_id_hash": "synthetic:syn-flood-trapped-02",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Som Ruenjai. We cannot get out. ติดอยู่ชั้นบน"
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "Cannot get out. ช่วยด้วย"
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district คะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอหนองม่วงไข่, Nong Muang Khai District, Phrae, near Placeholder Soi 10."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people, มีกี่คน?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสองคน, two of us."
+      }
+    ],
+    "fields": {
+      "location": "Nong Muang Khai District, Phrae",
+      "location_confidence": 0.92,
+      "people_count": 2,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [
+        "rising_water"
+      ],
+      "needs": [
+        "rescue"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T11:50:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P1",
+    "route": "rescue_coordination",
+    "needs": [
+      "rescue"
+    ],
+    "requires_human": true,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_red_critical",
+      "flood_trapped",
+      "flood_water_depth"
+    ],
+    "action": "create_provisional_dispatch"
+  },
+  "notes": "Synthetic flood_trapped. Colour red. Rescue is system_2 rescue_coordination. Route rescue_coordination on system_2."
+}

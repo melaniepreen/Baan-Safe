@@ -1,0 +1,134 @@
+{
+  "id": "syn-sphere-shelter-crowded-02-mixed",
+  "group_id": "syn-sphere-shelter-crowded-02",
+  "lang": "mixed",
+  "primary_label": "sphere_shelter_crowded",
+  "colour": "black",
+  "labels": [
+    "niems_black_not_a_patient",
+    "sphere_shelter_crowded"
+  ],
+  "hard_negatives": [
+    "niems_red_critical"
+  ],
+  "title": "sphere_shelter_crowded mixed 2",
+  "tags": [
+    "synthetic",
+    "system_1",
+    "mixed",
+    "sphere_shelter_crowded",
+    "multi_label",
+    "hard_negative"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Malee Phueng. We need a shelter. นอนไม่ลง. The ground is dry."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "ไม่มีใครบาดเจ็บ. We only need shelter."
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district คะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอเมืองพะเยา, Mueang Phayao District, Phayao, near Placeholder Soi 3."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people, มีกี่คน?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสามคน, three of us."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-sphere-shelter-crowded-02-mixed",
+    "caller_id_hash": "synthetic:syn-sphere-shelter-crowded-02",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Malee Phueng. We need a shelter. นอนไม่ลง. The ground is dry."
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "ไม่มีใครบาดเจ็บ. We only need shelter."
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district คะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอเมืองพะเยา, Mueang Phayao District, Phayao, near Placeholder Soi 3."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people, มีกี่คน?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสามคน, three of us."
+      }
+    ],
+    "fields": {
+      "location": "Mueang Phayao District, Phayao",
+      "location_confidence": 0.92,
+      "people_count": 3,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "shelter"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T10:05:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_1",
+    "priority": "P3",
+    "route": "shelter_placement",
+    "needs": [
+      "shelter"
+    ],
+    "requires_human": false,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_black_not_a_patient",
+      "sphere_shelter_crowded"
+    ],
+    "action": "create_provisional_dispatch"
+  },
+  "notes": "Synthetic sphere_shelter_crowded. Colour black. Route shelter_placement on system_1."
+}

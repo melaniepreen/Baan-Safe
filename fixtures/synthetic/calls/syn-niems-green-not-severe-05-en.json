@@ -1,0 +1,135 @@
+{
+  "id": "syn-niems-green-not-severe-05-en",
+  "group_id": "syn-niems-green-not-severe-05",
+  "lang": "en",
+  "primary_label": "niems_green_not_severe",
+  "colour": "green",
+  "labels": [
+    "niems_green_not_severe"
+  ],
+  "hard_negatives": [
+    "niems_red_critical",
+    "niems_not_conscious_or_breathing"
+  ],
+  "title": "niems_green_not_severe en 5",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "en",
+    "niems_green_not_severe",
+    "sarcasm",
+    "hard_negative"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Arun Jaidee. Oh it's nothing, just a scratch, she says. He has a small cut and is breathing normally."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, or is water inside the rooms?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "It is not severe. He is conscious. Do not mark this red."
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district are you calling from?"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "We are in Nong Muang Khai District, Phrae, near Placeholder Soi 9."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people are with you?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "Four of us."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-niems-green-not-severe-05-en",
+    "caller_id_hash": "synthetic:syn-niems-green-not-severe-05",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Arun Jaidee. Oh it's nothing, just a scratch, she says. He has a small cut and is breathing normally."
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, or is water inside the rooms?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "It is not severe. He is conscious. Do not mark this red."
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district are you calling from?"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "We are in Nong Muang Khai District, Phrae, near Placeholder Soi 9."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people are with you?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "Four of us."
+      }
+    ],
+    "fields": {
+      "location": "Nong Muang Khai District, Phrae",
+      "location_confidence": 0.92,
+      "people_count": 4,
+      "vulnerable": [],
+      "medical": true,
+      "danger": [],
+      "needs": [
+        "medical"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [
+      "conflicting_evidence"
+    ],
+    "resources": {},
+    "received_at": "2026-10-24T08:42:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P3",
+    "route": "medical_response",
+    "needs": [
+      "medical"
+    ],
+    "requires_human": true,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_green_not_severe"
+    ],
+    "action": "create_provisional_dispatch"
+  },
+  "notes": "Synthetic niems_green_not_severe. Colour green. Sarcasm is not the label. Route medical_response on system_2."
+}

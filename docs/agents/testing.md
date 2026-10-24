@@ -40,6 +40,7 @@ files:
 - `make test`
 - `make validate`
 - `make replay-stubs` when stub labels change.
+- `EXTRACT_EVAL_SET=synthetic make extract-eval` and `EVAL_LEARNING_SET=synthetic make eval-learning` for `fixtures/synthetic`. The defaults still use the original 24 fixtures and the eight stub groups.
 - `python3 scripts/check_agents.py` after editing `AGENTS.md` or `docs/agents/`.
 
 ## Common pitfalls

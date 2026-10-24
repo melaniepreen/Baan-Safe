@@ -1,0 +1,135 @@
+{
+  "id": "syn-niems-green-not-severe-05-th",
+  "group_id": "syn-niems-green-not-severe-05",
+  "lang": "th",
+  "primary_label": "niems_green_not_severe",
+  "colour": "green",
+  "labels": [
+    "niems_green_not_severe"
+  ],
+  "hard_negatives": [
+    "niems_red_critical",
+    "niems_not_conscious_or_breathing"
+  ],
+  "title": "niems_green_not_severe th 5",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "th",
+    "niems_green_not_severe",
+    "sarcasm",
+    "hard_negative"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "ดิฉัน อรุณ ใจดี บอกว่าไม่มีอะไร แต่มีแผลเล็กน้อย หายใจปกติ"
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "ไม่รุนแรงและรู้สึกตัว ไม่ใช่สายวิกฤติ"
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "โทรจากอำเภออะไรคะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอหนองม่วงไข่ จังหวัดแพร่ ใกล้ซอยตัวอย่าง 9 ค่ะ"
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "มีกี่คนคะ"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสี่คนค่ะ"
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-niems-green-not-severe-05-th",
+    "caller_id_hash": "synthetic:syn-niems-green-not-severe-05",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "ดิฉัน อรุณ ใจดี บอกว่าไม่มีอะไร แต่มีแผลเล็กน้อย หายใจปกติ"
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "ไม่รุนแรงและรู้สึกตัว ไม่ใช่สายวิกฤติ"
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "โทรจากอำเภออะไรคะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอหนองม่วงไข่ จังหวัดแพร่ ใกล้ซอยตัวอย่าง 9 ค่ะ"
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "มีกี่คนคะ"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสี่คนค่ะ"
+      }
+    ],
+    "fields": {
+      "location": "Nong Muang Khai District, Phrae",
+      "location_confidence": 0.92,
+      "people_count": 4,
+      "vulnerable": [],
+      "medical": true,
+      "danger": [],
+      "needs": [
+        "medical"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [
+      "conflicting_evidence"
+    ],
+    "resources": {},
+    "received_at": "2026-10-24T08:43:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P3",
+    "route": "medical_response",
+    "needs": [
+      "medical"
+    ],
+    "requires_human": true,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_green_not_severe"
+    ],
+    "action": "create_provisional_dispatch"
+  },
+  "notes": "Synthetic niems_green_not_severe. Colour green. Sarcasm is not the label. Route medical_response on system_2."
+}

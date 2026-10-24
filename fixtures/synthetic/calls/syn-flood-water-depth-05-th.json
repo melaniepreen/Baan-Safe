@@ -1,0 +1,141 @@
+{
+  "id": "syn-flood-water-depth-05-th",
+  "group_id": "syn-flood-water-depth-05",
+  "lang": "th",
+  "primary_label": "flood_water_depth",
+  "colour": "yellow",
+  "labels": [
+    "niems_yellow_urgent",
+    "flood_water_depth",
+    "safeguarding_older_person"
+  ],
+  "hard_negatives": [
+    "flood_trapped"
+  ],
+  "title": "flood_water_depth th 5",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "th",
+    "flood_water_depth",
+    "multi",
+    "multi_label",
+    "hard_negative"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "ดิฉัน สม เรือนใจ ยายอยู่ด้วย น้ำถึงประตูลึกระดับเข่า ยังเดินออกได้ ไม่มีใครติดอยู่"
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "ขอให้บันทึกความลึก ยังไม่ติด"
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "โทรจากอำเภออะไรคะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอเมืองน่าน จังหวัดน่าน ใกล้ซอยตัวอย่าง 3 ค่ะ"
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "มีกี่คนคะ"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสี่คนค่ะ"
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-flood-water-depth-05-th",
+    "caller_id_hash": "synthetic:syn-flood-water-depth-05",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "ดิฉัน สม เรือนใจ ยายอยู่ด้วย น้ำถึงประตูลึกระดับเข่า ยังเดินออกได้ ไม่มีใครติดอยู่"
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "ขอให้บันทึกความลึก ยังไม่ติด"
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "โทรจากอำเภออะไรคะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอเมืองน่าน จังหวัดน่าน ใกล้ซอยตัวอย่าง 3 ค่ะ"
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "มีกี่คนคะ"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสี่คนค่ะ"
+      }
+    ],
+    "fields": {
+      "location": "Mueang Nan District, Nan",
+      "location_confidence": 0.92,
+      "people_count": 4,
+      "vulnerable": [
+        "elderly"
+      ],
+      "medical": false,
+      "danger": [
+        "rising_water"
+      ],
+      "needs": [
+        "rescue"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T11:43:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P2",
+    "route": "rescue_coordination",
+    "needs": [
+      "rescue"
+    ],
+    "requires_human": true,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_yellow_urgent",
+      "flood_water_depth",
+      "safeguarding_older_person"
+    ],
+    "action": "create_provisional_dispatch"
+  },
+  "notes": "Synthetic flood_water_depth. Colour yellow. Rescue is system_2 rescue_coordination. Route rescue_coordination on system_2."
+}

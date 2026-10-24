@@ -1,0 +1,135 @@
+{
+  "id": "syn-safeguarding-serious-health-01-en",
+  "group_id": "syn-safeguarding-serious-health-01",
+  "lang": "en",
+  "primary_label": "safeguarding_serious_health",
+  "colour": "yellow",
+  "labels": [
+    "niems_yellow_urgent",
+    "safeguarding_serious_health"
+  ],
+  "hard_negatives": [
+    "flood_trapped",
+    "niems_red_critical"
+  ],
+  "title": "safeguarding_serious_health en 1",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "en",
+    "safeguarding_serious_health",
+    "multi_label",
+    "hard_negative"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Som Ruenjai. Mother is wheezing, a serious health condition. She is conscious."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, or is water inside the rooms?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "A person must decide the medical response. She is conscious."
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district are you calling from?"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "We are in Mae Tha District, Lampang, near Placeholder Soi 6."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people are with you?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "Two of us."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-safeguarding-serious-health-01-en",
+    "caller_id_hash": "synthetic:syn-safeguarding-serious-health-01",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Som Ruenjai. Mother is wheezing, a serious health condition. She is conscious."
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, or is water inside the rooms?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "A person must decide the medical response. She is conscious."
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district are you calling from?"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "We are in Mae Tha District, Lampang, near Placeholder Soi 6."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people are with you?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "Two of us."
+      }
+    ],
+    "fields": {
+      "location": "Mae Tha District, Lampang",
+      "location_confidence": 0.92,
+      "people_count": 2,
+      "vulnerable": [],
+      "medical": true,
+      "danger": [],
+      "needs": [
+        "medical"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T11:00:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P2",
+    "route": "medical_response",
+    "needs": [
+      "medical"
+    ],
+    "requires_human": true,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_yellow_urgent",
+      "safeguarding_serious_health"
+    ],
+    "action": "create_provisional_dispatch"
+  },
+  "notes": "Synthetic safeguarding_serious_health. Colour yellow. Route medical_response on system_2."
+}

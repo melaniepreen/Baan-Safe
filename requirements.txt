@@ -7,3 +7,4 @@ openai>=1.40
 pytest>=8
 shapely>=2.0
 pyshp>=2.3
+openpyxl>=3.1

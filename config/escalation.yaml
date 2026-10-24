@@ -9,8 +9,16 @@ route_to_system_2_if_any:
   medical: true
   vulnerable_any: [oxygen_dependent, immobile]
   location_confidence_below: 0.7     # a missing location or missing confidence also routes to System 2
-  policy_flags_any: [safeguarding, conflicting_evidence, aid_exception]
+  policy_flags_any: [safeguarding, conflicting_evidence, aid_exception, complex_situation]
   needs_any: [rescue, medical, aid_payment]
+
+# Signed off by Moly, 24 Oct 2026.
+# Only these s1_triage labels can graduate. Routine labels (sphere_*,
+# niems_green_not_severe, niems_white_general) never graduate, so repeated
+# routine corrections cannot push the fast path into System 2.
+graduation_labels: [flood_trapped, flood_water_depth, safeguarding_child, safeguarding_older_person,
+  safeguarding_disability, safeguarding_serious_health, safeguarding_protection_referral,
+  niems_red_critical, niems_yellow_urgent, niems_not_conscious_or_breathing, niems_black_not_a_patient]
 
 system_1_min_confidence: 0.80
 

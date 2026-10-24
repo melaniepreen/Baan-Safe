@@ -1,0 +1,139 @@
+{
+  "id": "syn-sphere-shelter-crowded-04-th",
+  "group_id": "syn-sphere-shelter-crowded-04",
+  "lang": "th",
+  "primary_label": "sphere_shelter_crowded",
+  "colour": "black",
+  "labels": [
+    "niems_black_not_a_patient",
+    "sphere_shelter_crowded"
+  ],
+  "hard_negatives": [
+    "flood_trapped"
+  ],
+  "title": "sphere_shelter_crowded th 4",
+  "tags": [
+    "synthetic",
+    "system_1",
+    "th",
+    "sphere_shelter_crowded",
+    "multi_label",
+    "hard_negative",
+    "missing_people"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "ดิฉัน วิลา คลอง ที่พักคนแน่นมาก ขอที่พัก บ้านแห้ง"
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "ไม่มีใครบาดเจ็บ ต้องการแค่ที่พัก"
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "โทรจากอำเภออะไรคะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอเมืองลำปาง จังหวัดลำปาง ใกล้ซอยตัวอย่าง 5 ค่ะ"
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "มีกี่คนคะ"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "ยังไม่ได้นับจำนวนคนค่ะ"
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-sphere-shelter-crowded-04-th",
+    "caller_id_hash": "synthetic:syn-sphere-shelter-crowded-04",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "ดิฉัน วิลา คลอง ที่พักคนแน่นมาก ขอที่พัก บ้านแห้ง"
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "มีใครบาดเจ็บไหมคะ หรือน้ำเข้าบ้านหรือยัง"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "ไม่มีใครบาดเจ็บ ต้องการแค่ที่พัก"
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "โทรจากอำเภออะไรคะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอเมืองลำปาง จังหวัดลำปาง ใกล้ซอยตัวอย่าง 5 ค่ะ"
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "มีกี่คนคะ"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "ยังไม่ได้นับจำนวนคนค่ะ"
+      }
+    ],
+    "fields": {
+      "location": "Mueang Lampang District, Lampang",
+      "location_confidence": 0.92,
+      "people_count": null,
+      "vulnerable": [],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "shelter"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T10:10:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_1",
+    "priority": "P3",
+    "route": "shelter_placement",
+    "needs": [
+      "shelter"
+    ],
+    "requires_human": false,
+    "missing_evidence": [
+      "people_count"
+    ],
+    "acceptable_next_questions": [
+      "How many people are with you?"
+    ],
+    "labels": [
+      "niems_black_not_a_patient",
+      "sphere_shelter_crowded"
+    ],
+    "action": "ask_next_question"
+  },
+  "notes": "Synthetic sphere_shelter_crowded. Colour black. Household size was not said. Route shelter_placement on system_1."
+}

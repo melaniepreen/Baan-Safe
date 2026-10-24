@@ -1,0 +1,138 @@
+{
+  "id": "syn-safeguarding-disability-05-en",
+  "group_id": "syn-safeguarding-disability-05",
+  "lang": "en",
+  "primary_label": "safeguarding_disability",
+  "colour": "yellow",
+  "labels": [
+    "niems_yellow_urgent",
+    "safeguarding_disability"
+  ],
+  "hard_negatives": [
+    "flood_trapped"
+  ],
+  "title": "safeguarding_disability en 5",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "en",
+    "safeguarding_disability",
+    "immobile",
+    "multi_label",
+    "hard_negative"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Wila Khlong. My brother uses a wheelchair and cannot walk. We need drinking water. The ground is dry."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, or is water inside the rooms?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "He is immobile. Nobody is trapped."
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district are you calling from?"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "We are in Mueang Phrae District, Phrae, near Placeholder Soi 9."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people are with you?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "There are five of us."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-safeguarding-disability-05-en",
+    "caller_id_hash": "synthetic:syn-safeguarding-disability-05",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Wila Khlong. My brother uses a wheelchair and cannot walk. We need drinking water. The ground is dry."
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, or is water inside the rooms?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "He is immobile. Nobody is trapped."
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district are you calling from?"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "We are in Mueang Phrae District, Phrae, near Placeholder Soi 9."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people are with you?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "There are five of us."
+      }
+    ],
+    "fields": {
+      "location": "Mueang Phrae District, Phrae",
+      "location_confidence": 0.92,
+      "people_count": 5,
+      "vulnerable": [
+        "disability",
+        "immobile"
+      ],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "water"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T10:57:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P2",
+    "route": "welfare_distribution",
+    "needs": [
+      "water"
+    ],
+    "requires_human": true,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_yellow_urgent",
+      "safeguarding_disability"
+    ],
+    "action": "create_provisional_dispatch"
+  },
+  "notes": "Synthetic safeguarding_disability. Colour yellow. Route welfare_distribution on system_2."
+}

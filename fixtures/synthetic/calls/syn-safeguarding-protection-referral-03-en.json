@@ -1,0 +1,141 @@
+{
+  "id": "syn-safeguarding-protection-referral-03-en",
+  "group_id": "syn-safeguarding-protection-referral-03",
+  "lang": "en",
+  "primary_label": "safeguarding_protection_referral",
+  "colour": "yellow",
+  "labels": [
+    "niems_yellow_urgent",
+    "safeguarding_protection_referral",
+    "safeguarding_child"
+  ],
+  "hard_negatives": [],
+  "title": "safeguarding_protection_referral en 3",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "en",
+    "safeguarding_protection_referral",
+    "multi_label"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Kwan Sainam. My child is alone without a parent. Refer this to protection."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, or is water inside the rooms?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "Please hand this to a protection worker."
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district are you calling from?"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "We are in Mueang Phrae District, Phrae, near Placeholder Soi 9."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people are with you?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "There are three of us, my two kids and me."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-safeguarding-protection-referral-03-en",
+    "caller_id_hash": "synthetic:syn-safeguarding-protection-referral-03",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Kwan Sainam. My child is alone without a parent. Refer this to protection."
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, or is water inside the rooms?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "Please hand this to a protection worker."
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district are you calling from?"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "We are in Mueang Phrae District, Phrae, near Placeholder Soi 9."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people are with you?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "There are three of us, my two kids and me."
+      }
+    ],
+    "fields": {
+      "location": "Mueang Phrae District, Phrae",
+      "location_confidence": 0.92,
+      "people_count": 3,
+      "vulnerable": [
+        "child"
+      ],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "shelter"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [
+      "safeguarding"
+    ],
+    "resources": {},
+    "received_at": "2026-10-24T11:21:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P2",
+    "route": "supervisor_escalation",
+    "needs": [
+      "shelter"
+    ],
+    "requires_human": true,
+    "missing_evidence": [
+      "guardian_contact_status"
+    ],
+    "acceptable_next_questions": [
+      "Is a named guardian expected, or should a supervisor take this now?"
+    ],
+    "labels": [
+      "niems_yellow_urgent",
+      "safeguarding_protection_referral",
+      "safeguarding_child"
+    ],
+    "action": "escalate_to_supervisor"
+  },
+  "notes": "Synthetic safeguarding_protection_referral. Colour yellow. Route supervisor_escalation on system_2."
+}

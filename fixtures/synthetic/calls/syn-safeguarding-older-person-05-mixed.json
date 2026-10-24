@@ -1,0 +1,147 @@
+{
+  "id": "syn-safeguarding-older-person-05-mixed",
+  "group_id": "syn-safeguarding-older-person-05",
+  "lang": "mixed",
+  "primary_label": "safeguarding_older_person",
+  "colour": "black",
+  "labels": [
+    "niems_black_not_a_patient",
+    "safeguarding_older_person"
+  ],
+  "hard_negatives": [
+    "niems_red_critical",
+    "flood_trapped"
+  ],
+  "title": "safeguarding_older_person mixed 5",
+  "tags": [
+    "synthetic",
+    "system_1",
+    "mixed",
+    "safeguarding_older_person",
+    "duplicate",
+    "multi_label",
+    "hard_negative",
+    "duplicate"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Arun Jaidee. I called earlier. ยายยังต้องการน้ำดื่ม"
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "Same household. ไม่มีใครบาดเจ็บ"
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district คะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอแม่เมาะ, Mae Mo District, Lampang, near Placeholder Soi 4."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people, มีกี่คน?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสี่คน, four of us."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-safeguarding-older-person-05-mixed",
+    "caller_id_hash": "synthetic:syn-safeguarding-older-person-01",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Arun Jaidee. I called earlier. ยายยังต้องการน้ำดื่ม"
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "Same household. ไม่มีใครบาดเจ็บ"
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district คะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอแม่เมาะ, Mae Mo District, Lampang, near Placeholder Soi 4."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people, มีกี่คน?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสี่คน, four of us."
+      }
+    ],
+    "fields": {
+      "location": "Mae Mo District, Lampang",
+      "location_confidence": 0.92,
+      "people_count": 4,
+      "vulnerable": [
+        "elderly"
+      ],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "water"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T10:44:00Z"
+  },
+  "memory_context": [
+    {
+      "memory_id": "mem-syn-safeguarding-older-person-05-mixed",
+      "kind": "similar_case",
+      "summary": "Open case syn-safeguarding-older-person-01-en from the same synthetic household. Not yet delivered.",
+      "relevance": 0.95,
+      "source_case_id": "syn-safeguarding-older-person-01-en"
+    }
+  ],
+  "expected": {
+    "system": "system_1",
+    "priority": "P3",
+    "route": "duplicate_merge",
+    "needs": [
+      "water"
+    ],
+    "requires_human": false,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_black_not_a_patient",
+      "safeguarding_older_person"
+    ],
+    "action": "finalize_case"
+  },
+  "notes": "Synthetic safeguarding_older_person. Colour black. Repeat caller. Memory similar_case drives duplicate_merge when System 1 runs. Route duplicate_merge on system_1."
+}

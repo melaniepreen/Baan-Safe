@@ -1,0 +1,137 @@
+{
+  "id": "syn-safeguarding-serious-health-05-en",
+  "group_id": "syn-safeguarding-serious-health-05",
+  "lang": "en",
+  "primary_label": "safeguarding_serious_health",
+  "colour": "yellow",
+  "labels": [
+    "niems_yellow_urgent",
+    "safeguarding_serious_health"
+  ],
+  "hard_negatives": [
+    "flood_trapped"
+  ],
+  "title": "safeguarding_serious_health en 5",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "en",
+    "safeguarding_serious_health",
+    "calm_critical",
+    "multi_label",
+    "hard_negative"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Arun Jaidee. I am calm. Mother uses oxygen and has laboured breathing. She is conscious."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, or is water inside the rooms?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "A serious health condition. A person must decide."
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district are you calling from?"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "We are in Nong Muang Khai District, Phrae, near Placeholder Soi 10."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people are with you?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "Two of us."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-safeguarding-serious-health-05-en",
+    "caller_id_hash": "synthetic:syn-safeguarding-serious-health-05",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Arun Jaidee. I am calm. Mother uses oxygen and has laboured breathing. She is conscious."
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, or is water inside the rooms?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "A serious health condition. A person must decide."
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district are you calling from?"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "We are in Nong Muang Khai District, Phrae, near Placeholder Soi 10."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people are with you?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "Two of us."
+      }
+    ],
+    "fields": {
+      "location": "Nong Muang Khai District, Phrae",
+      "location_confidence": 0.92,
+      "people_count": 2,
+      "vulnerable": [
+        "oxygen_dependent"
+      ],
+      "medical": true,
+      "danger": [],
+      "needs": [
+        "medical"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T11:12:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P2",
+    "route": "medical_response",
+    "needs": [
+      "medical"
+    ],
+    "requires_human": true,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_yellow_urgent",
+      "safeguarding_serious_health"
+    ],
+    "action": "create_provisional_dispatch"
+  },
+  "notes": "Synthetic safeguarding_serious_health. Colour yellow. Calm delivery with a critical fact. Route medical_response on system_2."
+}

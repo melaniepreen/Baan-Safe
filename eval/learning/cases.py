@@ -25,6 +25,7 @@ class CallGroup:
     sapling: str
     en: str
     th: str
+    mixed: str = ""
     source: str = "human"
 
 
@@ -217,7 +218,10 @@ def group_by_id() -> dict[str, CallGroup]:
 def variants(groups: tuple[CallGroup, ...] = GROUPS) -> tuple[CallVariant, ...]:
     rows: list[CallVariant] = []
     for group in groups:
-        for language, text in (("en", group.en), ("th", group.th)):
+        languages = [("en", group.en), ("th", group.th)]
+        if group.mixed:
+            languages.append(("mixed", group.mixed))
+        for language, text in languages:
             rows.append(
                 CallVariant(
                     group_id=group.group_id,

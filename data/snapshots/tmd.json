@@ -1,0 +1,10 @@
+{
+  "checked_at": "2026-10-24T17:38:17.309067+00:00",
+  "status": "failed",
+  "url": "https://www.tmd.go.th/",
+  "data_host": "https://data.tmd.go.th/",
+  "licence": "Not applicable. No dataset was stored.",
+  "rate_limit": "data.tmd.go.th robots.txt is Disallow: /. That host was not called.",
+  "detail": "data.tmd.go.th robots.txt disallows every path, so the registered data API was not called. https://www.tmd.go.th/api/weather returned an HTML error page, not observations.",
+  "http_status": 500
+}

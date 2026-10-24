@@ -1,0 +1,136 @@
+{
+  "id": "syn-safeguarding-disability-02-mixed",
+  "group_id": "syn-safeguarding-disability-02",
+  "lang": "mixed",
+  "primary_label": "safeguarding_disability",
+  "colour": "black",
+  "labels": [
+    "niems_black_not_a_patient",
+    "safeguarding_disability"
+  ],
+  "hard_negatives": [
+    "niems_red_critical"
+  ],
+  "title": "safeguarding_disability mixed 2",
+  "tags": [
+    "synthetic",
+    "system_1",
+    "mixed",
+    "safeguarding_disability",
+    "multi_label",
+    "hard_negative"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Natee Thongtin. คนพิการ, can walk. We need water to drink."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "He can walk. ขอรับน้ำดื่ม"
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district คะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอแม่ทะ, Mae Tha District, Lampang, near Placeholder Soi 6."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people, มีกี่คน?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสองคน, two of us."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-safeguarding-disability-02-mixed",
+    "caller_id_hash": "synthetic:syn-safeguarding-disability-02",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Natee Thongtin. คนพิการ, can walk. We need water to drink."
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "He can walk. ขอรับน้ำดื่ม"
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district คะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอแม่ทะ, Mae Tha District, Lampang, near Placeholder Soi 6."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people, มีกี่คน?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสองคน, two of us."
+      }
+    ],
+    "fields": {
+      "location": "Mae Tha District, Lampang",
+      "location_confidence": 0.92,
+      "people_count": 2,
+      "vulnerable": [
+        "disability"
+      ],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "water"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [],
+    "resources": {},
+    "received_at": "2026-10-24T10:50:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_1",
+    "priority": "P3",
+    "route": "welfare_distribution",
+    "needs": [
+      "water"
+    ],
+    "requires_human": false,
+    "missing_evidence": [],
+    "acceptable_next_questions": [],
+    "labels": [
+      "niems_black_not_a_patient",
+      "safeguarding_disability"
+    ],
+    "action": "create_provisional_dispatch"
+  },
+  "notes": "Synthetic safeguarding_disability. Colour black. Route welfare_distribution on system_1."
+}

@@ -1,0 +1,145 @@
+{
+  "id": "syn-safeguarding-protection-referral-05-mixed",
+  "group_id": "syn-safeguarding-protection-referral-05",
+  "lang": "mixed",
+  "primary_label": "safeguarding_protection_referral",
+  "colour": "yellow",
+  "labels": [
+    "niems_yellow_urgent",
+    "safeguarding_protection_referral",
+    "safeguarding_child",
+    "safeguarding_older_person"
+  ],
+  "hard_negatives": [],
+  "title": "safeguarding_protection_referral mixed 5",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "mixed",
+    "safeguarding_protection_referral",
+    "multi",
+    "multi_label"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Dao Saengthong. ยายอยู่ที่บ้าน and my child is alone. Protection referral."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "ลูกอยู่คนเดียว. Grandmother is elderly."
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district คะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอบ้านหลวง, Ban Luang District, Nan, near Placeholder Soi 11."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people, มีกี่คน?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสามคน, three of us, my two kids and me."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-safeguarding-protection-referral-05-mixed",
+    "caller_id_hash": "synthetic:syn-safeguarding-protection-referral-05",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Dao Saengthong. ยายอยู่ที่บ้าน and my child is alone. Protection referral."
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "ลูกอยู่คนเดียว. Grandmother is elderly."
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district คะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอบ้านหลวง, Ban Luang District, Nan, near Placeholder Soi 11."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people, มีกี่คน?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสามคน, three of us, my two kids and me."
+      }
+    ],
+    "fields": {
+      "location": "Ban Luang District, Nan",
+      "location_confidence": 0.92,
+      "people_count": 3,
+      "vulnerable": [
+        "child",
+        "elderly"
+      ],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "shelter"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [
+      "safeguarding"
+    ],
+    "resources": {},
+    "received_at": "2026-10-24T11:29:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P2",
+    "route": "supervisor_escalation",
+    "needs": [
+      "shelter"
+    ],
+    "requires_human": true,
+    "missing_evidence": [
+      "guardian_contact_status"
+    ],
+    "acceptable_next_questions": [
+      "Is a named guardian expected, or should a supervisor take this now?"
+    ],
+    "labels": [
+      "niems_yellow_urgent",
+      "safeguarding_protection_referral",
+      "safeguarding_child",
+      "safeguarding_older_person"
+    ],
+    "action": "escalate_to_supervisor"
+  },
+  "notes": "Synthetic safeguarding_protection_referral. Colour yellow. Route supervisor_escalation on system_2."
+}

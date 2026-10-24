@@ -37,6 +37,7 @@ _JURISDICTION = {
     "triage.yaml": "TH",
     "sphere.yaml": "intl",
     "safeguarding.yaml": "intl",
+    "flood.yaml": "intl",
 }
 _FILES = (*RULE_FILES, LABELS_NAME)
 

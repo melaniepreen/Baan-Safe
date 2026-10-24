@@ -4,6 +4,7 @@ tags: [gateway, mubit, llm, routing, memory, auth]
 files:
   - gateway/route.py
   - gateway/chooser.py
+  - gateway/graduation.py
   - gateway/auth.py
   - gateway/policy.py
   - llm/client.py
@@ -20,6 +21,7 @@ One turn: enrich, retrieve memory, record a policy pre-check, route to System 1 
 
 - `gateway/route.py` — `handle`, `choose_system`, `_extract`. Owner: Moly.
 - `gateway/chooser.py` — `choose`, `system_2_triggers`. The decided `gateway.route_chooser` (`field precheck`).
+- `gateway/graduation.py` — `apply(case)` tags graduated patterns (`complex_situation`) and adds a recommendation MemoryItem after memory retrieval. Sets no priority; nothing moves to System 1.
 - `gateway/auth.py` — records the auth scheme. Does not reject the request.
 - `gateway/policy.py` — `precheck_notes`. Does not read medical fields or change priority.
 - `memory/adapter.py` — `MEMORY_IMPL=mock` (default) or `mubit`.

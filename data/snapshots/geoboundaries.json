@@ -1,0 +1,9 @@
+{
+  "checked_at": "2026-10-24T17:38:31.410097+00:00",
+  "status": "available_not_used",
+  "url": "https://www.geoboundaries.org/api/current/gbOpen/THA/ADM2/",
+  "licence": "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)",
+  "year": "2019",
+  "rate_limit": "robots.txt Crawl-delay 10. One metadata request. The geometry file is not downloaded.",
+  "detail": "ADM2 metadata answered. The gazetteer uses the HDX COD-AB spreadsheet because it carries Thai district names and centroids. Geometry URL was present: True."
+}

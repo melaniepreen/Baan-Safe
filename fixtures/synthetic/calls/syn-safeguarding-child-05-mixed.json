@@ -1,0 +1,143 @@
+{
+  "id": "syn-safeguarding-child-05-mixed",
+  "group_id": "syn-safeguarding-child-05",
+  "lang": "mixed",
+  "primary_label": "safeguarding_child",
+  "colour": "yellow",
+  "labels": [
+    "niems_yellow_urgent",
+    "safeguarding_child",
+    "safeguarding_protection_referral"
+  ],
+  "hard_negatives": [],
+  "title": "safeguarding_child mixed 5",
+  "tags": [
+    "synthetic",
+    "system_2",
+    "mixed",
+    "safeguarding_child",
+    "hard_kinship",
+    "multi_label",
+    "demo"
+  ],
+  "transcript_stream": [
+    {
+      "t_ms": 0,
+      "speaker": "caller",
+      "text": "Kwan Sainam. หลานอยู่คนเดียว at the shelter, unaccompanied."
+    },
+    {
+      "t_ms": 4200,
+      "speaker": "operator",
+      "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+    },
+    {
+      "t_ms": 8400,
+      "speaker": "caller",
+      "text": "No parent with หลาน. Protection, please."
+    },
+    {
+      "t_ms": 12600,
+      "speaker": "operator",
+      "text": "Which district คะ"
+    },
+    {
+      "t_ms": 16800,
+      "speaker": "caller",
+      "text": "อยู่ที่อำเภอสอง, Song District, Phrae, near Placeholder Soi 7."
+    },
+    {
+      "t_ms": 21000,
+      "speaker": "operator",
+      "text": "How many people, มีกี่คน?"
+    },
+    {
+      "t_ms": 25200,
+      "speaker": "caller",
+      "text": "มีสามคน, three of us, but หลาน is alone."
+    }
+  ],
+  "case_state": {
+    "case_id": "syn-safeguarding-child-05-mixed",
+    "caller_id_hash": "synthetic:syn-safeguarding-child-05",
+    "transcript": [
+      {
+        "t_ms": 0,
+        "speaker": "caller",
+        "text": "Kwan Sainam. หลานอยู่คนเดียว at the shelter, unaccompanied."
+      },
+      {
+        "t_ms": 4200,
+        "speaker": "operator",
+        "text": "Is anyone hurt, หรือน้ำเข้าบ้าน?"
+      },
+      {
+        "t_ms": 8400,
+        "speaker": "caller",
+        "text": "No parent with หลาน. Protection, please."
+      },
+      {
+        "t_ms": 12600,
+        "speaker": "operator",
+        "text": "Which district คะ"
+      },
+      {
+        "t_ms": 16800,
+        "speaker": "caller",
+        "text": "อยู่ที่อำเภอสอง, Song District, Phrae, near Placeholder Soi 7."
+      },
+      {
+        "t_ms": 21000,
+        "speaker": "operator",
+        "text": "How many people, มีกี่คน?"
+      },
+      {
+        "t_ms": 25200,
+        "speaker": "caller",
+        "text": "มีสามคน, three of us, but หลาน is alone."
+      }
+    ],
+    "fields": {
+      "location": "Song District, Phrae",
+      "location_confidence": 0.92,
+      "people_count": 3,
+      "vulnerable": [
+        "child"
+      ],
+      "medical": false,
+      "danger": [],
+      "needs": [
+        "shelter"
+      ]
+    },
+    "memory_context": [],
+    "policy_flags": [
+      "safeguarding"
+    ],
+    "resources": {},
+    "received_at": "2026-10-24T10:29:00Z"
+  },
+  "memory_context": [],
+  "expected": {
+    "system": "system_2",
+    "priority": "P2",
+    "route": "supervisor_escalation",
+    "needs": [
+      "shelter"
+    ],
+    "requires_human": true,
+    "missing_evidence": [
+      "guardian_contact_status"
+    ],
+    "acceptable_next_questions": [
+      "Is a named guardian expected, or should a supervisor take this now?"
+    ],
+    "labels": [
+      "niems_yellow_urgent",
+      "safeguarding_child",
+      "safeguarding_protection_referral"
+    ],
+    "action": "escalate_to_supervisor"
+  },
+  "notes": "Synthetic safeguarding_child. Colour yellow. Route supervisor_escalation on system_2."
+}
