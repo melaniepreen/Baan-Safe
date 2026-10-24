@@ -1,12 +1,10 @@
 """Keyword extraction for the fast path. Owner: Moly.
 
 This is the decided `system1.extraction_method` (`rules-only`). Keyword
-phrases are English and Thai (glossary-backed): caller turns are
-sentence-split, matched against phrase and regex families, and a match is
-dropped when a negator sits within the three words before it (English) or a
-Thai negator prefix sits immediately before it. Thai phrases use substring
-match because script does not rely on spaces the way English word boundaries
-do. District names also match the Thai and English gazetteer.
+phrases are English: caller turns are sentence-split, matched against phrase
+and regex families, and a match is dropped when a negator sits within the
+three words before it. District names also match the Thai and English
+gazetteer.
 Aid phrases and minimising phrases are exempt from negation — "we cannot get
 the payment" and "not eligible" are exactly the signal. The returned flags
 are suggestions for `CaseState.policy_flags`; the gateway attaches them.
@@ -20,64 +18,13 @@ from contracts.models import ExtractedFields, Need, TranscriptTurn
 
 NEGATORS = {"no", "not", "nobody", "never", "don't", "isn't", "aren't", "wasn't"}
 
-# Longest-first. "ไม่ได้ติด" = did not get trapped; "เดินไม่ได้" is a positive
-# immobile phrase matched as a whole unit, not via the bare stem.
-THAI_NEGATOR_PREFIXES = (
-    "ไม่มีใคร",
-    "ไม่มีคน",
-    "ไม่ได้",
-    "ยังไม่",
-    "ไม่ใช่",
-    "ไม่",
-)
-
-_THAI_CHAR = re.compile(r"[\u0e00-\u0e7f]")
-_THAI_RUN = re.compile(r"[\u0e00-\u0e7f]+")
-
 _SENTENCE_END = re.compile(r"[.!?]+")
 _WORD = re.compile(r"[a-z']+")
 
 NEED_PHRASES: list[tuple[Need, tuple[str, ...]]] = [
-    (
-        Need.water,
-        (
-            "drinking water",
-            "bottles",
-            "water bottles",
-            "water to drink",
-            "need water",
-            "only need water",
-            "น้ำดื่ม",
-            "ขอน้ำดื่ม",
-            "ขอรับน้ำดื่ม",
-            "ต้องการน้ำดื่ม",
-            "น้ำขวด",
-        ),
-    ),
-    (
-        Need.food,
-        (
-            "rice",
-            "food",
-            "eat",
-            "อาหาร",
-            "ข้าวสาร",
-            "ต้องการอาหาร",
-            "ขอรับอาหาร",
-            "ไม่มีข้าว",
-            "ข้าวหมด",
-        ),
-    ),
-    (
-        Need.shelter,
-        (
-            "shelter",
-            "ที่พักพิง",
-            "ที่พัก",
-            "ศูนย์อพยพ",
-            "จุดอพยพ",
-        ),
-    ),
+    (Need.water, ("drinking water", "bottles", "water bottles", "water to drink", "need water", "only need water")),
+    (Need.food, ("rice", "food", "eat")),
+    (Need.shelter, ("shelter",)),
     (
         Need.evacuation,
         (
@@ -89,34 +36,10 @@ NEED_PHRASES: list[tuple[Need, tuple[str, ...]]] = [
             "time to leave",
             "need to leave",
             "told to leave",
-            "อพยพ",
         ),
     ),
-    (
-        Need.power,
-        (
-            "power",
-            "electricity",
-            "blackout",
-            "ไฟดับ",
-        ),
-    ),
-    (
-        Need.rescue,
-        (
-            "trapped",
-            "can't get out",
-            "cannot get out",
-            "on the roof",
-            "help us get out",
-            "ออกไปไม่ได้",
-            "ติดอยู่บนหลังคา",
-            "อยู่บนหลังคา",
-            "บนหลังคา",
-            "ติดอยู่ในน้ำ",
-            "ติดอยู่",
-        ),
-    ),
+    (Need.power, ("power", "electricity", "blackout")),
+    (Need.rescue, ("trapped", "can't get out", "cannot get out", "on the roof", "help us get out")),
     (
         Need.medical,
         (
@@ -130,19 +53,6 @@ NEED_PHRASES: list[tuple[Need, tuple[str, ...]]] = [
             "breathing",
             "unconscious",
             "injury",
-            "ออกซิเจน",
-            # bare ยา matches inside พะเยา / ยาย / อยาก — use longer forms only
-            "ต้องการยา",
-            "ขอยา",
-            "ยาหมด",
-            "ล้างไต",
-            "หมดสติ",
-            "เลือดออก",
-            "หายใจไม่ออก",
-            "หายใจลำบาก",
-            "หอบ",
-            "แผล",
-            "บาดเจ็บ",
         ),
     ),
 ]
@@ -155,9 +65,6 @@ INFORMATION_PATTERNS = (
     r"\bwhat time\b",
     r"\bis the\b[^.!?]*\bopen\b",
     r"\bupdate\b",
-    r"เมื่อไร",
-    r"เปิดกี่โมง",
-    r"กี่โมง",
 )
 
 # Aid phrases are exempt from negation: "we cannot get the payment" and
@@ -194,33 +101,8 @@ DANGER_PHRASES: dict[str, tuple[str, ...]] = {
         "water is inside",
         "water coming in",
         "coming up the step",
-        # Thai: specific depth / ingress phrases (not bare น้ำท่วม — that appears
-        # in information calls about flood announcements).
-        "น้ำถึงประตู",
-        "น้ำถึงบันได",
-        "น้ำถึงอก",
-        "น้ำถึงเข่า",
-        "ถึงประตู",
-        "น้ำเข้าบ้าน",
-        "น้ำท่วมเข้ามาในบ้าน",
-        "น้ำท่วมเข้ามา",
-        "น้ำอยู่ในบ้าน",
-        "น้ำลึก",
     ),
 }
-
-# Thai door/house water — sets the same rescue-inference flag as the English
-# building/house regexes.
-THAI_WATER_AT_DOOR_OR_HOUSE = (
-    "น้ำถึงประตู",
-    "น้ำถึงบันได",
-    "น้ำถึงอก",
-    "ถึงประตู",
-    "น้ำเข้าบ้าน",
-    "น้ำท่วมเข้ามาในบ้าน",
-    "น้ำท่วมเข้ามา",
-    "น้ำอยู่ในบ้าน",
-)
 
 _WATER_AT_BUILDING = re.compile(
     r"\b(?:water|it)\s+(?:is\s+|was\s+)?"
@@ -242,23 +124,8 @@ _WATER_AT_STREET_END = re.compile(
     r"(?:lane|road|street|soi)\b"
 )
 
-# Thai strings below are additive (glossary + synthetic callers). Keep English
-# plurals intact for the safeguarding-plurals path; do not reorder them away.
 VULNERABLE_PHRASES: dict[str, tuple[str, ...]] = {
-    "elderly": (
-        "grandmother",
-        "grandfather",
-        "elderly",
-        "old",
-        "ผู้สูงอายุ",
-        "คนแก่",
-        "อายุมาก",
-        "ยาย",
-        "ตา",
-        "ปู่",
-        "ป้า",
-        "ลุง",
-    ),
+    "elderly": ("grandmother", "grandfather", "elderly", "old"),
     "child": (
         "children",
         "grandchild",
@@ -271,15 +138,8 @@ VULNERABLE_PHRASES: dict[str, tuple[str, ...]] = {
         "son",
         "daughter",
         "infant",
-        "เด็ก",
-        "ลูก",
-        "หลาน",
-        "ทารก",
     ),
-    "oxygen_dependent": (
-        "oxygen",
-        "ออกซิเจน",
-    ),
+    "oxygen_dependent": ("oxygen",),
     "immobile": (
         "can't walk",
         "cannot walk",
@@ -288,10 +148,6 @@ VULNERABLE_PHRASES: dict[str, tuple[str, ...]] = {
         "bed-bound",
         "immobile",
         "can't climb",
-        "เดินไม่ได้",
-        "ติดเตียง",
-        "รถเข็น",
-        "ขึ้นชั้นบนไม่ได้",
     ),
 }
 
@@ -315,8 +171,6 @@ MINIMISING_PHRASES = (
     "it's nothing",
     "we only need",
     "just tell me",
-    "ล้อเล่น",
-    "ไม่มีอะไร",
 )
 
 ALONE_PHRASES = (
@@ -333,10 +187,6 @@ ALONE_PHRASES = (
     "lost my mum",
     "lost my dad",
     "lost my parents",
-    "คนเดียว",
-    "ลำพัง",
-    "ไม่มีผู้ใหญ่",
-    "ไม่มีพ่อแม่",
 )
 
 MINIMISING_VULNERABLE = {"child", "elderly", "immobile"}
@@ -372,11 +222,8 @@ DISTRICT_ALIASES = {
 NUMBER_WORDS = {
     "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
     "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
-    "หนึ่ง": 1, "สอง": 2, "สาม": 3, "สี่": 4, "ห้า": 5,
-    "หก": 6, "เจ็ด": 7, "แปด": 8, "เก้า": 9, "สิบ": 10,
 }
 _NUMBER = r"(one|two|three|four|five|six|seven|eight|nine|ten|\d+)"
-_THAI_NUMBER = r"(หนึ่ง|สอง|สาม|สี่|ห้า|หก|เจ็ด|แปด|เก้า|สิบ|\d+)"
 
 _PEOPLE_COUNT = re.compile(_NUMBER + r"\s+(people|persons|adults|of us)\b")
 _COUNT_PATTERNS = (
@@ -384,7 +231,6 @@ _COUNT_PATTERNS = (
     re.compile(r"\bwe are " + _NUMBER + r"\b"),
     re.compile(r"\ba family of " + _NUMBER + r"\b"),
 )
-_THAI_PEOPLE_COUNT = re.compile(r"มี\s*" + _THAI_NUMBER + r"\s*คน")
 _ME_AND_MY = re.compile(r"\bme and my [a-z]+\b")
 _JUST_ME = re.compile(r"\b(just me|only me)\b")
 _BARE_NUMBER = re.compile(r"^" + _NUMBER + r"\s*$")
@@ -439,58 +285,14 @@ def _sentences(transcript: list[TranscriptTurn]) -> list[str]:
     return _split(text)
 
 
-def _is_thai_phrase(phrase: str) -> bool:
-    return _THAI_CHAR.search(phrase) is not None
-
-
 def _negated(sentence: str, start: int) -> bool:
     """True when a negator sits within the three words before `start`."""
     words = _WORD.findall(sentence[:start])
     return any(word in NEGATORS for word in words[-3:])
 
 
-def _thai_negated(sentence: str, start: int) -> bool:
-    """True when a Thai negator prefix sits immediately before `start`.
-
-    Also allows a short glued particle or verb (1–4 Thai chars, no space)
-    between the negator and the phrase, so ไม่ได้ใช้รถเข็น drops รถเข็น.
-    """
-    before = sentence[:start]
-    for prefix in THAI_NEGATOR_PREFIXES:
-        if before.endswith(prefix):
-            return True
-        index = before.rfind(prefix)
-        if index < 0:
-            continue
-        between = before[index + len(prefix) :]
-        if (
-            between
-            and len(between) <= 4
-            and " " not in between
-            and _THAI_RUN.fullmatch(between) is not None
-        ):
-            return True
-    return False
-
-
-def _match_thai(sentence: str, phrase: str) -> bool:
-    """Substring match for Thai; drop when a Thai negator prefix precedes."""
-    start = 0
-    while True:
-        index = sentence.find(phrase, start)
-        if index < 0:
-            return False
-        if not _thai_negated(sentence, index):
-            return True
-        start = index + len(phrase)
-
-
 def _match_any(sentence: str, phrases: tuple[str, ...]) -> bool:
     for phrase in phrases:
-        if _is_thai_phrase(phrase):
-            if _match_thai(sentence, phrase):
-                return True
-            continue
         for match in re.finditer(r"\b" + re.escape(phrase) + r"\b", sentence):
             if not _negated(sentence, match.start()):
                 return True
@@ -499,10 +301,6 @@ def _match_any(sentence: str, phrases: tuple[str, ...]) -> bool:
 
 def _match_need(sentence: str, need: Need, phrases: tuple[str, ...]) -> bool:
     for phrase in phrases:
-        if _is_thai_phrase(phrase):
-            if _match_thai(sentence, phrase):
-                return True
-            continue
         for match in re.finditer(r"\b" + re.escape(phrase) + r"\b", sentence):
             if _negated(sentence, match.start()):
                 continue
@@ -633,7 +431,7 @@ def _people_count(sentences: list[str]) -> int | None:
             count = 1
         if _ME_AND_MY.search(stripped):
             count = 2
-        for pattern in (_PEOPLE_COUNT, *_COUNT_PATTERNS, _THAI_PEOPLE_COUNT):
+        for pattern in (_PEOPLE_COUNT, *_COUNT_PATTERNS):
             for match in pattern.finditer(stripped):
                 count = _number(match.group(1))
         breakdown = _BREAKDOWN.search(stripped)
@@ -673,9 +471,6 @@ def extract(
         if _match_any(sentence, DANGER_PHRASES["rising_water"]):
             rising_water = True
         if _match_regex(sentence, _WATER_AT_BUILDING) or _match_regex(sentence, _WATER_INSIDE_HOUSE):
-            rising_water = True
-            water_at_door_or_house = True
-        if _match_any(sentence, THAI_WATER_AT_DOOR_OR_HOUSE):
             rising_water = True
             water_at_door_or_house = True
         if _match_regex(sentence, _WATER_IN_STREET) or _match_regex(sentence, _WATER_AT_STREET_END):
@@ -728,9 +523,7 @@ def extract(
         or any(tag in vulnerable for tag in MINIMISING_VULNERABLE)
     ):
         flags.append("conflicting_evidence")
-    if "child" in vulnerable and any(
-        _match_any(sentence, ALONE_PHRASES) for sentence in sentences
-    ):
+    if "child" in vulnerable and any(phrase in text for phrase in ALONE_PHRASES):
         flags.append("safeguarding")
     if aid and (
         any(phrase in text for phrase in AID_EXCEPTION_PHRASES)
