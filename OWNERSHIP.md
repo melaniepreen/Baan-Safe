@@ -17,7 +17,7 @@ Mubit governs memory, policy, and traceability. System 1 acts fast. System 2 rea
 |---|---|---|
 | `gateway/` | Moly | `handle(..., use_stubs=True)` routes to one system, records that system's outcome, and does not evaluate escalation rules |
 | `router/` | Moly | `merge()` raises `NotImplementedError`. The stub gateway copies one outcome. It does not call `merge()` |
-| `ui/` | Moly | Transcript player only. Framework is `TODO_HUMAN`. Melanie's caseworker view is not built |
+| `ui/` | Moly | Transcript player, and `ui/sim/` the fixed-camera town. Framework is still `TODO_HUMAN`. Melanie's caseworker view is not built |
 | `system1/` | Moly for `decide()`, Melanie for `aid_eligibility.py` | Both raise |
 | `system2/` | Melanie | `decide()` raises while the orchestrator is unset. After reasoning, Sapling runs for aid eligibility and denials. The committed client is the stub |
 | `llm/` | Shared rule, Melanie wires the call | Refuses unless `MUBIT_BASE_URL` is a Mubit host. Does not print the key |

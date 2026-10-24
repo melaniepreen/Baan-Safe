@@ -46,13 +46,15 @@ make demo-stub      # gateway.handle(..., use_stubs=True) for every fixture
 make demo-correction-loop  # stub: correction -> JSONL -> model version -> before/after
 make eval-learning  # stub: held-out correction eval, writes eval/out/learning.md
 make latte-bench    # third-party latte-bench by reference; skips if bun or the checkout is missing
-make serve          # API on :8000, docs at /docs
+make serve          # API on :8000, docs at /docs, town sim at /ui/sim/
 make ingest         # public sources, using the cache
 make ingest-refresh # ignore the cache
 make data-report    # rewrite data/SOURCES.md
 ```
 
 `make` uses `python3` unless you pass `PYTHON=.venv/bin/python`.
+
+The town simulation is static files in `ui/sim/`. `make serve` mounts them at [http://127.0.0.1:8000/ui/sim/](http://127.0.0.1:8000/ui/sim/). It is a fixed isometric view (PixiJS, no GPU vendor requirement). `Play 20 calls` sends each scripted fixture through `POST /triage` and lights the house with the priority the gateway returns. How it sits on the contracts is `ui/sim/README.md`.
 
 ## API switches
 

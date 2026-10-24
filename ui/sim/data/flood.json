@@ -1,0 +1,300 @@
+{
+  "type": "FeatureCollection",
+  "properties": {
+    "crs_note": "Local metres. x east, y south toward the fixed camera. Not WGS84. Not a household address.",
+    "placeholder": true,
+    "live_layer": "/map/flood is the ingested WGS84 flood polygons. This file is the block overlay."
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "hazard_id": "haz-flood-canal",
+        "kind": "flood",
+        "summary": "Placeholder canal water along the west edge of the synthetic block.",
+        "location_label": "synthetic operator block",
+        "depth_m": 1.6,
+        "placeholder": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              0,
+              8
+            ],
+            [
+              34,
+              8
+            ],
+            [
+              34,
+              412
+            ],
+            [
+              0,
+              412
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "hazard_id": "haz-flood-south-deep",
+        "kind": "flood",
+        "summary": "Deeper standing water in the southern lanes. The temple compound is the hole in this polygon.",
+        "location_label": "synthetic operator block",
+        "depth_m": 0.9,
+        "placeholder": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              30,
+              328
+            ],
+            [
+              530,
+              328
+            ],
+            [
+              530,
+              412
+            ],
+            [
+              30,
+              412
+            ]
+          ],
+          [
+            [
+              142,
+              326
+            ],
+            [
+              220,
+              326
+            ],
+            [
+              220,
+              392
+            ],
+            [
+              142,
+              392
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "hazard_id": "haz-flood-streets",
+        "kind": "flood",
+        "summary": "Shallow floodwater on the main road and the lanes south of it.",
+        "location_label": "synthetic operator block",
+        "depth_m": 0.45,
+        "placeholder": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              30,
+              180
+            ],
+            [
+              530,
+              180
+            ],
+            [
+              530,
+              328
+            ],
+            [
+              30,
+              328
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "hazard_id": "haz-flood-soi-khlong",
+        "kind": "flood",
+        "summary": "Water sitting in the northern section of Soi Chamlong Khlong.",
+        "location_label": "synthetic operator block",
+        "depth_m": 0.35,
+        "placeholder": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              44,
+              40
+            ],
+            [
+              52,
+              40
+            ],
+            [
+              52,
+              180
+            ],
+            [
+              44,
+              180
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "hazard_id": "haz-flood-soi-wat-fa",
+        "kind": "flood",
+        "summary": "Water sitting in the northern section of Soi Chamlong Wat Fa.",
+        "location_label": "synthetic operator block",
+        "depth_m": 0.35,
+        "placeholder": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              127.8,
+              36
+            ],
+            [
+              136.2,
+              36
+            ],
+            [
+              136.2,
+              180
+            ],
+            [
+              127.8,
+              180
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "hazard_id": "haz-flood-soi-talat",
+        "kind": "flood",
+        "summary": "Water sitting in the northern section of Soi Chamlong Talat.",
+        "location_label": "synthetic operator block",
+        "depth_m": 0.35,
+        "placeholder": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              223.8,
+              40
+            ],
+            [
+              232.2,
+              40
+            ],
+            [
+              232.2,
+              180
+            ],
+            [
+              223.8,
+              180
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "hazard_id": "haz-flood-soi-fai",
+        "kind": "flood",
+        "summary": "Water sitting in the northern section of Soi Chamlong Sai Fai.",
+        "location_label": "synthetic operator block",
+        "depth_m": 0.35,
+        "placeholder": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              416,
+              48
+            ],
+            [
+              424,
+              48
+            ],
+            [
+              424,
+              180
+            ],
+            [
+              416,
+              180
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "hazard_id": "haz-flood-soi-bon",
+        "kind": "flood",
+        "summary": "Shallow water on Soi Chamlong Bon.",
+        "location_label": "synthetic operator block",
+        "depth_m": 0.3,
+        "placeholder": true
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              56,
+              68.4
+            ],
+            [
+              470,
+              68.4
+            ],
+            [
+              470,
+              75.6
+            ],
+            [
+              56,
+              75.6
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

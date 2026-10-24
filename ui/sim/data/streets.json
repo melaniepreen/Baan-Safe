@@ -1,0 +1,212 @@
+{
+  "note": "Not a cadastral map and not one real town. Street names are placeholders in streets.json. Household location_label stays the fixture district. Plots are local metres, not home addresses. F12's blue temple and F06's north hall are the invented landmarks from the fixtures.",
+  "streets": [
+    {
+      "id": "thanon-chamlong-nam-thuam",
+      "name_th": "ถนนจำลองน้ำท่วม",
+      "name_en": "PLACEHOLDER · Thanon Chamlong Nam Thuam",
+      "kind": "main",
+      "placeholder": true,
+      "axis": "h",
+      "fixed": 196,
+      "start": 16,
+      "end": 524,
+      "width_m": 16,
+      "points": [
+        [
+          16,
+          196
+        ],
+        [
+          524,
+          196
+        ]
+      ],
+      "poles": true
+    },
+    {
+      "id": "soi-chamlong-bon",
+      "name_th": "ซอยจำลองบน",
+      "name_en": "PLACEHOLDER · Soi Chamlong Bon",
+      "kind": "soi",
+      "placeholder": true,
+      "axis": "h",
+      "fixed": 72,
+      "start": 56,
+      "end": 470,
+      "width_m": 6.5,
+      "points": [
+        [
+          56,
+          72
+        ],
+        [
+          470,
+          72
+        ]
+      ],
+      "poles": false
+    },
+    {
+      "id": "soi-chamlong-lang",
+      "name_th": "ซอยจำลองล่าง",
+      "name_en": "PLACEHOLDER · Soi Chamlong Lang",
+      "kind": "soi",
+      "placeholder": true,
+      "axis": "h",
+      "fixed": 312,
+      "start": 56,
+      "end": 490,
+      "width_m": 7,
+      "points": [
+        [
+          56,
+          312
+        ],
+        [
+          490,
+          312
+        ]
+      ],
+      "poles": false
+    },
+    {
+      "id": "soi-chamlong-khlong",
+      "name_th": "ซอยจำลองคลอง",
+      "name_en": "PLACEHOLDER · Soi Chamlong Khlong",
+      "kind": "soi",
+      "placeholder": true,
+      "axis": "v",
+      "fixed": 48,
+      "start": 24,
+      "end": 400,
+      "width_m": 5.5,
+      "points": [
+        [
+          48,
+          24
+        ],
+        [
+          48,
+          400
+        ]
+      ],
+      "poles": false
+    },
+    {
+      "id": "soi-chamlong-wat-fa",
+      "name_th": "ซอยจำลองวัดฟ้า",
+      "name_en": "PLACEHOLDER · Soi Chamlong Wat Fa",
+      "kind": "soi",
+      "placeholder": true,
+      "axis": "v",
+      "fixed": 132,
+      "start": 24,
+      "end": 400,
+      "width_m": 7,
+      "points": [
+        [
+          132,
+          24
+        ],
+        [
+          132,
+          400
+        ]
+      ],
+      "poles": false
+    },
+    {
+      "id": "soi-chamlong-talat",
+      "name_th": "ซอยจำลองตลาด",
+      "name_en": "PLACEHOLDER · Soi Chamlong Talat",
+      "kind": "soi",
+      "placeholder": true,
+      "axis": "v",
+      "fixed": 228,
+      "start": 32,
+      "end": 396,
+      "width_m": 7,
+      "points": [
+        [
+          228,
+          32
+        ],
+        [
+          228,
+          396
+        ]
+      ],
+      "poles": false
+    },
+    {
+      "id": "soi-chamlong-ho-nuea",
+      "name_th": "ซอยจำลองหอเหนือ",
+      "name_en": "PLACEHOLDER · Soi Chamlong Ho Nuea",
+      "kind": "soi",
+      "placeholder": true,
+      "axis": "v",
+      "fixed": 324,
+      "start": 196,
+      "end": 404,
+      "width_m": 7.5,
+      "points": [
+        [
+          324,
+          196
+        ],
+        [
+          324,
+          404
+        ]
+      ],
+      "poles": false
+    },
+    {
+      "id": "soi-chamlong-fai",
+      "name_th": "ซอยจำลองสายไฟ",
+      "name_en": "PLACEHOLDER · Soi Chamlong Sai Fai",
+      "kind": "soi",
+      "placeholder": true,
+      "axis": "v",
+      "fixed": 420,
+      "start": 40,
+      "end": 380,
+      "width_m": 6.5,
+      "points": [
+        [
+          420,
+          40
+        ],
+        [
+          420,
+          380
+        ]
+      ],
+      "poles": false
+    },
+    {
+      "id": "khlong-chamlong",
+      "name_th": "คลองจำลอง",
+      "name_en": "PLACEHOLDER · Khlong Chamlong",
+      "kind": "canal",
+      "placeholder": true,
+      "axis": "v",
+      "fixed": 22,
+      "start": 30,
+      "end": 400,
+      "width_m": 14,
+      "points": [
+        [
+          22,
+          30
+        ],
+        [
+          22,
+          400
+        ]
+      ],
+      "poles": false
+    }
+  ]
+}

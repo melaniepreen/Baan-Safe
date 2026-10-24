@@ -67,6 +67,8 @@ def main() -> int:
     check("docs", client.get("/docs"))
     check("openapi", client.get("/openapi.json"))
     check("player", client.get("/ui/player.html"))
+    check("town-sim", client.get("/ui/sim/index.html"))
+    check("town-data", client.get("/ui/sim/data/town.json"))
     failed = [name for name, _status, ok in checks if not ok]
     if failed:
         print("failed:", ", ".join(failed))
