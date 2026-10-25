@@ -7,9 +7,18 @@
 
 export const S2_LABEL = {
   real: "live via Mubit",
-  cache: "cache (replays, Mubit on miss)",
-  stub: "stub",
+  cache: "replaying saved answers, live via Mubit on new calls",
+  stub: "sample answers, no model call",
 };
+
+/* Plain words for the memory backend. `dormant` wins: that deploy remembers nothing. */
+export function MEMORY_LABEL(mode, dormant) {
+  if (dormant) return "off (Mubit memory API unavailable)";
+  if (mode === "local") return "on (BaanSafe store)";
+  if (mode === "mubit") return "on (Mubit)";
+  if (mode === "mock") return "sample files";
+  return "checking…";
+}
 
 function text(value) {
   return value == null ? "" : String(value);
@@ -62,19 +71,19 @@ export function hostingLabel(hosting, health) {
     };
   }
   const s2 = system2Mode(hosting, health);
-  const s2Label = s2 ? S2_LABEL[s2] || s2 : "unknown";
-  const memory = memoryMode(hosting, health) || "unknown";
+  const s2Label = s2 ? S2_LABEL[s2] || s2 : "checking…";
+  const memory = memoryMode(hosting, health);
   const dormant = memoryDormant(hosting, health);
   const warning = dormant
     ? text(health && health.memory && health.memory.warning) ||
       "MEMORY_IMPL=mubit is dormant: Mubit has no memory API today. Set MEMORY_IMPL=local."
     : null;
-  let credentials = "unknown";
-  if (hosting && typeof hosting.secrets === "boolean") credentials = hosting.secrets ? "yes" : "no";
+  let credentials = "checking…";
+  if (hosting && typeof hosting.secrets === "boolean") credentials = hosting.secrets ? "connected" : "not connected";
   const parts = [
-    "System 2: " + s2Label,
-    "Memory: " + memory + (dormant ? " (dormant!)" : ""),
-    "Mubit credentials: " + credentials,
+    "System 2 (Nemotron): " + s2Label,
+    "Case memory: " + MEMORY_LABEL(memory, dormant),
+    "Mubit: " + credentials,
   ];
   let tone = "muted";
   if (dormant) tone = "error";

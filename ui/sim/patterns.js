@@ -1,9 +1,10 @@
 /* Simulated pattern memory for the town demo.
 
-   Mirrors correction_loop.escalation_threshold: after enough consistent
-   repeats the pattern graduates to System 2 as complex_situation.
-   This is not RL_OVERLAY promotion into System 1, and it does not change
-   the stub gateway outcome.
+   Mirrors correction_loop.escalation_threshold: after enough matching
+   corrections the pattern is tagged complex_situation and goes to System 2
+   first. Graduation into System 1 rules is the RL loop's job (RL_OVERLAY,
+   eval/rl), which this simulated memory does not run. It does not change
+   the gateway outcome.
 */
 export const PATTERN_KEY = "baansafe.sim.pattern-memory";
 
@@ -81,7 +82,7 @@ export function decidePath({
       explain:
         "This pattern has " +
         after +
-        " consistent corrections, so it graduates to System 2 as a complex situation. It does not enter the System 1 fast path (RL_OVERLAY is off on this desk).",
+        " matching corrections, so the desk treats it as complex: it skips the fast path and goes to Nemotron first, with a person approving. Once Nemotron settles on the same answer repeatedly, the RL loop graduates the pattern into System 1 rules — fast, deterministic, no model call. That last step (RL_OVERLAY) is off on this desk.",
       timesBefore: prior,
     };
   }
