@@ -1,0 +1,8 @@
+{"chosen":"niems_yellow_urgent","prompt":"case_id: RL-WEAK-1\nlang: en","rejected":"sphere_water_short"}
+{"chosen":"create_provisional_dispatch","prompt":"case_id: SIM-sim-switch-nan\nlang: en","rejected":"escalate_to_supervisor"}
+{"chosen":"create_provisional_dispatch","prompt":"case_id: SIM-sim-under-lampang\nlang: en","rejected":"escalate_to_supervisor"}
+{"chosen":"create_provisional_dispatch","prompt":"case_id: SIM-sim-over-phrae\nlang: en","rejected":"escalate_to_supervisor"}
+{"chosen":"ask_next_question","prompt":"case_id: SIM-sim-omit-phayao\nlang: en","rejected":"escalate_to_supervisor"}
+{"chosen":"finalize_case","prompt":"case_id: RL-ROAD-3\nlang: en","rejected":"ask_next_question"}
+{"chosen":"create_provisional_dispatch","prompt":"case_id: SIM-sim-under-nan\nlang: en","rejected":"escalate_to_supervisor"}
+{"chosen":"ask_next_question","prompt":"case_id: SIM-sim-omit-phrae\nlang: en","rejected":"escalate_to_supervisor"}

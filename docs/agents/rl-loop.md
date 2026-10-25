@@ -45,6 +45,7 @@ Score System 1 / System 2 outcomes in a reward loop. A System 1 escalate cascade
 
 - `python -m eval.rl --s2 fake --epochs 3` — road-info and cold-hall graduate, quiet-grandmother and upstairs-water recommend, weak-grandfather-water demotes, aid never graduates.
 - `make rl-loop-replay` (cache only, no network). `make rl-loop` only with Mubit env.
+- `eval/out/` is gitignored. `make rl-snapshot` copies a run into `eval/snapshots/rl/<stamp>-<MEMORY_IMPL>/` (committed); `make rl-restore SNAPSHOT=<folder>` copies one back so replay and `/rl/run` work on a fresh clone. Two 25 Oct runs are kept there (memory empty vs memory local); see its README.
 - `tests/test_rl_loop.py` (fake + mocked live/replay traces), `tests/test_cascade.py`, `tests/test_overlay.py`, `tests/test_orchestrator.py`.
 - `GET /rl/run` and `GET /metrics` on `make serve`.
 

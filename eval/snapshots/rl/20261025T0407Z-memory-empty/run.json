@@ -1,0 +1,3445 @@
+{
+  "bandit_log_tail": [
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "G01",
+      "coarse": "needs=rescue|vuln=elderly|danger=rising_water|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 2,
+      "pick": "system_2",
+      "seq": 46
+    },
+    {
+      "actual": [
+        "system_1"
+      ],
+      "agree": false,
+      "case_id": "F06",
+      "coarse": "needs=evacuation|vuln=none|danger=rising_water|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 2,
+      "pick": "system_2",
+      "seq": 47
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "F13",
+      "coarse": "needs=shelter|vuln=none|danger=none|medical=0|loc=none|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 0
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "C01-b",
+      "coarse": "needs=rescue|vuln=elderly|danger=rising_water|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 1
+    },
+    {
+      "actual": [
+        "system_1",
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "RL-UP-1",
+      "coarse": "needs=none|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 2
+    },
+    {
+      "actual": [
+        "system_1"
+      ],
+      "agree": true,
+      "case_id": "RL-ROAD-2",
+      "coarse": "needs=none|vuln=none|danger=none|medical=0|loc=ok|people=unknown|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 3
+    },
+    {
+      "actual": [
+        "system_1"
+      ],
+      "agree": true,
+      "case_id": "F09",
+      "coarse": "needs=water|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 4
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "F11",
+      "coarse": "needs=medical,rescue|vuln=elderly,immobile|danger=rising_water|medical=1|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 5
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "C01-a",
+      "coarse": "needs=rescue|vuln=elderly|danger=rising_water|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 6
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "RL-WEAK-2",
+      "coarse": "needs=water|vuln=elderly|danger=none|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 7
+    },
+    {
+      "actual": [
+        "system_1"
+      ],
+      "agree": true,
+      "case_id": "F02",
+      "coarse": "needs=food|vuln=child|danger=none|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 8
+    },
+    {
+      "actual": [
+        "system_1",
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "RL-COLD-1",
+      "coarse": "needs=none|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 9
+    },
+    {
+      "actual": [
+        "system_1"
+      ],
+      "agree": true,
+      "case_id": "F01",
+      "coarse": "needs=water|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 10
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "F18",
+      "coarse": "needs=aid_payment|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=aid_exception",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 11
+    },
+    {
+      "actual": [
+        "system_1"
+      ],
+      "agree": true,
+      "case_id": "RL-ROAD-1",
+      "coarse": "needs=none|vuln=none|danger=none|medical=0|loc=ok|people=unknown|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 12
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "F16",
+      "coarse": "needs=shelter|vuln=child|danger=none|medical=0|loc=ok|people=known|flags=safeguarding",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 13
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "F12",
+      "coarse": "needs=rescue|vuln=none|danger=rising_water|medical=0|loc=low|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 14
+    },
+    {
+      "actual": [
+        "system_1"
+      ],
+      "agree": true,
+      "case_id": "SIM-sim-clear-lampang",
+      "coarse": "needs=water|vuln=none|danger=none|medical=0|loc=ok|people=unknown|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 15
+    },
+    {
+      "actual": [
+        "system_1",
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "RL-GRAN-2",
+      "coarse": "needs=none|vuln=elderly|danger=none|medical=0|loc=ok|people=unknown|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 16
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "RL-AID-1",
+      "coarse": "needs=aid_payment|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=aid_exception",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 17
+    },
+    {
+      "actual": [
+        "system_1"
+      ],
+      "agree": true,
+      "case_id": "F03",
+      "coarse": "needs=shelter|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 18
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": false,
+      "case_id": "RL-WEAK-1",
+      "coarse": "needs=water|vuln=elderly|danger=none|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 19
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "G01",
+      "coarse": "needs=rescue|vuln=elderly|danger=rising_water|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 20
+    },
+    {
+      "actual": [
+        "system_1",
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "RL-COLD-2",
+      "coarse": "needs=none|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 21
+    },
+    {
+      "actual": [
+        "system_1"
+      ],
+      "agree": true,
+      "case_id": "F08",
+      "coarse": "needs=water|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 22
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "SIM-sim-switch-nan",
+      "coarse": "needs=rescue|vuln=none|danger=rising_water|medical=0|loc=ok|people=unknown|flags=none",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 23
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "RL-AID-2",
+      "coarse": "needs=aid_payment|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=aid_exception",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 24
+    },
+    {
+      "actual": [
+        "system_1"
+      ],
+      "agree": true,
+      "case_id": "F06",
+      "coarse": "needs=evacuation|vuln=none|danger=rising_water|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 25
+    },
+    {
+      "actual": [
+        "system_1",
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "RL-UP-2",
+      "coarse": "needs=none|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 26
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "G03",
+      "coarse": "needs=rescue|vuln=elderly|danger=rising_water|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 27
+    },
+    {
+      "actual": [
+        "system_1",
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "RL-GRAN-1",
+      "coarse": "needs=none|vuln=elderly|danger=none|medical=0|loc=ok|people=unknown|flags=none",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 28
+    },
+    {
+      "actual": [
+        "system_1"
+      ],
+      "agree": true,
+      "case_id": "F04",
+      "coarse": "needs=power|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 29
+    },
+    {
+      "actual": [
+        "system_1",
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "SIM-sim-under-lampang",
+      "coarse": "needs=none|vuln=none|danger=none|medical=0|loc=ok|people=unknown|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 30
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "SIM-sim-omit-phrae",
+      "coarse": "needs=none|vuln=none|danger=none|medical=0|loc=none|people=unknown|flags=none",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 31
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "F15",
+      "coarse": "needs=information|vuln=child|danger=none|medical=0|loc=ok|people=known|flags=conflicting_evidence",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 32
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "F14",
+      "coarse": "needs=rescue|vuln=none|danger=rising_water|medical=0|loc=ok|people=known|flags=conflicting_evidence",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 33
+    },
+    {
+      "actual": [
+        "system_1"
+      ],
+      "agree": false,
+      "case_id": "RL-RICE-1",
+      "coarse": "needs=food|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 34
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "F10",
+      "coarse": "needs=medical,rescue|vuln=elderly,oxygen_dependent|danger=rising_water|medical=1|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 35
+    },
+    {
+      "actual": [
+        "system_1"
+      ],
+      "agree": true,
+      "case_id": "F07",
+      "coarse": "needs=information|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 36
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "G02",
+      "coarse": "needs=rescue|vuln=elderly|danger=rising_water|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 37
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "F17",
+      "coarse": "needs=aid_payment|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=aid_exception",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 38
+    },
+    {
+      "actual": [
+        "system_1"
+      ],
+      "agree": false,
+      "case_id": "RL-RICE-2",
+      "coarse": "needs=food|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 39
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "RL-DOOR-1",
+      "coarse": "needs=rescue|vuln=child|danger=rising_water|medical=0|loc=ok|people=known|flags=conflicting_evidence",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 40
+    },
+    {
+      "actual": [
+        "system_1",
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "SIM-sim-under-nan",
+      "coarse": "needs=none|vuln=none|danger=none|medical=0|loc=ok|people=unknown|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 41
+    },
+    {
+      "actual": [
+        "system_1"
+      ],
+      "agree": true,
+      "case_id": "F05",
+      "coarse": "needs=information|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 42
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "SIM-sim-omit-phayao",
+      "coarse": "needs=none|vuln=none|danger=none|medical=0|loc=none|people=unknown|flags=none",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 43
+    },
+    {
+      "actual": [
+        "system_1",
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "SIM-sim-over-phrae",
+      "coarse": "needs=none|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 44
+    },
+    {
+      "actual": [
+        "system_1"
+      ],
+      "agree": true,
+      "case_id": "RL-ROAD-3",
+      "coarse": "needs=none|vuln=none|danger=none|medical=0|loc=ok|people=unknown|flags=none",
+      "epoch": 3,
+      "pick": "system_1",
+      "seq": 45
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "RL-DOOR-2",
+      "coarse": "needs=rescue|vuln=child|danger=rising_water|medical=0|loc=ok|people=known|flags=conflicting_evidence",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 46
+    },
+    {
+      "actual": [
+        "system_2"
+      ],
+      "agree": true,
+      "case_id": "G04",
+      "coarse": "needs=rescue|vuln=elderly|danger=rising_water|medical=0|loc=ok|people=known|flags=none",
+      "epoch": 3,
+      "pick": "system_2",
+      "seq": 47
+    }
+  ],
+  "episodes": [
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "F07",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": 1.45,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 0,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P4",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "G03",
+      "kind": "fixture",
+      "missed_human": true,
+      "priority": "P1",
+      "reward": 0.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 1,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 1,
+      "id": "C01-a",
+      "kind": "fixture",
+      "missed_human": true,
+      "priority": "P2",
+      "reward": -3.3,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 2,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "F01",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 3,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "RL-GRAN-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": 1.15,
+      "route": "supervisor_escalation",
+      "s2_fell_back": false,
+      "seq": 4,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 1,
+      "id": "RL-UP-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -1.85,
+      "route": "supervisor_escalation",
+      "s2_fell_back": false,
+      "seq": 5,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "RL-COLD-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 0.65,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 6,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "F03",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "shelter_placement",
+      "s2_fell_back": false,
+      "seq": 7,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "RL-WEAK-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": -2.05,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 8,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P2",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "RL-WEAK-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": -2.3,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 9,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "RL-RICE-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 10,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "F18",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": -1.8,
+      "route": "aid_caseworker",
+      "s2_fell_back": false,
+      "seq": 11,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "F04",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 12,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "F10",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P1",
+      "reward": 1.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 13,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 1,
+      "id": "sim-omit-phrae",
+      "kind": "sim",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -1.8,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 14,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "RL-ROAD-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -1.6,
+      "route": "supervisor_escalation",
+      "s2_fell_back": false,
+      "seq": 15,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P4",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "RL-GRAN-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P1",
+      "reward": -0.35,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 16,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "sim-over-phrae",
+      "kind": "sim",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -0.85,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 17,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 1,
+      "id": "sim-under-lampang",
+      "kind": "sim",
+      "missed_human": true,
+      "priority": "P3",
+      "reward": -5.35,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 18,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "F08",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 19,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "sim-omit-phayao",
+      "kind": "sim",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": 0.45,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 20,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "G01",
+      "kind": "fixture",
+      "missed_human": true,
+      "priority": "P1",
+      "reward": 0.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 21,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "RL-AID-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": -1.8,
+      "route": "aid_caseworker",
+      "s2_fell_back": false,
+      "seq": 22,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": true
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "RL-COLD-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -0.35,
+      "route": "shelter_placement",
+      "s2_fell_back": false,
+      "seq": 23,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 1,
+      "id": "RL-DOOR-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -1.8,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 24,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "sim-clear-lampang",
+      "kind": "sim",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 25,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "RL-ROAD-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": -0.35,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 26,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P4",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 1,
+      "id": "sim-under-nan",
+      "kind": "sim",
+      "missed_human": true,
+      "priority": "P4",
+      "reward": -7.35,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 27,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "F15",
+      "kind": "fixture",
+      "missed_human": true,
+      "priority": "P3",
+      "reward": -3.3,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 28,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "sim-switch-nan",
+      "kind": "sim",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": 0.7,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 29,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "F11",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P1",
+      "reward": 1.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 30,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "RL-AID-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": -2.3,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 31,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "G02",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P1",
+      "reward": 1.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 32,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "G04",
+      "kind": "fixture",
+      "missed_human": true,
+      "priority": "P1",
+      "reward": 0.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 33,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "F05",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": 1.45,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 34,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P4",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "F02",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 35,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 1,
+      "id": "RL-DOOR-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -1.8,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 36,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 1,
+      "id": "C01-b",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -1.8,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 37,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "RL-RICE-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 38,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "F12",
+      "kind": "fixture",
+      "missed_human": true,
+      "priority": "P1",
+      "reward": -1.3,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 39,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "F14",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": 1.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 40,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "F17",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -0.3,
+      "route": "aid_caseworker",
+      "s2_fell_back": false,
+      "seq": 41,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 1,
+      "id": "RL-UP-2",
+      "kind": "theme",
+      "missed_human": true,
+      "priority": "P2",
+      "reward": -2.85,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 42,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "F16",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": -2.3,
+      "route": "shelter_placement",
+      "s2_fell_back": false,
+      "seq": 43,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "F09",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 0.95,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 44,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "F06",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": 1.45,
+      "route": "shelter_placement",
+      "s2_fell_back": false,
+      "seq": 45,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "RL-ROAD-3",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": 1.15,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 46,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P4",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 1,
+      "id": "F13",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.2,
+      "route": "shelter_placement",
+      "s2_fell_back": false,
+      "seq": 47,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "RL-AID-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": -2.3,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 0,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "F07",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": 1.45,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 1,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P4",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "F09",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 0.95,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 2,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "F17",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -0.3,
+      "route": "aid_caseworker",
+      "s2_fell_back": false,
+      "seq": 3,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "G03",
+      "kind": "fixture",
+      "missed_human": true,
+      "priority": "P1",
+      "reward": 0.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 4,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "F15",
+      "kind": "fixture",
+      "missed_human": true,
+      "priority": "P3",
+      "reward": -3.3,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 5,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "F16",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": -2.3,
+      "route": "shelter_placement",
+      "s2_fell_back": false,
+      "seq": 6,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": true
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 2,
+      "id": "RL-UP-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -1.85,
+      "route": "supervisor_escalation",
+      "s2_fell_back": false,
+      "seq": 7,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 2,
+      "id": "sim-under-nan",
+      "kind": "sim",
+      "missed_human": true,
+      "priority": "P4",
+      "reward": -7.35,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 8,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "RL-COLD-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -0.35,
+      "route": "shelter_placement",
+      "s2_fell_back": false,
+      "seq": 9,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "RL-ROAD-3",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": 1.15,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 10,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P4",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 2,
+      "id": "C01-a",
+      "kind": "fixture",
+      "missed_human": true,
+      "priority": "P2",
+      "reward": -3.3,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 11,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 2,
+      "id": "sim-under-lampang",
+      "kind": "sim",
+      "missed_human": true,
+      "priority": "P3",
+      "reward": -5.35,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 12,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "F14",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": 1.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 13,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 2,
+      "id": "RL-DOOR-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -1.8,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 14,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "F03",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "shelter_placement",
+      "s2_fell_back": false,
+      "seq": 15,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "F08",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 16,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "RL-RICE-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 17,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "RL-ROAD-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": 1.45,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 18,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P4",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "F04",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 19,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "RL-RICE-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 20,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "sim-switch-nan",
+      "kind": "sim",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": 0.7,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 21,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "RL-WEAK-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": -2.3,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 22,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 2,
+      "id": "C01-b",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -1.8,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 23,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "RL-ROAD-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": 1.45,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 24,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P4",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "RL-GRAN-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": 1.15,
+      "route": "supervisor_escalation",
+      "s2_fell_back": false,
+      "seq": 25,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "F01",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 26,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "F02",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 27,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "F13",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.2,
+      "route": "shelter_placement",
+      "s2_fell_back": false,
+      "seq": 28,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "F12",
+      "kind": "fixture",
+      "missed_human": true,
+      "priority": "P1",
+      "reward": -1.3,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 29,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "F05",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": 1.45,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 30,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P4",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "RL-GRAN-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P1",
+      "reward": -0.35,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 31,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "RL-COLD-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 0.65,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 32,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "G02",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P1",
+      "reward": 1.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 33,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "RL-AID-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": -1.8,
+      "route": "aid_caseworker",
+      "s2_fell_back": false,
+      "seq": 34,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "F10",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P1",
+      "reward": 1.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 35,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "RL-WEAK-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": -2.3,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 36,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": true
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 2,
+      "id": "RL-UP-2",
+      "kind": "theme",
+      "missed_human": true,
+      "priority": "P2",
+      "reward": -2.85,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 37,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "G04",
+      "kind": "fixture",
+      "missed_human": true,
+      "priority": "P1",
+      "reward": 0.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 38,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 2,
+      "id": "RL-DOOR-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -1.8,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 39,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 2,
+      "id": "sim-omit-phrae",
+      "kind": "sim",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -1.8,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 40,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "sim-omit-phayao",
+      "kind": "sim",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": 0.45,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 41,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "F11",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P1",
+      "reward": 1.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 42,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "F18",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": -1.8,
+      "route": "aid_caseworker",
+      "s2_fell_back": false,
+      "seq": 43,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": true
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "sim-over-phrae",
+      "kind": "sim",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -0.85,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 44,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "sim-clear-lampang",
+      "kind": "sim",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 45,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "G01",
+      "kind": "fixture",
+      "missed_human": true,
+      "priority": "P1",
+      "reward": 0.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 46,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 2,
+      "id": "F06",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": 1.45,
+      "route": "shelter_placement",
+      "s2_fell_back": false,
+      "seq": 47,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "F13",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.2,
+      "route": "shelter_placement",
+      "s2_fell_back": false,
+      "seq": 0,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 3,
+      "id": "C01-b",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -1.8,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 1,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 3,
+      "id": "RL-UP-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -1.85,
+      "route": "supervisor_escalation",
+      "s2_fell_back": false,
+      "seq": 2,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "RL-ROAD-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": 1.45,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 3,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P4",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "F09",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 0.95,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 4,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "F11",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P1",
+      "reward": 1.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 5,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 3,
+      "id": "C01-a",
+      "kind": "fixture",
+      "missed_human": true,
+      "priority": "P2",
+      "reward": -3.3,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 6,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "RL-WEAK-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": -2.3,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 7,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "F02",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 8,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "RL-COLD-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 0.65,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 9,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "F01",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 10,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "F18",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": -1.8,
+      "route": "aid_caseworker",
+      "s2_fell_back": false,
+      "seq": 11,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "RL-ROAD-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": 1.45,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 12,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P4",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "F16",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": -2.3,
+      "route": "shelter_placement",
+      "s2_fell_back": false,
+      "seq": 13,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "F12",
+      "kind": "fixture",
+      "missed_human": true,
+      "priority": "P1",
+      "reward": -1.3,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 14,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "sim-clear-lampang",
+      "kind": "sim",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 15,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "RL-GRAN-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P1",
+      "reward": -0.35,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 16,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "RL-AID-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": -2.3,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 17,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "F03",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "shelter_placement",
+      "s2_fell_back": false,
+      "seq": 18,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "RL-WEAK-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": -2.3,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 19,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "G01",
+      "kind": "fixture",
+      "missed_human": true,
+      "priority": "P1",
+      "reward": 0.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 20,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "RL-COLD-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -0.35,
+      "route": "shelter_placement",
+      "s2_fell_back": false,
+      "seq": 21,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "F08",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 22,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "sim-switch-nan",
+      "kind": "sim",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": 0.7,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 23,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "RL-AID-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": -1.8,
+      "route": "aid_caseworker",
+      "s2_fell_back": false,
+      "seq": 24,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "F06",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": 1.45,
+      "route": "shelter_placement",
+      "s2_fell_back": false,
+      "seq": 25,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 3,
+      "id": "RL-UP-2",
+      "kind": "theme",
+      "missed_human": true,
+      "priority": "P2",
+      "reward": -2.85,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 26,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "G03",
+      "kind": "fixture",
+      "missed_human": true,
+      "priority": "P1",
+      "reward": 0.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 27,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "RL-GRAN-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": 1.15,
+      "route": "supervisor_escalation",
+      "s2_fell_back": false,
+      "seq": 28,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "F04",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 29,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 3,
+      "id": "sim-under-lampang",
+      "kind": "sim",
+      "missed_human": true,
+      "priority": "P3",
+      "reward": -5.35,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 30,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 3,
+      "id": "sim-omit-phrae",
+      "kind": "sim",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -1.8,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 31,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "F15",
+      "kind": "fixture",
+      "missed_human": true,
+      "priority": "P3",
+      "reward": -3.3,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 32,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "F14",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": 1.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 33,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "RL-RICE-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 34,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "F10",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P1",
+      "reward": 1.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 35,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "F07",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": 1.45,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 36,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P4",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "G02",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P1",
+      "reward": 1.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 37,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "F17",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -0.3,
+      "route": "aid_caseworker",
+      "s2_fell_back": false,
+      "seq": 38,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "RL-RICE-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P3",
+      "reward": 1.45,
+      "route": "welfare_distribution",
+      "s2_fell_back": false,
+      "seq": 39,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 3,
+      "id": "RL-DOOR-1",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -1.8,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 40,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 3,
+      "id": "sim-under-nan",
+      "kind": "sim",
+      "missed_human": true,
+      "priority": "P4",
+      "reward": -7.35,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 41,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "F05",
+      "kind": "fixture",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": 1.45,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 42,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P4",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "sim-omit-phayao",
+      "kind": "sim",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": 0.45,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 43,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P2",
+      "under_triage": false
+    },
+    {
+      "cascaded": true,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "sim-over-phrae",
+      "kind": "sim",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -0.85,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 44,
+      "systems": [
+        "system_1",
+        "system_2"
+      ],
+      "truth_priority": "P3",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": true,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "RL-ROAD-3",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P4",
+      "reward": 1.45,
+      "route": "information_only",
+      "s2_fell_back": false,
+      "seq": 45,
+      "systems": [
+        "system_1"
+      ],
+      "truth_priority": "P4",
+      "under_triage": false
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": true,
+      "epoch": 3,
+      "id": "RL-DOOR-2",
+      "kind": "theme",
+      "missed_human": false,
+      "priority": "P2",
+      "reward": -1.8,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 46,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": true
+    },
+    {
+      "cascaded": false,
+      "correct": false,
+      "critical_under": false,
+      "epoch": 3,
+      "id": "G04",
+      "kind": "fixture",
+      "missed_human": true,
+      "priority": "P1",
+      "reward": 0.2,
+      "route": "rescue_coordination",
+      "s2_fell_back": false,
+      "seq": 47,
+      "systems": [
+        "system_2"
+      ],
+      "truth_priority": "P1",
+      "under_triage": false
+    }
+  ],
+  "epochs": [
+    {
+      "correct": 18,
+      "critical_under": 9,
+      "episodes": 48,
+      "epoch": 1,
+      "mean_reward": -0.443,
+      "missed_human": 9,
+      "s2_fallbacks": 0,
+      "share_cascade": 0.25,
+      "share_s1_only": 0.271,
+      "share_s2_only": 0.479,
+      "under_triage": 16
+    },
+    {
+      "correct": 20,
+      "critical_under": 9,
+      "episodes": 48,
+      "epoch": 2,
+      "mean_reward": -0.347,
+      "missed_human": 9,
+      "s2_fallbacks": 0,
+      "share_cascade": 0.208,
+      "share_s1_only": 0.292,
+      "share_s2_only": 0.5,
+      "under_triage": 16
+    },
+    {
+      "correct": 20,
+      "critical_under": 9,
+      "episodes": 48,
+      "epoch": 3,
+      "mean_reward": -0.341,
+      "missed_human": 9,
+      "s2_fallbacks": 0,
+      "share_cascade": 0.188,
+      "share_s1_only": 0.312,
+      "share_s2_only": 0.5,
+      "under_triage": 16
+    }
+  ],
+  "events": [
+    {
+      "case_id": "RL-WEAK-1",
+      "epoch": 1,
+      "kind": "demote",
+      "priority": "P3",
+      "seq": 8,
+      "signature": "needs=water|vuln=elderly|danger=none|medical=0|loc=ok|people=known|flags=none"
+    },
+    {
+      "case_id": "RL-ROAD-3",
+      "epoch": 2,
+      "kind": "graduate",
+      "needs": [],
+      "priority": "P4",
+      "requires_human": false,
+      "route": "information_only",
+      "seq": 10,
+      "signature": "needs=none|vuln=none|danger=none|medical=0|loc=ok|people=unknown|flags=none|text=48cbc66b7bef"
+    }
+  ],
+  "final_overlay": {
+    "demoted": {
+      "needs=water|vuln=elderly|danger=none|medical=0|loc=ok|people=known|flags=none": {
+        "reason": "System 1 under-triaged RL-WEAK-1: predicted P3, truth P2.",
+        "since": "2026-10-25T04:07:33+00:00"
+      }
+    },
+    "graduated": {
+      "needs=none|vuln=none|danger=none|medical=0|loc=ok|people=unknown|flags=none|text=48cbc66b7bef": {
+        "needs": [],
+        "priority": "P4",
+        "requires_human": false,
+        "route": "information_only",
+        "since": "2026-10-25T04:07:42+00:00",
+        "wins": 2
+      }
+    },
+    "graduation_threshold": 2,
+    "recommendations": {},
+    "schema": "baansafe.rl_overlay.v1"
+  },
+  "model": "nvidia/nemotron-3-nano-30b-a3b",
+  "mubit": {
+    "avg_latency_ms": 450.6,
+    "cache_hits": 154,
+    "errors": 1,
+    "live_ok": 54,
+    "model": "nvidia/nemotron-3-nano-30b-a3b",
+    "mubit_chat_count": 209,
+    "via": "api.mubit.ai"
+  },
+  "notes": [
+    "Live S2 calls go only through Mubit (llm.complete); no OpenRouter client.",
+    "Replay cache misses score as System 2 fallbacks; they do not invent a host.",
+    "P1 and complex patterns never graduate; they become recommendations.",
+    "The shadow bandit never routes.",
+    "Fine-tune decisions are set; make modal-finetune consumes the exported datasets."
+  ],
+  "s2": "live",
+  "schema": "baansafe.rl_run.v1",
+  "seed": 17,
+  "training": {
+    "counts": {
+      "prefs": 8,
+      "s1": 18,
+      "s2": 36,
+      "sapling": 0
+    },
+    "finetune": "ready: make modal-finetune (datasets under eval/out/rl/training)",
+    "status": "exported"
+  }
+}

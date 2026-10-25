@@ -1,0 +1,21 @@
+{
+  "demoted": {
+    "needs=water|vuln=elderly|danger=none|medical=0|loc=ok|people=known|flags=none": {
+      "reason": "System 1 under-triaged RL-WEAK-1: predicted P3, truth P2.",
+      "since": "2026-10-25T04:07:33+00:00"
+    }
+  },
+  "graduated": {
+    "needs=none|vuln=none|danger=none|medical=0|loc=ok|people=unknown|flags=none|text=48cbc66b7bef": {
+      "needs": [],
+      "priority": "P4",
+      "requires_human": false,
+      "route": "information_only",
+      "since": "2026-10-25T04:07:42+00:00",
+      "wins": 2
+    }
+  },
+  "graduation_threshold": 2,
+  "recommendations": {},
+  "schema": "baansafe.rl_overlay.v1"
+}
