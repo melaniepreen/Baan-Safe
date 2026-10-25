@@ -1,5 +1,61 @@
 # BaanSafe
 
+BaanSafe ('safe home' in Thai) is a disaster-response call desk for Thai floods. It does emergency triage, dispatch and aid casework, with synthetic callers only.
+
+## Live demo
+
+- Town desk: [https://baansafe--baansafe-gateway-web.us-east.modal.run/ui/sim/](https://baansafe--baansafe-gateway-web.us-east.modal.run/ui/sim/)
+- Training page: [`/ui/training.html`](https://baansafe--baansafe-gateway-web.us-east.modal.run/ui/training.html) (same host; local `make serve` serves it at `http://127.0.0.1:8000/ui/training.html`)
+- Demo video (2 minutes or less): _link to be added_
+
+## How it works
+
+System 1 is deterministic: keyword extraction (`system1/extract.py`) and a needs table (`system1/decide.py`). The route chooser is the field precheck in `gateway/chooser.py`. It sends an ordinary case to System 1. A trigger, or a System 1 escalate under `mode: cascade`, continues to System 2 in the same turn. System 2's orchestrator is Nemotron (`nvidia/nemotron-3-nano-30b-a3b`) via the Mubit gateway (`system2.hosting` is `openrouter via mubit gateway`). Calls go through `llm/client.py` to a Mubit host. Human approval is required on safeguarding, aid, and P1; the town holds a System 2 row until Accept or Reject. An unset decision stays the string `TODO_HUMAN`.
+
+Learning reads corrections. Two high-risk human corrections on one pattern tag it `complex_situation` and set no priority (`gateway/graduation.py`). A separate RL loop can graduate a pattern into a System 1 rule when `RL_OVERLAY` is on. The 25 Oct eval graduated none (below).
+
+Mubit is the gateway, the trace record, and the trainer of per-task adapters. It does not reason. Every System 2 hop passes `case_id`, sets `metadata.session_id` to that `case_id`, and sends `x-middleware-record: full`. One Task is the calls that share the static system prompt. Memory is BaanSafe's own local store behind `memory/adapter.py` (`MEMORY_IMPL=local`, hosted at `/data/memory.jsonl`). Mubit exposes no memory API; a `MEMORY_IMPL=mubit` setting stays dormant.
+
+## Mubit usage / eval
+
+Cited from [`ui/sim/data/mubit_eval.json`](ui/sim/data/mubit_eval.json) (`source` `eval/snapshots/rl/20261025T0600Z-memory-local`, label `25 Oct Mubit eval, memory on`).
+
+- Outcome: Reward -0.125 → 0.189 across 3 epochs. No pattern graduated into System 1.
+- `via` `api.mubit.ai`, `model` `nvidia/nemotron-3-nano-30b-a3b`, `s2` `live`. `live_ok` 187, `cache_hits` 238, `errors` 3.
+- `RL-UP-2` (`upstairs-water`), status Recommendation. Detail: P1 · rescue coordination · requires human · seen 5. P1 or complex pattern; a human keeps authority.
+- `RL-COLD-2` (`cold-hall`), status Recommendation. Detail: P3 · welfare distribution · requires human · seen 1. P1 or complex pattern; a human keeps authority.
+- `RL-WEAK-1` (`weak-grandfather-water`), status Demoted. Detail: System 1 under-triaged RL-WEAK-1: predicted P3, truth P2.
+
+## Run it
+
+Python 3.11 or newer. From the repo root: `python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`. `make` uses `python3` unless `PYTHON=.venv/bin/python`. Stub mode needs no keys.
+
+```bash
+make serve             # API on :8000; town at /ui/sim/, training at /ui/training.html
+make validate          # fixtures, mocks, decisions, personal-data scan
+make test              # pytest
+make replay-stubs      # s1/s2 stub files against expected labels
+make demo-stub         # gateway.handle(..., use_stubs=True) for every fixture
+make rl-loop-replay    # reward loop on cached System 2 replies
+make rl-loop           # same loop, live Nemotron (Mubit env required)
+make mubit-traffic     # opt-in paid System 2 calls; traces stay on that machine
+make record-s2-cache   # fill fixtures/s2_cache/demo.jsonl misses (needs .env)
+make demo-reset        # RESET_ARGS=--yes restores the frozen local demo script
+make eval-learning     # held-out stub scoreboard, writes eval/out/learning.md
+make sim-eval          # scripted caller simulator and coach notes
+make latte-bench       # skips (exit 0) when bun or third_party/latte-bench is missing
+```
+
+Other targets are in the Makefile, including `ingest`, `export-training`, `modal-finetune`, and `deploy-modal`.
+
+## Limitations
+
+The hosted site runs `S2_IMPL=cache`, so System 2 replies are replayed from `fixtures/s2_cache/demo.jsonl`. A cache hit opens no socket. Scripted town events are labelled scripted (`source` `simulated` in `ui/sim/data/sim_events.json`, and the page badge `simulated`). No pattern graduated in the 25 Oct eval, so the System 2 to System 1 move in the town is scripted. Memory on a turn is BaanSafe's local store.
+
+## Team
+
+Moly: System 1, the route chooser, the live call UI, RL, and Mubit. Melanie: memory, System 2, aid eligibility, and `ui/sim`.
+
 ## For the judges
 
 **Why.** In a flood, the same hotline hears a family that needs a boat and a household that only needs drinking water, and no desk can sort every call before the water rises. BaanSafe listens, names the need, and puts a life in front of an operator while a routine delivery can leave on its own.
@@ -14,9 +70,9 @@ Open the town: [https://baansafe--baansafe-gateway-web.us-east.modal.run/ui/sim/
 
 The whole block. The phone has the saved prompts open, including the household that needs drinking water.
 
-![The drinking-water prompt in progress, with one Mubit case matched](docs/images/town-progress.png)
+![The drinking-water prompt in progress](docs/images/town-progress.png)
 
-The prompt is in progress. Mubit has matched 1 case, and the desk is still moving the call from System 2 to System 1.
+The prompt is in progress. The desk shows a move from System 2 to System 1. That move is scripted: no pattern graduated in the 25 Oct eval. Any past case on the desk is BaanSafe's local store.
 
 ![The supply boat deployed from Sun Chuai Lue Nam Thuam](docs/images/town-deployed.png)
 
