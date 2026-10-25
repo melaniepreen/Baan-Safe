@@ -26,7 +26,7 @@ eval/rl              reward loop: graduate, recommend, demote, shadow bandit
 3. Synthetic people only. `scripts/validate.py` rejects phones, 13-digit ids, PromptPay, passport, immigration status, and bank account.
 4. Do not fetch ReliefWeb or add DDPM as a source. `ingest/reliefweb.py` sends no request.
 5. Never commit or print secrets. `.env` is gitignored. A key in an error string is a bug.
-6. Branch off `main`, open a pull request, and merge into `main` when green. Do not push feature work straight to `main`. Delete the remote branch after merge. Prefer one focused PR per change set; rebase onto `main` before merge if the tip moved.
+6. Branch off `main`, open a pull request, and merge into `main` when green. Do not push feature work straight to `main`. Delete the remote branch after merge. Prefer one focused PR per change set; rebase onto `main` before merge if the tip moved. Work in a worktree per branch, stage paths explicitly (never `git add -A` in the shared checkout), and run `make check-owners` before the PR.
 7. `make test` and `make validate` stay green before merge.
 8. Do not edit `frontend-prototype/` unless the task says so.
 9. The no-stub fallback outcome (`missing_evidence == ["fixture_stub"]`) never cascades.
@@ -38,6 +38,8 @@ make test
 make validate
 make replay-stubs
 make demo-graduation
+make demo-reset
+make check-owners
 make rl-loop
 make rl-loop-replay
 make rl-snapshot

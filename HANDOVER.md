@@ -214,6 +214,8 @@ Suggested order if one person has ~2.5 h: E2, E1, F5, H2 (all outside `ui/sim`);
 
 Branch → PR → merge when `make test` / `make validate` green. Do not push feature work straight to `main`. Prefer one writer on `ui/sim/sim.js` and `llm/client.py`.
 
+Use a worktree per branch, not the shared checkout: `git fetch origin && git worktree add -b <branch> ../Baan-Safe-wt/<name> origin/main`, then work only there and stage paths explicitly (`git add <paths>`). Never `git add -A` in the shared checkout; PRs #34 and #35 each swept in someone else's in-progress edits that way. Run `make check-owners` before `gh pr create`: it warns when the branch touches `ui/sim/sim.js` (Melanie, branches `melanie/`, `mel/`) or `llm/client.py` (Moly, `moly/`) from a branch that is not the owner's (`OWNERS_ARGS=--strict` exits 1). `.github/CODEOWNERS` (`@melaniepreen` for `ui/sim/`, `@molyleelatham` for `llm/client.py`, `gateway/`, `infra/`) requests the same review on GitHub. Before a demo, `make demo-reset` (dry run) then `make demo-reset RESET_ARGS=--yes` puts traces, case memory, and recorded replies back to the start of the frozen script; `RESET_ARGS='--hosted --yes'` does the same on the `baansafe-demo` volume between demos (not while the container is serving). H1 and H2 above are done by this.
+
 ---
 
 ## Live System 2
