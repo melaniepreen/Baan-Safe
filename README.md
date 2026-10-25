@@ -277,7 +277,12 @@ The exports above are examples of the variable names. `SAPLING_MODEL_ID` is the 
 
 ### Trained weights
 
-Fine-tune versions live on the `baansafe-versions` Modal volume (`registry.json`, `versions/<id>/{adapter,metrics.json}`) and are listed with loss curves at `GET /training` / `/ui/training.html`. Trained on synthetic callers only. Copies of the 25 Oct runs are on the Hugging Face Hub under the `baansafe` org (public since 25 Oct):
+Fine-tune versions live on the `baansafe-versions` Modal volume (`registry.json`, `versions/<id>/{adapter,metrics.json}`) and are listed with loss curves at `GET /training` / `/ui/training.html`. Trained on synthetic callers only. The two public copies on the Hugging Face Hub:
+
+- [baansafe/baansafe-s1-triage-setfit](https://huggingface.co/baansafe/baansafe-s1-triage-setfit): System 1 triage classifier (SetFit, 0.875 on held-out calls)
+- [baansafe/baansafe-s2-nemotron-nano-4b-lora](https://huggingface.co/baansafe/baansafe-s2-nemotron-nano-4b-lora): System 2 Nemotron Nano LoRA adapter (experimental, trained on a small set)
+
+Neither model is loaded on the live call path yet.
 
 | Hub repo | Version | What | Result |
 |---|---|---|---|
@@ -285,7 +290,7 @@ Fine-tune versions live on the `baansafe-versions` Modal volume (`registry.json`
 | [baansafe/baansafe-s2-nemotron-nano-4b-lora](https://huggingface.co/baansafe/baansafe-s2-nemotron-nano-4b-lora) | `ft-20261025T045425Z-114efba3` (root) | LoRA r=8 on Nemotron Nano 4B, 36-row RL System 2 set | loss 13.20 → 6.56 |
 | same repo, `versions/ft-20261025T045212Z-8d9937b9/` | `ft-20261025T045212Z-8d9937b9` | LoRA r=8, 7-row event-log set | loss 14.27 → 0.0017 (overfit, pipeline demo) |
 
-Each repo carries `training/metrics.json` with the per-step loss. None of these weights is loaded on the live path: System 1 stays rules-only and System 2 is Nemotron through Mubit. Reproduce with `SYNTHETIC=1 make export-training` then `make modal-finetune DATASET=training/out/s1_synthetic.jsonl` (the held-out file next to it is picked up automatically) or `DATASET=eval/out/rl/training/s2.jsonl`; push a new version with `hf upload baansafe/<repo> <adapter dir> .`.
+Each repo carries `training/metrics.json` with the per-step loss. System 1 stays rules-only and System 2 is Nemotron through Mubit. Reproduce with `SYNTHETIC=1 make export-training` then `make modal-finetune DATASET=training/out/s1_synthetic.jsonl` (the held-out file next to it is picked up automatically) or `DATASET=eval/out/rl/training/s2.jsonl`; push a new version with `hf upload baansafe/<repo> <adapter dir> .`.
 
 Local API container (CPU). This is the same process as `make serve`:
 
