@@ -656,15 +656,18 @@ body[data-notes="1"] .bubble.note { display: block; }
 }
 .sim-badge, .gw-badge {
   display: inline-block;
-  margin-right: 6px;
-  padding: 0 6px;
+  margin-left: 6px;
+  padding: 1px 6px;
   border-radius: 999px;
-  font-size: 10px;
-  letter-spacing: 0.06em;
+  border: 1px solid;
+  background: transparent;
+  font-size: 9px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  vertical-align: middle;
 }
-.sim-badge { background: #014855; color: #e6edf5; }
-.gw-badge { background: #012246; color: #e6edf5; border: 1px solid #0076D8; }
+.gw-badge { color: #3dd68c; border-color: #3dd68c; }
+.sim-badge { color: #6b7a90; border-color: #6b7a90; }
 .gateway-line { display: block; margin-top: 4px; color: var(--muted); }
 @keyframes handoff { from { transform: translateX(-12px); opacity: 0.15; } to { transform: none; opacity: 1; } }
 
@@ -703,6 +706,8 @@ body[data-notes="1"] .bubble.note { display: block; }
 }
 #approval-status { margin: 0; font-weight: 700; }
 #approval-proposal { margin: 6px 0 0; color: #9aa8bb; font-size: 13px; line-height: 1.4; }
+/* The approval banner (#approval-banner) is the one place for approval. */
+.dispatch-pending { display: none !important; }
 .dispatch-pending {
   position: fixed;
   z-index: 4;

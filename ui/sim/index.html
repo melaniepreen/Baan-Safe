@@ -87,7 +87,7 @@
       </button>
     </form>
     <details id="scripted">
-      <summary>20 scripted calls</summary>
+      <summary>20 example calls</summary>
       <div class="wordmark-actions">
         <button type="button" id="calls-play">Play 20 calls</button>
         <button type="button" id="calls-step">Step</button>
@@ -120,8 +120,8 @@
     <aside id="backend" aria-label="Backend path">
       <div class="feed-head">
         <div>
-          <p class="kicker">Backend</p>
-          <h1 id="call-heading">No call yet</h1>
+          <p class="kicker">Decision</p>
+          <h1 id="call-heading">Waiting for a call</h1>
         </div>
         <div class="feed-head-actions">
           <label class="colour-mode">Colour
@@ -137,12 +137,12 @@
       <div class="feed-meter" aria-hidden="true"><div id="feed-progress"></div></div>
       <p id="feed-count" class="muted"></p>
       <section id="gateway-hop" class="mubit-readout" hidden>
-        <p class="kicker">Model path <span class="gw-badge">trace</span></p>
+        <p class="kicker">Model path <span class="gw-badge">LIVE</span></p>
         <p id="gateway-hop-line" class="msg"></p>
         <ol id="gateway-hop-list" class="path-rows"></ol>
       </section>
       <section id="memory-panel" class="mubit-readout" hidden>
-        <p class="kicker">Memory <span class="gw-badge">case.memory_context</span></p>
+        <p class="kicker">Memory <span class="gw-badge">LIVE</span></p>
         <ul id="memory-list" class="mem-list"></ul>
       </section>
       <section id="metrics-strip" class="metrics-strip" hidden>
@@ -171,8 +171,8 @@
         <p id="location-context-note" class="demo-note">From case.resources.location_context. Distances are gateway values only.</p>
         <div id="location-context-body"></div>
       </section>
-      <h2>Mubit eval <span class="sim-badge">25 Oct</span></h2>
-      <p id="mubit-eval-note" class="demo-note">Loading the live Mubit run…</p>
+      <h2>Mubit eval</h2>
+      <p id="mubit-eval-note" class="demo-note">Loading the 25 Oct live Mubit run…</p>
       <div class="pattern-wrap">
         <table id="mubit-eval-list">
           <thead>
@@ -185,7 +185,7 @@
           <tbody></tbody>
         </table>
       </div>
-      <h2>Patterns <span class="sim-badge">simulated</span></h2>
+      <h2>Patterns <span class="sim-badge">SAMPLE</span></h2>
       <p id="pattern-rule" class="demo-note">Two matching corrections mark a pattern as complex: it goes to Nemotron first and a person approves. Patterns Nemotron settles repeatedly then graduate into System 1 rules through the RL loop (RL_OVERLAY) — fast and deterministic. Life-safety stays with a person until Accept.</p>
       <div class="pattern-wrap">
         <table id="pattern-list" hidden>
@@ -203,7 +203,7 @@
         <p id="pattern-empty" class="pattern-empty">No patterns yet — repeated calls will show up here</p>
       </div>
       <button type="button" id="pattern-reset">Reset patterns</button>
-      <h2>Rulebook <span class="sim-badge">overlay</span></h2>
+      <h2>Rulebook <span class="sim-badge">SAMPLE</span></h2>
       <p id="rulebook-label" class="demo-note"></p>
       <table id="rulebook"><tbody></tbody></table>
       <h2>Decision log</h2>
