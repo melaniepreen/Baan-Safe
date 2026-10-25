@@ -1,26 +1,31 @@
-"""Seed the Mubit memory workspace with lessons derived from the policy corpus.
+"""Seed the memory store with lessons derived from the policy corpus.
 
-`make seed-memory` ingests 6-10 short English items into lane `baansafe-policy`
-through `memory.mubit._ingest`, the same client the gateway uses. Every item
-is prefixed with a stable tag `[policy:<rule_id>]` and its text is taken from
-the sentences `policies/service.py` serves for that rule. `rule` items are
-corpus sentences only. `lesson` items add one operational note from this
-repo's own fixes (for example system1/extract.py on "unaccompanied").
+`make seed-memory` writes 6-10 short English items into lane `baansafe-policy`
+through `memory.adapter.ingest_items`, the same adapter the gateway uses:
+`MEMORY_IMPL=local` appends them to the JSONL file at MEMORY_LOCAL_PATH
+(`var/memory.jsonl` by default, `/data/memory.jsonl` on Modal);
+`MEMORY_IMPL=mubit` posts them to `/v2/control/ingest` (dormant until Mubit
+exposes a memory API). Every item is prefixed with a stable tag
+`[policy:<rule_id>]` and its text is taken from the sentences
+`policies/service.py` serves for that rule. `rule` items are corpus
+sentences only. `lesson` items add one operational note from this repo's
+own fixes (for example system1/extract.py on "unaccompanied").
 
-Idempotency: before ingesting, the script runs the same /v2/control/query
-body shape as memory/mubit.py and skips any tag whose content already comes
-back. The control API exposes no client-side id or dedup field in the shapes
-this repo has seen, so the tag prefix is the dedup key.
+Idempotency: before writing, the script looks for the tags already in the
+store (local: read the file; mubit: the same /v2/control/query body shape as
+memory/mubit.py) and skips any tag that is present. The tag prefix is the
+dedup key.
 
 Flags:
-  --dry-run            print the items; POST nothing (no key needed)
-  --case-fact CASE_ID  also ingest one synthetic `fact` for a case id, in the
-                       summary shape of memory.mubit.write, so a second call
-                       from the same household can retrieve it
+  --dry-run            print the items; write nothing (no key needed)
+  --case-fact CASE_ID  also write one synthetic `fact` for a case id, in the
+                       summary shape of memory.content.record_content, so a
+                       second call from the same household can retrieve it
+  --path FILE          local mode: write to FILE instead of MEMORY_LOCAL_PATH
   --json               machine-readable report on stdout
 
-Refuses to run (exit 2) when MEMORY_IMPL is not `mubit` or MUBIT_API_KEY is
-unset. Never prints the key. Synthetic people only.
+Refuses to run (exit 2) when MEMORY_IMPL is `mock`, or is `mubit` without
+MUBIT_API_KEY. Never prints the key. Synthetic people only.
 """
 
 from __future__ import annotations
@@ -40,6 +45,7 @@ if str(ROOT) not in sys.path:
 
 LANE = "baansafe-policy"
 CASE_LANE = "baansafe-case"
+WRITABLE_MODES = ("local", "mubit")
 MAX_CHARS = 300
 _TAG = re.compile(r"\[policy:([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+)\]")
 _SENTENCE = re.compile(r"(?<=[.!?])\s+")
@@ -207,12 +213,26 @@ def build_case_fact(case_id: str) -> dict[str, Any]:
         needs = ",".join(case.fields.needs) or "none"
     except Exception:
         pass
+    location = "Watthana District, Bangkok"
     summary = (
-        f"Case {case_id}: needs={needs}; decision={decision}; priority={priority}. "
-        "Synthetic household (no real person): older resident, water on the "
-        "ground floor, Watthana District, Bangkok."
+        f"Case {case_id}: needs={needs}; location={location}; decision={decision}; "
+        f"priority={priority}. "
+        "Synthetic household (no real person): older resident, water on the ground floor."
     )
-    return {"type": "fact", "content": summary[:800], "lane": CASE_LANE}
+    return {
+        "type": "fact",
+        "content": summary[:800],
+        "lane": CASE_LANE,
+        "source_case_id": case_id,
+        "metadata": {
+            "source_case_id": case_id,
+            "lane": CASE_LANE,
+            "location": location,
+            "needs": needs.split(","),
+            "priority": priority,
+            "next_action": decision,
+        },
+    }
 
 
 def _texts_in(payload: Any) -> list[str]:
@@ -236,15 +256,29 @@ def _texts_in(payload: Any) -> list[str]:
     return out
 
 
-def existing_tags(items: list[dict[str, Any]]) -> tuple[set[str], dict[str, Any]]:
-    """Tags already present in the workspace, by a tag-only control query.
+def _memory_mode() -> str:
+    return os.environ.get("MEMORY_IMPL", "mock").strip().lower() or "mock"
 
-    Uses the same body shape as memory.mubit.retrieve. Returns the tag set
-    and the raw (secret-free) payload for the report.
+
+def existing_tags(items: list[dict[str, Any]]) -> tuple[set[str], dict[str, Any]]:
+    """Tags already present in the store.
+
+    Local mode reads the JSONL file. Mubit mode runs a tag-only control query
+    with the same body shape as memory.mubit.retrieve. Returns the tag set
+    and a secret-free probe for the report.
     """
+    wanted = [tag_for(_TAG.search(item["content"]).group(1)) for item in items]
+    if _memory_mode() == "local":
+        from memory import local
+
+        found: set[str] = set()
+        rows = local.load_rows()
+        for row in rows:
+            found |= tags_in(str(row.get("content") or "")) & set(wanted)
+        return found, {"path": str(local.store_path()), "rows": len(rows)}
+
     from memory import mubit
 
-    wanted = [tag_for(_TAG.search(item["content"]).group(1)) for item in items]
     body = mubit.query_body(
         "BaanSafe policy lessons " + " ".join(wanted),
         limit=50,
@@ -258,13 +292,14 @@ def existing_tags(items: list[dict[str, Any]]) -> tuple[set[str], dict[str, Any]
 
 
 def refuse_reason() -> str | None:
-    mode = os.environ.get("MEMORY_IMPL", "mock").strip().lower() or "mock"
-    if mode != "mubit":
+    mode = _memory_mode()
+    if mode not in WRITABLE_MODES:
         return (
-            f"MEMORY_IMPL is {mode!r}; seeding writes only to the Mubit control "
-            "plane. Set MEMORY_IMPL=mubit (load .env) and retry."
+            f"MEMORY_IMPL is {mode!r}; seeding writes to BaanSafe's local store "
+            "(MEMORY_IMPL=local, file at MEMORY_LOCAL_PATH) or to the Mubit control "
+            "plane (MEMORY_IMPL=mubit, load .env). Set one and retry."
         )
-    if not os.environ.get("MUBIT_API_KEY", "").strip():
+    if mode == "mubit" and not os.environ.get("MUBIT_API_KEY", "").strip():
         return "MUBIT_API_KEY is unset. Load .env (set -a; source .env; set +a) and retry."
     return None
 
@@ -280,13 +315,19 @@ def run(argv: list[str] | None = None) -> int:
     parser.add_argument("--case-fact", metavar="CASE_ID", help="also ingest one synthetic case fact")
     parser.add_argument("--json", action="store_true", help="JSON report on stdout")
     parser.add_argument("--no-skip", action="store_true", help="ingest even when the tag already exists")
+    parser.add_argument(
+        "--path", metavar="FILE", help="local mode: JSONL file to write (overrides MEMORY_LOCAL_PATH)"
+    )
     args = parser.parse_args(argv)
+    if args.path:
+        os.environ["MEMORY_LOCAL_PATH"] = str(Path(args.path).expanduser())
 
     items = build_lessons()
     if args.case_fact:
         items.append(build_case_fact(args.case_fact))
     report: dict[str, Any] = {
         "lane": LANE,
+        "mode": _memory_mode(),
         "count": len(items),
         "tags": sorted(tags_in(" ".join(i["content"] for i in items))),
         "items": items,
@@ -302,7 +343,7 @@ def run(argv: list[str] | None = None) -> int:
         print(f"seed-memory refused: {reason}", file=sys.stderr)
         return 2
 
-    from memory import mubit
+    from memory.adapter import ingest_items
 
     try:
         if args.no_skip:
@@ -313,9 +354,9 @@ def run(argv: list[str] | None = None) -> int:
         report["query_error"] = _scrub(f"{type(exc).__name__}: {exc}")
         _print(report, args.json)
         print(
-            "seed-memory: the control query failed, so nothing was ingested. "
-            "If the error is HTTP 404 unknown_route, this base URL serves only the chat "
-            "gateway; set MUBIT_CONTROL_URL to the memory instance URL from the Mubit console.",
+            "seed-memory: the store probe failed, so nothing was ingested. "
+            "If the error is HTTP 404 unknown_route, current Mubit has no memory API; "
+            "use MEMORY_IMPL=local, or set MUBIT_CONTROL_URL to a host that serves /v2/control.",
             file=sys.stderr,
         )
         return 1
@@ -332,7 +373,7 @@ def run(argv: list[str] | None = None) -> int:
         _print(report, args.json)
         return 0
     try:
-        response = mubit._ingest(to_send)
+        response = ingest_items(to_send)
     except Exception as exc:
         report["ingest_error"] = _scrub(f"{type(exc).__name__}: {exc}")
         _print(report, args.json)
@@ -348,7 +389,10 @@ def _print(report: dict[str, Any], as_json: bool) -> None:
         print(_scrub(json.dumps(report, ensure_ascii=False, indent=2, default=str)))
         return
     label = "dry-run" if report.get("dry_run") else "seed"
-    print(f"seed-memory {label}: {report['count']} items, lane={report['lane']}")
+    print(
+        f"seed-memory {label}: {report['count']} items, lane={report['lane']}, "
+        f"mode={report.get('mode', 'mock')}"
+    )
     for item in report["items"]:
         print(f"  {item['type']:6} {len(item['content']):3} chars  {_scrub(item['content'])}")
     if "already_present" in report:

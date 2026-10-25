@@ -19,6 +19,8 @@
         "llm/client.py",
         "llm/openai_client.py",
         "memory/adapter.py",
+        "memory/local.py",
+        "memory/mubit.py",
         "gateway/overlay.py"
       ]
     },

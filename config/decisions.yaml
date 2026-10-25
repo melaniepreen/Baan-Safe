@@ -26,6 +26,8 @@ gateway:
   route_chooser: field precheck      # decided: gateway/chooser.py reads config/escalation.yaml triggers
   auth: TODO_HUMAN                   # auth scheme in front of the Mubit gateway
 memory:
+  # MEMORY_IMPL=local (memory/local.py, JSONL at MEMORY_LOCAL_PATH) is the hosted store. The mubit backend
+  # is dormant until Mubit exposes a memory API: current Mubit answers 404 unknown_route on /v2/control/*.
   mubit_project: baansafe-demo       # decided: control-plane run_id / project scope; override with MUBIT_PROJECT_ID for a console proj-…
   retrieval_top_k: 5                 # decided: max evidence rows from /v2/control/query
   token_budget: 400                  # decided: max_token_budget hint on the query payload
