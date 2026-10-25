@@ -72,6 +72,22 @@
           "text": "Tool called: nearest shelter."
         },
         {
+          "id": "was-s2",
+          "kind": "system_2",
+          "when": "accepted",
+          "delay_ms": 680,
+          "source": "simulated",
+          "text": "System 2 had this drinking-water pattern."
+        },
+        {
+          "id": "to-s1",
+          "kind": "handoff",
+          "when": "accepted",
+          "delay_ms": 720,
+          "source": "simulated",
+          "text": "Moved from System 2 to System 1. The fast path takes it now."
+        },
+        {
           "id": "s1",
           "kind": "system_1",
           "delay_ms": 680,

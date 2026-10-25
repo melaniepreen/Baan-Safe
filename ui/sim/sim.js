@@ -22,6 +22,7 @@ import {
   systemPath,
 } from "./modelpath.js";
 import { phaseDurationMs } from "./pace.js";
+import { evalHeadline, evalRows } from "./mubit_eval.js";
 import { decidePath, PATTERN_KEY, withTop } from "./patterns.js";
 import { legsFromPath, nearestNode, walk } from "./route_walk.js";
 import { Application, Container, Graphics, Text } from "./vendor/pixi.min.mjs";
@@ -2091,12 +2092,17 @@ function topScore(scores) {
   return { key, value: Math.max(0, value) };
 }
 
-function renderScores(scores, needs, accepted) {
+function renderScores(scores, needs, accepted, moved) {
   const box = document.getElementById("scores");
   if (!box) return;
   box.replaceChildren();
   const top = topScore(scores);
-  box.append(el("p", null, accepted ? "System 1 ACCEPTED — stays on the fast path." : "System 1 REJECTED — handed to System 2."));
+  const line = moved
+    ? "System 2 → System 1. The fast path takes it now."
+    : accepted
+      ? "System 1 ACCEPTED — stays on the fast path."
+      : "System 1 REJECTED — handed to System 2.";
+  box.append(el("p", null, line));
   for (const [key, score] of Object.entries(scores || {})) {
     const row = el("div", "score" + (key === top.key ? (accepted ? " accepted" : " rejected") : ""));
     row.append(el("span", null, key));
@@ -2433,6 +2439,38 @@ function formatSeen(iso) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function renderMubitEval(report) {
+  const note = document.getElementById("mubit-eval-note");
+  const table = document.getElementById("mubit-eval-list");
+  if (note) note.textContent = evalHeadline(report);
+  if (!table) return;
+  const body = table.querySelector("tbody");
+  if (!body) return;
+  body.replaceChildren();
+  for (const row of evalRows(report)) {
+    const tr = document.createElement("tr");
+    tr.append(el("td", null, row.label));
+    const status = document.createElement("td");
+    const tone = row.status === "Demoted" ? "s2" : "learned";
+    status.append(el("span", "pat-badge " + tone, row.status));
+    tr.append(status);
+    tr.append(el("td", null, row.detail));
+    body.append(tr);
+  }
+}
+
+function loadMubitEval() {
+  fetch("./data/mubit_eval.json")
+    .then((response) => (response.ok ? response.json() : null))
+    .then((report) => {
+      if (report) renderMubitEval(report);
+    })
+    .catch(() => {
+      const note = document.getElementById("mubit-eval-note");
+      if (note) note.textContent = "The 25 Oct Mubit eval could not be loaded.";
+    });
 }
 
 function renderPatterns(rows) {
@@ -2906,7 +2944,8 @@ async function playFeed(call, decision, trace, text, fast) {
   renderModelPath(decision, trace);
   renderMemoryPanel(caseState, decision);
   renderMetricsStrip(decision);
-  renderScores(scores, needs, accepted);
+  const moved = accepted && (scenario && scenario.steps || []).some((step) => step.id === "to-s1");
+  renderScores(scores, needs, accepted, moved);
   setPriorityBadge(decision.final_priority);
   clearApprovalChrome();
   const list = document.getElementById("flow");
@@ -3788,6 +3827,7 @@ function bindChrome() {
     patternRule.textContent = eventsFile.learning.life_safety_rule;
   }
   renderPatterns();
+  loadMubitEval();
   const threshold = document.getElementById("threshold");
   if (eventsFile && eventsFile.confidence_threshold != null) threshold.value = String(eventsFile.confidence_threshold);
   renderPrompts();
