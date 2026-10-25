@@ -22,6 +22,14 @@ The prompt is in progress. Mubit has matched 1 case, and the desk is still movin
 
 The supply boat is deployed from Sun Chuai Lue Nam Thuam.
 
+![The baansafe project on Mubit: 1,330 calls in 24 hours, 9 tasks, one adapter](docs/images/mubit-projects.png)
+
+The baansafe project on Mubit after those calls. 1,330 calls in 24 hours, 9 tasks, one adapter, and the project is healthy.
+
+![Seven learnings Mubit formed from the project's calls](docs/images/mubit-learnings.png)
+
+Mubit formed seven learnings from those calls. They are rules for the System 1 fast path: what it may infer, and what it must not. Distress with no named hazard goes to a supervisor at P2 instead of a guessed need, a hazard that appears only in a past case stays out of the rationale, and minor water with the household fine stays information-only at P3 or P4.
+
 Flood and disaster call-triage scaffold. Mubit is the LLM gateway and trace record: every System 2 call goes through it, is grouped into a task, and can train a per-task adapter. Memory is BaanSafe's own store. System 1 acts fast. System 2 reasons deeply with Nemotron as its orchestrator. On aid-eligibility and denial checks, Banyan Sapling verifies the claim before the decision router. The field precheck picks the entry system; a System 1 escalate cascades to System 2 in the same turn, and the decision router turns the deciding outcome into the next action. Mubit does not reason.
 
 Sapling is [MubitLabs/banyan-sapling](https://huggingface.co/MubitLabs/banyan-sapling), the Apache-2.0 23B verifier (research preview). It takes a policy, evidence, and a claim, and returns `supported`, `violation`, `missing`, `contradicted`, or `unsure`, with probabilities. `supported` lets the proposed action stand. `violation` blocks it. `unsure`, `missing`, and `contradicted` hand the case to a human. The input limit is 16,384 tokens. It does not run on System 1. `system2.use_banyan_sapling` is true for those two checks. Hosting, the GPU, and Thai handling stay `TODO_HUMAN`. Tests use the stub client and do not load a GPU. `infra/modal/sapling_app.py` is the Modal web server (`baansafe-sapling`). `POST /verify` is a Starlette route. The process refuses until `SAPLING_MODEL_ID` and a 48GB-class `SAPLING_GPU` (`L40S`, `A100-80GB`, `H100`, `H100!`, or `H200`) are exported. The default turn still uses the stub.
