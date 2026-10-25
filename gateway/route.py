@@ -37,7 +37,7 @@ from gateway.chooser import choose
 from gateway.graduation import apply as apply_graduations
 from gateway.overlay import Overlay, load_from_env, narrow_signature
 from gateway.policy import precheck_notes
-from memory.adapter import retrieve
+from memory.adapter import memory_mode, retrieve
 from mocks.loader import (
     has_s1_stub,
     has_s2_stub,
@@ -76,13 +76,17 @@ def handle(
     )
     memory_started = _now()
     case.memory_context = retrieve(case)
+    memory_ms = max(0, int((_now() - memory_started).total_seconds() * 1000))
     emit(
         TraceEvent(
             case_id=case.case_id,
             stage="memory",
             started_at=memory_started,
-            latency_ms=0,
-            notes=f"memory via adapter; items={len(case.memory_context)}",
+            latency_ms=memory_ms,
+            notes=(
+                f"memory via adapter mode={memory_mode()}; "
+                f"items={len(case.memory_context)}"
+            ),
         )
     )
     graduations = apply_graduations(case)

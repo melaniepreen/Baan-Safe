@@ -26,7 +26,7 @@ One turn: enrich, retrieve memory, record a policy pre-check, route by the field
 - `gateway/auth.py` — records the auth scheme. Does not reject the request.
 - `gateway/policy.py` — `precheck_notes`. Does not read medical fields or change priority.
 - `memory/adapter.py` — `MEMORY_IMPL=mock` (default) or `mubit`.
-- `memory/mubit.py` — raises. No network client yet.
+- `memory/mubit.py` — control-plane client (`/v2/control/query`, `/v2/control/ingest`) when `MEMORY_IMPL=mubit`.
 - `llm/client.py` — `complete` (httpx). Owner: Melanie wires the call.
 - `llm/openai_client.py` — registered OpenAI SDK client (`MUBIT_BASE_URL` + `MUBIT_API_KEY`).
 - `gateway/overlay.py` — learned overlay (`RL_OVERLAY` opt-in): signatures, `Overlay`, `load`, `save`, `load_from_env`.
@@ -71,7 +71,8 @@ One turn: enrich, retrieve memory, record a policy pre-check, route by the field
 ## Open TODO_HUMAN keys
 
 - `gateway.auth`
-- `memory.mubit_project`, `memory.retrieval_top_k`, `memory.token_budget`
 - `llm.token_price_usd`
+
+`memory.mubit_project` (`baansafe-demo`), `memory.retrieval_top_k` (`5`), and `memory.token_budget` (`400`) are decided. Override the project with `MUBIT_PROJECT_ID` when the console id differs. Keep `MEMORY_IMPL=mock` on the public demo unless the project has ingested facts.
 
 See also `docs/agents/rl-loop.md` for the overlay and the cascade learner.
