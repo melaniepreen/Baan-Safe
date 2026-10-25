@@ -34,6 +34,7 @@ def _case(case_id: str = "case-mem") -> CaseState:
 def test_retrieve_maps_evidence(monkeypatch):
     monkeypatch.setenv("MUBIT_API_KEY", "mbt_test")
     monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai/compat/openrouter/v1")
+    monkeypatch.delenv("MUBIT_PROJECT_ID", raising=False)
 
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.path == "/v2/control/query"

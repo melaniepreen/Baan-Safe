@@ -20,6 +20,7 @@ def isolated_runtime(tmp_path, monkeypatch):
     # Same refusal on every machine: a Mubit host, no key, no socket.
     monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai")
     monkeypatch.delenv("MUBIT_API_KEY", raising=False)
+    monkeypatch.delenv("MUBIT_PROJECT_ID", raising=False)
     reset()
     yield
     reset()
