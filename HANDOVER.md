@@ -210,6 +210,22 @@ Ranked by demo value. Owners per `OWNERSHIP.md`: Moly = API / calls / infra / ev
 
 Suggested order if one person has ~2.5 h: E2, E1, F5, H2 (all outside `ui/sim`); F1–F4 go with Melanie's next `ui/sim` pull.
 
+**Status 25 Oct 07:15 UTC — all but E2 and F4 merged to `main`.**
+
+| Done | PR | Where |
+|---|---|---|
+| E1, E3, E4, E5 | #43 | `make rl-compare`, `GET /training/compare` + "memory off vs on" cards; `GET /training/episodes?filter=&epoch=`; `make eval-gate` (`EVAL_GATE_S1_ACC`, `EVAL_GATE_BASELINE`); `make mubit-requests N=` |
+| F1, F2, F3 | #47 | `CACHE HIT · replayed` badge; `/hosting` banner strip (red when memory dormant); Hub links + held-out per-label table on `ui/training.html`. Added as `hosting_banner.js` / `training_polish.js`; `sim.js` untouched |
+| F5, H1, H2 | #48 | `make demo-reset` (dry run; `RESET_ARGS=--yes`, `--hosted`); `.github/CODEOWNERS` + `make check-owners`; `.env.example` complete, with `tests/test_env_example.py` asserting every env name the code reads is documented |
+| QA | #42 | `/rl/run` honours `RL_RUN_PATH`; truthful precheck note; Modal apps load `.env` before reading env; streamed traces |
+| Served by | #49 | `x-middleware-served-by` kept in trace note and reply (`mubit_served_by`); cache replays carry the recorded value |
+| Root | #52 | `GET /` → 307 to `/ui/sim/index.html` (was FastAPI `{"detail":"Not Found"}` on local and hosted) |
+| Fix | #51 | `.env.example` gained `RL_COMPARE_A/B`, `EVAL_GATE_*` — #43 and #48 were each green alone, red together (new env reads vs new "every env name documented" test). Run `make test` on the rebased branch *before* `gh pr merge`, and read the exit code, not the tail |
+
+Duplicates closed unmerged: #44, #45, #46, #50 (a second agent built E3/E4/E5/F5/E1 in parallel). Only differences not carried over: episode filters `s2_fell_back` / `cascaded`, `eval-gate --strict`, `/training/compare?a=&b=`. Pick up if wanted.
+
+Open: **E2** (upload `training/out` to the volume or accept the snapshot fallback), **F4** (Melanie, needs `sim.js`). The local dev server a sidekick started on a random port (`127.0.0.1:62752`) runs pre-merge code; `make serve` on 8000 for current `main`.
+
 ### Branch policy
 
 Branch → PR → merge when `make test` / `make validate` green. Do not push feature work straight to `main`. Prefer one writer on `ui/sim/sim.js` and `llm/client.py`.
