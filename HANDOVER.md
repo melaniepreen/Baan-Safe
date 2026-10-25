@@ -12,16 +12,16 @@ One call: `gateway/route.py` `handle` ← `POST /triage` / `POST /cases/{id}/tur
 |---|---|---|
 | Extraction | `system1/extract.py` | English keywords; bare `unaccompanied` → child unless `adult` named. Thai = district names only. Demo English / code-switched. |
 | Enrichment | `enrich/context.py`, `ingest.store` | Live when `districts.json` present. Flags never change priority. |
-| Memory | `memory/adapter.py`, `memory/mubit.py` | Hosted **mubit** when `baansafe-mubit` secrets exist (same gate as S2). `/v2/control/query` + ingest; project `baansafe-demo` or `MUBIT_PROJECT_ID`. Retrieve soft-fails to `[]`. |
+| Memory | `memory/adapter.py`, `memory/local.py` | Hosted **local** (`MEMORY_LOCAL_PATH=/data/memory.jsonl` on `baansafe-demo`). Case record written after every routed turn (`memory_write` stage); policy lessons seeded; repeat caller at same place + need → S1 `duplicate_merge`. `GET /metrics.memory`. `memory/mubit.py` is dormant: current Mubit has no memory API (`/v2/control/*` = 404). |
 | Graduation | `gateway/graduation.py` | Threshold 2 → `complex_situation` (not into S1 rules). |
 | Chooser | `gateway/chooser.py` | `field precheck`; `routing.yaml` `mode: cascade`. |
 | System 1 | `system1/decide.py` | Rules-only. |
 | System 2 | `system2/orchestrator.py` | Hosted **real** when `baansafe-mubit` injects key+URL. |
 | Sapling | `system2/sapling.py` | Stub. |
 | Router / ledger | `router/merge.py`, `ledger.py` | Confirm/cancel; in-process holds. Modal **`max_containers=1`**. |
-| Traces | `llm/client.py`, `GET /metrics` | `mubit_chat` on every hop (and RL cache hits). |
+| Traces | `llm/client.py`, `GET /metrics` | `mubit_chat` on every hop (and RL cache hits). Every call sends `metadata.session_id=case_id`; Mubit groups all S2 calls into one Task (static system prompt). ~290 distinct requests sent 25 Oct. |
 | UI | `ui/sim/` | Wired to transcript / dispatches / `location_context`. **Freeze until Melanie reviews.** |
-| Hosting | Modal gateway | Redeployed `3d1f362` era; `include_source=True`. Smoke: `/hosting` live, one S2 turn, `mubit_chat.call_count≥1`. |
+| Hosting | Modal gateway | Redeployed at `82e68ac` (25 Oct 04:15 UTC). `/hosting` → `backends=live`, `memory=local`. Smoke: two callers on Sukhumvit Soi 22 → second one `finalize_case` with `duplicate_merge_count=1`, `write_error_count=0`. |
 | Place | `data.demo_event` | **`Sukhumvit / Watthana (Bangkok)`** — matches basemap + `flood.json`. |
 
 Owners: `OWNERSHIP.md`. Contracts: `v0.3-contracts` (TraceEvent stages grew; schema sync still backlog).
@@ -43,7 +43,8 @@ Owners: `OWNERSHIP.md`. Contracts: `v0.3-contracts` (TraceEvent stages grew; sch
 | Modal `max_containers=1` | PR #12 |
 | Modal `include_source=True` (crash-loop fix) | PR #13 |
 | Hosted smoke | `/hosting` `backends=live`, S2 real; free-text oxygen → S2; `mubit_chat` ok |
-| Mubit memory client + three decisions | `memory/mubit.py` query/ingest. Local default `MEMORY_IMPL=mock`. Hosted sets `mubit` when the secret exists |
+| Memory: local store, write path, metrics | PRs #20 #22 (+ #23 session ids, #24 RL note). Mubit memory API does not exist in the current product; `MEMORY_IMPL=local` is the hosted default. Seed with `MEMORY_IMPL=local make seed-memory`, upload via `modal volume put baansafe-demo <file> memory.jsonl` |
+| Fine-tune decisions + SetFit run | PR #19, version `ft-20261025T031241Z-e4ce5eb6` |
 
 ---
 
@@ -51,19 +52,19 @@ Owners: `OWNERSHIP.md`. Contracts: `v0.3-contracts` (TraceEvent stages grew; sch
 
 Four tracks. Order tonight: 1 → 4 → 3 (backend half). Track 2 is done except the shadow label. Owners per `OWNERSHIP.md`: Moly = API / calls / flow / infra, Melanie = S2 / Sapling / decision brains / `ui/sim`.
 
-### Track 1 — Mubit memory: from "wired" to "changed an outcome" (tonight, Moly)
+### Track 1 — Memory: done (local store), Mubit memory API does not exist
 
-State: hosted runs `MEMORY_IMPL=mubit` on workspace `ws-3e4ac86aadff0b72`, but every trace showed `items=0`. Judge read that as "claimed, not used".
+Finding (25 Oct, verified live and in docs.mubit.ai): current Mubit is an LLM gateway that records calls and trains per-task adapters. `https://api.mubit.ai/v2/control/*` returns `404 unknown_route`; the `/v2/control` client came from the retired "Mubit Memory" SDK. The hosted `items=0` was a swallowed 404, and corrections were 500ing on the hosted demo.
 
 | Step | What | Status |
 |---|---|---|
-| 1a | `feat/memory-record-metrics`: call `store_record()` after the router; carry `source_case_id` through ingest/retrieve so S1 `duplicate_merge` can fire; `memory` block on `GET /metrics` (`retrieve_count`, `hit_count`, `item_total`, `write_count`, `duplicate_merge_count`, `hit_rate`); `memory_write` trace stage | agent running |
-| 1b | `feat/memory-seed`: `scripts/seed_memory.py` + `make seed-memory` (6–10 policy lessons from `policies/` into the workspace, idempotent); live proof turn 1 → correction → turn 2 on the hosted URL | agent running |
-| 1c | Merge 1a then 1b; re-run seed once if 1a changed the ingest shape | after both land |
-| 1d | `modal deploy` gateway; smoke: turn 1, correction, turn 2 shows `memory via adapter mode=mubit; items≥1`, router note `retrieved correction memory`, `/metrics.memory.hit_count≥1` | after 1c |
-| 1e | Frozen script step 3 becomes "second caller → memory retrieves the correction"; point at `/metrics` memory block | after 1d |
+| 1a | PR #22: honest `retrieve_error=` on the memory trace, correction kept locally (no more 500), `scripts/seed_memory.py` with 10 policy lessons from `policies/service.py`, `MUBIT_CONTROL_URL` override | merged, deployed |
+| 1b | PR #20: `MEMORY_IMPL=local` (`memory/local.py`, JSONL, field-overlap scoring), `store_record()` after the router, `source_case_id` round-trip, own-case exclusion, `/metrics.memory`, 16 new tests | merged, deployed |
+| 1c | Seeded `/data/memory.jsonl` on `baansafe-demo` with the 10 lessons | done |
+| 1d | Hosted proof: caller A (water, Sukhumvit Soi 22) → `create_provisional_dispatch`, `items=2`; caller B next door, same need → `items=3`, `finalize_case`, `duplicate_merge_count=1` | done |
+| 1e | Frozen script step 3 uses the two-caller merge | done below |
 
-Not tonight: `memory_ref` on the training event (ties memory to the fine-tune story).
+Known behaviour to say out loud: duplicate detection is district/street + need granularity (that's all the record carries), so two households on the same soi with the same need merge. The town's Reject button writes a correction lesson into the same store.
 
 ### Track 2 — Fine-tuning: decide, don't train (tier 1 done)
 
@@ -116,7 +117,7 @@ Design reviewed against code. Compatible with four corrections:
 | # | Who | Action |
 |---|---|---|
 | 1 | Both | **Keep paid S2 on public URL?** Smoke left it **on** (`S2_IMPL=real`). Else redeploy with stub / no secret spend. Watch `/metrics` and 429s. |
-| 2 | Both | Optional: set `MUBIT_PROJECT_ID` to a console `proj-…` if `baansafe-demo` is empty. Pitch: gateway + traces + live memory retrieve. |
+| 2 | Both | Ask Mubit to switch **training on** for workspace `ws-3e4ac86aadff0b72` (console has no Adapters page). The System 2 Task already holds ~290 requests; a version trains on their next cycle. Pitch: gateway + traces + per-task adapter; memory is ours. |
 | 3 | Melanie | Pull `main`, rebase any local `ui/sim` work; review Moly’s town wire before editing. |
 | 4 | Moly | Share URL **only with judges**; run the frozen 3‑min script once dry. |
 | 5 | Both | Optional: hide aid 501 UI / keep RL panel off (`index.html` does not load `rl_panel.js`). |
@@ -125,7 +126,7 @@ Design reviewed against code. Compatible with four corrections:
 
 1. English **S1** (e.g. F02 rice) — threshold accept, boat may move.  
 2. **S2** (e.g. F10 oxygen / under threshold) — PENDING → Accept; say Mubit→Nemotron; point at `/metrics` if a live hop ran.  
-3. Reject → Correct this, or repeat theme ×2 → **Graduated to S2**.  
+3. Second caller, same soi + same need → **memory** `items≥1`, S1 `duplicate_merge` (no second truck); `/metrics.memory.duplicate_merge_count`. Then Reject → Correct this (lesson lands in the store).  
 4. Cards in `sim_events.json` are **scripted**; one live hop proves traces.
 
 ### Nice-to-have / backlog (not demo blockers)
