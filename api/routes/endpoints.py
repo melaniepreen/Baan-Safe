@@ -15,6 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from api.caller_ip import resolve_caller_ip, stamp_caller_ip
 from api.deps import enrich_impl, impl_snapshot, not_ready, s1_impl, s2_impl
+from api.routes.training import display_path, rl_run_path
 from api.store import StoredCase, get, put
 from contracts.models import (
     CaseState,
@@ -575,6 +576,82 @@ def rl_run() -> dict:
             detail="no RL run yet; run `make rl-loop` first",
         )
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+# Per-episode flags in run.json (eval/rl). `incorrect` is `not correct`.
+EPISODE_FILTERS = (
+    "critical_under",
+    "under_triage",
+    "missed_human",
+    "s2_fell_back",
+    "incorrect",
+    "cascaded",
+)
+
+
+def _episode_matches(episode: dict, name: str) -> bool:
+    if name == "incorrect":
+        return not bool(episode.get("correct"))
+    return bool(episode.get(name))
+
+
+@router.get("/rl/run/episodes")
+def rl_run_episodes(
+    filter: str | None = Query(default=None),
+    epoch: int | None = Query(default=None),
+) -> dict:
+    """Per-episode drill-down of the last RL run (HANDOVER E3).
+
+    Reads `rl_run_path()` (RL_RUN_PATH, else eval/out/rl/run.json). `filter`
+    keeps episodes with that flag set; `epoch` keeps one epoch. Rows come
+    back sorted by (epoch, seq). `run_path` is the display form, never an
+    absolute path.
+    """
+    if filter is not None and filter not in EPISODE_FILTERS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"unknown filter {filter!r}; allowed: {', '.join(EPISODE_FILTERS)}",
+        )
+    path = rl_run_path()
+    if not path.is_file():
+        raise HTTPException(
+            status_code=404,
+            detail="no RL run yet; run `make rl-loop` first",
+        )
+    try:
+        run = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise HTTPException(
+            status_code=404,
+            detail="no RL run yet; run `make rl-loop` first",
+        ) from exc
+    raw = run.get("episodes") if isinstance(run, dict) else None
+    episodes = [row for row in (raw or []) if isinstance(row, dict)]
+    kept = episodes
+    if epoch is not None:
+        kept = [row for row in kept if row.get("epoch") == epoch]
+    if filter is not None:
+        kept = [row for row in kept if _episode_matches(row, filter)]
+    kept = sorted(kept, key=lambda row: (_int_or_zero(row.get("epoch")), _int_or_zero(row.get("seq"))))
+    return {
+        "run_path": display_path(path),
+        "filter": filter,
+        "epoch": epoch,
+        "total": len(episodes),
+        "count": len(kept),
+        "episodes": kept,
+    }
+
+
+def _int_or_zero(value: Any) -> int:
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, int):
+        return value
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
 
 
 @router.get("/metrics")

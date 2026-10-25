@@ -524,6 +524,107 @@ def test_training_endpoint_with_nothing_on_disk(client, tmp_path, monkeypatch):
     assert str(tmp_path) not in response.text
 
 
+# --- GET /rl/run/episodes ---------------------------------------------------
+
+
+def _episode(id_: str, epoch: int, seq: int, **flags) -> dict:
+    row = {
+        "id": id_,
+        "kind": "fixture",
+        "epoch": epoch,
+        "seq": seq,
+        "systems": ["system_1"],
+        "cascaded": False,
+        "priority": "P3",
+        "truth_priority": "P3",
+        "route": "welfare_distribution",
+        "reward": 1.0,
+        "correct": True,
+        "under_triage": False,
+        "critical_under": False,
+        "missed_human": False,
+        "s2_fell_back": False,
+    }
+    row.update(flags)
+    return row
+
+
+@pytest.fixture
+def episodes_run(tmp_path, monkeypatch):
+    # Written out of (epoch, seq) order on purpose. One critical_under (epoch 1),
+    # two incorrect (one per epoch).
+    episodes = [
+        _episode("E2-B", 2, 1),
+        _episode("E1-B", 1, 1, correct=False, under_triage=True, critical_under=True, priority="P3", truth_priority="P1"),
+        _episode("E2-A", 2, 0, correct=False, missed_human=True, cascaded=True, systems=["system_2", "system_1"]),
+        _episode("E1-A", 1, 0),
+    ]
+    run_path = tmp_path / "run-dir" / "run.json"
+    run_path.parent.mkdir()
+    run_path.write_text(json.dumps({"schema": "baansafe.rl_run.v1", "episodes": episodes}), encoding="utf-8")
+    monkeypatch.setenv("RL_RUN_PATH", str(run_path))
+    return run_path
+
+
+def test_rl_run_episodes_unfiltered_sorted_by_epoch_then_seq(client, episodes_run, tmp_path):
+    response = client.get("/rl/run/episodes")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["filter"] is None
+    assert body["epoch"] is None
+    assert body["total"] == 4
+    assert body["count"] == 4
+    assert [(e["epoch"], e["seq"]) for e in body["episodes"]] == [(1, 0), (1, 1), (2, 0), (2, 1)]
+    assert [e["id"] for e in body["episodes"]] == ["E1-A", "E1-B", "E2-A", "E2-B"]
+    assert body["run_path"] == "run.json"
+    assert str(tmp_path) not in response.text, "temp paths must not leak"
+
+
+def test_rl_run_episodes_filter_critical_under(client, episodes_run):
+    response = client.get("/rl/run/episodes", params={"filter": "critical_under"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["filter"] == "critical_under"
+    assert body["total"] == 4
+    assert body["count"] == 1
+    assert [e["id"] for e in body["episodes"]] == ["E1-B"]
+    assert body["episodes"][0]["truth_priority"] == "P1"
+
+
+def test_rl_run_episodes_filter_incorrect_within_epoch(client, episodes_run):
+    everywhere = client.get("/rl/run/episodes", params={"filter": "incorrect"}).json()
+    assert [e["id"] for e in everywhere["episodes"]] == ["E1-B", "E2-A"]
+    response = client.get("/rl/run/episodes", params={"filter": "incorrect", "epoch": 2})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["epoch"] == 2
+    assert body["total"] == 4
+    assert body["count"] == 1
+    assert [e["id"] for e in body["episodes"]] == ["E2-A"]
+    assert body["episodes"][0]["correct"] is False
+    only_epoch = client.get("/rl/run/episodes", params={"epoch": 1}).json()
+    assert [e["id"] for e in only_epoch["episodes"]] == ["E1-A", "E1-B"]
+    cascaded = client.get("/rl/run/episodes", params={"filter": "cascaded"}).json()
+    assert [e["id"] for e in cascaded["episodes"]] == ["E2-A"]
+
+
+def test_rl_run_episodes_rejects_unknown_filter(client, episodes_run):
+    response = client.get("/rl/run/episodes", params={"filter": "bogus"})
+    assert response.status_code == 400
+    detail = response.json()["detail"]
+    assert "bogus" in detail
+    for name in ("critical_under", "under_triage", "missed_human", "s2_fell_back", "incorrect", "cascaded"):
+        assert name in detail
+
+
+def test_rl_run_episodes_404_without_a_run(client, tmp_path, monkeypatch):
+    monkeypatch.setenv("RL_RUN_PATH", str(tmp_path / "none" / "run.json"))
+    response = client.get("/rl/run/episodes")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "no RL run yet; run `make rl-loop` first"
+    assert str(tmp_path) not in response.text
+
+
 def test_registry_path_defaults(monkeypatch, tmp_path):
     monkeypatch.delenv("TRAINING_REGISTRY_PATH", raising=False)
     monkeypatch.setattr(surface, "VOLUME_REGISTRY_PATH", str(tmp_path / "vol" / "registry.json"))

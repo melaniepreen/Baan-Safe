@@ -43,6 +43,7 @@ make rl-loop-replay
 make rl-snapshot
 make rl-restore
 make mubit-traffic
+make mubit-requests
 make record-s2-cache
 make eval-learning
 make sim-eval
