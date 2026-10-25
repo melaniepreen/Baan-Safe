@@ -101,6 +101,9 @@ STUB_ENV = {
     "POLICY_PIN_DIR": f"{DATA_MOUNT}/policy-pins",
     # S2_IMPL=cache: committed fixtures/s2_cache/demo.jsonl + misses recorded here.
     "S2_CACHE_RECORD_PATH": f"{DATA_MOUNT}/s2_cache.jsonl",
+    # Hosted case ids are random and the store grows per case: key on the
+    # transcript/fields/triggers, not case_id/memory/resources.
+    "S2_CACHE_KEY": "case",
     **READ_ENV,
 }
 
@@ -266,7 +269,8 @@ def _hosting_note(impl: dict[str, str]) -> str:
     elif s2 == "cache":
         s2_line = (
             "System 2 replays exact-key cached Nemotron replies (S2_IMPL=cache; "
-            "fixtures/s2_cache/demo.jsonl plus S2_CACHE_RECORD_PATH on the volume); "
+            "fixtures/s2_cache/demo.jsonl plus S2_CACHE_RECORD_PATH on the volume, "
+            "S2_CACHE_KEY=case ignores case_id/memory/resources); "
             + ("a miss goes to Mubit and is recorded." if has_secrets else "a miss falls back to supervisor escalation.")
         )
     elif has_secrets:

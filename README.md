@@ -170,7 +170,7 @@ The town simulation is static files in `ui/sim/`. `make serve` mounts them at [h
 | Variable | Default tonight | Owner flips to |
 |---|---|---|
 | `S1_IMPL` | `stub` | `real` runs the rules in `system1/decide.py` |
-| `S2_IMPL` | `stub` | `real` runs the Nemotron orchestrator (`system2.orchestrator_model`) through Mubit on every turn. `cache` replays an exact-key reply from `fixtures/s2_cache/demo.jsonl` (+ `S2_CACHE_RECORD_PATH`) and calls Mubit only on a miss, so a demo survives a Mubit timeout |
+| `S2_IMPL` | `stub` | `real` runs the Nemotron orchestrator (`system2.orchestrator_model`) through Mubit on every turn. `cache` replays an exact-key reply from `fixtures/s2_cache/demo.jsonl` (+ `S2_CACHE_RECORD_PATH`) and calls Mubit only on a miss, so a demo survives a Mubit timeout. `S2_CACHE_KEY=case` (hosted) keys on transcript/fields/triggers instead of the whole payload |
 | `MEMORY_IMPL` | `mock` | BaanSafe's store in `memory/adapter.py`. `local` is the JSONL store (`memory/local.py`, file at `MEMORY_LOCAL_PATH`, default `var/memory.jsonl`); Modal sets `local` with `/data/memory.jsonl`. `mubit` is dormant: Mubit is not that store |
 | `ENRICH_IMPL` | `data` if `data/processed` exists, else `off` | `off` to skip lookups |
 
