@@ -1,6 +1,8 @@
 # Handover
 
-25 October 2026, early morning. `main` is at `61663d0`. `make test` is 271 passed, 1 skipped (`tests/test_synthetic_calls.py` needs the `laya` module). `make validate` is ok.
+25 October 2026. `main` tip at write time: check `git rev-parse --short HEAD` (policy change landed as `bbde2f0`; this doc ships on a follow-up PR). `make test` is **272 passed, 1 skipped** (`tests/test_synthetic_calls.py` needs the `laya` module). `make validate` is ok.
+
+`requirements.txt` includes `openai>=1.40` (audit note that it was missing is stale unless a deploy image omits the file).
 
 ## Main parts
 
@@ -8,7 +10,7 @@ One call goes through these parts in order. `gateway/route.py` `handle` is the e
 
 | Part | Where | State |
 |---|---|---|
-| Extraction | `system1/extract.py` | Runs when fields are empty. English keyword rules (incl. kids/children/unaccompanied → safeguarding). Thai matches **district names only** (need/danger keywords were added then reverted). Gazetteer: `admin_districts` + `districts` + snapshot. |
+| Extraction | `system1/extract.py` | Runs when fields are empty. English keyword rules (kids/children; bare `unaccompanied` → child unless `adult` named). Thai matches **district names only**. Demo in English or code-switched. |
 | Enrichment | `enrich/context.py`, `data/processed/`, snapshots | JSON/GeoJSON via `ingest.store` (SQLite is ingest cache only). Matches `districts` then `admin_districts`. Flags never change priority. |
 | Memory | `memory/adapter.py` | `MEMORY_IMPL=mock`. `memory/mubit.py` raises. |
 | Graduation to System 2 | `gateway/graduation.py` | Escalation threshold 2. Tags `complex_situation`; does not write System 1 rules. |
@@ -20,7 +22,7 @@ One call goes through these parts in order. `gateway/route.py` `handle` is the e
 | Traces / metrics | `llm/client.py`, `trace.py`, `GET /metrics` | Every Mubit chat emits `mubit_chat`. RL live/cache hits too. |
 | RL loop | `eval/rl/`, `ui/sim/rl_panel.js` | Live = Mubit; replay = cache; panel labels honestly. |
 | UI | `ui/sim/`, `ui/correct.js` | Transcript create, dispatches, `location_context`, Mubit hop, confirm/cancel. |
-| Hosting | `make serve`, `infra/modal/gateway_app.py` | Local 8000. Modal: S1 real + enrich auto; `baansafe-mubit` attached; S2 real only when creds present. **Redeploy required** for live URL. |
+| Hosting | `make serve`, `infra/modal/gateway_app.py` | Local 8000. Git has S1 real + enrich auto + `baansafe-mubit`; **hosted URL does not match git until redeploy**. No auth on corrections — judges only. |
 | Training | `training/`, Modal finetune / Laya export | Exports exist. No checkpoint at inference. |
 
 Owners: `OWNERSHIP.md`. Contracts: `v0.3-contracts`. Detail plan: `docs/wire-frontend.md` (mostly landed).
@@ -42,89 +44,61 @@ Owners: `OWNERSHIP.md`. Contracts: `v0.3-contracts`. Detail plan: `docs/wire-fro
 | `data.demo_event` = Hat Yai / Songkhla; G01–G04 → system_2 | `110e370` |
 | Correct this Mubit→Nemotron line | `61663d0` |
 | Enrich `admin_districts` fallback | Hat Yai resolves |
+| Unaccompanied adult ≠ child | Bare `unaccompanied` still implies child; `adult` named does not |
 
 ---
 
-## Plan of action
+## Judge audit (25 Oct) — context for both owners
 
-Ordered for demo truth → hosted live → product depth. Each row is one work package.
+External pass did **not** boot the API or make live Mubit calls; endpoints on the hosted URL are unchecked until A1–A2.
 
-### P0 — Make the public demo match git (ops)
+### Still true / hold the line
+- Every LLM call goes through Mubit (`llm/client.py`); no ReliefWeb / DDPM; synthetic people only.
+- Architecture still *promises* Mubit memory, Sapling verifier, and model-based System 1 — runtime today: **memory stub**, **Sapling stub**, **S1 rules-only**. Pitch Mubit as **gateway + traces**, not memory, unless Melanie lands the three `memory.*` decisions tonight.
+- `config/decisions.yaml` still has many `TODO_HUMAN` leaves (~33 outside `DECIDED`).
+- High churn on `ui/sim/sim.js` in the last hours — prefer one writer per PR (branch → PR → merge).
 
-| # | Action | Owner hint | How |
-|---|---|---|---|
-| A1 | **Redeploy Modal gateway** | shared | `make modal-secrets` (if keys changed) then `make deploy-modal`. Confirm `GET /hosting`: `backends` `s1-real` or `live`, `secrets` true when Mubit present, note starts with LLM via Mubit. |
-| A2 | **Smoke Mubit on hosted URL** | shared | One S2 fixture turn; `GET /cases/{id}/trace` shows `mubit_chat`; `GET /metrics` `mubit_chat.call_count` > 0. Never log keys. |
-| A3 | **Share URL only with judges** | shared | `gateway.auth` still unset — corrections can graduate patterns. |
+### Risks called out
+| Risk | Mitigation |
+|---|---|
+| Hosted URL ≠ git | Redeploy Modal; smoke `/metrics` |
+| Hat Yai event vs Sukhumvit town vs northern calls | No flood in demo until place lines up |
+| Live Nemotron: ~3/6 fixtures, rate limits | Script S2 with rules safety gate; keep `make rl-loop-replay` cache ready |
+| Two learning stories | Freeze **corrections escalate to System 2** |
+| Unaccompanied adult → child | Treat as bug; do not imply child when `adult` is named |
+| Thai extract = districts only | Demo English / code-switched |
+| Stock holds | Pin Modal to **one** container |
+| Aid 501 + RL panel noise | **Hide** from demo UI for the script |
 
-### P1 — Align place and story (product + small code)
+### Next 5 (in order) — both owners
 
-| # | Action | Why | How |
-|---|---|---|---|
-| B1 | **Pick one learning story and freeze copy** | Three paths still exist (correction→S2, RL→S1 rules, stub model versions) | Choose: (1) demo = correction escalation to S2 only, or (2) RL_OVERLAY graduation. Update `sim_events` / README / architecture note so they do not contradict. Human confirms cascade / latency already in yaml if needed. |
-| B2 | **Move calls or town to Songkhla / Hat Yai** | `demo_event` is Hat Yai but fixtures/town often still north/Sukhumvit → enrich stays dry | Either relocate a demo fixture set + town pins to Songkhla, or change basemap; then flood polygons / facilities show in desk. |
-| B3 | **Widen flood match or use district area** | Thepha-style false dry | Buffer / polygon-in-district in `enrich/context.py`; add a fixture that lights `near_flood_extent`. |
-| B4 | **Weather for admin-only districts** | Gauges keyed to 50 `districts` ids | Map admin match → nearest `districts` location_id, or extend weather rows. |
+1. **Redeploy Modal** and run a Mubit check on the live URL (`GET /hosting`, one System 2 turn, `GET /metrics` → `mubit_chat`). Share the link **only with judges** (no auth).
+2. **Line up place on Hat Yai** — move town pins + one fixture set to Songkhla/Hat Yai, *or* change `data.demo_event` back if the basemap stays Sukhumvit.
+3. **Freeze the ~3-minute script:** English System 1 call → System 2 escalation through Mubit (rules safety gate visible) → human confirm dispatch → graduation (correction path to S2). Keep RL replay cache warm; do not depend on live nano for the scripted beat.
+4. **Settle Mubit memory** (Melanie: `memory.mubit_project`, `retrieval_top_k`, `token_budget` + wire) **or** reword all pitch/docs to “gateway + traces”.
+5. **Keep HANDOVER tip SHA / test counts fresh** after each merge; confirm deploy image installs `requirements.txt` (includes `openai>=1.40`).
 
-### P2 — Hosted hardening
+### Same-night smaller fixes
+- Hide aid eligibility UI and RL panel for the demo path.
+- Pin Modal concurrency / replicas to 1 for ledger holds.
+- Unaccompanied adult must not get `vulnerable: child` (see extract fix on this PR if merged).
 
-| # | Action | Why | How |
-|---|---|---|---|
-| C1 | **Decide `gateway.auth`** | Open write on public URL | Hackathon: keep open + judge-only URL. After: reject unauthenticated corrections. |
-| C2 | **Persist ledger / cases across replicas** | In-process holds; Modal multi-container | Single container or volume/DB for ledger + case store (PRD open item). |
-| C3 | **RL artifacts on Modal (optional)** | `GET /rl/run` 404 — `.dockerignore` drops `eval/out` | Bake a small `run.json` into image or serve from volume after `make rl-loop`. |
+## Plan of action (full backlog)
 
-### P3 — Mubit depth (beyond chat hop)
-
-| # | Action | Blocked on | How |
-|---|---|---|---|
-| D1 | **Wire Mubit memory** | `memory.mubit_project`, `retrieval_top_k`, `token_budget` (Melanie) | Implement `memory/mubit.py` against `/v2/control/`; `MEMORY_IMPL=mubit` on demo when ready. |
-| D2 | **Live Sapling** | `sapling.*` decisions + GPU app | `make modal-deploy-sapling`; `SAPLING_IMPL=live`; keep scope aid/denial only. |
-| D3 | **STT live** | `modal.stt_*` | `make modal-deploy-stt`; set `STT_UPSTREAM` at gateway deploy. |
-
-### P4 — Learning / models (not required for triage demo)
-
-| # | Action | Notes |
-|---|---|---|
-| E1 | `make export-laya` / `LAYA_TRAIN=1 make laya-train` | GPU or Modal task; does not change rules-only S1 by itself |
-| E2 | Decide classifier second opinion | Product: load Laya/SetFit into cascade or keep rules-only |
-| E3 | `make modal-finetune` | Event-log SetFit/LoRA — **not** Laya; needs `modal.finetune_base_model` |
-| E4 | Refresh RL cache for nano | `make rl-loop` live once so `rl-loop-replay` hits |
-
-### P5 — Thai (only if product reopens)
-
-| # | Action | Notes |
-|---|---|---|
-| F1 | Re-add Thai need/danger/vulnerable keywords | Was reverted on purpose; use glossary + synthetic eval; watch false friends (`ยา`) |
-| F2 | Thai UI labels | `name_th` / facility names when `lang` is th/mixed |
-
-### P6 — Data / cleanup (backlog)
-
+### After the Next 5
 | # | Action |
 |---|---|
-| G1 | UI or S2 consumer for `/map/flood` + `/map/facilities` (province-filtered) |
-| G2 | Runtime reader for `disaster_report` (“past floods here”) |
-| G3 | Flag stale Open-Meteo / snapshot age at point of use |
-| G4 | Resolve `routes.yaml` vs `NEEDS_TABLE` (delete or generate from code) |
-| G5 | Single district list story (document or merge `districts` / `admin_districts` / gazetteer) |
-| G6 | Aid endpoints still 501 — implement or hide from demo |
-| G7 | `countries/` loader or drop from demo narrative |
-| G8 | Housekeeping: gitignore `.vscode/` `*.log`; move architecture/OWNERSHIP/research under `docs/`; untrack approved junk markdown |
+| B3 | Widen flood buffer / district-area match |
+| B4 | Weather for admin-only district matches |
+| C1 | Post-hackathon: `gateway.auth` |
+| C3 | Optional: ship `eval/out/rl/run.json` on Modal volume |
+| D2–D3 | Live Sapling / STT when decisions set |
+| E1–E4 | Laya train / classifier product decision / finetune / refresh nano RL cache |
+| F1–F2 | Thai keywords / Thai UI labels only if product reopens |
+| G1–G8 | Map consumers, disaster_report, snapshot age, routes.yaml, district lists, aid 501, countries, markdown housekeeping |
 
-### P7 — Doc sync
-
-| # | Action |
-|---|---|
-| H1 | Keep this file’s tip SHA and “Done recently” updated after each push |
-| H2 | PRD / architecture refresh agents: rebase before push (docs-only commits collide) |
-
----
-
-## Remaining gaps (short index)
-
-Maps to the plan above. Struck items are done.
-
-~~1. Plural children~~ · **2. Hosted auth** → C1 · **3. Thai keywords** → F1 (opt-in) · ~~4. Demo skips extract~~ · ~~5. Hosted S1 stub~~ (redeploy A1) · ~~6–7. Dispatches / confirm API~~ · **8. Mubit memory** → D1 · **9. Trained models unused** → E* · **10. Two graduation paths** → B1 · ~~11. Stale TODO town copy~~ · ~~12. G01–G04~~ · **13. Modal RL / stock** → C2–C3 · ~~14. demo_event~~ (calls still north → B2) · **15. Melanie review orchestrator** · **16. routes.yaml** → G4 · ~~17. Town ignores backend~~ (mostly fixed; chooser still demo-only for pins) · **18. Three learning stories** → B1 · **19. always_requires_human text** · **20–21. Duplicated lists** → G5 · **22–26. Unused scrape** → G1–G7 · **27–28. Dead code** (opportunistic) · ~~29. location_context UI~~ · **30–31. Flood geography** → B2–B3 · ~~32. admin_districts enrich~~ · **33–37. Unused history/map/Thai UI** → G1–G2, F2
+### Branch policy
+Branch → PR → merge to `main` when `make test` / `make validate` green. Do not push feature work straight to `main`.
 
 ---
 
