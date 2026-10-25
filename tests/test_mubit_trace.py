@@ -47,6 +47,7 @@ def test_complete_emits_mubit_chat_on_success(monkeypatch, tmp_path):
         assert "api.mubit.ai" in url
         headers = kwargs.get("headers") or {}
         assert headers.get("Authorization", "").startswith("Bearer ")
+        sent["headers"] = headers
         sent.update(kwargs.get("json") or {})
         return _ok_response(httpx.Request("POST", url))
 
@@ -59,7 +60,10 @@ def test_complete_emits_mubit_chat_on_success(monkeypatch, tmp_path):
     assert body["usage"]["prompt_tokens"] == 11
     # Mubit sessions: one case = one session, test cases held out by session.
     assert sent["metadata"] == {"session_id": "F10"}
-    assert "x-middleware-store" not in {k.lower() for k in (sent.get("headers") or {})}
+    headers = {k.lower(): v for k, v in (sent.get("headers") or {}).items()}
+    assert "x-middleware-store" not in headers
+    # Keep the full request + answer so the call can be a kept example.
+    assert headers.get("x-middleware-record") == "full"
     events = read_traces("F10")
     assert len(events) == 1
     event = events[0]

@@ -51,17 +51,22 @@ latte-bench:
 serve:
 	$(PYTHON) -m uvicorn api.main:app --host 0.0.0.0 --port 8000
 
-# Ingest policy lessons into the Mubit workspace (MEMORY_IMPL=mubit + .env loaded).
-# SEED_ARGS='--dry-run' prints without POSTing; '--case-fact CASE_ID' adds one synthetic fact.
+# Ingest the 10 policy lessons into the memory store (MEMORY_IMPL=local, path from
+# MEMORY_LOCAL_PATH; mubit is dormant). SEED_ARGS='--dry-run' prints without writing;
+# '--case-fact CASE_ID' adds one synthetic fact.
 seed-memory:
 	$(PYTHON) scripts/seed_memory.py $(SEED_ARGS)
 
 # Distinct synthetic System 2 calls through Mubit so its task gains kept examples.
 # Needs .env loaded. COUNT / SEED override; TRAFFIC_ARGS="--dry-run" prints only.
+# TRAFFIC_MEMORY=local (with MEMORY_LOCAL_PATH set to a seeded store) puts the
+# policy lessons and earlier cases into every prompt, so the kept examples carry
+# them; mock sends memory: [] on every call.
 COUNT ?= 100
 SEED ?= 1
+TRAFFIC_MEMORY ?= mock
 mubit-traffic:
-	S1_IMPL=real S2_IMPL=real MEMORY_IMPL=mock $(PYTHON) scripts/mubit_traffic.py --count $(COUNT) --seed $(SEED) $(TRAFFIC_ARGS)
+	S1_IMPL=real S2_IMPL=real MEMORY_IMPL=$(TRAFFIC_MEMORY) $(PYTHON) scripts/mubit_traffic.py --count $(COUNT) --seed $(SEED) $(TRAFFIC_ARGS)
 
 # Record fixtures/s2_cache/demo.jsonl for S2_IMPL=cache (needs .env; fills misses only).
 record-s2-cache:

@@ -35,6 +35,11 @@ _COMPAT_V1 = re.compile(r"^/compat/[A-Za-z0-9._-]+/v1$")
 # or its own error). It is what the console's Requests filter and Mubit
 # support take. `mreq_` plus 32 hex digits.
 REQUEST_ID_HEADER = "x-middleware-request-id"
+# Ask Mubit to keep the full request and answer. `full` is the default; sending
+# it makes the intent explicit. `metadata`/`off` (or x-middleware-store: false)
+# would keep the call out of the task's examples, so they are never sent.
+RECORD_HEADER = "x-middleware-record"
+RECORD_FULL = "full"
 REPLY_REQUEST_ID = "mubit_request_id"
 _MREQ = re.compile(r"^mreq_[0-9a-f]{32}$")
 
@@ -200,6 +205,7 @@ def complete(
             headers={
                 "Authorization": f"Bearer {key}",
                 "Content-Type": "application/json",
+                RECORD_HEADER: RECORD_FULL,
             },
             json=body,
             timeout=timeout,
