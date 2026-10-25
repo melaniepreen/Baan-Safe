@@ -43,7 +43,7 @@ Owners: `OWNERSHIP.md`. Contracts: `v0.3-contracts` (TraceEvent stages grew; sch
 | Modal `max_containers=1` | PR #12 |
 | Modal `include_source=True` (crash-loop fix) | PR #13 |
 | Hosted smoke | `/hosting` `backends=live`, S2 real; free-text oxygen → S2; `mubit_chat` ok |
-| Mubit memory client + three decisions | `memory/mubit.py` query/ingest; still default `MEMORY_IMPL=mock` |
+| Mubit memory client + three decisions | `memory/mubit.py` query/ingest. Local default `MEMORY_IMPL=mock`. Hosted sets `mubit` when the secret exists |
 
 ---
 

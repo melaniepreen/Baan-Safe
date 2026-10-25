@@ -73,6 +73,6 @@ One turn: enrich, retrieve memory, record a policy pre-check, route by the field
 - `gateway.auth`
 - `llm.token_price_usd`
 
-`memory.mubit_project` (`baansafe-demo`), `memory.retrieval_top_k` (`5`), and `memory.token_budget` (`400`) are decided. Override the project with `MUBIT_PROJECT_ID` when the console id differs. Keep `MEMORY_IMPL=mock` on the public demo unless the project has ingested facts.
+`memory.mubit_project` (`baansafe-demo`), `memory.retrieval_top_k` (`5`), and `memory.token_budget` (`400`) are decided. Override the project with `MUBIT_PROJECT_ID` when the console id differs. Local `MEMORY_IMPL` stays `mock`. The Modal gateway sets `MEMORY_IMPL=mubit` when `baansafe-mubit` injects both Mubit values. An empty `baansafe-demo` project returns no items.
 
 See also `docs/agents/rl-loop.md` for the overlay and the cascade learner.
