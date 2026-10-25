@@ -123,6 +123,20 @@ def test_write_correction_ingests_lesson(monkeypatch):
     assert b"Needs food only" in body
 
 
+def test_adapter_retrieve_soft_fails_to_empty(monkeypatch):
+    monkeypatch.setenv("MEMORY_IMPL", "mubit")
+    monkeypatch.setenv("MUBIT_API_KEY", "mbt_test")
+    monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai")
+
+    def boom(**_kwargs):
+        raise RuntimeError("control plane down")
+
+    monkeypatch.setattr(mubit, "retrieve", boom)
+    from memory.adapter import retrieve
+
+    assert retrieve(_case()) == []
+
+
 def test_project_env_override(monkeypatch):
     monkeypatch.setenv("MUBIT_API_KEY", "mbt_test")
     monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai")

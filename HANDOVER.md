@@ -12,7 +12,7 @@ One call: `gateway/route.py` `handle` ← `POST /triage` / `POST /cases/{id}/tur
 |---|---|---|
 | Extraction | `system1/extract.py` | English keywords; bare `unaccompanied` → child unless `adult` named. Thai = district names only. Demo English / code-switched. |
 | Enrichment | `enrich/context.py`, `ingest.store` | Live when `districts.json` present. Flags never change priority. |
-| Memory | `memory/adapter.py`, `memory/mubit.py` | Default **mock**. `MEMORY_IMPL=mubit` calls `/v2/control/query` + ingest. Decisions: project `baansafe-demo`, top_k 5, budget 400. Override project with `MUBIT_PROJECT_ID`. |
+| Memory | `memory/adapter.py`, `memory/mubit.py` | Hosted **mubit** when `baansafe-mubit` secrets exist (same gate as S2). `/v2/control/query` + ingest; project `baansafe-demo` or `MUBIT_PROJECT_ID`. Retrieve soft-fails to `[]`. |
 | Graduation | `gateway/graduation.py` | Threshold 2 → `complex_situation` (not into S1 rules). |
 | Chooser | `gateway/chooser.py` | `field precheck`; `routing.yaml` `mode: cascade`. |
 | System 1 | `system1/decide.py` | Rules-only. |
@@ -54,7 +54,7 @@ Owners: `OWNERSHIP.md`. Contracts: `v0.3-contracts` (TraceEvent stages grew; sch
 | # | Who | Action |
 |---|---|---|
 | 1 | Both | **Keep paid S2 on public URL?** Smoke left it **on** (`S2_IMPL=real`). Else redeploy with stub / no secret spend. Watch `/metrics` and 429s. |
-| 2 | Both | **Memory live?** Client is wired; keep `MEMORY_IMPL=mock` on public demo until `baansafe-demo` / `MUBIT_PROJECT_ID` has facts. Pitch stays gateway + traces (+ optional memory hop). |
+| 2 | Both | Optional: set `MUBIT_PROJECT_ID` to a console `proj-…` if `baansafe-demo` is empty. Pitch: gateway + traces + live memory retrieve. |
 | 3 | Melanie | Pull `main`, rebase any local `ui/sim` work; review Moly’s town wire before editing. |
 | 4 | Moly | Share URL **only with judges**; run the frozen 3‑min script once dry. |
 | 5 | Both | Optional: hide aid 501 UI / keep RL panel off (`index.html` does not load `rl_panel.js`). |

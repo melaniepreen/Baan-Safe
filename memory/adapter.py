@@ -20,7 +20,11 @@ def memory_mode() -> str:
 
 def retrieve(case: CaseState) -> list[MemoryItem]:
     if memory_mode() == "mubit":
-        return mubit.retrieve(case)
+        try:
+            return mubit.retrieve(case)
+        except Exception:
+            # Live demo: empty context beats a failed turn if control plane errs.
+            return []
     return load_memory(case.case_id)
 
 
