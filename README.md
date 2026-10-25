@@ -116,7 +116,7 @@ flowchart LR
   synth -.->|"EVAL_LEARNING_SET=synthetic"| eval
 ```
 
-This tree is Phase 0 plus a Phase 1 API. **System 2 calls live Nemotron through Mubit; System 1 is rules-only: keyword extraction plus a deterministic needs table.** `make rl-loop` runs the reward-scored learning loop (graduation, recommendations, demotion, shadow bandit) over the cascade; `GET /rl/run` serves the last report. Callers, households, and transcripts are synthetic. Real district names and public flood polygons are used only to anchor scenarios.
+This tree is Phase 0 plus a Phase 1 API. **System 2 calls live Nemotron through Mubit; System 1 is rules-only: keyword extraction plus a deterministic needs table.** `make rl-loop` runs the reward-scored learning loop (graduation, recommendations, demotion, shadow bandit) over the cascade; `GET /rl/run` serves the last report. `GET /training` and `/ui/training.html` show Mubit traffic, fine-tune versions with loss curves, RL epochs, and training-event counts. Callers, households, and transcripts are synthetic. Real district names and public flood polygons are used only to anchor scenarios.
 
 The architecture note is `BaanSafe_Revised_Architecture.md`. What to do in the morning is `MORNING_REPORT.md`. Who owns each folder is `OWNERSHIP.md`. Background reading for Phase 1 is `research/INDEX.md`. The training event schema is `docs/agents/training-schema.md` (listed in `docs/agents/index.json`).
 
@@ -145,7 +145,7 @@ make rl-loop-replay # reward loop replaying the cached System 2 replies
 make eval-learning  # stub: held-out correction eval, writes eval/out/learning.md
 make sim-eval       # stub: caller simulator and coach notes, writes eval/out/sim.md
 make latte-bench    # third-party latte-bench by reference; skips if bun or the checkout is missing
-make serve          # API on :8000, docs at /docs, town sim at /ui/sim/
+make serve          # API on :8000, docs at /docs, town sim at /ui/sim/, training page at /ui/training.html
 make ingest         # public sources, using the cache
 make ingest-refresh # ignore the cache
 make data-report    # rewrite data/SOURCES.md

@@ -73,6 +73,7 @@ Index: `docs/agents/index.json`. Read one topic file, not the whole set.
 | Corrections, learning eval, latte-bench | `docs/agents/correction-loop-and-evals.md` | `eval/correction_loop.py`, `eval/learning/` |
 | RL loop, overlay, cascade | `docs/agents/rl-loop.md` | `eval/rl/`, `gateway/overlay.py` |
 | Training log, export, per-task fine-tune | `docs/agents/training-schema.md` | `training/log.py`, `training/export.py`, `infra/modal/finetune_job.py` |
+| Training page, loss curves, Mubit traffic | `docs/agents/training-surface.md` | `api/routes/training.py`, `ui/training.html` |
 | Caller simulation, coach | `docs/agents/caller-simulation.md` | `sim/env.py`, `sim/coach.py` |
 | Ingest, data files, banned sources | `docs/agents/data-ingest.md` | `ingest/__main__.py`, `data/SOURCES.md` |
 | Live public sources, snapshots | `docs/agents/data-sources.md` | `ingest/demo_sources.py`, `data/snapshots/` |

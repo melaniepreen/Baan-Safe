@@ -8,9 +8,13 @@ A dry run records a version and does not load weights. Accuracy is not invented.
 
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
+import logging
 import os
+import re
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -19,6 +23,9 @@ from contracts.training import S1Label, S2Action, SaplingVerdict
 
 ROLES = ("system_1", "system_2", "orchestrator")
 TASKS = ("sft", "s1_triage", "s2_action", "sapling_verdict", "prefs")
+HELDOUT_NAME = "s1_synthetic_heldout.jsonl"
+LORA_R = 8
+LORA_LR = 1e-4
 
 
 class DatasetError(ValueError):
@@ -383,11 +390,16 @@ def train_lora(
     max_steps: int,
     max_length: int,
 ) -> dict:
-    """Short LoRA. Imports torch only when a real job calls it."""
+    """Short LoRA. Imports torch only when a real job calls it.
+
+    The returned dict is written to `metrics.json` next to the adapter and
+    read back by `GET /training`: a per-step `loss_curve` plus its summary.
+    """
     import torch
     from peft import LoraConfig, get_peft_model
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
+    started = time.monotonic()
     token = _hf_token()
     tokenizer = AutoTokenizer.from_pretrained(base_model, token=token)
     if tokenizer.pad_token is None:
@@ -411,8 +423,8 @@ def train_lora(
     model = get_peft_model(
         model,
         LoraConfig(
-            r=8,
-            lora_alpha=16,
+            r=LORA_R,
+            lora_alpha=2 * LORA_R,
             lora_dropout=0.05,
             bias="none",
             task_type="CAUSAL_LM",
@@ -423,12 +435,12 @@ def train_lora(
     if not use_cuda:
         model.to(device)
     model.train()
-    optim = torch.optim.AdamW((p for p in model.parameters() if p.requires_grad), lr=1e-4)
+    optim = torch.optim.AdamW((p for p in model.parameters() if p.requires_grad), lr=LORA_LR)
     encoded = [_encode(tokenizer, messages, max_length) for messages in rows]
     encoded = [item for item in encoded if item is not None]
     if not encoded:
         raise DatasetError("every row was empty after truncation")
-    last_loss = None
+    loss_curve: list[dict] = []
     steps = 0
     for step in range(max_steps):
         input_ids, labels = encoded[step % len(encoded)]
@@ -438,13 +450,219 @@ def train_lora(
         loss = model(input_ids=batch_ids, labels=batch_labels).loss
         loss.backward()
         optim.step()
-        last_loss = float(loss.detach().float().cpu())
         steps = step + 1
+        loss_curve.append({"step": steps, "loss": float(loss.detach().float().cpu())})
     out_dir.mkdir(parents=True, exist_ok=True)
     model.save_pretrained(out_dir)
     tokenizer.save_pretrained(out_dir)
     trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    return {"steps": steps, "last_loss": last_loss, "trainable_parameters": int(trainable)}
+    return lora_metrics(
+        loss_curve,
+        rows=len(rows),
+        max_length=max_length,
+        trainable_parameters=int(trainable),
+        wall_seconds=time.monotonic() - started,
+        base_model=base_model,
+        gpu_name=gpu_name,
+    )
+
+
+def lora_metrics(
+    loss_curve: list[dict],
+    *,
+    rows: int,
+    max_length: int,
+    trainable_parameters: int,
+    wall_seconds: float,
+    base_model: str = "",
+    gpu_name: str = "",
+) -> dict:
+    """The `metrics.json` shape for a LoRA run. Pure, so tests can call it."""
+
+    return {
+        "trainer": "lora",
+        "steps": len(loss_curve),
+        "rows": rows,
+        "max_length": max_length,
+        "lr": LORA_LR,
+        "lora_r": LORA_R,
+        "trainable_parameters": trainable_parameters,
+        "base_model": base_model,
+        "gpu": gpu_name,
+        "wall_seconds": round(float(wall_seconds), 3),
+        "loss_curve": loss_curve,
+        **loss_summary(loss_curve),
+    }
+
+
+def loss_summary(loss_curve: list[dict]) -> dict:
+    """first/last/min/mean over a `[{step, loss}]` curve. Empty curve gives nulls."""
+
+    values = [float(point["loss"]) for point in loss_curve if point.get("loss") is not None]
+    if not values:
+        return {"first_loss": None, "last_loss": None, "min_loss": None, "mean_loss": None}
+    return {
+        "first_loss": values[0],
+        "last_loss": values[-1],
+        "min_loss": min(values),
+        "mean_loss": sum(values) / len(values),
+    }
+
+
+def loss_curve_from_log_history(log_history) -> list[dict]:
+    """`[{step, loss}]` from a transformers-style `state.log_history`.
+
+    SetFit's SentenceTransformerTrainer logs `embedding_loss`; a plain
+    transformers trainer logs `loss`. Eval rows and rows with neither are
+    skipped. A missing `step` falls back to the row's position.
+    """
+
+    curve: list[dict] = []
+    if not isinstance(log_history, (list, tuple)):
+        return curve
+    for index, entry in enumerate(log_history, start=1):
+        if not isinstance(entry, dict):
+            continue
+        value = entry.get("embedding_loss")
+        if value is None:
+            value = entry.get("loss")
+        if value is None or isinstance(value, bool):
+            continue
+        try:
+            loss = float(value)
+        except (TypeError, ValueError):
+            continue
+        step = entry.get("step")
+        if not isinstance(step, int) or isinstance(step, bool):
+            step = index
+        curve.append({"step": step, "loss": loss})
+    return curve
+
+
+def setfit_log_history(trainer) -> list:
+    """Best-effort `log_history` from a SetFit trainer, else an empty list.
+
+    SetFit 1.1 keeps the SentenceTransformerTrainer on `trainer.st_trainer`;
+    older SetFit exposes `trainer.state` directly. Neither is required.
+    """
+
+    for owner in (getattr(trainer, "st_trainer", None), trainer):
+        state = getattr(owner, "state", None) if owner is not None else None
+        history = getattr(state, "log_history", None)
+        if isinstance(history, list) and history:
+            return history
+    return []
+
+
+_LOSS_LINE = re.compile(r"\{[^{}]*'(?:embedding_)?loss'\s*:[^{}]*\}")
+
+
+class LossLogHandler(logging.Handler):
+    """Parse `{'embedding_loss': x, 'step': n}` lines from the setfit loggers.
+
+    Last-resort capture when no trainer state or callback hook is available.
+    """
+
+    def __init__(self) -> None:
+        super().__init__(level=logging.INFO)
+        self.entries: list[dict] = []
+
+    def emit(self, record: logging.LogRecord) -> None:  # noqa: D401 - logging API
+        try:
+            message = record.getMessage()
+        except Exception:  # noqa: BLE001 - never break training on a log line
+            return
+        for entry in parse_loss_lines(message):
+            self.entries.append(entry)
+
+
+def parse_loss_lines(text: str) -> list[dict]:
+    """Dict literals with a `loss` or `embedding_loss` key found in `text`."""
+
+    found: list[dict] = []
+    for match in _LOSS_LINE.finditer(text or ""):
+        try:
+            payload = ast.literal_eval(match.group(0))
+        except (ValueError, SyntaxError):
+            continue
+        if isinstance(payload, dict):
+            found.append(payload)
+    return found
+
+
+def heldout_metrics(expected: list[str], predicted: list[str]) -> dict:
+    """Accuracy and per-label precision/recall. Pure; the model is not needed."""
+
+    if len(expected) != len(predicted):
+        raise ValueError("expected and predicted must have the same length")
+    rows = len(expected)
+    labels = sorted(set(expected) | set(predicted))
+    per_label: dict[str, dict] = {}
+    correct = 0
+    for label in labels:
+        tp = sum(1 for e, p in zip(expected, predicted) if e == label and p == label)
+        fp = sum(1 for e, p in zip(expected, predicted) if e != label and p == label)
+        fn = sum(1 for e, p in zip(expected, predicted) if e == label and p != label)
+        correct += tp
+        per_label[label] = {
+            "support": tp + fn,
+            "precision": (tp / (tp + fp)) if (tp + fp) else None,
+            "recall": (tp / (tp + fn)) if (tp + fn) else None,
+        }
+    return {
+        "rows": rows,
+        "accuracy": (correct / rows) if rows else None,
+        "per_label": per_label,
+    }
+
+
+def heldout_path_for(dataset_path: str) -> Path | None:
+    """`FINETUNE_HELDOUT`, else `s1_synthetic_heldout.jsonl` next to the dataset."""
+
+    raw = os.environ.get("FINETUNE_HELDOUT", "").strip()
+    if raw:
+        candidate = Path(raw)
+        return candidate if candidate.is_file() else None
+    if not dataset_path:
+        return None
+    sibling = Path(dataset_path).parent / HELDOUT_NAME
+    return sibling if sibling.is_file() else None
+
+
+def parse_heldout(text: str) -> list[dict]:
+    """Held-out rows are the s1 shape `{text, label, ...}`."""
+
+    return _parse_objects(text, _s1_row)
+
+
+def setfit_metrics(
+    loss_curve: list[dict],
+    *,
+    rows: list[dict],
+    base_model: str,
+    max_steps: int,
+    wall_seconds: float,
+    loss_source: str,
+    heldout: dict | None = None,
+) -> dict:
+    """The `metrics.json` shape for a SetFit run. Pure, so tests can call it."""
+
+    labels = sorted({str(row["label"]) for row in rows})
+    payload = {
+        "trainer": "setfit",
+        "steps": max_steps,
+        "rows": len(rows),
+        "label_count": len(labels),
+        "labels": labels,
+        "base_model": base_model,
+        "wall_seconds": round(float(wall_seconds), 3),
+        "loss_source": loss_source,
+        "loss_curve": loss_curve,
+        **loss_summary(loss_curve),
+    }
+    if heldout is not None:
+        payload["heldout"] = heldout
+    return payload
 
 
 def train_setfit(
@@ -453,16 +671,21 @@ def train_setfit(
     out_dir: Path,
     *,
     max_steps: int,
+    heldout: list[dict] | None = None,
 ) -> dict:
     """SetFit on {text, label}. Imports setfit only when a real job calls it.
 
     Row weights are kept on the stored JSONL. This loop does not turn them
-    into a loss weight, and it does not score accuracy.
+    into a loss weight. The embedding loss curve is captured best-effort:
+    trainer `log_history`, else a `TrainerCallback`, else the setfit loggers.
+    When `heldout` rows are passed, accuracy and per-label precision/recall
+    on them are stored under `heldout`. Nothing else is scored.
     """
 
     from datasets import Dataset
     from setfit import SetFitModel, Trainer, TrainingArguments
 
+    started = time.monotonic()
     dataset = Dataset.from_dict(
         {
             "text": [row["text"] for row in rows],
@@ -470,24 +693,109 @@ def train_setfit(
         }
     )
     model = SetFitModel.from_pretrained(base_model)
+    args = _setfit_args(TrainingArguments, out_dir, max_steps)
+    callback = _setfit_callback()
+    handler = LossLogHandler()
+    loggers = [logging.getLogger("setfit"), logging.getLogger("sentence_transformers")]
+    for logger in loggers:
+        logger.addHandler(handler)
     try:
-        args = TrainingArguments(
-            output_dir=str(out_dir),
-            batch_size=1,
-            num_epochs=1,
-            max_steps=max_steps,
-        )
-    except TypeError:
-        args = TrainingArguments(
-            output_dir=str(out_dir),
-            batch_size=1,
-            num_epochs=max(1, max_steps),
-        )
-    trainer = Trainer(model=model, args=args, train_dataset=dataset)
-    trainer.train()
+        trainer = None
+        if callback is not None:
+            try:
+                trainer = Trainer(
+                    model=model, args=args, train_dataset=dataset, callbacks=[callback]
+                )
+            except TypeError:
+                trainer = None
+        if trainer is None:
+            trainer = Trainer(model=model, args=args, train_dataset=dataset)
+        trainer.train()
+    finally:
+        for logger in loggers:
+            logger.removeHandler(handler)
+    loss_curve, loss_source = setfit_loss_curve(
+        trainer,
+        callback_logs=getattr(callback, "logs", None),
+        handler_entries=handler.entries,
+    )
     out_dir.mkdir(parents=True, exist_ok=True)
     model.save_pretrained(str(out_dir))
-    return {"steps": max_steps, "trainer": "setfit", "rows": len(rows)}
+    heldout_block = None
+    if heldout:
+        expected = [str(row["label"]) for row in heldout]
+        predicted = [str(label) for label in model.predict([row["text"] for row in heldout])]
+        heldout_block = heldout_metrics(expected, predicted)
+    return setfit_metrics(
+        loss_curve,
+        rows=rows,
+        base_model=base_model,
+        max_steps=max_steps,
+        wall_seconds=time.monotonic() - started,
+        loss_source=loss_source,
+        heldout=heldout_block,
+    )
+
+
+def setfit_loss_curve(
+    trainer,
+    *,
+    callback_logs: list[dict] | None = None,
+    handler_entries: list[dict] | None = None,
+) -> tuple[list[dict], str]:
+    """Pick the first non-empty source: log_history, callback, logger lines."""
+
+    curve = loss_curve_from_log_history(setfit_log_history(trainer))
+    if curve:
+        return curve, "log_history"
+    curve = loss_curve_from_log_history(callback_logs or [])
+    if curve:
+        return curve, "callback"
+    curve = loss_curve_from_log_history(handler_entries or [])
+    if curve:
+        return curve, "logger"
+    return [], "none"
+
+
+def _setfit_args(training_arguments, out_dir: Path, max_steps: int):
+    """`logging_steps=1` so every step lands in log_history. Older signatures degrade."""
+
+    attempts = (
+        {"batch_size": 1, "num_epochs": 1, "max_steps": max_steps, "logging_steps": 1},
+        {"batch_size": 1, "num_epochs": 1, "max_steps": max_steps},
+        {"batch_size": 1, "num_epochs": max(1, max_steps)},
+    )
+    last: TypeError | None = None
+    for kwargs in attempts:
+        try:
+            return training_arguments(output_dir=str(out_dir), **kwargs)
+        except TypeError as exc:
+            last = exc
+    raise last if last is not None else TypeError("TrainingArguments refused every signature")
+
+
+def _setfit_callback():
+    """A transformers TrainerCallback that keeps every `on_log` payload, or None."""
+
+    try:
+        from transformers import TrainerCallback
+    except Exception:  # noqa: BLE001 - transformers is optional at this point
+        return None
+
+    class _Collect(TrainerCallback):
+        def __init__(self) -> None:
+            self.logs: list[dict] = []
+
+        def on_log(self, args, state, control, logs=None, **kwargs):  # noqa: ANN001
+            if isinstance(logs, dict):
+                entry = dict(logs)
+                step = getattr(state, "global_step", None)
+                if "step" not in entry and isinstance(step, int):
+                    entry["step"] = step
+                self.logs.append(entry)
+            return control
+
+    return _Collect()
 
 
 def _hf_token() -> str | None:

@@ -73,6 +73,8 @@ Closed enums live in `contracts/training.py`:
 
 The correction loop's event for `CORR-LOOP-1` is `s1_triage`, `output_model` null, `output_correct` `sphere_water_short`, `source` `human`, `model_version` `s1@stub-0`. The route names stay on the memory row and in `sft.jsonl`.
 
+`GET /training` (`api/routes/training.py`) counts this log by `task` and `source`, lists the export manifests, and joins the fine-tune registry with each version's `metrics.json` (loss curves). `/ui/training.html` draws it. See `docs/agents/training-surface.md`.
+
 Export shapes from the event log are s1 `{text, label, group_id, weight}`, s2 chat to an action plus a short reason, sapling `{policy, evidence, claim, verdict}`, and prefs `{prompt, chosen, rejected}` where `output_model` differs from `output_correct`. Each export writes a manifest (`schema_version`, event count, `policy_version`, hash). Exporters dedup on `content_hash` and do not edit the log.
 
 `make export-training` reads that log. `SYNTHETIC=1` also writes SetFit rows from `fixtures/synthetic`: `training/out/s1_synthetic.jsonl` (train groups) and `s1_synthetic_heldout.jsonl`. The row is `{text, label, group_id, weight}`. `label` is the call's primary label. The original 24 fixtures stay on the log export.
