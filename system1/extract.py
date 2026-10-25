@@ -488,11 +488,15 @@ def extract(
         for pattern in IMMOBILE_PATTERNS
     ):
         vulnerable.append("immobile")
-    # "Unaccompanied" alone is a child-alone signal (HANDOVER safety gap #1).
+    # "Unaccompanied" alone is a child-alone signal, unless the caller named an adult.
     if "child" not in vulnerable and any(
         _match_any(sentence, ("unaccompanied",)) for sentence in fact_sentences
     ):
-        vulnerable.append("child")
+        adult_named = any(
+            _match_any(sentence, ("adult", "adults")) for sentence in fact_sentences
+        )
+        if not adult_named:
+            vulnerable.append("child")
 
     vulnerable_hit = any(
         tag in vulnerable for tag in ("elderly", "immobile", "oxygen_dependent", "child")

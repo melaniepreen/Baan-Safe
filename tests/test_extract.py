@@ -210,6 +210,15 @@ def test_not_unaccompanied_does_not_imply_child():
     assert "safeguarding" not in flags
 
 
+def test_unaccompanied_adult_does_not_imply_child():
+    fields, flags = extract(
+        _turns(("caller", "An unaccompanied adult is at the shelter. We need water.")),
+        districts=DISTRICTS,
+    )
+    assert "child" not in fields.vulnerable
+    assert "safeguarding" not in flags
+
+
 def test_child_with_adult_no_safeguarding():
     _, flags = extract(
         _turns(("caller", "My son is here with me. We need food.")),
