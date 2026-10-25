@@ -4,8 +4,9 @@
 # system2.use_banyan_sapling, system2.sapling_scope, sapling.client,
 # system2.hosting, llm.provider_route, gateway.route_chooser,
 # system1.extraction_method, system2.orchestrator_model,
-# system2.max_latency_ms, correction_loop.graduation_threshold, and
-# correction_loop.escalation_threshold, and data.demo_event.
+# system2.max_latency_ms, correction_loop.graduation_threshold,
+# correction_loop.escalation_threshold, data.demo_event, memory.*,
+# modal.finetune_base_model, and modal.finetune_gpu.
 system1:
   extraction_method: rules-only      # decided: keyword rules in system1/extract.py; extraction_model stays TODO_HUMAN
   extraction_model: TODO_HUMAN       # only if a model is used
@@ -58,7 +59,8 @@ policies:
   authoritative_set: TODO_HUMAN
 # Modal hosting. These do not replace system1.* or system2.*.
 # Apps read the environment variable first and refuse while the value is TODO_HUMAN.
-# Leave this block as TODO_HUMAN in git. scripts/validate.py rejects any other value here.
+# Leave this block as TODO_HUMAN in git except finetune_gpu and finetune_base_model.
+# scripts/validate.py rejects any other value here.
 # Set the matching environment variable at deploy time. See infra/HARDWARE.md.
 modal:
   s1_gpu: TODO_HUMAN                 # cpu | T4 | L4
@@ -67,7 +69,7 @@ modal:
   s2_model_id: TODO_HUMAN            # Nemotron checkpoint id
   nemotron_size: TODO_HUMAN          # 4B | 8B | 9B | 30B-A3B | 49B | 70B | 120B-A12B
   s2_quant: TODO_HUMAN               # bf16 | fp8 | awq
-  finetune_gpu: TODO_HUMAN           # cpu | T4 | L4 | A10 | L40S | A100-40GB | A100-80GB | H100 | H200
-  finetune_base_model: TODO_HUMAN    # checkpoint the correction-loop LoRA starts from
+  finetune_gpu: T4                   # decided: cheapest Modal GPU; the 4B bf16 base fits 16 GB per infra/HARDWARE.md
+  finetune_base_model: nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1  # decided: LoRA base, same family as System 2; SetFit for S1 still reads FINETUNE_S1_MODEL
   stt_gpu: TODO_HUMAN                # cpu | T4 | L4
   stt_model_id: TODO_HUMAN           # Whisper or a Thai fine-tune id

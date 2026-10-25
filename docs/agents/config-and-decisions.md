@@ -24,14 +24,14 @@ Product choices live in `config/decisions.yaml`. Readers fail loudly while a val
 
 - `require_decision(path)` returns the value or raises `DecisionRequired`.
 - `unset_decisions(paths)` returns the paths that are missing, `None`, `""`, or `TODO_HUMAN`.
-- Allowlisted today (`DECIDED`): `system2.use_banyan_sapling` `true`, `system2.sapling_scope` `aid_eligibility,denial`, `sapling.client` `stub`, `system2.hosting` `openrouter via mubit gateway`, `llm.provider_route` `mubit`, `gateway.route_chooser` `field precheck`, `system1.extraction_method` `rules-only`, `system2.orchestrator_model` `nvidia/nemotron-3-nano-30b-a3b`, `system2.max_latency_ms` `10000`, `correction_loop.graduation_threshold` `2`, `correction_loop.escalation_threshold` `2`, `data.demo_event` `Sukhumvit / Watthana (Bangkok)`, `memory.mubit_project` `baansafe-demo`, `memory.retrieval_top_k` `5`, `memory.token_budget` `400`.
+- Allowlisted today (`DECIDED`): `system2.use_banyan_sapling` `true`, `system2.sapling_scope` `aid_eligibility,denial`, `sapling.client` `stub`, `system2.hosting` `openrouter via mubit gateway`, `llm.provider_route` `mubit`, `gateway.route_chooser` `field precheck`, `system1.extraction_method` `rules-only`, `system2.orchestrator_model` `nvidia/nemotron-3-nano-30b-a3b`, `system2.max_latency_ms` `10000`, `correction_loop.graduation_threshold` `2`, `correction_loop.escalation_threshold` `2`, `data.demo_event` `Sukhumvit / Watthana (Bangkok)`, `memory.mubit_project` `baansafe-demo`, `memory.retrieval_top_k` `5`, `memory.token_budget` `400`, `modal.finetune_base_model` `nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1`, `modal.finetune_gpu` `T4`.
 - A new decided value needs the yaml leaf and a matching `DECIDED` entry. Validate fails if they differ.
 
 ## Invariants
 
 - Do not put a model id, GPU name, price, or threshold into yaml from a research note.
 - `decisions()` is `lru_cache`d. Tests that change the file in-process must clear the cache. Prefer a new process.
-- `modal.*` stays `TODO_HUMAN` in git even when a deploy exports the same name as an environment variable.
+- `modal.*` stays `TODO_HUMAN` in git even when a deploy exports the same name as an environment variable, except the two decided finetune keys.
 - Routing mode is `exclusive` or `cascade`. Validate checks for one of those strings. The decided value is `cascade`: a System 1 escalate continues to System 2 in the same turn, except the no-stub fallback.
 
 ## How to test
@@ -49,4 +49,4 @@ Product choices live in `config/decisions.yaml`. Readers fail loudly while a val
 
 ## Open TODO_HUMAN keys
 
-All leaves except those in `DECIDED`. The groups are `system1` (model id), `sapling` (except `client`), `gateway` (`auth`), `llm` (`token_price_usd`), `speech_to_text`, `ui`, `data` (`production_db` only; `demo_event` is decided), `policies` (`authoritative_set`), `correction_loop` (except the two thresholds), `learning_eval`, `latte_bench`, `sim` (`caller_model`, `caller_gpu`), `modal`.
+All leaves except those in `DECIDED`. The groups are `system1` (model id), `sapling` (except `client`), `gateway` (`auth`), `llm` (`token_price_usd`), `speech_to_text`, `ui`, `data` (`production_db` only; `demo_event` is decided), `policies` (`authoritative_set`), `correction_loop` (except the two thresholds), `learning_eval`, `latte_bench`, `sim` (`caller_model`, `caller_gpu`), `modal` (except `finetune_base_model` and `finetune_gpu`).
