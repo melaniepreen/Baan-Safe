@@ -4,7 +4,7 @@ Flood and disaster call-triage scaffold. Mubit is the LLM gateway and trace reco
 
 Sapling is [MubitLabs/banyan-sapling](https://huggingface.co/MubitLabs/banyan-sapling), the Apache-2.0 23B verifier (research preview). It takes a policy, evidence, and a claim, and returns `supported`, `violation`, `missing`, `contradicted`, or `unsure`, with probabilities. `supported` lets the proposed action stand. `violation` blocks it. `unsure`, `missing`, and `contradicted` hand the case to a human. The input limit is 16,384 tokens. It does not run on System 1. `system2.use_banyan_sapling` is true for those two checks. Hosting, the GPU, and Thai handling stay `TODO_HUMAN`. Tests use the stub client and do not load a GPU.
 
-The diagram follows one caller turn from top to bottom. Solid boxes and edges are implemented. Dashed ones are a stub, opt-in, or not wired. Green is System 1, blue is System 2, and yellow is where a person decides. A local `make serve` defaults to stub files (`S1_IMPL=stub`, `S2_IMPL=stub`, `MEMORY_IMPL=mock`). `S1_IMPL=real` runs the needs table, and `S2_IMPL=real` calls Nemotron through Mubit. `S2_IMPL=cache` is opt-in: a hit replays `fixtures/s2_cache/demo.jsonl` and opens no socket, `S2_CACHE_KEY=case` drops memory and resources from the key, and a miss calls Mubit when credentials exist. That Mubit edge is the LLM gateway only: the orchestrator passes `case_id` on every hop, `metadata.session_id` is that case id, and Mubit groups those calls into one Task by the static system prompt. Changing that prompt starts a new Task. Memory on the turn is BaanSafe's own store behind `memory/adapter.py` (mock files by default). `MEMORY_IMPL=local` is append-only JSONL. The Modal gateway sets that mode and `MEMORY_LOCAL_PATH=/data/memory.jsonl`, and writes a case record after merge. A deploy-time `MEMORY_IMPL=mubit` next to the credentials stays dormant. Mubit exposes no memory API. The Modal gateway runs System 1 rules and auto enrichment, mounts `baansafe-versions` read-only at `/vol`, and sets System 2 live when `baansafe-mubit` is present. It keeps one container (`max_containers=1`). `router/ledger.py` holds stock in that process only. Accept confirms those holds and Reject cancels them. A confirm after idle scaledown returns 422. `GET /resources` subtracts the holds. `make mubit-traffic` is opt-in: real System 1 and System 2, `MEMORY_IMPL=mock`, paid Nemotron, case ids `traffic-<seed>-`. Those traces stay on the machine that ran it. `GET /training` counts `mubit_chat` in this server's trace file and reads `/vol/registry.json`. Country packs are not loaded. The file-by-file request map is in `BaanSafe_Revised_Architecture.md`.
+The diagram follows one caller turn from top to bottom. Solid boxes and edges are implemented. Dashed ones are a stub, opt-in, or not wired. Green is System 1, blue is System 2, and yellow is where a person decides. A local `make serve` defaults to stub files (`S1_IMPL=stub`, `S2_IMPL=stub`, `MEMORY_IMPL=mock`). `S1_IMPL=real` runs the needs table, and `S2_IMPL=real` calls Nemotron through Mubit. `S2_IMPL=cache` is opt-in: a hit replays `fixtures/s2_cache/demo.jsonl` and opens no socket, `S2_CACHE_KEY=case` drops memory and resources from the key, and a miss calls Mubit when credentials exist. That Mubit edge is the LLM gateway only: the orchestrator passes `case_id` on every hop, `metadata.session_id` is that case id, and Mubit groups those calls into one Task by the static system prompt. Changing that prompt starts a new Task. `llm.client.complete` sends `x-middleware-record: full` on every call (`37e5ab1`; this reverses the earlier never-send rule for that client). It never sends `x-middleware-store: false` or `x-middleware-record: metadata` or `off`. `llm/openai_client.py` does not add that header. The trace note carries `request_id=mreq_…`, and a cache hit appends `(recorded)`. `_post_rules` forces a human on safeguarding, aid, and P1. `GET /health` sets `memory.dormant` when `MEMORY_IMPL=mubit`. The town Model Path panel (`ui/sim/modelpath.js`) reads `GET /cases/{id}/trace` for the last turn. Memory on the turn is BaanSafe's own store behind `memory/adapter.py` (mock files by default). `MEMORY_IMPL=local` is append-only JSONL. The Modal gateway sets that mode and `MEMORY_LOCAL_PATH=/data/memory.jsonl`, and writes a case record after merge. A deploy-time `MEMORY_IMPL=mubit` next to the credentials stays dormant. Mubit exposes no memory API. The Modal gateway runs System 1 rules and auto enrichment, mounts `baansafe-versions` read-only at `/vol`, and sets System 2 live when `baansafe-mubit` is present. It keeps one container (`max_containers=1`). `router/ledger.py` holds stock in that process only. Accept confirms those holds and Reject cancels them. A confirm after idle scaledown returns 422. `GET /resources` subtracts the holds. `make mubit-traffic` is opt-in: real System 1 and System 2, `TRAFFIC_MEMORY` default `mock` (`TRAFFIC_MEMORY=local` puts a seeded store in the prompt), paid Nemotron, case ids `traffic-<seed>-`. Those traces stay on the machine that ran it. `GET /training` counts `mubit_chat` in this server's trace file and reads `/vol/registry.json`. Country packs are not loaded. The file-by-file request map is in `BaanSafe_Revised_Architecture.md`.
 
 <!-- Diagram guide for the agent that refreshes this README. This diagram is the model: keep its layout. Keep the numbered subgraphs (1 caller, 2 Mubit gateway with its data inputs, 3a System 1, 3b System 2, 4 decision router with the dispatch list, 5 operator review, 6 learning loops), the colour classes (s1 green, s2 blue, human yellow, store grey, unwired dashed with a transparent fill so it reads in dark mode), hexagons for decisions, data stores beside the step that reads them, and the legend above (solid = implemented, dashed = stub, opt-in, or not wired). Each box names its step, its file, and the rule or numbers it applies. When the code changes, update labels, edges, and status in place, and keep the legend paragraph true. Do not shrink it back to a file-by-file request map. That map lives in BaanSafe_Revised_Architecture.md. -->
 
@@ -23,10 +23,10 @@ flowchart TD
 
   subgraph L2["2 · Mubit gateway — gateway/route.py · routes, traces every stage to traces.jsonl, never reasons"]
     places_db[("districts.json · admin_districts.json<br/>gazetteer snapshot")]:::store
-    extract["Extract — system1/extract.py<br/>runs when a case arrives without fields<br/>English needs · people · danger<br/>bare unaccompanied → child unless adult is named<br/>district names in Thai and English"]
+    extract["Extract — system1/extract.py<br/>runs when a case arrives without fields<br/>English needs · people · danger<br/>rising water does not add a second rescue<br/>bare unaccompanied → child unless adult is named<br/>district names in Thai and English"]
     geo_db[("weather_observation.json · flood.geojson<br/>facilities.geojson: 4,218 facilities<br/>Open-Meteo and RID snapshots")]:::store
     enrich["Enrich — enrich/context.py<br/>districts.json first, 50 rows, province null<br/>then admin_districts: Hat Yai · Mueang Songkhla<br/>rain null on admin-only · flags never change priority"]
-    memory["Memory — memory/adapter.py<br/>BaanSafe's own store, every turn<br/>mock files by default<br/>local JSONL · write after merge<br/>hosted /data/memory.jsonl<br/>similar case · correction · policy"]
+    memory["Memory — memory/adapter.py<br/>BaanSafe's own store, every turn<br/>mock files by default<br/>local JSONL · write after merge<br/>hosted /data/memory.jsonl<br/>mubit mode dormant · GET /health says so<br/>similar case · correction · policy"]
     grad["Correction escalation — gateway/graduation.py<br/>2 cases with a high-risk human correction on one pattern<br/>tag complex_situation · sets no priority"]
     pick{{"Field precheck — gateway/chooser.py<br/>medical · oxygen or immobile<br/>location below 0.7 · rescue, medical or aid need<br/>safeguarding · conflict · aid exception · complex?"}}
   end
@@ -36,9 +36,9 @@ flowchart TD
   end
 
   subgraph L3b["3b · System 2 — reasoned_recommendation"]
-    nemo["Nemotron nano 30B-A3B — system2/orchestrator.py<br/>10 s budget · safeguarding and aid always need a human"]:::s2
-    mmem["Mubit — llm/client.py<br/>LLM gateway only<br/>case_id on every System 2 hop<br/>metadata.session_id = case_id<br/>one Task per static system prompt<br/>trace record · per-task adapters<br/>no memory API"]:::s2
-    cache["S2_IMPL=cache — system2/cache.py<br/>158 replies in fixtures/s2_cache/demo.jsonl<br/>case key drops memory and resources<br/>hit: host=s2_cache, no socket<br/>miss: Mubit, else supervisor fallback"]:::unwired
+    nemo["Nemotron nano 30B-A3B — system2/orchestrator.py<br/>10 s budget · safeguarding, aid, and P1 need a human"]:::s2
+    mmem["Mubit — llm/client.py<br/>LLM gateway only<br/>case_id on every System 2 hop<br/>metadata.session_id = case_id<br/>x-middleware-record: full on every call<br/>trace request_id=mreq_… · cache replay (recorded)<br/>never store false or record metadata or off<br/>one Task per static system prompt<br/>trace record · per-task adapters<br/>no memory API"]:::s2
+    cache["S2_IMPL=cache — system2/cache.py<br/>158 replies in fixtures/s2_cache/demo.jsonl<br/>case key drops memory and resources<br/>hit: host=s2_cache, no socket<br/>replayed id marked (recorded)<br/>demo.jsonl has no ids until re-recorded<br/>miss: Mubit, else supervisor fallback"]:::unwired
     down["No usable reply → system2_unavailable<br/>P1 if life-safety, else P2 · human"]:::s2
     sap["Banyan Sapling gate — system2/sapling.py<br/>aid eligibility and denial only<br/>supported stands · violation blocks · else human<br/>stub client, not hosted"]:::unwired
   end
@@ -55,6 +55,7 @@ flowchart TD
 
   subgraph L5["5 · Operator review — browser, ui/sim"]
     hold["Operator Accept / Reject<br/>confirm or cancel this process's holds<br/>422 when this process has no holds"]:::human
+    path["Model path — ui/sim/modelpath.js<br/>GET /cases/{id}/trace, last turn<br/>live via Mubit · CACHE HIT · learned rule<br/>request_id when it is mreq_ plus 32 hex"]
     form["Correction form<br/>ui/correct.js"]:::human
   end
 
@@ -64,7 +65,7 @@ flowchart TD
     overlay["Learned overlay<br/>only with RL_OVERLAY"]:::unwired
     ft["Fine-tune on Modal<br/>Nemotron Nano 4B · T4 · both decisions set<br/>loss curves on baansafe-versions<br/>7-row s2 LoRA is overfit<br/>Hub copies private, not served<br/>weights not loaded into System 1"]:::unwired
     page["GET /training · ui/training.html<br/>this server's mubit_chat rows<br/>/vol/registry.json · RL_RUN_PATH"]
-    traffic["make mubit-traffic<br/>scripts/mubit_traffic.py<br/>MEMORY_IMPL=mock · real S1 and S2<br/>paid Nemotron · case ids traffic-seed-<br/>traces stay on that machine"]:::unwired
+    traffic["make mubit-traffic<br/>scripts/mubit_traffic.py<br/>TRAFFIC_MEMORY=mock by default<br/>local puts a seeded store in the prompt<br/>real S1 and S2 · paid Nemotron<br/>case ids traffic-seed- · traces stay local"]:::unwired
   end
 
   stt -.-> caller
@@ -93,6 +94,7 @@ flowchart TD
   merge --> disp --> fan
   ask -->|"next question, next turn"| caller
   fan --> hold
+  fan --> path
   hold -->|"Reject"| form
   form -->|"POST /cases/{id}/corrections"| log
   log -->|"read every turn"| grad
@@ -119,7 +121,7 @@ flowchart LR
   log --> export[export-training]
   export -.-> ft["Modal fine-tune, Nano 4B · T4<br/>loss curves · 7-row s2 LoRA overfit"]:::unwired
   ft -.-> page["GET /training reads /vol/registry.json<br/>this server's mubit_chat rows"]
-  traffic["make mubit-traffic<br/>mock memory · paid S2 · local traces"]:::unwired
+  traffic["make mubit-traffic<br/>TRAFFIC_MEMORY=mock by default · paid S2 · local traces"]:::unwired
   traffic -.->|"not the hosted trace file"| page
   synth["fixtures/synthetic"] --> setfit["SetFit rows"]
   synth --> laya["Laya JSONL"]
