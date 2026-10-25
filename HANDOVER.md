@@ -19,7 +19,7 @@ One call: `gateway/route.py` `handle` ← `POST /triage` / `POST /cases/{id}/tur
 | System 2 | `system2/orchestrator.py` | Hosted **real** when `baansafe-mubit` injects key+URL. |
 | Sapling | `system2/sapling.py` | Stub. |
 | Router / ledger | `router/merge.py`, `ledger.py` | Confirm/cancel; in-process holds. Modal **`max_containers=1`**. |
-| Traces | `llm/client.py`, `GET /metrics` | `mubit_chat` on every hop (and RL cache hits). Every call sends `metadata.session_id=case_id`; Mubit groups all S2 calls into one Task (static system prompt). ~290 distinct requests sent 25 Oct. |
+| Traces | `llm/client.py`, `GET /metrics` | `mubit_chat` on every hop (and RL cache hits). Every call sends `metadata.session_id=case_id`; Mubit groups all S2 calls into one Task (static system prompt). ~650 distinct requests sent 25 Oct (RL loop + synthetic set + two `make mubit-traffic` batches: seed 3 → 160 hops, seed 11 → 204 hops, all distinct sessions). Top up with `make mubit-traffic COUNT=n SEED=s`. |
 | UI | `ui/sim/` | Wired to transcript / dispatches / `location_context`. **Freeze until Melanie reviews.** |
 | Hosting | Modal gateway | Redeployed at `82e68ac` (25 Oct 04:15 UTC). `/hosting` → `backends=live`, `memory=local`. Smoke: two callers on Sukhumvit Soi 22 → second one `finalize_case` with `duplicate_merge_count=1`, `write_error_count=0`. |
 | Place | `data.demo_event` | **`Sukhumvit / Watthana (Bangkok)`** — matches basemap + `flood.json`. |
@@ -117,7 +117,7 @@ Design reviewed against code. Compatible with four corrections:
 | # | Who | Action |
 |---|---|---|
 | 1 | Both | **Keep paid S2 on public URL?** Smoke left it **on** (`S2_IMPL=real`). Else redeploy with stub / no secret spend. Watch `/metrics` and 429s. |
-| 2 | Both | Ask Mubit to switch **training on** for workspace `ws-3e4ac86aadff0b72` (console has no Adapters page). The System 2 Task already holds ~290 requests; a version trains on their next cycle. Pitch: gateway + traces + per-task adapter; memory is ours. |
+| 2 | Both | Ask Mubit to switch **training on** for workspace `ws-3e4ac86aadff0b72` (console has no Adapters page). The System 2 Task already holds ~650 requests across ~650 sessions (adapter cycle ran 25 Oct ~04:00 with issues; see Mubit history). `make mubit-traffic` adds more distinct examples any time. Pitch: gateway + traces + per-task adapter; memory is ours. |
 | 3 | Melanie | Pull `main`, rebase any local `ui/sim` work; review Moly’s town wire before editing. |
 | 4 | Moly | Share URL **only with judges**; run the frozen 3‑min script once dry. |
 | 5 | Both | Optional: hide aid 501 UI / keep RL panel off (`index.html` does not load `rl_panel.js`). |
