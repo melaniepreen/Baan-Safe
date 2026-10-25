@@ -129,13 +129,102 @@ def test_adapter_retrieve_soft_fails_to_empty(monkeypatch):
     monkeypatch.setenv("MUBIT_API_KEY", "mbt_test")
     monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai")
 
-    def boom(**_kwargs):
+    def boom(case):
         raise RuntimeError("control plane down")
 
     monkeypatch.setattr(mubit, "retrieve", boom)
-    from memory.adapter import retrieve
+    from memory.adapter import last_retrieve_error, retrieve
 
     assert retrieve(_case()) == []
+    # The gateway puts this on the memory trace so items=0 is never silent.
+    assert last_retrieve_error() == "RuntimeError: control plane down"
+
+    monkeypatch.setattr(mubit, "retrieve", lambda case: [])
+    assert retrieve(_case()) == []
+    assert last_retrieve_error() is None
+
+
+def test_store_correction_keeps_local_log_when_ingest_fails(monkeypatch, tmp_path):
+    monkeypatch.setenv("MEMORY_IMPL", "mubit")
+    monkeypatch.setenv("MUBIT_API_KEY", "mbt_should_not_appear")
+    monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai")
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            404, json={"error": {"code": "unknown_route", "message": "Unknown route."}}
+        )
+
+    transport = httpx.MockTransport(handler)
+    real_client = httpx.Client
+    monkeypatch.setattr(
+        mubit.httpx,
+        "Client",
+        lambda **kwargs: real_client(transport=transport, **kwargs),
+    )
+    from memory.adapter import store_correction
+    from mocks.loader import read_corrections
+
+    correction = Correction(
+        correction_id="corr-404",
+        case_id="F02",
+        corrected_by="operator",
+        field="priority",
+        old_value="P2",
+        new_value="P3",
+        reason="kept locally",
+        created_at=datetime.now(timezone.utc),
+    )
+    note = store_correction(correction)
+    assert "ingest failed" in note
+    assert "HTTP 404 unknown_route" in note
+    assert "corr-404" in note
+    assert "mbt_should_not_appear" not in note
+    assert any(row.correction_id == "corr-404" for row in read_corrections())
+
+
+def test_adapter_error_text_never_carries_key(monkeypatch):
+    monkeypatch.setenv("MEMORY_IMPL", "mubit")
+    monkeypatch.setenv("MUBIT_API_KEY", "mbt_should_not_appear")
+    monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai")
+
+    def boom(case):
+        raise RuntimeError("leaked mbt_should_not_appear in text")
+
+    monkeypatch.setattr(mubit, "retrieve", boom)
+    from memory.adapter import last_retrieve_error, retrieve
+
+    assert retrieve(_case()) == []
+    assert "mbt_should_not_appear" not in (last_retrieve_error() or "")
+
+
+def test_query_404_names_route_code(monkeypatch):
+    monkeypatch.setenv("MUBIT_API_KEY", "mbt_test")
+    monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai/openai/v1")
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            404, json={"error": {"code": "unknown_route", "message": "Unknown route."}}
+        )
+
+    transport = httpx.MockTransport(handler)
+    real_client = httpx.Client
+    monkeypatch.setattr(
+        mubit.httpx,
+        "Client",
+        lambda **kwargs: real_client(transport=transport, **kwargs),
+    )
+    with pytest.raises(RuntimeError, match="HTTP 404 unknown_route"):
+        mubit.retrieve(_case())
+
+
+def test_control_url_override_wins_but_stays_on_mubit(monkeypatch):
+    monkeypatch.setenv("MUBIT_API_KEY", "mbt_test")
+    monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai/openai/v1")
+    monkeypatch.setenv("MUBIT_CONTROL_URL", "https://memory-demo.mubit.ai")
+    assert mubit._gateway_origin() == "https://memory-demo.mubit.ai"
+    monkeypatch.setenv("MUBIT_CONTROL_URL", "https://openrouter.ai")
+    with pytest.raises(RuntimeError, match="not a Mubit host"):
+        mubit._gateway_origin()
 
 
 def test_project_env_override(monkeypatch):

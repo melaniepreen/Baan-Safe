@@ -360,7 +360,7 @@ def correct(case_id: str, body: CorrectionIn) -> CorrectionResult:
         if correction_is_v1(correction):
             raise HTTPException(status_code=422, detail=str(exc)) from exc
     try:
-        store_correction(correction)
+        write_note = store_correction(correction)
     except NotImplementedError as exc:
         raise not_ready("Melanie", exc) from exc
     stored.corrections.append(correction)
@@ -372,7 +372,7 @@ def correct(case_id: str, body: CorrectionIn) -> CorrectionResult:
             stage="memory_write",
             started_at=_now(),
             latency_ms=0,
-            notes=f"mock correction {correction.correction_id}",
+            notes=write_note,
         )
     )
     decision = execute(stored.state)

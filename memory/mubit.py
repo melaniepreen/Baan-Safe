@@ -41,11 +41,20 @@ def _api_key() -> str:
 
 
 def _gateway_origin() -> str:
-    """Control routes live on the Mubit host root, not the OpenAI compat prefix."""
-    base = os.environ.get("MUBIT_BASE_URL", "").strip()
+    """Origin for the control routes (/v2/control/*).
+
+    MUBIT_CONTROL_URL wins when set: the Mubit SDK addresses a memory
+    instance as `https://<instance>.mubit.ai`, which can differ from the chat
+    gateway in MUBIT_BASE_URL. Either way the host must be a Mubit host, and
+    the OpenAI compat prefix is dropped.
+    """
+    base = os.environ.get("MUBIT_CONTROL_URL", "").strip() or os.environ.get(
+        "MUBIT_BASE_URL", ""
+    ).strip()
     if not base:
         raise RuntimeError(
-            "MEMORY_IMPL=mubit requires MUBIT_BASE_URL. Refusing the call."
+            "MEMORY_IMPL=mubit requires MUBIT_BASE_URL (or MUBIT_CONTROL_URL). "
+            "Refusing the call."
         )
     parsed = urlparse(base if "://" in base else f"https://{base}")
     host = (parsed.hostname or "").lower()
@@ -183,35 +192,68 @@ def _evidence_to_items(payload: dict[str, Any], *, limit: int) -> list[MemoryIte
     return items
 
 
-def retrieve(case: CaseState) -> list[MemoryItem]:
-    """Query Mubit control plane for case-scoped memory items."""
-    origin = _gateway_origin()
-    limit = _top_k()
-    body = {
+def _error_code(response: httpx.Response) -> str:
+    """Short machine code from a Mubit error body. Never the body itself."""
+    try:
+        payload = response.json()
+    except ValueError:
+        return ""
+    error = payload.get("error") if isinstance(payload, dict) else None
+    if isinstance(error, dict):
+        code = error.get("code") or error.get("type")
+        return str(code)[:40] if code else ""
+    if isinstance(error, str):
+        return error[:40]
+    return ""
+
+
+def _fail(op: str, response: httpx.Response, hint: str = "") -> RuntimeError:
+    code = _error_code(response)
+    detail = f"HTTP {response.status_code}" + (f" {code}" if code else "")
+    return RuntimeError(f"Mubit memory {op} failed {detail}." + (f" {hint}" if hint else ""))
+
+
+def query_body(query: str, *, limit: int | None = None, entry_types: list[str] | None = None) -> dict[str, Any]:
+    """The /v2/control/query body. scripts/seed_memory.py reuses this shape."""
+    return {
         **_scope_fields(),
-        "query": _case_query(case),
-        "limit": limit,
-        "entry_types": ["fact", "lesson", "rule"],
+        "query": query,
+        "limit": limit if limit is not None else _top_k(),
+        "entry_types": entry_types or ["fact", "lesson", "rule"],
         "mode": "agent_routed",
         "max_token_budget": _token_budget(),
     }
+
+
+def query(body: dict[str, Any]) -> dict[str, Any]:
+    """POST one control query. Returns the parsed payload or raises RuntimeError."""
+    origin = _gateway_origin()
     url = f"{origin}/v2/control/query"
     with httpx.Client(timeout=20.0) as client:
         response = client.post(url, headers=_headers(), json=body)
     if response.status_code >= 400:
-        raise RuntimeError(
-            f"Mubit memory query failed HTTP {response.status_code}. "
-            "Check MUBIT_PROJECT_ID / memory.mubit_project and key scope."
+        raise _fail(
+            "query",
+            response,
+            "Check MUBIT_CONTROL_URL / MUBIT_BASE_URL serves /v2/control, "
+            "and MUBIT_PROJECT_ID / key scope.",
         )
     payload = response.json()
-    if not isinstance(payload, dict):
+    return payload if isinstance(payload, dict) else {}
+
+
+def retrieve(case: CaseState) -> list[MemoryItem]:
+    """Query Mubit control plane for case-scoped memory items."""
+    limit = _top_k()
+    payload = query(query_body(_case_query(case), limit=limit))
+    if not payload:
         return []
     return _evidence_to_items(payload, limit=limit)
 
 
-def _ingest(items: list[dict[str, Any]]) -> None:
+def _ingest(items: list[dict[str, Any]]) -> dict[str, Any]:
     if not items:
-        return
+        return {}
     origin = _gateway_origin()
     body = {
         **_scope_fields(),
@@ -221,9 +263,12 @@ def _ingest(items: list[dict[str, Any]]) -> None:
     with httpx.Client(timeout=20.0) as client:
         response = client.post(url, headers=_headers(), json=body)
     if response.status_code >= 400:
-        raise RuntimeError(
-            f"Mubit memory ingest failed HTTP {response.status_code}."
-        )
+        raise _fail("ingest", response)
+    try:
+        payload = response.json()
+    except ValueError:
+        return {}
+    return payload if isinstance(payload, dict) else {}
 
 
 def write(record: MemoryRecord) -> None:

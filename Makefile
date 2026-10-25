@@ -1,7 +1,7 @@
 PYTHON ?= $(shell test -x .venv/bin/python && echo .venv/bin/python || echo python3)
 export PYTHONPATH := .
 
-.PHONY: validate test replay-stubs demo-stub demo-correction-loop demo-graduation rl-loop rl-loop-replay eval-learning sim-eval extract-eval latte-bench serve ingest ingest-refresh data-report sources-refresh sources-status \
+.PHONY: validate test replay-stubs demo-stub demo-correction-loop demo-graduation rl-loop rl-loop-replay eval-learning sim-eval extract-eval latte-bench serve seed-memory ingest ingest-refresh data-report sources-refresh sources-status \
 	export-training export-laya laya-train sync push modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune deploy-modal docker-build docker-run
 
 IMAGE ?= baansafe-api:local
@@ -50,6 +50,11 @@ latte-bench:
 
 serve:
 	$(PYTHON) -m uvicorn api.main:app --host 0.0.0.0 --port 8000
+
+# Ingest policy lessons into the Mubit workspace (MEMORY_IMPL=mubit + .env loaded).
+# SEED_ARGS='--dry-run' prints without POSTing; '--case-fact CASE_ID' adds one synthetic fact.
+seed-memory:
+	$(PYTHON) scripts/seed_memory.py $(SEED_ARGS)
 
 ingest:
 	$(PYTHON) -m ingest
