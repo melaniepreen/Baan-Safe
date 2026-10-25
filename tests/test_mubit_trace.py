@@ -193,3 +193,40 @@ def test_gateway_emits_enrich_and_memory(client):
     assert response.status_code == 200
     stages = {event["stage"] for event in response.json()}
     assert {"enrich", "memory", "gateway", "system_1", "router"} <= stages
+
+
+def test_served_by_header_lands_in_trace_and_reply(monkeypatch, tmp_path):
+    """Mubit's "Served by" (provider model or adapter) is kept when sent and
+    ignored when absent; it never changes the request."""
+    monkeypatch.setenv("TRACE_PATH", str(tmp_path / "traces.jsonl"))
+    monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai/compat/openrouter/v1")
+    monkeypatch.setenv("MUBIT_API_KEY", "mbt_should_not_appear")
+    served = {"value": "adapter:baansafe-s2-v3"}
+
+    def fake_post(url, **kwargs):
+        headers = {"x-middleware-request-id": MREQ}
+        if served["value"]:
+            headers["x-middleware-served-by"] = served["value"]
+        return httpx.Response(
+            200,
+            json={"choices": [{"message": {"content": "{}"}}], "usage": {}},
+            headers=headers,
+            request=httpx.Request("POST", url),
+        )
+
+    monkeypatch.setattr("llm.client.httpx.post", fake_post)
+    body = complete([{"role": "user", "content": "synthetic"}], model="m", case_id="SB1")
+    assert body["mubit_served_by"] == "adapter:baansafe-s2-v3"
+    note = read_traces("SB1")[0].notes or ""
+    assert "served_by=adapter:baansafe-s2-v3" in note
+    assert "mbt_" not in note
+
+    served["value"] = None
+    body = complete([{"role": "user", "content": "synthetic"}], model="m", case_id="SB2")
+    assert "mubit_served_by" not in body
+    assert "served_by=" not in (read_traces("SB2")[0].notes or "")
+
+    # Odd header values are dropped, not echoed.
+    served["value"] = "<script>alert(1)</script>"
+    body = complete([{"role": "user", "content": "synthetic"}], model="m", case_id="SB3")
+    assert "mubit_served_by" not in body

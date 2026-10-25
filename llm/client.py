@@ -41,6 +41,11 @@ REQUEST_ID_HEADER = "x-middleware-request-id"
 RECORD_HEADER = "x-middleware-record"
 RECORD_FULL = "full"
 REPLY_REQUEST_ID = "mubit_request_id"
+# Mubit's "Served by": what answered the call, the provider model or a Mubit
+# adapter. Sent only when Mubit sets it; absent today (provider-served).
+SERVED_BY_HEADER = "x-middleware-served-by"
+REPLY_SERVED_BY = "mubit_served_by"
+_SERVED_BY_OK = re.compile(r"^[A-Za-z0-9 ._:/@+-]{1,80}$")
 _MREQ = re.compile(r"^mreq_[0-9a-f]{32}$")
 
 
@@ -110,6 +115,17 @@ def request_id_from(headers: Any) -> str | None:
     return value if _MREQ.match(value) else None
 
 
+def served_by_from(headers: Any) -> str | None:
+    """The `x-middleware-served-by` value, or None when absent or odd-looking.
+    Never a key: the header names a model or adapter."""
+    try:
+        raw = headers.get(SERVED_BY_HEADER)
+    except AttributeError:
+        return None
+    value = str(raw or "").strip()
+    return value if _SERVED_BY_OK.match(value) else None
+
+
 def emit_mubit_chat_trace(
     *,
     case_id: str,
@@ -122,6 +138,7 @@ def emit_mubit_chat_trace(
     started_at: datetime | None = None,
     request_id: str | None = None,
     recorded: bool = False,
+    served_by: str | None = None,
 ) -> None:
     """Append one mubit_chat TraceEvent. Never include a key or bearer.
 
@@ -132,6 +149,8 @@ def emit_mubit_chat_trace(
     notes = f"mubit chat host={host} status={status}"
     if request_id:
         notes += f" request_id={request_id}" + (" (recorded)" if recorded else "")
+    if served_by:
+        notes += f" served_by={served_by}"
     emit(
         TraceEvent(
             case_id=case_id or "mubit",
@@ -199,6 +218,7 @@ def complete(
     tokens_in: int | None = None
     tokens_out: int | None = None
     request_id: str | None = None
+    served_by: str | None = None
     try:
         response = httpx.post(
             url,
@@ -211,6 +231,7 @@ def complete(
             timeout=timeout,
         )
         request_id = request_id_from(response.headers)
+        served_by = served_by_from(response.headers)
         code = response.status_code
         if code == 429:
             status = "http_429"
@@ -227,6 +248,8 @@ def complete(
         if request_id and isinstance(data, dict):
             # Ride along on the reply so a cache that stores it can replay it.
             data[REPLY_REQUEST_ID] = request_id
+        if served_by and isinstance(data, dict):
+            data[REPLY_SERVED_BY] = served_by
         return data
     except httpx.HTTPStatusError as exc:
         code = exc.response.status_code
@@ -249,4 +272,5 @@ def complete(
             tokens_out=tokens_out,
             started_at=started_at,
             request_id=request_id,
+            served_by=served_by,
         )
