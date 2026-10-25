@@ -319,7 +319,9 @@ async def transcribe(request: Request) -> dict:
     max_containers=1,
     scaledown_window=120,
     timeout=120,
-    include_source=False,
+    # Keep True: Modal imports this file as top-level `gateway_app` at hydrate time.
+    # The repo also ships under /opt/baansafe via add_local_dir for runtime imports.
+    include_source=True,
 )
 @modal.asgi_app()
 def web():
