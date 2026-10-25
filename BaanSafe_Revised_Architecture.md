@@ -75,22 +75,22 @@ Parallel workstreams during a call feed the gateway: evidence extraction (locati
 
 ## Routing in detail
 
-Checked against `main` on 24 October 2026. This section says where each step runs: the browser, the API process, Mubit, OpenRouter, Modal, or local disk.
+Checked against `main` on 25 October 2026 (`daeaad9`). This section says where each step runs: the browser, the API process, Mubit, OpenRouter, Modal, or local disk.
 
 ### Where things run
 
-"Mubit Gateway" in the diagrams above is the `gateway/` package. It runs inside the BaanSafe API process, not on Mubit. The Mubit service is the LLM gateway and the trace record. `llm.complete` sends `metadata.session_id` = `case_id[:200]`. Mubit groups that case's calls and can train a per-task adapter. It exposes no memory API. Memory is BaanSafe's own store behind `memory/adapter.py`. The host diagram draws only that LLM edge.
+"Mubit Gateway" in the diagrams above is the `gateway/` package. It runs inside the BaanSafe API process, not on Mubit. The Mubit service is the LLM gateway and the trace record. `llm.complete` sends `metadata.session_id` = `case_id[:200]`. Mubit groups that case's calls by session and groups System 2 calls into one Task by the static system prompt. Changing that prompt starts a new Task. It exposes no memory API. Memory is BaanSafe's own store behind `memory/adapter.py`. The host diagram draws only that LLM edge. `GET /training` reads this server's trace file and the read-only versions volume.
 
 | Place | What runs there | State it holds |
 |---|---|---|
-| Browser | `ui/sim/` town and phone, `ui/correct.js` | None that the backend reads |
+| Browser | `ui/sim/` town and phone, `ui/correct.js`, `ui/training.html` | None that the backend reads. The training page reads `GET /training` |
 | API process (`api/main.py`) | FastAPI routes, `gateway/`, `system1/`, `system2/`, `router/`, `policies/`, `memory/adapter.py`. Mock files unless `MEMORY_IMPL=local` (JSONL) or the dormant `mubit` client | Cases in `api/store.py` and stock holds in `router/ledger.py`, both in memory. Both reset on restart. The Modal gateway pins `max_containers=1` |
 | Mubit (`api.mubit.ai`) | The LLM hop at `/compat/openrouter/v1`. `metadata.session_id` is the case id. Traces and per-task adapters stay on that hop. There is no memory API. `llm/client.py` refuses any other host | Mubit-side request traces and per-task adapters. The repo does not read them |
 | OpenRouter, behind Mubit | `nvidia/nemotron-3-nano-30b-a3b` (`system2.orchestrator_model`). Its provider key is in the Mubit console, not in the repo or Modal | Account credit and the free-tier counter |
-| Modal | Six apps in `infra/modal/`. `gateway_app` is the hosted API. `HANDOVER.md` records a smoke of that URL. This note did not list Modal apps | Secrets `baansafe-hf` (`HF_TOKEN`) and `baansafe-mubit` (`MUBIT_API_KEY`, `MUBIT_BASE_URL`, and optional `MUBIT_PROJECT_ID` and `S2_SERVE_API_KEY`) |
+| Modal | Six apps in `infra/modal/`. `gateway_app` is the hosted API. It mounts `baansafe-demo` at `/data` and `baansafe-versions` read-only at `/vol`. `HANDOVER.md` records a smoke of that URL. This note did not list Modal apps | Secrets `baansafe-hf` (`HF_TOKEN`) and `baansafe-mubit` (`MUBIT_API_KEY`, `MUBIT_BASE_URL`, and optional `MUBIT_PROJECT_ID` and `S2_SERVE_API_KEY`). The versions volume holds `registry.json` and per-version `metrics.json` |
 | Local disk | `traces.jsonl` (`TRACE_PATH`), `training/events/events.jsonl` (`TRAINING_EVENTS_PATH`), the mock corrections JSONL, `MEMORY_LOCAL_PATH` (`var/memory.jsonl`, or `/data/memory.jsonl` on Modal), committed `data/processed` JSON and GeoJSON, `data/snapshots/`, `eval/out/` | Everything that survives a restart. `data/raw/ingest.sqlite` is the gitignored ingest cache. The hosted memory file persists across demo runs |
 
-The API process is the same code in three hosts: `make serve` on a laptop, `docker/Dockerfile` (`make docker-build`), or `infra/modal/gateway_app.py` on Modal. `make serve` and the image default to `S1_IMPL=stub`, `S2_IMPL=stub`, and `MEMORY_IMPL=mock`. The local `.env` sets `S1_IMPL=real`. The Modal gateway sets `S1_IMPL=real`, auto enrichment, and `S2_IMPL=real` when `baansafe-mubit` injects both Mubit values. `apply_runtime_impl` sets `MEMORY_IMPL=local` and `MEMORY_LOCAL_PATH=/data/memory.jsonl`. That file is BaanSafe's store. Mubit has no memory API. `max_containers=1`. Holds live in that one process and empty after `scaledown_window=120` seconds idle.
+The API process is the same code in three hosts: `make serve` on a laptop, `docker/Dockerfile` (`make docker-build`), or `infra/modal/gateway_app.py` on Modal. `make serve` and the image default to `S1_IMPL=stub`, `S2_IMPL=stub`, and `MEMORY_IMPL=mock`. The local `.env` sets `S1_IMPL=real`. The Modal gateway sets `S1_IMPL=real`, auto enrichment, and `S2_IMPL=real` when `baansafe-mubit` injects both Mubit values. `apply_runtime_impl` sets `MEMORY_IMPL=local` and `MEMORY_LOCAL_PATH=/data/memory.jsonl`. That file is BaanSafe's store. Mubit has no memory API. The Modal function mounts `baansafe-versions` read-only at `/vol` and sets `TRAINING_REGISTRY_PATH=/vol/registry.json` and `RL_RUN_PATH=/data/rl_run.json`. `GET /training` and `/ui/training.html` read those files plus the process `TRACE_PATH`. `GET /hosting` lists them under `reads`. `max_containers=1`. Holds live in that one process and empty after `scaledown_window=120` seconds idle.
 
 ```mermaid
 flowchart LR
@@ -106,12 +106,14 @@ flowchart LR
     s2["System 2: orchestrate, then Sapling gate"]
     router["router.merge + ledger"]
     corr["POST /cases/{id}/corrections"]
+    train["GET /training · /ui/training.html"]
     store[("api.store + ledger, in memory")]
   end
   subgraph disk["Local disk"]
     events[("training/events/events.jsonl")]
-    traces[("traces.jsonl")]
+    traces[("traces.jsonl · this server's TRACE_PATH")]
     memfile[("/data/memory.jsonl when MEMORY_IMPL=local")]
+    vol[("/vol/registry.json · baansafe-versions, read-only")]
     snaps[("data/processed JSON, snapshots")]
     overlay[("eval/out/rl/overlay.json")]
   end
@@ -122,7 +124,7 @@ flowchart LR
     nano["Nemotron nano 30B-A3B"]
   end
   subgraph modal["Modal"]
-    gapp["gateway_app: S1 real, memory local, S2 if secret, one container"]:::unwired
+    gapp["gateway_app: S1 real, memory local, /vol read-only, S2 if secret"]:::unwired
     sap["sapling_app"]:::unwired
     ft["finetune_app"]:::unwired
     stt["stt_app"]:::unwired
@@ -139,6 +141,8 @@ flowchart LR
   router --> phone
   gw <--> store
   gw --> traces
+  train --> traces
+  train --> vol
   router -.->|"local write after merge"| memfile
   snaps --> gw
   correct --> corr --> events
@@ -185,7 +189,7 @@ Each step names its file and where it runs. Everything runs in the API process u
 | L2 Cascade | System 1 `escalate=true` | System 1, then System 2 in the same turn, at most once | API process, plus Mubit and OpenRouter when `S2_IMPL=real` | The same turn |
 | L3 Human correction to escalation | Operator Reject in `ui/correct.js` | `POST /cases/{id}/corrections`: `memory.store_correction` (mock JSONL, a `baansafe-correction` row when `MEMORY_IMPL=local`, or a lesson post when `MEMORY_IMPL=mubit`) and `training/log.append_event`. A failed ingest keeps the correction in the local log. On the next turn, step 6 counts the local events | Browser, API process, and local disk | The next turn after the second distinct case. Live, no training |
 | L4 RL loop | `make rl-loop` (live) or `make rl-loop-replay` | `eval/rl/run.py` runs authored themes through `gateway.handle(overlay=...)`. The S2 modes are `live` (Mubit, 2/4/8 s 429 backoff, replies cached in `s2_cache.jsonl`) and `replay` (cache only). `eval/rl/reward.py` scores each episode against settled truth. `eval/rl/learner.py` graduates, recommends, and demotes, and the shadow bandit only records. The run writes `overlay.json`, `run.json`, and sim TrainingEvents | Laptop, then Mubit and OpenRouter in live mode | Offline. It reaches the live path only when `RL_OVERLAY` names `overlay.json` |
-| L5 Training export to fine-tune | `make export-training` | The event log becomes per-task datasets (`s1`, `s2`, `sapling`, `prefs`). `eval/rl/run.py` reports fine-tune ready only when both `modal.finetune_base_model` and `modal.finetune_gpu` are set. Both are set (`nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1`, `T4`). `infra/modal/finetune_app.py` trains SetFit for `s1_triage` and LoRA for the others | Laptop, then Modal | Not closed: no trained weight is loaded into System 1 |
+| L5 Training export to fine-tune | `make export-training` | The event log becomes per-task datasets (`s1`, `s2`, `sapling`, `prefs`). `eval/rl/run.py` reports fine-tune ready only when both `modal.finetune_base_model` and `modal.finetune_gpu` are set. Both are set (`nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1`, `T4`). `infra/modal/finetune_app.py` trains SetFit for `s1_triage` and LoRA for the others and writes loss curves to `baansafe-versions`. `GET /training` reads that registry | Laptop, then Modal | Not closed: no trained weight is loaded into System 1 |
 | L6 Caller sim and coach | `make sim-eval` | `sim/env.py` and `sim/coach.py` append `source=sim` and `source=coach` events | Laptop | Feeds L5. The coach source counts in eval arm `C_coach` only |
 
 A pattern's path through the loops: a System 1 under-triage is corrected by a human (L3). From the second distinct case on, that pattern goes to System 2. The RL loop (L4) can demote a coarse pattern to System 2 after one under-triage. It can graduate a narrow pattern into a System 1 rule after `correction_loop.graduation_threshold` (2) matching System 2 decisions, but only for low-confidence handoffs and never for P1 or complex cases. A human escalation (L3) always wins over a learned System 1 rule (L4), because `complex_situation` forces a System 2 entry at step 7, and System 1 never sees the case.
@@ -194,14 +198,14 @@ A pattern's path through the loops: a System 1 under-triage is corrected by a hu
 
 | App | Needed for | Blocked by | Status |
 |---|---|---|---|
-| `gateway_app` | A public URL for the town and the API | Nothing in git. `make deploy-modal` | Attaches `baansafe-mubit`. `max_containers=1`. `include_source=True`. Sets `S2_IMPL=real` when both Mubit values are present. `apply_runtime_impl` sets `MEMORY_IMPL=local` and `MEMORY_LOCAL_PATH=/data/memory.jsonl` |
+| `gateway_app` | A public URL for the town, the API, and `/ui/training.html` | Nothing in git. `make deploy-modal` | Attaches `baansafe-mubit`. `max_containers=1`. `include_source=True`. Sets `S2_IMPL=real` when both Mubit values are present. `apply_runtime_impl` sets `MEMORY_IMPL=local` and `MEMORY_LOCAL_PATH=/data/memory.jsonl`. Mounts `baansafe-versions` read-only at `/vol` |
 | `sapling_app` | A live Sapling verifier. The 23B checkpoint needs a 48 GB-class GPU, and no hosted API serves it | `sapling.hosting`, `sapling.gpu`, `sapling.model_id`, `sapling.thai_handling` | Refuses. The router uses the stub |
 | `finetune_app` | The "correction becomes a model update" beat with real weights (L5) | Nothing in git for the two decided leaves. `.env()` is inside the image | `modal.finetune_base_model` is `nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1` and `modal.finetune_gpu` is `T4`. System 1 does not load the weights |
 | `stt_app` | Live Thai speech-to-text behind `/stt/transcribe`. `gateway_app` forwards there when `STT_UPSTREAM` is set at deploy time | `modal.stt_model_id`, `modal.stt_gpu` | Refuses. The phone uses typed or scripted lines |
 | `s1_app` | A learned System 1 classifier (mDeBERTa or Laya) | `modal.s1_model_id`, `modal.s1_gpu` | Not needed now: `system1.extraction_method` is `rules-only` |
 | `s2_app` | Self-hosted Nemotron on vLLM, registered in the Mubit console | `modal.s2_model_id`, `modal.nemotron_size`, `modal.s2_quant`, `modal.s2_gpu` | Not needed now: `system2.hosting` is `openrouter via mubit gateway` |
 
-`gateway_app` already attaches `mubit_secret()`, promotes System 2 when those credentials exist, and sets `max_containers=1`, so `api.store` and `router/ledger.py` stay in one process until the container scales down. Memory stays BaanSafe's store: `MEMORY_IMPL=local` and `/data/memory.jsonl` on the `baansafe-demo` volume. That file persists across demo runs.
+`gateway_app` already attaches `mubit_secret()`, promotes System 2 when those credentials exist, and sets `max_containers=1`, so `api.store` and `router/ledger.py` stay in one process until the container scales down. Memory stays BaanSafe's store: `MEMORY_IMPL=local` and `/data/memory.jsonl` on the `baansafe-demo` volume. That file persists across demo runs. `baansafe-versions` is a second mount, read-only, at `/vol`. `GET /training` counts `mubit_chat` rows in this server's trace file. A local `make mubit-traffic` does not appear there until those traces are on `/data/traces.jsonl`.
 
 ### Why containerise
 

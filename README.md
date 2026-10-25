@@ -109,6 +109,7 @@ flowchart LR
   sim[Simulator] --> log
   log --> export[export-training]
   export -.-> ft["Modal fine-tune, Nano 4B · T4"]:::unwired
+  ft -.-> page["GET /training reads /vol/registry.json"]
   synth["fixtures/synthetic"] --> setfit["SetFit rows"]
   synth --> laya["Laya JSONL"]
   laya -.-> ltrain["laya-train, skips"]:::unwired
