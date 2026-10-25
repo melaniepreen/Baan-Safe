@@ -4,9 +4,10 @@ One `*.modal.run` URL serves the town (`/ui/sim/`), triage, cases, and
 `POST /stt/transcribe`. The image installs `requirements.txt` and mounts this
 repo at `/opt/baansafe`. System 1 and enrichment run without secrets
 (`S1_IMPL=real`, `ENRICH_IMPL` auto via `ingest.store`). The `baansafe-mubit`
-Modal secret is attached so System 2 can call Nemotron through Mubit when
-`MUBIT_API_KEY` and `MUBIT_BASE_URL` are present (`S2_IMPL=real`). Without
-those credentials, S2 stays stub. Secret values are never in git or STUB_ENV.
+Modal secret is attached so System 2 and memory can use Mubit when
+`MUBIT_API_KEY` and `MUBIT_BASE_URL` are present (`S2_IMPL=real`,
+`MEMORY_IMPL=mubit`). Without those credentials, S2 stays stub and memory
+stays mock. Secret values are never in git or STUB_ENV.
 
 `STT_UPSTREAM`, when it is an http(s) URL at deploy time, forwards speech
 uploads to `{STT_UPSTREAM}/transcribe`. `S1_UPSTREAM`, `S2_UPSTREAM`, and
@@ -100,17 +101,22 @@ def mubit_credentials_present() -> bool:
 
 
 def apply_runtime_impl() -> None:
-    """Promote S2 to real when Mubit credentials exist; otherwise keep stub.
+    """Promote S2 and memory when Mubit credentials exist; otherwise stub/mock.
 
-    Deploy-time S2_IMPL=real is honored only when credentials are present.
-    Without credentials, S2 is forced to stub. TRACE_PATH stays the volume path.
+    Deploy-time S2_IMPL=real / MEMORY_IMPL=mubit is honored only when
+    credentials are present. Without credentials, S2 is stub and memory is mock.
+    TRACE_PATH stays the volume path.
     """
-    override = os.environ.get("S2_IMPL", "").strip().lower()
     if mubit_credentials_present():
-        if override in {"", "stub", "real"}:
+        s2 = os.environ.get("S2_IMPL", "").strip().lower()
+        if s2 in {"", "stub", "real"}:
             os.environ["S2_IMPL"] = "real"
+        memory = os.environ.get("MEMORY_IMPL", "").strip().lower()
+        if memory in {"", "mock", "mubit"}:
+            os.environ["MEMORY_IMPL"] = "mubit"
     else:
         os.environ["S2_IMPL"] = "stub"
+        os.environ["MEMORY_IMPL"] = "mock"
 
 
 def image_env() -> dict[str, str]:
@@ -216,6 +222,7 @@ def _backends_label(impl: dict[str, str]) -> str:
 def _hosting_note(impl: dict[str, str]) -> str:
     has_secrets = mubit_credentials_present()
     s2 = impl.get("S2_IMPL", "stub")
+    memory = impl.get("MEMORY_IMPL", "mock")
     if has_secrets and s2 == "real":
         s2_line = (
             "System 2 is real: Nemotron via Mubit (S2_IMPL=real). "
@@ -231,12 +238,22 @@ def _hosting_note(impl: dict[str, str]) -> str:
             "System 2 stays stub until baansafe-mubit injects "
             "MUBIT_API_KEY and MUBIT_BASE_URL."
         )
+    if has_secrets and memory == "mubit":
+        memory_line = (
+            "Memory is live via Mubit control plane (MEMORY_IMPL=mubit; "
+            "project baansafe-demo or MUBIT_PROJECT_ID)."
+        )
+    elif has_secrets:
+        memory_line = "Memory stays mock even though Mubit credentials are present."
+    else:
+        memory_line = "Memory stays mock until Mubit credentials are present."
     return (
         "LLM via Mubit only. "
         "System 1 runs the rules path (S1_IMPL=real). "
         "Enrichment reads shipped JSON via ingest.store (no secret). "
         f"{s2_line} "
-        "Memory and Sapling stay mock/stub. "
+        f"{memory_line} "
+        "Sapling stays stub. "
         "S1_UPSTREAM, S2_UPSTREAM, and SAPLING_UPSTREAM do not replace gateway outcomes. "
         "STT_UPSTREAM forwards POST /stt/transcribe and invents no words."
     )

@@ -247,22 +247,27 @@ def test_gateway_s2_real_when_mubit_credentials_present(monkeypatch):
 
     monkeypatch.setenv("S1_IMPL", "real")
     monkeypatch.setenv("S2_IMPL", "stub")
+    monkeypatch.setenv("MEMORY_IMPL", "mock")
     monkeypatch.setenv("MUBIT_API_KEY", "test-key-not-real")
     monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai")
     assert gateway.mubit_credentials_present() is True
     gateway.apply_runtime_impl()
     assert os.environ["S2_IMPL"] == "real"
+    assert os.environ["MEMORY_IMPL"] == "mubit"
     body = gateway.hosting()
     assert body["secrets"] is True
     assert body["backends"] == "live"
     assert body["impl"]["S2_IMPL"] == "real"
+    assert body["impl"]["MEMORY_IMPL"] == "mubit"
     assert "LLM via Mubit only" in body["note"]
+    assert "MEMORY_IMPL=mubit" in body["note"]
     assert "test-key-not-real" not in body["note"]
     assert "traces" in body["writes"]["TRACE_PATH"]
 
     monkeypatch.delenv("MUBIT_API_KEY", raising=False)
     gateway.apply_runtime_impl()
     assert os.environ["S2_IMPL"] == "stub"
+    assert os.environ["MEMORY_IMPL"] == "mock"
     assert gateway.hosting()["secrets"] is False
     assert gateway.hosting()["backends"] == "s1-real"
 
