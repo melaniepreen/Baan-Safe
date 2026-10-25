@@ -6,6 +6,7 @@ import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from api.routes.endpoints import router
@@ -40,5 +41,13 @@ app.add_middleware(
 app.include_router(router)
 app.include_router(policies_router)
 app.include_router(training_router)
+
+
+@app.get("/", include_in_schema=False)
+def root() -> RedirectResponse:
+    """Bare host opens the town sim instead of FastAPI's `{"detail":"Not Found"}`."""
+    return RedirectResponse(url="/ui/sim/index.html", status_code=307)
+
+
 # /ui/training.html reads GET /training. Same static mount as the player and the town.
 app.mount("/ui", StaticFiles(directory=ROOT / "ui", html=True), name="ui")
