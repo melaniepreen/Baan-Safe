@@ -440,6 +440,10 @@ def test_activity_prompts_and_rulebook_are_draft_simulations():
     phone_page = (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
     assert "+66 81 555 0149" in landmarks
     assert "+66 81 555 0149" in phone_page
+    assert 'id="about-open"' in phone_page
+    assert "In Thailand, the water rises faster" in phone_page
+    assert "335 mm" in phone_page
+    assert "mountAbout" in source
     assert "คุณเชื่อมต่อกับ Baan-Safe แล้ว มีอะไรให้ช่วยไหมคะ" in source
 
 

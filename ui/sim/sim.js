@@ -6,6 +6,7 @@
 
    Houses, streets, flood polygons, and routes come from ./data.
 */
+import { mountAbout, stopAbout } from "./about.js";
 import { mountCorrectForm } from "../correct.js";
 import { closedWithoutVehicle, needsOperatorApproval } from "./approval.js";
 import { callSummary } from "./call_title.js";
@@ -3719,6 +3720,18 @@ function resetCalls() {
 
 function bindChrome() {
   document.getElementById("view-fit").addEventListener("click", fitTown);
+  const about = document.getElementById("about");
+  const aboutOpen = document.getElementById("about-open");
+  if (about && aboutOpen) {
+    aboutOpen.addEventListener("click", () => {
+      if (typeof about.showModal === "function") about.showModal();
+      mountAbout(document.getElementById("about-stage"));
+    });
+    about.addEventListener("close", stopAbout);
+    about.addEventListener("click", (event) => {
+      if (event.target === about) about.close();
+    });
+  }
   document.getElementById("view-dispatch").addEventListener("click", () => {
     const camera = town.meta.camera;
     lookAt(camera.look_at[0], camera.look_at[1], camera.zoom_px_per_m);

@@ -18,8 +18,29 @@
       <button type="button" id="view-dispatch">Dispatch frame</button>
       <button type="button" id="town-reset">Reset</button>
       <button type="button" id="view-fit">See the whole block</button>
+      <button type="button" id="about-open">About</button>
     </div>
   </header>
+
+  <dialog id="about" aria-labelledby="about-title">
+    <form method="dialog" class="about-bar">
+      <p class="about-mark">Baan-Safe</p>
+      <button type="submit" class="about-close" value="close">Close</button>
+    </form>
+    <h2 id="about-title">In Thailand, the water rises faster than a desk can sort the calls.</h2>
+    <div class="about-stats">
+      <p><strong>13 million</strong><span>people affected in the 2011 floods</span></p>
+      <p><strong>$46.5 billion</strong><span>the scale of that year's damage</span></p>
+      <p><strong>335 mm</strong><span>Hat Yai, one day in November 2025. The heaviest in 300 years.</span></p>
+    </div>
+    <div id="about-stage" aria-hidden="true"></div>
+    <p class="about-source">2011 is the scale cited for that basin flood. The 335 mm figure is Reuters' report of the Hat Yai measurement, not a number this desk computed.</p>
+    <ol class="about-path">
+      <li><span>01</span><div><h3>A call arrives</h3><p>A household asks for a boat, or only for the time of the flood news.</p></div></li>
+      <li><span>02</span><div><h3>Rules, or Nemotron</h3><p>A clear request stays on System 1. Oxygen, someone who cannot walk, or rising water goes to Nemotron through Mubit.</p></div></li>
+      <li><span>03</span><div><h3>A person, then a boat</h3><p>Accept sends help. Reject holds it. The same place and the same need does not send a second boat.</p></div></li>
+    </ol>
+  </dialog>
 
   <p id="dispatch-pending" class="dispatch-pending" hidden>
     <strong>PENDING APPROVAL</strong>
