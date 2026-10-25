@@ -21,7 +21,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
-from config.settings import require_decision
+from config.settings import require_decision, unset_decisions
 from contracts.models import (
     CaseState,
     ExtractedFields,
@@ -134,7 +134,7 @@ def run(
             "Replay cache misses score as System 2 fallbacks; they do not invent a host.",
             "P1 and complex patterns never graduate; they become recommendations.",
             "The shadow bandit never routes.",
-            "Fine-tune is blocked on modal.finetune_base_model.",
+            _finetune_note(),
         ],
     }
     (out / "run.json").write_text(
@@ -286,7 +286,7 @@ def _export(events_path: Path, out: Path) -> dict:
     return {
         "status": "exported",
         "counts": {name: body["event_count"] for name, body in manifests.items()},
-        "finetune": "blocked on modal.finetune_base_model",
+        "finetune": _finetune_status(),
     }
 
 
@@ -437,6 +437,21 @@ def _mubit_trace_summary(s2: str, model: str) -> dict:
         "errors": errors,
         "avg_latency_ms": avg,
     }
+
+
+def _finetune_status() -> str:
+    """Reflect config/decisions.yaml instead of a hardcoded block message."""
+    missing = unset_decisions(["modal.finetune_base_model", "modal.finetune_gpu"])
+    if missing:
+        return "blocked on " + ", ".join(missing)
+    return "ready: make modal-finetune (datasets under eval/out/rl/training)"
+
+
+def _finetune_note() -> str:
+    status = _finetune_status()
+    if status.startswith("blocked"):
+        return f"Fine-tune is {status}."
+    return "Fine-tune decisions are set; make modal-finetune consumes the exported datasets."
 
 
 def _cache_key(model: str | None, messages) -> str:
