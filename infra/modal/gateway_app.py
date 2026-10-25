@@ -4,10 +4,13 @@ One `*.modal.run` URL serves the town (`/ui/sim/`), triage, cases, and
 `POST /stt/transcribe`. The image installs `requirements.txt` and mounts this
 repo at `/opt/baansafe`. System 1 and enrichment run without secrets
 (`S1_IMPL=real`, `ENRICH_IMPL` auto via `ingest.store`). The `baansafe-mubit`
-Modal secret is attached so System 2 and memory can use Mubit when
-`MUBIT_API_KEY` and `MUBIT_BASE_URL` are present (`S2_IMPL=real`,
-`MEMORY_IMPL=mubit`). Without those credentials, S2 stays stub and memory
-stays mock. Secret values are never in git or STUB_ENV.
+Modal secret is attached so System 2 can use Mubit when `MUBIT_API_KEY` and
+`MUBIT_BASE_URL` are present (`S2_IMPL=real`). Without those credentials S2
+stays stub. Memory is BaanSafe's own store on the volume (`MEMORY_IMPL=local`,
+`MEMORY_LOCAL_PATH=/data/memory.jsonl`) with or without the secret; current
+Mubit has no memory API, so `MEMORY_IMPL=mubit` is honoured only when set at
+deploy time together with the credentials. Secret values are never in git or
+STUB_ENV.
 
 `STT_UPSTREAM`, when it is an http(s) URL at deploy time, forwards speech
 uploads to `{STT_UPSTREAM}/transcribe`. `S1_UPSTREAM`, `S2_UPSTREAM`, and
@@ -72,11 +75,12 @@ STUB_ENV = {
     "PYTHONUNBUFFERED": "1",
     "S1_IMPL": "real",
     "S2_IMPL": "stub",
-    "MEMORY_IMPL": "mock",
+    "MEMORY_IMPL": "local",
     "SAPLING_IMPL": "stub",
     # Empty = same auto as local serve: data if store.available() else off.
     "ENRICH_IMPL": "",
     "TRACE_PATH": f"{DATA_MOUNT}/traces.jsonl",
+    "MEMORY_LOCAL_PATH": f"{DATA_MOUNT}/memory.jsonl",
     "MOCK_CORRECTIONS_PATH": f"{DATA_MOUNT}/corrections.jsonl",
     "TRAINING_EVENTS_PATH": f"{DATA_MOUNT}/events.jsonl",
     "POLICY_PIN_DIR": f"{DATA_MOUNT}/policy-pins",
@@ -101,22 +105,26 @@ def mubit_credentials_present() -> bool:
 
 
 def apply_runtime_impl() -> None:
-    """Promote S2 and memory when Mubit credentials exist; otherwise stub/mock.
+    """Promote S2 when Mubit credentials exist; memory is the local store.
 
-    Deploy-time S2_IMPL=real / MEMORY_IMPL=mubit is honored only when
-    credentials are present. Without credentials, S2 is stub and memory is mock.
-    TRACE_PATH stays the volume path.
+    Deploy-time S2_IMPL=real is honoured only when credentials are present;
+    without them S2 is stub. MEMORY_IMPL becomes `local` (BaanSafe's JSONL on
+    the volume) unless it was deployed as `mubit` next to the credentials;
+    that dormant path is kept, not defaulted to. MEMORY_LOCAL_PATH falls back
+    to the volume file next to TRACE_PATH.
     """
+    memory = os.environ.get("MEMORY_IMPL", "").strip().lower()
     if mubit_credentials_present():
         s2 = os.environ.get("S2_IMPL", "").strip().lower()
         if s2 in {"", "stub", "real"}:
             os.environ["S2_IMPL"] = "real"
-        memory = os.environ.get("MEMORY_IMPL", "").strip().lower()
-        if memory in {"", "mock", "mubit"}:
-            os.environ["MEMORY_IMPL"] = "mubit"
+        if memory != "mubit":
+            os.environ["MEMORY_IMPL"] = "local"
     else:
         os.environ["S2_IMPL"] = "stub"
-        os.environ["MEMORY_IMPL"] = "mock"
+        os.environ["MEMORY_IMPL"] = "local"
+    if not os.environ.get("MEMORY_LOCAL_PATH", "").strip():
+        os.environ["MEMORY_LOCAL_PATH"] = STUB_ENV["MEMORY_LOCAL_PATH"]
 
 
 def image_env() -> dict[str, str]:
@@ -238,15 +246,18 @@ def _hosting_note(impl: dict[str, str]) -> str:
             "System 2 stays stub until baansafe-mubit injects "
             "MUBIT_API_KEY and MUBIT_BASE_URL."
         )
-    if has_secrets and memory == "mubit":
+    if memory == "local":
         memory_line = (
-            "Memory is live via Mubit control plane (MEMORY_IMPL=mubit; "
-            "project baansafe-demo or MUBIT_PROJECT_ID)."
+            "Memory is BaanSafe's own store (MEMORY_IMPL=local; "
+            "MEMORY_LOCAL_PATH on the demo volume). Mubit has no memory API today."
         )
-    elif has_secrets:
-        memory_line = "Memory stays mock even though Mubit credentials are present."
+    elif memory == "mubit" and has_secrets:
+        memory_line = (
+            "Memory is the dormant Mubit control-plane client (MEMORY_IMPL=mubit; "
+            "project baansafe-demo or MUBIT_PROJECT_ID); expect no items."
+        )
     else:
-        memory_line = "Memory stays mock until Mubit credentials are present."
+        memory_line = f"Memory is {memory} (MEMORY_IMPL={memory})."
     return (
         "LLM via Mubit only. "
         "System 1 runs the rules path (S1_IMPL=real). "
@@ -271,6 +282,7 @@ def hosting() -> dict:
         "app": APP_NAME,
         "backends": _backends_label(impl),
         "secrets": mubit_credentials_present(),
+        "memory": impl["MEMORY_IMPL"],
         "impl": impl,
         "upstreams": {name: bool(http_upstream(name)) for name in UPSTREAM_ENV_NAMES},
         "writes": {
@@ -282,6 +294,9 @@ def hosting() -> dict:
                 "TRAINING_EVENTS_PATH", STUB_ENV["TRAINING_EVENTS_PATH"]
             ),
             "POLICY_PIN_DIR": os.environ.get("POLICY_PIN_DIR", STUB_ENV["POLICY_PIN_DIR"]),
+            "MEMORY_LOCAL_PATH": os.environ.get(
+                "MEMORY_LOCAL_PATH", STUB_ENV["MEMORY_LOCAL_PATH"]
+            ),
         },
         "note": _hosting_note(impl),
     }

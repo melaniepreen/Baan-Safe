@@ -11,6 +11,8 @@ files:
   - llm/client.py
   - llm/openai_client.py
   - memory/adapter.py
+  - memory/local.py
+  - memory/mubit.py
   - config/routing.yaml
 ---
 
@@ -25,9 +27,10 @@ One turn: enrich, retrieve memory, record a policy pre-check, route by the field
 - `gateway/graduation.py` — `apply(case)` tags graduated patterns (`complex_situation`) and adds a recommendation MemoryItem after memory retrieval. Sets no priority; nothing moves to System 1.
 - `gateway/auth.py` — records the auth scheme. Does not reject the request.
 - `gateway/policy.py` — `precheck_notes`. Does not read medical fields or change priority.
-- `memory/adapter.py` — `MEMORY_IMPL=mock` (default) or `mubit`.
-- `memory/mubit.py` — control-plane client (`/v2/control/query`, `/v2/control/ingest`) when `MEMORY_IMPL=mubit`. `MUBIT_CONTROL_URL` (a `mubit.ai` host) overrides the origin when the memory instance is not the chat gateway.
-- `scripts/seed_memory.py` — `make seed-memory` ingests 10 corpus-derived items tagged `[policy:<rule_id>]` into lane `baansafe-policy`; a tag-only query first skips tags already present. `SEED_ARGS='--dry-run'` prints without POSTing; `--case-fact CASE_ID` adds one synthetic fact.
+- `memory/adapter.py` — `MEMORY_IMPL=mock` (default), `local` (hosted default), or `mubit`. `memory_mode`, `retrieve`, `store_correction`, `store_record` (no-op in mock mode, returns `False`), `last_retrieve_error`.
+- `memory/local.py` — BaanSafe's own store when `MEMORY_IMPL=local`: append-only JSONL at `MEMORY_LOCAL_PATH` (default `var/memory.jsonl`), written under an exclusive file lock, scored on read. Lanes: `baansafe-case` → `similar_case`, `baansafe-correction` → `correction`, `baansafe-policy` → `policy`.
+- `memory/mubit.py` — control-plane client (`/v2/control/query`, `/v2/control/ingest`) when `MEMORY_IMPL=mubit`. `MUBIT_CONTROL_URL` (a `mubit.ai` host) overrides the origin. Dormant: current Mubit is an LLM gateway and returns 404 `unknown_route` for `/v2/control/*`, so this backend returns no items until Mubit exposes a memory API. Same lanes as local.
+- `scripts/seed_memory.py` — `make seed-memory` writes 10 corpus-derived items tagged `[policy:<rule_id>]` into lane `baansafe-policy` through the adapter (`MEMORY_IMPL=local` seeds the JSONL file; `mubit` ingests); items already present by tag are skipped. `SEED_ARGS='--dry-run'` prints without writing; `--case-fact CASE_ID` adds one synthetic fact; `--path FILE` overrides `MEMORY_LOCAL_PATH`.
 - `llm/client.py` — `complete` (httpx). Owner: Melanie wires the call.
 - `llm/openai_client.py` — registered OpenAI SDK client (`MUBIT_BASE_URL` + `MUBIT_API_KEY`).
 - `gateway/overlay.py` — learned overlay (`RL_OVERLAY` opt-in): signatures, `Overlay`, `load`, `save`, `load_from_env`.
@@ -41,8 +44,11 @@ One turn: enrich, retrieve memory, record a policy pre-check, route by the field
 - Before enrichment, `_extract` runs `system1/extract.py` when fields are empty or `keyword_extraction` is already in `policy_flags`. Fixture cases carry hand-filled fields and are never extracted.
 - `complete(messages, model, max_tokens, *, timeout, temperature, seed, reasoning, case_id)` posts to the Mubit chat URL only after the host check and `llm.provider_route` (`mubit`). Compat prefix `…/compat/openrouter/v1` maps to `…/chat/completions`. `temperature`, `seed`, and `reasoning` are sent only when set. When `case_id` is set the body carries `metadata.session_id=<case_id>`: Mubit groups a conversation's calls into one session by that field and holds adapter test cases out by session, so a case's turns stay together and held-out tests are other cases. Never send `x-middleware-store`/`x-middleware-record`; a call recorded without request and reply is never a kept example. Every socket attempt emits TraceEvent stage `mubit_chat` (model, `latency_ms`, `notes` with `status=ok` / `status=http_429` / other). Config refusals before a socket do not emit.
 - `make_client()` returns `OpenAI(base_url=MUBIT_BASE_URL, api_key=MUBIT_API_KEY)`. `openai_client.chat` is the SDK path with the same `mubit_chat` emit.
-- `handle` emits `enrich`, `memory`, `gateway`, system stage(s), and `router`. S2 real path: `mubit_chat` from `llm.complete`, then `system_2`. The `memory` note is `memory via adapter mode=<impl>; items=N`, plus `; retrieve_error=<type: text>` when a mubit retrieve soft-failed to `[]` (never the key).
-- `GET /metrics` includes `mubit_chat.call_count`, `ok_count`, `error_count`, `avg_latency_ms`, and `models` so a judge can see hops through Mubit.
+- `handle` emits `enrich`, `memory`, `gateway`, system stage(s), `router`, and (local or mubit mode) `memory_write`. S2 real path: `mubit_chat` from `llm.complete`, then `system_2`. The `memory` note is `memory via adapter mode=<impl>; items=N`, plus `; retrieve_error=<type: text>` when a local or mubit retrieve soft-failed to `[]` (never the key).
+- Memory write path: after `router.merge`, `handle` → `_write_memory` builds a `MemoryRecord` (`evidence=case.fields`, `decision`, `corrections` passed in by the API from `StoredCase.corrections`; no transcript, no `resources`) and calls `store_record`. Not in mock mode; skipped for the no-stub fallback. Soft-fails: the stage note is `status=ok|error; kind=case_record; mode=<impl>; lane=baansafe-case; corrections=N` (`error=<ExceptionType>` on failure, never the message or key). A correction's `memory_write` note from `store_correction` is `status=ok|error; kind=correction; mode=<impl>; id=<id>; <detail>`; on a failed local or mubit write the correction is kept in the local correction log.
+- Record content is `"Case <id>: needs=…; location=…; people=…; decision=…; route=…; priority=…"` (`memory.content.record_content`). `memory/local.py` appends `{id, kind, lane, content, source_case_id, location, needs, vulnerable, danger, priority, route, next_action, created_at, metadata}`; `memory.mubit.write` ingests `{type: fact, content, lane: baansafe-case, source_case_id, metadata: {source_case_id, lane, record_id, location, needs, route, priority, next_action}}`. On read `source_case_id` comes from the top-level field, then `metadata`, then the `Case <id>:` prefix; `run_id` is never used. A `similar_case` row for the case being triaged is dropped so turn 2 cannot duplicate-merge on itself.
+- Local scoring per row: +3 when a normalised location token overlaps (lower-case, punctuation stripped), +2 per overlapping need, +1 per overlapping vulnerable or danger token, +1 for a `baansafe-policy` or `baansafe-correction` row whose content mentions one of the case's needs or flags; rows with `source_case_id == case.case_id` are excluded. Rows scoring 0 are dropped. `relevance = max(0.5, min(1, score / 6))`; a same-location row with one overlapping need scores 5 and is clamped to `DUPLICATE_RELEVANCE` (0.9) so a repeat caller duplicate-merges. Top `memory.retrieval_top_k` (5) returned.
+- `GET /metrics` includes `mubit_chat.call_count`, `ok_count`, `error_count`, `avg_latency_ms`, and `models` so a judge can see hops through Mubit, and a `memory` block from the same traces: `mode`, `retrieve_count`, `hit_count` (memory stage with `items>=1`), `item_total`, `hit_rate`, `write_count`, `write_error_count`, `avg_write_latency_ms`, `duplicate_merge_count` (`system_1` outcomes routed `duplicate_merge`).
 - What Mubit does with those calls (docs.mubit.ai, read 25 Oct 2026): records each as a Request, groups calls with the same model + system instructions + tools + output format into one Task, keeps eligible examples, trains a per-task adapter at ~25 kept examples, tests each version against the provider model's answers on held-out sessions, and exposes a `Passed` version in the console's Try models. System 2's system prompt is static and all per-case data is in the user message, so every System 2 call lands in one Task. There is no Mubit model id: an adapter cannot be called from the live path. Mubit has no memory API in the current product; see the memory section.
 
 ## Invariants
@@ -62,6 +68,7 @@ One turn: enrich, retrieve memory, record a policy pre-check, route by the field
 - Host refusal: `tests/test_architecture.py` (`test_llm_refuses_openrouter_and_ignores_its_key`).
 - Live smoke: `python scripts/smoke_mubit.py` with `.env` set (lists models; never prints the key). Optional connectivity check only; chat tracing is covered by unit tests that mock httpx.
 - Mubit chat traces: `tests/test_mubit_trace.py` (mocked httpx; no live network).
+- Memory client and the write path: `tests/test_mubit_memory.py` (mocked httpx: ingest shape, lane → kind, self-case exclusion, mock no-op), `tests/test_memory_write.py` (API turn with `MEMORY_IMPL=mubit`, `memory_write` stage, `/metrics` `memory` block), and `tests/test_memory_local.py` (JSONL round trip, scoring order, own-case exclusion, repeat-caller `duplicate_merge` through the API with `MEMORY_IMPL=local`).
 
 ## Common pitfalls
 
@@ -75,6 +82,6 @@ One turn: enrich, retrieve memory, record a policy pre-check, route by the field
 - `gateway.auth`
 - `llm.token_price_usd`
 
-`memory.mubit_project` (`baansafe-demo`), `memory.retrieval_top_k` (`5`), and `memory.token_budget` (`400`) are decided. Override the project with `MUBIT_PROJECT_ID` when the console id differs. Local `MEMORY_IMPL` stays `mock`. The Modal gateway sets `MEMORY_IMPL=mubit` when `baansafe-mubit` injects both Mubit values. Run `make seed-memory` with `.env` loaded so the workspace holds the policy lessons, and read the `memory` trace note: `items=0` with a `retrieve_error` means the control plane was not reached, not that the workspace is empty.
+`memory.mubit_project` (`baansafe-demo`), `memory.retrieval_top_k` (`5`), and `memory.token_budget` (`400`) are decided. Override the project with `MUBIT_PROJECT_ID` when the console id differs. Developer default `MEMORY_IMPL` stays `mock`. The Modal gateway sets `MEMORY_IMPL=local` and `MEMORY_LOCAL_PATH=/data/memory.jsonl` on the `baansafe-demo` volume (next to `TRACE_PATH`); `/hosting` reports `memory: local`. Run `MEMORY_IMPL=local make seed-memory` so the store holds the policy lessons, and read the `memory` trace note: `items=0` with a `retrieve_error` means the store was not read, not that it is empty.
 
 See also `docs/agents/rl-loop.md` for the overlay and the cascade learner.

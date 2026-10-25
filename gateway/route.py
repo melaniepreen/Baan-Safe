@@ -17,13 +17,17 @@ S1_IMPL=real / S2_IMPL=real on the chosen system, calls that system's decide().
 
 from __future__ import annotations
 
+import logging
 import os
+from collections.abc import Sequence
 from datetime import datetime, timezone
 
 from config.settings import load_yaml
 from contracts.models import (
     CaseState,
+    Correction,
     ExtractedFields,
+    MemoryRecord,
     Outcome,
     Priority,
     Route,
@@ -37,7 +41,7 @@ from gateway.chooser import choose
 from gateway.graduation import apply as apply_graduations
 from gateway.overlay import Overlay, load_from_env, narrow_signature
 from gateway.policy import precheck_notes
-from memory.adapter import last_retrieve_error, memory_mode, retrieve
+from memory.adapter import last_retrieve_error, memory_mode, retrieve, store_record
 from mocks.loader import (
     has_s1_stub,
     has_s2_stub,
@@ -52,13 +56,17 @@ from system2 import decide as system2
 from trace import emit
 
 _MODES = ("exclusive", "cascade")
+_log = logging.getLogger(__name__)
 
 
 def handle(
     case: CaseState,
     use_stubs: bool = True,
     overlay: Overlay | None = None,
+    corrections: Sequence[Correction] = (),
 ) -> RouterDecision:
+    """One turn. `corrections` are the human corrections already stored for
+    this case; they ride along on the memory record written at the end."""
     if overlay is None:
         overlay = load_from_env()
     started = _now()
@@ -150,7 +158,73 @@ def handle(
             notes="router.merge ran on the selected outcome(s)",
         )
     )
+    _write_memory(case, decision, outcome, corrections)
     return decision
+
+
+def _write_memory(
+    case: CaseState,
+    decision: RouterDecision,
+    outcome: Outcome,
+    corrections: Sequence[Correction],
+) -> None:
+    """Store this turn's record so a repeat caller retrieves a `similar_case`.
+
+    Local and mubit modes only; mock memory is hand-written fixtures.
+    Soft-fails: a store error is traced as `status=error` and never breaks
+    the turn. The no-stub fallback is "no decision", not a case to remember.
+    """
+    mode = memory_mode()
+    if mode == "mock":
+        return
+    if outcome.missing_evidence == ["fixture_stub"]:
+        return
+    started = _now()
+    status = "status=ok"
+    try:
+        store_record(_memory_record(case, decision, outcome, corrections))
+    except Exception as exc:  # noqa: BLE001 - soft-fail by design
+        # Exception type only: a message could echo a URL or header.
+        status = f"status=error; error={type(exc).__name__}"
+        _log.warning(
+            "memory_write failed for %s (%s)", case.case_id, type(exc).__name__
+        )
+    latency_ms = max(0, int((_now() - started).total_seconds() * 1000))
+    emit(
+        TraceEvent(
+            case_id=case.case_id,
+            stage="memory_write",
+            started_at=started,
+            latency_ms=latency_ms,
+            notes=(
+                f"{status}; kind=case_record; mode={mode}; lane=baansafe-case; "
+                f"corrections={len(corrections)}"
+            ),
+        )
+    )
+
+
+def _memory_record(
+    case: CaseState,
+    decision: RouterDecision,
+    outcome: Outcome,
+    corrections: Sequence[Correction],
+) -> MemoryRecord:
+    turns = len(case.transcript)
+    summary = (
+        f"{outcome.system.value} {outcome.outcome} after {turns} turn(s): "
+        f"{outcome.reason}"
+    )
+    return MemoryRecord(
+        record_id=f"rec-{case.case_id}-{turns}",
+        case_id=case.case_id,
+        case_summary=summary[:400],
+        evidence=case.fields,
+        decision=decision,
+        outcome_label=decision.final_route.value,
+        failure=None,
+        corrections=list(corrections),
+    )
 
 
 def choose_system(case: CaseState, overlay: Overlay | None = None) -> System:

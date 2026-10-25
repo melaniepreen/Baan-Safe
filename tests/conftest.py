@@ -17,6 +17,8 @@ def isolated_runtime(tmp_path, monkeypatch):
     monkeypatch.setenv("S1_IMPL", "stub")
     monkeypatch.setenv("S2_IMPL", "stub")
     monkeypatch.setenv("MEMORY_IMPL", "mock")
+    # A local-mode test must set its own tmp file; never the developer's var/.
+    monkeypatch.delenv("MEMORY_LOCAL_PATH", raising=False)
     # Same refusal on every machine: a Mubit host, no key, no socket.
     monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai")
     monkeypatch.delenv("MUBIT_API_KEY", raising=False)

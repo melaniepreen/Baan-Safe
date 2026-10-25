@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import pytest
 
-from contracts.models import NextAction
+from contracts.models import MemoryItem, NextAction, Route
 from fixtures.load import load_case, load_fixture
 from gateway.route import handle
-from system1.decide import decide
+from system1.decide import DUPLICATE_RELEVANCE, decide
 
 S1_IDS = [f"F{n:02d}" for n in range(1, 10)]
 
@@ -52,3 +52,39 @@ def test_missing_people_count_asks_next_question():
     decision = handle(case, use_stubs=False)
     assert decision.next_action is NextAction.ask_next_question
     assert decision.dispatches == []
+
+
+def _similar(source_case_id: str | None, relevance: float) -> MemoryItem:
+    return MemoryItem(
+        memory_id=f"mem-{source_case_id or 'none'}",
+        kind="similar_case",
+        summary=f"Case {source_case_id}: needs=water; route=welfare_distribution",
+        relevance=relevance,
+        source_case_id=source_case_id,
+    )
+
+
+def test_similar_case_from_another_case_duplicate_merges():
+    """A retrieved case record (as memory.mubit maps a baansafe-case fact)
+    for a different case at high relevance is a duplicate."""
+    case = load_case("F01")
+    case.memory_context = [_similar("case-earlier", 0.95)]
+    outcome = decide(case)
+    assert outcome.route is Route.duplicate_merge
+    assert outcome.outcome == "fast_route"
+    assert outcome.escalate is False
+    assert "case-earlier" in outcome.reason
+    assert outcome.needs == case.fields.needs
+    # The full turn (handle replaces memory_context from the adapter) is
+    # covered in tests/test_memory_write.py with a mocked control plane.
+
+
+def test_similar_case_needs_source_and_relevance_to_merge():
+    base = load_case("F01")
+    below = base.model_copy(deep=True)
+    below.memory_context = [_similar("case-earlier", DUPLICATE_RELEVANCE - 0.01)]
+    assert decide(below).route is not Route.duplicate_merge
+
+    unsourced = base.model_copy(deep=True)
+    unsourced.memory_context = [_similar(None, 0.99)]
+    assert decide(unsourced).route is not Route.duplicate_merge

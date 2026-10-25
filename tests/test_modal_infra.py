@@ -129,7 +129,7 @@ def test_policy_pin_dir_and_db_path_follow_env(monkeypatch, tmp_path):
     assert _default_db_path() == tmp_path / "demo.sqlite"
 
 
-def test_gateway_app_builds_demo_asgi_with_mubit_secret_slot(monkeypatch):
+def test_gateway_app_builds_demo_asgi_with_mubit_secret_slot(monkeypatch, tmp_path):
     pytest.importorskip("modal")
     for name in (
         "S1_UPSTREAM",
@@ -151,7 +151,8 @@ def test_gateway_app_builds_demo_asgi_with_mubit_secret_slot(monkeypatch):
 
     assert gateway.STUB_ENV["S1_IMPL"] == "real"
     assert gateway.STUB_ENV["S2_IMPL"] == "stub"
-    assert gateway.STUB_ENV["MEMORY_IMPL"] == "mock"
+    assert gateway.STUB_ENV["MEMORY_IMPL"] == "local"
+    assert gateway.STUB_ENV["MEMORY_LOCAL_PATH"] == "/data/memory.jsonl"
     assert gateway.STUB_ENV["SAPLING_IMPL"] == "stub"
     assert gateway.STUB_ENV["ENRICH_IMPL"] == ""
     assert "ENRICH_IMPL" not in gateway.image_env()
@@ -160,6 +161,8 @@ def test_gateway_app_builds_demo_asgi_with_mubit_secret_slot(monkeypatch):
     assert gateway.image_env()["S1_IMPL"] == "real"
     assert gateway.image_env()["S2_IMPL"] == "stub"
     assert gateway.STUB_ENV["TRACE_PATH"].startswith("/data/")
+    assert gateway.STUB_ENV["MEMORY_LOCAL_PATH"].startswith("/data/")
+    assert gateway.image_env()["MEMORY_IMPL"] == "local"
     assert gateway.STUB_ENV["POLICY_PIN_DIR"].startswith("/data/")
     assert "BAANSAFE_DB_PATH" not in gateway.STUB_ENV
     assert "HF_TOKEN" not in gateway.image_env()
@@ -181,15 +184,20 @@ def test_gateway_app_builds_demo_asgi_with_mubit_secret_slot(monkeypatch):
     assert gateway.web._is_web_endpoint()
     assert gateway._ignore(Path(".env"))
     assert gateway._ignore(Path(".git/config"))
+    assert gateway._ignore(Path("var/memory.jsonl"))
     assert gateway._ignore(Path("ui/sim/index.html")) is False
     assert gateway._ignore(Path("api/main.py")) is False
 
     for key in ("S1_IMPL", "S2_IMPL", "MEMORY_IMPL", "SAPLING_IMPL"):
         monkeypatch.setenv(key, gateway.STUB_ENV[key])
+    # Keep the local store off /data on a developer machine.
+    monkeypatch.setenv("MEMORY_LOCAL_PATH", str(tmp_path / "memory.jsonl"))
     monkeypatch.delenv("ENRICH_IMPL", raising=False)
     monkeypatch.delenv("MUBIT_API_KEY", raising=False)
     gateway.apply_runtime_impl()
     assert os.environ["S2_IMPL"] == "stub"
+    assert os.environ["MEMORY_IMPL"] == "local"
+    assert os.environ["MEMORY_LOCAL_PATH"] == str(tmp_path / "memory.jsonl")
     assert gateway.mubit_credentials_present() is False
 
     from fastapi.testclient import TestClient
@@ -209,8 +217,12 @@ def test_gateway_app_builds_demo_asgi_with_mubit_secret_slot(monkeypatch):
         body = hosting.json()
         assert body["backends"] == "s1-real"
         assert body["secrets"] is False
+        assert body["memory"] == "local"
         assert body["impl"]["S1_IMPL"] == "real"
         assert body["impl"]["S2_IMPL"] == "stub"
+        assert body["impl"]["MEMORY_IMPL"] == "local"
+        assert body["writes"]["MEMORY_LOCAL_PATH"] == str(tmp_path / "memory.jsonl")
+        assert "MEMORY_IMPL=local" in body["note"]
         assert "LLM via Mubit only" in body["note"]
         assert "stub gateway" not in body["note"].lower()
         assert "System 1" in body["note"]
@@ -237,39 +249,79 @@ def test_gateway_app_builds_demo_asgi_with_mubit_secret_slot(monkeypatch):
             json={"t_ms": 90000, "speaker": "operator", "text": "Noted."},
         )
         assert turned.status_code == 200
+        # The routed turn landed in the local store, not on /data.
+        assert (tmp_path / "memory.jsonl").exists()
+        trace = client.get(f"/cases/{case_id}/trace").json()
+        writes = [e for e in trace if e["stage"] == "memory_write"]
+        assert writes and "status=ok" in writes[-1]["notes"]
+        assert "mode=local" in writes[-1]["notes"]
         triaged = client.post("/triage", json=created.json()["case"])
         assert triaged.status_code == 200
 
 
-def test_gateway_s2_real_when_mubit_credentials_present(monkeypatch):
+def test_gateway_s2_real_when_mubit_credentials_present(monkeypatch, tmp_path):
     pytest.importorskip("modal")
     import infra.modal.gateway_app as gateway
 
     monkeypatch.setenv("S1_IMPL", "real")
     monkeypatch.setenv("S2_IMPL", "stub")
-    monkeypatch.setenv("MEMORY_IMPL", "mock")
+    monkeypatch.setenv("MEMORY_IMPL", "local")
+    monkeypatch.setenv("MEMORY_LOCAL_PATH", str(tmp_path / "memory.jsonl"))
     monkeypatch.setenv("MUBIT_API_KEY", "test-key-not-real")
     monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai")
     assert gateway.mubit_credentials_present() is True
     gateway.apply_runtime_impl()
     assert os.environ["S2_IMPL"] == "real"
-    assert os.environ["MEMORY_IMPL"] == "mubit"
+    # Credentials promote System 2 only; memory stays BaanSafe's own store.
+    assert os.environ["MEMORY_IMPL"] == "local"
     body = gateway.hosting()
     assert body["secrets"] is True
     assert body["backends"] == "live"
+    assert body["memory"] == "local"
     assert body["impl"]["S2_IMPL"] == "real"
-    assert body["impl"]["MEMORY_IMPL"] == "mubit"
+    assert body["impl"]["MEMORY_IMPL"] == "local"
     assert "LLM via Mubit only" in body["note"]
-    assert "MEMORY_IMPL=mubit" in body["note"]
+    assert "MEMORY_IMPL=local" in body["note"]
     assert "test-key-not-real" not in body["note"]
+    assert "test-key-not-real" not in str(body)
     assert "traces" in body["writes"]["TRACE_PATH"]
+    assert body["writes"]["MEMORY_LOCAL_PATH"].endswith("memory.jsonl")
 
     monkeypatch.delenv("MUBIT_API_KEY", raising=False)
     gateway.apply_runtime_impl()
     assert os.environ["S2_IMPL"] == "stub"
-    assert os.environ["MEMORY_IMPL"] == "mock"
+    assert os.environ["MEMORY_IMPL"] == "local"
     assert gateway.hosting()["secrets"] is False
     assert gateway.hosting()["backends"] == "s1-real"
+    assert gateway.hosting()["memory"] == "local"
+
+
+def test_gateway_memory_mubit_only_when_deployed_with_credentials(monkeypatch, tmp_path):
+    """The dormant mubit path is kept: explicit MEMORY_IMPL=mubit plus the
+    secret is honoured; without the secret, or when deployed mock/empty, the
+    runtime is the local store."""
+    pytest.importorskip("modal")
+    import infra.modal.gateway_app as gateway
+
+    monkeypatch.setenv("MEMORY_IMPL", "mubit")
+    monkeypatch.delenv("MEMORY_LOCAL_PATH", raising=False)
+    monkeypatch.setenv("MUBIT_API_KEY", "test-key-not-real")
+    monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai")
+    gateway.apply_runtime_impl()
+    assert os.environ["MEMORY_IMPL"] == "mubit"
+    assert os.environ["MEMORY_LOCAL_PATH"] == "/data/memory.jsonl"
+    body = gateway.hosting()
+    assert body["memory"] == "mubit"
+    assert "test-key-not-real" not in str(body)
+
+    monkeypatch.delenv("MUBIT_API_KEY", raising=False)
+    gateway.apply_runtime_impl()
+    assert os.environ["MEMORY_IMPL"] == "local"
+
+    monkeypatch.setenv("MEMORY_IMPL", "mock")
+    monkeypatch.setenv("MUBIT_API_KEY", "test-key-not-real")
+    gateway.apply_runtime_impl()
+    assert os.environ["MEMORY_IMPL"] == "local"
 
 
 def test_mubit_secret_requires_key_and_base_url():

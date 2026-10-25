@@ -161,7 +161,7 @@ The town simulation is static files in `ui/sim/`. `make serve` mounts them at [h
 |---|---|---|
 | `S1_IMPL` | `stub` | `real` runs the rules in `system1/decide.py` |
 | `S2_IMPL` | `stub` | `real` runs the Nemotron orchestrator (`system2.orchestrator_model`) |
-| `MEMORY_IMPL` | `mock` | BaanSafe's store in `memory/adapter.py`. Mubit is not that store |
+| `MEMORY_IMPL` | `mock` | BaanSafe's store in `memory/adapter.py`. `local` is the JSONL store (`memory/local.py`, file at `MEMORY_LOCAL_PATH`, default `var/memory.jsonl`); Modal sets `local` with `/data/memory.jsonl`. `mubit` is dormant: Mubit is not that store |
 | `ENRICH_IMPL` | `data` if `data/processed` exists, else `off` | `off` to skip lookups |
 
 `real` on System 2 calls Nemotron through Mubit and returns HTTP 503 when `MUBIT_BASE_URL`/`MUBIT_API_KEY` is unset. That hop sends `metadata.session_id` and is the only Mubit edge. `S1_IMPL=real` is implemented. Memory stays `memory/adapter.py`.

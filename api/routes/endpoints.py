@@ -40,7 +40,7 @@ from fixtures.load import all_ids, list_entries, load_case, load_fixture
 from config.settings import DecisionRequired
 from gateway.route import handle
 from ingest import store
-from memory.adapter import retrieve, store_correction
+from memory.adapter import memory_mode, retrieve, store_correction
 from training.log import append_event
 from mocks.loader import (
     ResourceUnit,
@@ -179,9 +179,12 @@ def _refresh_memory(stored: StoredCase) -> None:
 
 
 def execute(case: CaseState) -> RouterDecision:
-    """Mubit gateway. Memory retrieval happens inside handle(), not before it."""
+    """Mubit gateway. Memory retrieval and the end-of-turn record write happen
+    inside handle(). Stored corrections ride along on that record."""
+    stored = get(case.case_id)
+    corrections = list(stored.corrections) if stored is not None else []
     try:
-        return handle(case, use_stubs=True)
+        return handle(case, use_stubs=True, corrections=corrections)
     except NotImplementedError as exc:
         owner = "Melanie" if "Melanie" in str(exc) else "Moly"
         raise not_ready(owner, exc) from exc
@@ -580,6 +583,13 @@ def metrics() -> dict:
     mubit_cache = 0
     mubit_error = 0
     mubit_models: dict[str, int] = {}
+    memory_retrieve = 0
+    memory_hit = 0
+    memory_items = 0
+    memory_write_ok = 0
+    memory_write_error = 0
+    memory_write_latency: list[int] = []
+    duplicate_merges = 0
     for event in events:
         by_case.setdefault(event.case_id, set()).add(event.stage)
         if event.stage in latency:
@@ -594,6 +604,25 @@ def metrics() -> dict:
                 mubit_error += 1
             if event.model:
                 mubit_models[event.model] = mubit_models.get(event.model, 0) + 1
+        elif event.stage == "memory":
+            # Note shape: "memory via adapter mode=<mode>; items=<n>".
+            memory_retrieve += 1
+            count = _note_int(event.notes, "items")
+            memory_items += count
+            if count >= 1:
+                memory_hit += 1
+        elif event.stage == "memory_write":
+            memory_write_latency.append(event.latency_ms)
+            if "status=error" in (event.notes or ""):
+                memory_write_error += 1
+            else:
+                memory_write_ok += 1
+        elif (
+            event.stage == "system_1"
+            and event.outcome is not None
+            and event.outcome.route.value == "duplicate_merge"
+        ):
+            duplicate_merges += 1
     handled_s2 = sum(1 for stages in by_case.values() if "system_2" in stages)
     handled_s1 = sum(
         1 for stages in by_case.values() if "system_1" in stages and "system_2" not in stages
@@ -619,6 +648,17 @@ def metrics() -> dict:
             "models": mubit_models,
             "via": "api.mubit.ai",
         },
+        "memory": {
+            "mode": memory_mode(),
+            "retrieve_count": memory_retrieve,
+            "hit_count": memory_hit,
+            "item_total": memory_items,
+            "hit_rate": (memory_hit / memory_retrieve) if memory_retrieve else 0.0,
+            "write_count": memory_write_ok,
+            "write_error_count": memory_write_error,
+            "avg_write_latency_ms": _avg(memory_write_latency),
+            "duplicate_merge_count": duplicate_merges,
+        },
         "correction_count": correction_count,
         "enrich": enrich_impl(),
     }
@@ -628,3 +668,15 @@ def _avg(values: list[int]) -> float | None:
     if not values:
         return None
     return sum(values) / len(values)
+
+
+def _note_int(note: str | None, key: str) -> int:
+    """Read `key=<int>` from a `; `-separated trace note. Missing is 0."""
+    for part in (note or "").split(";"):
+        name, sep, value = part.strip().partition("=")
+        if sep and name.strip() == key:
+            try:
+                return int(value.strip())
+            except ValueError:
+                return 0
+    return 0
