@@ -1,8 +1,8 @@
 """Mubit memory client adapter. Owner: Melanie.
 
-MEMORY_IMPL=mock reads mocks/loader.py. MEMORY_IMPL=mubit calls memory.mubit,
-which raises until a human wires the network client. The gateway is the only
-retrieval caller. There is no retrieval step in front of the gateway.
+MEMORY_IMPL=mock (default) reads mocks/loader.py. MEMORY_IMPL=mubit calls
+memory.mubit against the Mubit control plane (/v2/control/query + ingest).
+The gateway is the only retrieval caller.
 """
 
 from __future__ import annotations

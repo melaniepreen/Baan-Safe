@@ -1,6 +1,6 @@
 # Handover
 
-25 October 2026, ~01:40 UTC. `main` tip **`3d1f362`**. `make test` **272 passed, 1 skipped** (`tests/test_synthetic_calls.py` needs `laya`). `make validate` ok. `requirements.txt` has `openai>=1.40`.
+25 October 2026. Tip: check `git rev-parse --short HEAD`. `make test` / `make validate` must stay green. `requirements.txt` has `openai>=1.40`.
 
 **Judges-only URL (no auth):** `https://baansafe--baansafe-gateway-web.us-east.modal.run` — town at `/ui/sim/`. Do not broadcast.
 
@@ -12,7 +12,7 @@ One call: `gateway/route.py` `handle` ← `POST /triage` / `POST /cases/{id}/tur
 |---|---|---|
 | Extraction | `system1/extract.py` | English keywords; bare `unaccompanied` → child unless `adult` named. Thai = district names only. Demo English / code-switched. |
 | Enrichment | `enrich/context.py`, `ingest.store` | Live when `districts.json` present. Flags never change priority. |
-| Memory | `memory/adapter.py` | **mock**. `memory/mubit.py` raises. Pitch **gateway + traces**, not memory. |
+| Memory | `memory/adapter.py`, `memory/mubit.py` | Default **mock**. `MEMORY_IMPL=mubit` calls `/v2/control/query` + ingest. Decisions: project `baansafe-demo`, top_k 5, budget 400. Override project with `MUBIT_PROJECT_ID`. |
 | Graduation | `gateway/graduation.py` | Threshold 2 → `complex_situation` (not into S1 rules). |
 | Chooser | `gateway/chooser.py` | `field precheck`; `routing.yaml` `mode: cascade`. |
 | System 1 | `system1/decide.py` | Rules-only. |
@@ -43,6 +43,7 @@ Owners: `OWNERSHIP.md`. Contracts: `v0.3-contracts` (TraceEvent stages grew; sch
 | Modal `max_containers=1` | PR #12 |
 | Modal `include_source=True` (crash-loop fix) | PR #13 |
 | Hosted smoke | `/hosting` `backends=live`, S2 real; free-text oxygen → S2; `mubit_chat` ok |
+| Mubit memory client + three decisions | `memory/mubit.py` query/ingest; still default `MEMORY_IMPL=mock` |
 
 ---
 
@@ -53,7 +54,7 @@ Owners: `OWNERSHIP.md`. Contracts: `v0.3-contracts` (TraceEvent stages grew; sch
 | # | Who | Action |
 |---|---|---|
 | 1 | Both | **Keep paid S2 on public URL?** Smoke left it **on** (`S2_IMPL=real`). Else redeploy with stub / no secret spend. Watch `/metrics` and 429s. |
-| 2 | Melanie | **Memory:** set `memory.mubit_project`, `retrieval_top_k`, `token_budget` + wire — **or** leave pitch as gateway + traces. |
+| 2 | Both | **Memory live?** Client is wired; keep `MEMORY_IMPL=mock` on public demo until `baansafe-demo` / `MUBIT_PROJECT_ID` has facts. Pitch stays gateway + traces (+ optional memory hop). |
 | 3 | Melanie | Pull `main`, rebase any local `ui/sim` work; review Moly’s town wire before editing. |
 | 4 | Moly | Share URL **only with judges**; run the frozen 3‑min script once dry. |
 | 5 | Both | Optional: hide aid 501 UI / keep RL panel off (`index.html` does not load `rl_panel.js`). |

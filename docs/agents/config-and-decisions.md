@@ -24,7 +24,7 @@ Product choices live in `config/decisions.yaml`. Readers fail loudly while a val
 
 - `require_decision(path)` returns the value or raises `DecisionRequired`.
 - `unset_decisions(paths)` returns the paths that are missing, `None`, `""`, or `TODO_HUMAN`.
-- Allowlisted today (`DECIDED`, twelve leaves): `system2.use_banyan_sapling` `true`, `system2.sapling_scope` `aid_eligibility,denial`, `sapling.client` `stub`, `system2.hosting` `openrouter via mubit gateway`, `llm.provider_route` `mubit`, `gateway.route_chooser` `field precheck`, `system1.extraction_method` `rules-only`, `system2.orchestrator_model` `nvidia/nemotron-3-nano-30b-a3b`, `system2.max_latency_ms` `10000`, `correction_loop.graduation_threshold` `2` (System 2 → System 1, RL loop), `correction_loop.escalation_threshold` `2` (human corrections → System 2 `complex_situation`, `gateway/graduation.py`), `data.demo_event` `Sukhumvit / Watthana (Bangkok)` (matches town basemap + `flood.json`; GISTDA Hat Yai is off-script).
+- Allowlisted today (`DECIDED`): `system2.use_banyan_sapling` `true`, `system2.sapling_scope` `aid_eligibility,denial`, `sapling.client` `stub`, `system2.hosting` `openrouter via mubit gateway`, `llm.provider_route` `mubit`, `gateway.route_chooser` `field precheck`, `system1.extraction_method` `rules-only`, `system2.orchestrator_model` `nvidia/nemotron-3-nano-30b-a3b`, `system2.max_latency_ms` `10000`, `correction_loop.graduation_threshold` `2`, `correction_loop.escalation_threshold` `2`, `data.demo_event` `Sukhumvit / Watthana (Bangkok)`, `memory.mubit_project` `baansafe-demo`, `memory.retrieval_top_k` `5`, `memory.token_budget` `400`.
 - A new decided value needs the yaml leaf and a matching `DECIDED` entry. Validate fails if they differ.
 
 ## Invariants
@@ -49,4 +49,4 @@ Product choices live in `config/decisions.yaml`. Readers fail loudly while a val
 
 ## Open TODO_HUMAN keys
 
-All leaves except the twelve in `DECIDED`. The groups are `system1` (model id), `sapling` (except `client`), `gateway`, `memory`, `llm` (`token_price_usd`), `speech_to_text`, `ui`, `data` (`production_db` only; `demo_event` is decided), `policies` (`authoritative_set`), `correction_loop` (except the two thresholds), `learning_eval`, `latte_bench`, `sim` (`caller_model`, `caller_gpu`), `modal`.
+All leaves except those in `DECIDED`. The groups are `system1` (model id), `sapling` (except `client`), `gateway` (`auth`), `llm` (`token_price_usd`), `speech_to_text`, `ui`, `data` (`production_db` only; `demo_event` is decided), `policies` (`authoritative_set`), `correction_loop` (except the two thresholds), `learning_eval`, `latte_bench`, `sim` (`caller_model`, `caller_gpu`), `modal`.

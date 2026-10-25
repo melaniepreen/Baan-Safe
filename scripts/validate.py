@@ -67,6 +67,9 @@ DECIDED = {
     "correction_loop.graduation_threshold": 2,
     "correction_loop.escalation_threshold": 2,
     "data.demo_event": "Sukhumvit / Watthana (Bangkok)",
+    "memory.mubit_project": "baansafe-demo",
+    "memory.retrieval_top_k": 5,
+    "memory.token_budget": 400,
 }
 
 
