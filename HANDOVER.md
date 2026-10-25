@@ -214,7 +214,7 @@ Suggested order if one person has ~2.5 h: E2, E1, F5, H2 (all outside `ui/sim`);
 
 | Done | PR | Where |
 |---|---|---|
-| E1, E3, E4, E5 | #43 | `make rl-compare`, `GET /training/compare` + "memory off vs on" cards; `GET /training/episodes?filter=&epoch=`; `make eval-gate` (`EVAL_GATE_S1_ACC`, `EVAL_GATE_BASELINE`); `make mubit-requests N=` |
+| E1, E3, E4, E5 | #43 | `make rl-compare`, `compare` section of `GET /training` (hosted: `available: true`) + "memory off vs on" cards; `GET /training/episodes?filter=&epoch=`; `make eval-gate` (`EVAL_GATE_S1_ACC`, `EVAL_GATE_BASELINE`); `make mubit-requests N=` |
 | F1, F2, F3 | #47 | `CACHE HIT · replayed` badge; `/hosting` banner strip (red when memory dormant); Hub links + held-out per-label table on `ui/training.html`. Added as `hosting_banner.js` / `training_polish.js`; `sim.js` untouched |
 | F5, H1, H2 | #48 | `make demo-reset` (dry run; `RESET_ARGS=--yes`, `--hosted`); `.github/CODEOWNERS` + `make check-owners`; `.env.example` complete, with `tests/test_env_example.py` asserting every env name the code reads is documented |
 | QA | #42 | `/rl/run` honours `RL_RUN_PATH`; truthful precheck note; Modal apps load `.env` before reading env; streamed traces |
