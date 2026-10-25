@@ -45,6 +45,7 @@ Score System 1 / System 2 outcomes in a reward loop. A System 1 escalate cascade
 
 - `python -m eval.rl --s2 fake --epochs 3` — road-info and cold-hall graduate, quiet-grandmother and upstairs-water recommend, weak-grandfather-water demotes, aid never graduates.
 - `make rl-loop-replay` (cache only, no network). `make rl-loop` only with Mubit env.
+- `make rl-compare A=<snapshot|dir|run.json> B=<…>` (`eval/rl/compare.py`, defaults: memory-empty vs memory-local snapshots) writes `eval/out/rl_compare.md` + `.json`: per-epoch `correct`/`under_triage`/`critical_under`/`missed_human`/`mean_reward`/`s2_fallbacks`, mubit `live_ok`/`cache_hits`/`errors`, overlay counts, and last-epoch per-case flips (`fixed_in_b` / `new_in_b`). `make eval-gate` (`scripts/eval_gate.py`) exits 1 when the newest `s1_triage` fine-tune heldout accuracy is below `EVAL_GATE_S1_ACC` (0.85) or `eval/out/rl/run.json` last-epoch `critical_under` exceeds the baseline snapshot's (`EVAL_GATE_BASELINE`, default memory-local); absent inputs print `SKIP`.
 - `eval/out/` is gitignored. `make rl-snapshot` copies a run into `eval/snapshots/rl/<stamp>-<MEMORY_IMPL>/` (committed); `make rl-restore SNAPSHOT=<folder>` copies one back so replay and `/rl/run` work on a fresh clone. Two 25 Oct runs are kept there (memory empty vs memory local); see its README.
 - `tests/test_rl_loop.py` (fake + mocked live/replay traces), `tests/test_cascade.py`, `tests/test_overlay.py`, `tests/test_orchestrator.py`.
 - `GET /rl/run` and `GET /metrics` on `make serve`.

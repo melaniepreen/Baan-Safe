@@ -21,7 +21,8 @@
         "memory/adapter.py",
         "memory/local.py",
         "memory/mubit.py",
-        "gateway/overlay.py"
+        "gateway/overlay.py",
+        "scripts/mubit_requests.py"
       ]
     },
     {
@@ -121,7 +122,9 @@
       "files": [
         "eval/rl/run.py",
         "eval/rl/learner.py",
-        "gateway/overlay.py"
+        "gateway/overlay.py",
+        "eval/rl/compare.py",
+        "scripts/eval_gate.py"
       ]
     },
     {
@@ -160,7 +163,8 @@
         "ui/training.html",
         "ui/training.js",
         "infra/modal/finetune_job.py",
-        "infra/modal/gateway_app.py"
+        "infra/modal/gateway_app.py",
+        "eval/rl/compare.py"
       ]
     },
     {

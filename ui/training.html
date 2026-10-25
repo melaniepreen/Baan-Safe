@@ -75,6 +75,24 @@
   <div class="scroll" id="rl-table"></div>
   <div class="cards" id="overlay-cards" style="margin-top:0.75rem"></div>
   <div class="chart" id="reward-chart"></div>
+  <div class="chart" id="compare-card"></div>
+  <div class="chart" id="episodes-card">
+    <h3>Episodes</h3>
+    <p class="meta">
+      <label for="episode-filter">Show</label>
+      <select id="episode-filter">
+        <option value="critical_under" selected>critical under-triage</option>
+        <option value="under_triage">under-triage</option>
+        <option value="missed_human">missed human</option>
+        <option value="incorrect">incorrect</option>
+        <option value="all">all</option>
+      </select>
+      <label for="episode-epoch">epoch</label>
+      <select id="episode-epoch"><option value="">all</option></select>
+      <span id="episodes-meta"></span>
+    </p>
+    <div class="scroll" id="episodes-table"></div>
+  </div>
 
   <h2>Training events</h2>
   <div class="pair">

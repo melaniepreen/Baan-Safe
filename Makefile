@@ -1,7 +1,7 @@
 PYTHON ?= $(shell test -x .venv/bin/python && echo .venv/bin/python || echo python3)
 export PYTHONPATH := .
 
-.PHONY: mubit-traffic record-s2-cache rl-snapshot rl-restore validate test replay-stubs demo-stub demo-correction-loop demo-graduation rl-loop rl-loop-replay eval-learning sim-eval extract-eval latte-bench serve seed-memory ingest ingest-refresh data-report sources-refresh sources-status \
+.PHONY: mubit-traffic mubit-requests record-s2-cache rl-snapshot rl-restore rl-compare eval-gate validate test replay-stubs demo-stub demo-correction-loop demo-graduation rl-loop rl-loop-replay eval-learning sim-eval extract-eval latte-bench serve seed-memory ingest ingest-refresh data-report sources-refresh sources-status \
 	export-training export-laya laya-train sync push modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune deploy-modal docker-build docker-run
 
 IMAGE ?= baansafe-api:local
@@ -47,6 +47,17 @@ rl-restore:
 	cp $(RL_SNAPSHOTS)/$(SNAPSHOT)/rl.md $(RL_OUT)/ 2>/dev/null; \
 	cp $(RL_SNAPSHOTS)/$(SNAPSHOT)/training/* $(RL_OUT)/training/ 2>/dev/null; echo "restored $(SNAPSHOT) → $(RL_OUT)"
 
+# A vs B RL runs: snapshot folder name under eval/snapshots/rl, a dir, or a run.json.
+A ?= 20261025T0407Z-memory-empty
+B ?= 20261025T0600Z-memory-local
+rl-compare:
+	$(PYTHON) -m eval.rl.compare --a $(A) --b $(B) --out eval/out/rl_compare.md --json eval/out/rl_compare.json
+
+# Exit 1 when the newest s1_triage fine-tune heldout accuracy < EVAL_GATE_S1_ACC (0.85)
+# or eval/out/rl/run.json last-epoch critical_under > the baseline snapshot's. Skips what is absent.
+eval-gate:
+	$(PYTHON) scripts/eval_gate.py
+
 eval-learning:
 	$(PYTHON) -m eval.learning
 
@@ -82,6 +93,11 @@ SEED ?= 1
 TRAFFIC_MEMORY ?= mock
 mubit-traffic:
 	S1_IMPL=real S2_IMPL=real MEMORY_IMPL=$(TRAFFIC_MEMORY) $(PYTHON) scripts/mubit_traffic.py --count $(COUNT) --seed $(SEED) $(TRAFFIC_ARGS)
+
+# Last N mubit_chat hops with a Mubit request_id from TRACE_PATH, newest first. REQ_ARGS="--json".
+N ?= 20
+mubit-requests:
+	$(PYTHON) scripts/mubit_requests.py --n $(N) $(REQ_ARGS)
 
 # Record fixtures/s2_cache/demo.jsonl for S2_IMPL=cache (needs .env; fills misses only).
 record-s2-cache:
