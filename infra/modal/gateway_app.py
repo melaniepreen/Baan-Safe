@@ -99,6 +99,8 @@ STUB_ENV = {
     "MOCK_CORRECTIONS_PATH": f"{DATA_MOUNT}/corrections.jsonl",
     "TRAINING_EVENTS_PATH": f"{DATA_MOUNT}/events.jsonl",
     "POLICY_PIN_DIR": f"{DATA_MOUNT}/policy-pins",
+    # S2_IMPL=cache: committed fixtures/s2_cache/demo.jsonl + misses recorded here.
+    "S2_CACHE_RECORD_PATH": f"{DATA_MOUNT}/s2_cache.jsonl",
     **READ_ENV,
 }
 
@@ -134,10 +136,14 @@ def apply_runtime_impl() -> None:
         s2 = os.environ.get("S2_IMPL", "").strip().lower()
         if s2 in {"", "stub", "real"}:
             os.environ["S2_IMPL"] = "real"
+        # `cache` is kept: exact-key replay, Mubit only on a miss.
         if memory != "mubit":
             os.environ["MEMORY_IMPL"] = "local"
     else:
-        os.environ["S2_IMPL"] = "stub"
+        s2 = os.environ.get("S2_IMPL", "").strip().lower()
+        # Without credentials `cache` still serves recorded replies; anything
+        # else is stub.
+        os.environ["S2_IMPL"] = "cache" if s2 == "cache" else "stub"
         os.environ["MEMORY_IMPL"] = "local"
     if not os.environ.get("MEMORY_LOCAL_PATH", "").strip():
         os.environ["MEMORY_LOCAL_PATH"] = STUB_ENV["MEMORY_LOCAL_PATH"]
@@ -148,12 +154,12 @@ def image_env() -> dict[str, str]:
 
     Empty STUB_ENV values (ENRICH_IMPL auto) are omitted so the process
     matches local serve: unset → data if store.available() else off.
-    Deploy-time S2_IMPL=real|stub is copied when set; runtime still gates
+    Deploy-time S2_IMPL=real|stub|cache is copied when set; runtime still gates
     on Mubit credentials via apply_runtime_impl().
     """
     env = {key: value for key, value in STUB_ENV.items() if value != ""}
     deploy_s2 = os.environ.get("S2_IMPL", "").strip().lower()
-    if deploy_s2 in {"real", "stub"}:
+    if deploy_s2 in {"real", "stub", "cache"}:
         env["S2_IMPL"] = deploy_s2
     for name in UPSTREAM_ENV_NAMES:
         value = http_upstream(name)
@@ -243,6 +249,8 @@ def _backends_label(impl: dict[str, str]) -> str:
         return "s1-real"
     if s1 == "real" and s2 == "real":
         return "live"
+    if s1 == "real" and s2 == "cache":
+        return "cache"
     return "stub"
 
 
@@ -254,6 +262,12 @@ def _hosting_note(impl: dict[str, str]) -> str:
         s2_line = (
             "System 2 is real: Nemotron via Mubit (S2_IMPL=real). "
             "TRACE_PATH on the demo volume records gateway/system stages."
+        )
+    elif s2 == "cache":
+        s2_line = (
+            "System 2 replays exact-key cached Nemotron replies (S2_IMPL=cache; "
+            "fixtures/s2_cache/demo.jsonl plus S2_CACHE_RECORD_PATH on the volume); "
+            + ("a miss goes to Mubit and is recorded." if has_secrets else "a miss falls back to supervisor escalation.")
         )
     elif has_secrets:
         s2_line = (

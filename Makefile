@@ -1,7 +1,7 @@
 PYTHON ?= $(shell test -x .venv/bin/python && echo .venv/bin/python || echo python3)
 export PYTHONPATH := .
 
-.PHONY: mubit-traffic validate test replay-stubs demo-stub demo-correction-loop demo-graduation rl-loop rl-loop-replay eval-learning sim-eval extract-eval latte-bench serve seed-memory ingest ingest-refresh data-report sources-refresh sources-status \
+.PHONY: mubit-traffic record-s2-cache validate test replay-stubs demo-stub demo-correction-loop demo-graduation rl-loop rl-loop-replay eval-learning sim-eval extract-eval latte-bench serve seed-memory ingest ingest-refresh data-report sources-refresh sources-status \
 	export-training export-laya laya-train sync push modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune deploy-modal docker-build docker-run
 
 IMAGE ?= baansafe-api:local
@@ -62,6 +62,10 @@ COUNT ?= 100
 SEED ?= 1
 mubit-traffic:
 	S1_IMPL=real S2_IMPL=real MEMORY_IMPL=mock $(PYTHON) scripts/mubit_traffic.py --count $(COUNT) --seed $(SEED) $(TRAFFIC_ARGS)
+
+# Record fixtures/s2_cache/demo.jsonl for S2_IMPL=cache (needs .env; fills misses only).
+record-s2-cache:
+	S1_IMPL=real S2_IMPL=cache MEMORY_IMPL=mock S2_CACHE_RECORD_PATH=fixtures/s2_cache/demo.jsonl $(PYTHON) scripts/record_s2_cache.py --synthetic $(RECORD_ARGS)
 
 ingest:
 	$(PYTHON) -m ingest
