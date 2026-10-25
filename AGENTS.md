@@ -1,6 +1,6 @@
 # BaanSafe
 
-Flood and disaster call-triage scaffold. Mubit governs memory, policy, and traceability and does not reason. The field precheck picks one entry point; `mode: cascade` lets a System 1 escalate continue to System 2 in the same turn. System 2's orchestrator is Nemotron, hosted as `openrouter via mubit gateway` (model `nvidia/nemotron-3-nano-30b-a3b`). Banyan Sapling verifies System 2 aid-eligibility and denial claims before the Decision Router. System 1 is rules-only. Fixture callers are synthetic. Owners: `OWNERSHIP.md`. Architecture note: `BaanSafe_Revised_Architecture.md`.
+Flood and disaster call-triage scaffold. Mubit is the LLM gateway: it records every System 2 call, groups them into a task, and trains per-task adapters; it does not reason and exposes no memory API (memory is BaanSafe's own store behind `memory/adapter.py`). The field precheck picks one entry point; `mode: cascade` lets a System 1 escalate continue to System 2 in the same turn. System 2's orchestrator is Nemotron, hosted as `openrouter via mubit gateway` (model `nvidia/nemotron-3-nano-30b-a3b`). Banyan Sapling verifies System 2 aid-eligibility and denial claims before the Decision Router. System 1 is rules-only. Fixture callers are synthetic. Owners: `OWNERSHIP.md`. Architecture note: `BaanSafe_Revised_Architecture.md`.
 
 ## Architecture
 
