@@ -14,9 +14,17 @@ Open the town: [https://baansafe--baansafe-gateway-web.us-east.modal.run/ui/sim/
 
 The desk at rest. The caller is connected in English and Thai. The block is Watthana, with flood depth drawn darker where the water is deeper. Accept and Reject wait for a case.
 
-![A drinking-water call moving from System 2 to System 1, with one past case](docs/images/town-call.png)
+![A drinking-water call with one past case, moving from System 2 to System 1, as the supply boat leaves](docs/images/town-call.png)
 
-A household asks for drinking water. Mubit has one past case, System 2 had the pattern, and the desk moves it to System 1. Water scores 0.90, and a supply boat leaves Sun Chuai Lue Nam Thuam in about twenty minutes. The reply on the phone is scripted. The priority is the gateway's.
+A household asks for drinking water. Mubit has one past case, System 2 had the pattern, and the desk moves it to System 1. The supply boat leaves Sun Chuai Lue Nam Thuam.
+
+![The supply boat leaving Sun Chuai Lue Nam Thuam](docs/images/town-boat.gif)
+
+The full call is [docs/videos/town-water.mp4](docs/videos/town-water.mp4) (16 seconds): one past case, the move from System 2 to System 1, and the supply boat leaving.
+
+![Mubit eval: 187 live calls on the memory-on run, compared with memory off](docs/images/mubit-eval.png)
+
+That scoreboard is the Mubit eval, not Sapling. Sapling checks an aid or denial claim before anyone is told they do not qualify. The eval scores the System 2 calls that went through Mubit: the memory-on run has 187 live calls and 238 cache hits, against 54 live calls when memory was off.
 
 Flood and disaster call-triage scaffold. Mubit is the LLM gateway and trace record: every System 2 call goes through it, is grouped into a task, and can train a per-task adapter. Memory is BaanSafe's own store. System 1 acts fast. System 2 reasons deeply with Nemotron as its orchestrator. On aid-eligibility and denial checks, Banyan Sapling verifies the claim before the decision router. The field precheck picks the entry system; a System 1 escalate cascades to System 2 in the same turn, and the decision router turns the deciding outcome into the next action. Mubit does not reason.
 
