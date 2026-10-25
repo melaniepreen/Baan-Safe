@@ -1,6 +1,6 @@
 # Wire the frontend
 
-24 October 2026. Plan to connect `ui/sim/` (and the transcript player) to what the API already returns. Source gaps: `HANDOVER.md` items 4–7, 11, 14, 17, 29–37. Do not edit `frontend-prototype/` unless a task names it (`docs/agents/frontend.md`).
+24 October 2026. Plan to connect `ui/sim/` (and the transcript player) to what the API already returns. Source gaps: handover items 4–7, 11, 14, 17, 29–37. Do not edit `frontend-prototype/` unless a task names it (`docs/agents/frontend.md`).
 
 ## Problem
 
@@ -106,8 +106,8 @@ Leave alone unless named: `frontend-prototype/**`, trained-model loading, `count
 
 ## References
 
-- `HANDOVER.md` — Gaps 4–7, 11, 14, 17, 29–37  
+- Local handover — gaps 4–7, 11, 14, 17, 29–37  
 - `docs/agents/frontend.md` — UI invariants  
 - `docs/agents/decision-router.md` — `merge()` and dispatches  
 - `docs/agents/data-sources.md` — enrichment flags and snapshots  
-- `BaanSafe_Revised_Architecture.md` — routing walk-through  
+- Local architecture note — routing walk-through  

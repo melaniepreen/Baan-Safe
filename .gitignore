@@ -14,3 +14,13 @@ var/
 *.egg-info/
 .DS_Store
 *.sqlite
+
+# internal notes, kept local
+MORNING_REPORT.md
+HANDOVER.md
+CLAUDE.md
+countries/REFACTOR_PROPOSAL.md
+countries/AGENT_INSTRUCTIONS.md
+BaanSafe_Revised_Architecture.md
+contracts/CHANGE_REQUESTS.md
+research/DEMO_PLAN.md
