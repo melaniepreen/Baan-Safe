@@ -109,7 +109,15 @@ export function parseMubitNote(notes) {
     tone = "cache";
     label = "CACHE HIT";
   }
-  return { host: bag.host || null, status, tone, label };
+  const requestId = /^mreq_[0-9a-f]{32}$/.test(bag.request_id || "") ? bag.request_id : null;
+  return {
+    host: bag.host || null,
+    status,
+    tone,
+    label,
+    requestId,
+    recorded: requestId !== null && /\(recorded\)/.test(text(notes)),
+  };
 }
 
 export function parseMemoryWriteNote(notes) {
@@ -241,6 +249,7 @@ export function modelPathRows(trace, decision) {
           bits.push("tokens " + (event.tokens_in == null ? "?" : event.tokens_in) + " in / " + (event.tokens_out == null ? "?" : event.tokens_out) + " out");
         }
         if (chat.host) bits.push(chat.host);
+        if (chat.requestId) bits.push(chat.requestId + (chat.recorded ? " (recorded)" : ""));
         row.detail = bits.join(" · ");
         row.badges.push({ tone: chat.tone, text: chat.label });
         row.tone = chat.tone;

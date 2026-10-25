@@ -20,6 +20,9 @@ def client():
         yield test_client
 
 
+MREQ = "mreq_0123456789abcdef0123456789abcdef"
+
+
 def _ok_response(request: httpx.Request) -> httpx.Response:
     return httpx.Response(
         200,
@@ -27,6 +30,7 @@ def _ok_response(request: httpx.Request) -> httpx.Response:
             "choices": [{"message": {"content": '{"priority":"P2"}'}}],
             "usage": {"prompt_tokens": 11, "completion_tokens": 7},
         },
+        headers={"x-middleware-request-id": MREQ},
         request=request,
     )
 
@@ -43,6 +47,7 @@ def test_complete_emits_mubit_chat_on_success(monkeypatch, tmp_path):
         assert "api.mubit.ai" in url
         headers = kwargs.get("headers") or {}
         assert headers.get("Authorization", "").startswith("Bearer ")
+        sent["headers"] = headers
         sent.update(kwargs.get("json") or {})
         return _ok_response(httpx.Request("POST", url))
 
@@ -55,7 +60,10 @@ def test_complete_emits_mubit_chat_on_success(monkeypatch, tmp_path):
     assert body["usage"]["prompt_tokens"] == 11
     # Mubit sessions: one case = one session, test cases held out by session.
     assert sent["metadata"] == {"session_id": "F10"}
-    assert "x-middleware-store" not in {k.lower() for k in (sent.get("headers") or {})}
+    headers = {k.lower(): v for k, v in (sent.get("headers") or {}).items()}
+    assert "x-middleware-store" not in headers
+    # Keep the full request + answer so the call can be a kept example.
+    assert headers.get("x-middleware-record") == "full"
     events = read_traces("F10")
     assert len(events) == 1
     event = events[0]
@@ -66,8 +74,27 @@ def test_complete_emits_mubit_chat_on_success(monkeypatch, tmp_path):
     assert event.notes is not None
     assert "status=ok" in event.notes
     assert "host=api.mubit.ai" in event.notes
+    # Mubit's id for this call, so the console's Requests filter finds it.
+    assert f"request_id={MREQ}" in event.notes
+    assert body["mubit_request_id"] == MREQ
     assert "mbt_should_not_appear" not in event.notes
     assert "Bearer" not in event.notes
+
+
+def test_complete_without_request_id_header_omits_it(monkeypatch, tmp_path):
+    monkeypatch.setenv("TRACE_PATH", str(tmp_path / "traces.jsonl"))
+    monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai")
+    monkeypatch.setenv("MUBIT_API_KEY", "mbt_should_not_appear")
+
+    def bare(url, **kwargs):
+        return httpx.Response(
+            200, json={"choices": []}, request=httpx.Request("POST", url)
+        )
+
+    monkeypatch.setattr("llm.client.httpx.post", bare)
+    body = complete([{"role": "user", "content": "synthetic"}], model="m", case_id="F10")
+    assert "mubit_request_id" not in body
+    assert "request_id=" not in (read_traces("F10")[0].notes or "")
 
 
 def test_complete_emits_http_429_status(monkeypatch, tmp_path):
@@ -77,7 +104,12 @@ def test_complete_emits_http_429_status(monkeypatch, tmp_path):
 
     def limited(url, **kwargs):
         request = httpx.Request("POST", url)
-        return httpx.Response(429, request=request, text="rate")
+        return httpx.Response(
+            429,
+            request=request,
+            text="rate",
+            headers={"x-middleware-request-id": MREQ, "retry-after": "5"},
+        )
 
     monkeypatch.setattr("llm.client.httpx.post", limited)
     with pytest.raises(httpx.HTTPStatusError):
@@ -90,6 +122,8 @@ def test_complete_emits_http_429_status(monkeypatch, tmp_path):
     assert len(events) == 1
     assert events[0].stage == "mubit_chat"
     assert "status=http_429" in (events[0].notes or "")
+    # An error still has Mubit's id; that is the one to quote to them.
+    assert f"request_id={MREQ}" in (events[0].notes or "")
     dumped = events[0].model_dump_json()
     assert "mbt_should_not_appear" not in dumped
 

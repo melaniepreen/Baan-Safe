@@ -79,6 +79,22 @@ if (parseMubitNote("mubit chat host=api.mubit.ai status=cache_hit").label !== "C
 const bad = parseMubitNote("mubit chat host=api.mubit.ai status=http_429");
 if (bad.tone !== "error" || !bad.label.includes("http_429")) throw new Error(JSON.stringify(bad));
 if (parseMubitNote("mubit chat host=api.mubit.ai status=timeout").tone !== "error") throw new Error("timeout is error");
+const MREQ = "mreq_0123456789abcdef0123456789abcdef";
+const withId = parseMubitNote("mubit chat host=api.mubit.ai status=ok request_id=" + MREQ);
+if (withId.requestId !== MREQ || withId.recorded) throw new Error(JSON.stringify(withId));
+const replayed = parseMubitNote("mubit chat host=s2_cache/case status=cache_hit request_id=" + MREQ + " (recorded)");
+if (replayed.requestId !== MREQ || !replayed.recorded) throw new Error(JSON.stringify(replayed));
+if (parseMubitNote("mubit chat host=api.mubit.ai status=ok").requestId !== null) throw new Error("no id → null");
+const idRow = modelPathRows(
+  [{ ...cascadeTrace[3], notes: "mubit chat host=api.mubit.ai status=http_429 request_id=" + MREQ }],
+  null
+).find((row) => row.stage === "mubit_chat");
+if (!idRow || !idRow.detail.includes(MREQ)) throw new Error("mubit row shows request id even on error");
+const replayRow = modelPathRows(
+  [{ ...cascadeTrace[3], notes: "mubit chat host=s2_cache status=cache_hit request_id=" + MREQ + " (recorded)" }],
+  null
+).find((row) => row.stage === "mubit_chat");
+if (!replayRow || !replayRow.detail.includes(MREQ + " (recorded)")) throw new Error("replayed id is marked recorded");
 
 const write = parseMemoryWriteNote("status=error; error=ConnectionError; kind=case_record; mode=mubit");
 if (write.ok || write.error !== "ConnectionError" || write.mode !== "mubit") throw new Error(JSON.stringify(write));

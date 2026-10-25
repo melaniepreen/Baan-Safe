@@ -31,6 +31,17 @@ from trace import emit
 
 _MUBIT_HOSTS = ("api.mubit.ai",)
 _COMPAT_V1 = re.compile(r"^/compat/[A-Za-z0-9._-]+/v1$")
+# Mubit's id for one call, on every answer it sends (success, provider error,
+# or its own error). It is what the console's Requests filter and Mubit
+# support take. `mreq_` plus 32 hex digits.
+REQUEST_ID_HEADER = "x-middleware-request-id"
+# Ask Mubit to keep the full request and answer. `full` is the default; sending
+# it makes the intent explicit. `metadata`/`off` (or x-middleware-store: false)
+# would keep the call out of the task's examples, so they are never sent.
+RECORD_HEADER = "x-middleware-record"
+RECORD_FULL = "full"
+REPLY_REQUEST_ID = "mubit_request_id"
+_MREQ = re.compile(r"^mreq_[0-9a-f]{32}$")
 
 
 def _base_url() -> str:
@@ -88,6 +99,17 @@ def _require_mubit_host(base: str) -> str:
     return host
 
 
+def request_id_from(headers: Any) -> str | None:
+    """The `mreq_…` id from a Mubit answer's headers, or None when absent or
+    malformed. Never a key: the header holds only the id."""
+    try:
+        raw = headers.get(REQUEST_ID_HEADER)
+    except AttributeError:
+        return None
+    value = str(raw or "").strip()
+    return value if _MREQ.match(value) else None
+
+
 def emit_mubit_chat_trace(
     *,
     case_id: str,
@@ -98,8 +120,18 @@ def emit_mubit_chat_trace(
     tokens_in: int | None = None,
     tokens_out: int | None = None,
     started_at: datetime | None = None,
+    request_id: str | None = None,
+    recorded: bool = False,
 ) -> None:
-    """Append one mubit_chat TraceEvent. Never include a key or bearer."""
+    """Append one mubit_chat TraceEvent. Never include a key or bearer.
+
+    `request_id` is Mubit's id for the call. `recorded=True` marks a cache
+    replay, where the id belongs to the call that was recorded, not to a hop
+    made now.
+    """
+    notes = f"mubit chat host={host} status={status}"
+    if request_id:
+        notes += f" request_id={request_id}" + (" (recorded)" if recorded else "")
     emit(
         TraceEvent(
             case_id=case_id or "mubit",
@@ -109,7 +141,7 @@ def emit_mubit_chat_trace(
             tokens_in=tokens_in,
             tokens_out=tokens_out,
             model=model,
-            notes=f"mubit chat host={host} status={status}",
+            notes=notes,
         )
     )
 
@@ -166,16 +198,19 @@ def complete(
     status = "ok"
     tokens_in: int | None = None
     tokens_out: int | None = None
+    request_id: str | None = None
     try:
         response = httpx.post(
             url,
             headers={
                 "Authorization": f"Bearer {key}",
                 "Content-Type": "application/json",
+                RECORD_HEADER: RECORD_FULL,
             },
             json=body,
             timeout=timeout,
         )
+        request_id = request_id_from(response.headers)
         code = response.status_code
         if code == 429:
             status = "http_429"
@@ -189,6 +224,9 @@ def complete(
             completion = usage.get("completion_tokens")
             tokens_in = int(prompt) if prompt is not None else None
             tokens_out = int(completion) if completion is not None else None
+        if request_id and isinstance(data, dict):
+            # Ride along on the reply so a cache that stores it can replay it.
+            data[REPLY_REQUEST_ID] = request_id
         return data
     except httpx.HTTPStatusError as exc:
         code = exc.response.status_code
@@ -210,4 +248,5 @@ def complete(
             tokens_in=tokens_in,
             tokens_out=tokens_out,
             started_at=started_at,
+            request_id=request_id,
         )

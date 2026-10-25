@@ -2577,7 +2577,17 @@ function renderModelPath(decision, trace) {
     head.append(el("span", "path-stage", row.label));
     head.append(el("span", "path-ms", row.latency_ms == null ? "—" : row.latency_ms + " ms"));
     item.append(head);
-    const detail = el("p", "path-detail", row.detail || "");
+    const detail = el("p", "path-detail");
+    const mreq = (row.detail || "").match(/mreq_[0-9a-f]{32}( \(recorded\))?/);
+    if (mreq) {
+      const [before, after] = row.detail.split(mreq[0]);
+      detail.append(document.createTextNode(before));
+      const code = el("code", "path-mreq", mreq[0]);
+      code.title = "Mubit request id. Paste into the console's Requests page.";
+      detail.append(code, document.createTextNode(after || ""));
+    } else {
+      detail.textContent = row.detail || "";
+    }
     for (const badge of row.badges || []) detail.append(document.createTextNode(" "), pathBadge(badge));
     item.append(detail);
     list.append(item);
