@@ -44,16 +44,18 @@ flowchart TD
   out -.-> hold["town holds S2 or cascade"]
   s1 -.-> rules["system1.decide if S1_IMPL=real"]
   rules -.-> merge
-  s2 -.-> s2d["system2.decide if S2_IMPL=real"]
+  s2 -.-> s2d["system2.decide if S2_IMPL=real or cache"]
   s2d -.-> sap["Sapling gate, client stub"]:::unwired
-  s2d -.-> llm["Mubit LLM gateway: session_id, one Task per static prompt, traces, adapters"]:::unwired
+  s2d -.->|"S2_IMPL=real"| llm["Mubit LLM gateway: session_id, one Task per static prompt, traces, adapters"]:::unwired
+  s2d -.-> scache["S2_IMPL=cache replay · no socket on a hit"]:::unwired
+  scache -.->|"miss"| llm
   traffic["make mubit-traffic: mock memory, paid S2, local traces"]:::unwired
   traffic -.-> llm
   packs["country packs, not loaded"]:::unwired
-  modal["Modal gateway: S1 real, memory local, /vol read-only, GET /training, S2 if secret"]:::unwired
+  modal["Modal gateway: S1 real, memory local, /vol read-only, GET /training, S2 real or cache"]:::unwired
 ```
 
-Training is a separate path from that call. Operator corrections, coach notes, and simulator outcomes append one `TrainingEvent` each. `make export-training` reads the log. `fixtures/synthetic` is a seeded flood-call set. `training/synthetic_export.py` writes SetFit rows from it (`SYNTHETIC=1` on that make target). `training/laya_export.py` writes Laya JSONL. `scripts/laya_train.py` skips unless `LAYA_TRAIN=1`, a GPU or a Modal task is present, and `laya-train` is on `PATH`. Laya is export-only. `make modal-finetune` is SetFit and LoRA from the event log (`infra/modal/finetune_job.py`). It writes loss curves to `baansafe-versions`. It does not train Laya or read `training/out/laya/`. `modal.finetune_base_model` is `nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1` and `modal.finetune_gpu` is `T4`. `eval/rl/run.py` reports ready only when both are set. System 1 stays rules-only. `HANDOVER.md` records LoRA `ft-20261025T045212Z-8d9937b9` on the 7-row event `s2` set as overfit (loss 14.27 to 0.0017). Held-out eval splits on `group_id` and filters `source`. It scores stub arms and does not load fine-tune weights. `EVAL_LEARNING_SET=synthetic` scores that call set on its committed group split and still does not promote. `make mubit-traffic` (`41413c6`) calls `gateway.handle` with `use_stubs=False`, `S1_IMPL=real`, `S2_IMPL=real`, and `MEMORY_IMPL=mock`. Case ids are `traffic-<seed>-`. `HANDOVER.md` (`30dfa0d`, `daeaad9`) records ~650 requests on 25 Oct, including local batches seed 3 (160 hops) and seed 11 (204 hops). Those traces stay on the machine that ran the command. `GET /training` counts `mubit_chat` in the answering server's `TRACE_PATH` and reads `TRAINING_REGISTRY_PATH` (`/vol/registry.json` on the hosted gateway).
+Training is a separate path from that call. Operator corrections, coach notes, and simulator outcomes append one `TrainingEvent` each. `make export-training` reads the log. `fixtures/synthetic` is a seeded flood-call set. `training/synthetic_export.py` writes SetFit rows from it (`SYNTHETIC=1` on that make target). `training/laya_export.py` writes Laya JSONL. `scripts/laya_train.py` skips unless `LAYA_TRAIN=1`, a GPU or a Modal task is present, and `laya-train` is on `PATH`. Laya is export-only. `make modal-finetune` is SetFit and LoRA from the event log (`infra/modal/finetune_job.py`). It writes loss curves to `baansafe-versions`. It does not train Laya or read `training/out/laya/`. `modal.finetune_base_model` is `nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1` and `modal.finetune_gpu` is `T4`. `eval/rl/run.py` reports ready only when both are set. System 1 stays rules-only. `HANDOVER.md` records LoRA `ft-20261025T045212Z-8d9937b9` on the 7-row event `s2` set as overfit (loss 14.27 to 0.0017). Private Hub copies under `baansafe` are not served. Held-out eval splits on `group_id` and filters `source`. It scores stub arms and does not load fine-tune weights. `EVAL_LEARNING_SET=synthetic` scores that call set on its committed group split and still does not promote. `make mubit-traffic` (`41413c6`) calls `gateway.handle` with `use_stubs=False`, `S1_IMPL=real`, `S2_IMPL=real`, and `MEMORY_IMPL=mock`. Case ids are `traffic-<seed>-`. `HANDOVER.md` (`30dfa0d`, `daeaad9`) records ~650 requests on 25 Oct, including local batches seed 3 (160 hops) and seed 11 (204 hops). Those traces stay on the machine that ran the command. `GET /training` counts `mubit_chat` in the answering server's `TRACE_PATH` and reads `TRAINING_REGISTRY_PATH` (`/vol/registry.json` on the hosted gateway).
 
 ```mermaid
 flowchart LR
@@ -80,7 +82,7 @@ Parallel workstreams during a call feed the gateway: evidence extraction (locati
 
 ## Routing in detail
 
-Checked against `main` on 25 October 2026 (`daeaad9`). This section says where each step runs: the browser, the API process, Mubit, OpenRouter, Modal, or local disk.
+Checked against `main` on 25 October 2026 (`7eec910`). This section says where each step runs: the browser, the API process, Mubit, OpenRouter, Modal, or local disk.
 
 ### Where things run
 
@@ -95,7 +97,7 @@ Checked against `main` on 25 October 2026 (`daeaad9`). This section says where e
 | Modal | Six apps in `infra/modal/`. `gateway_app` is the hosted API. It mounts `baansafe-demo` at `/data` and `baansafe-versions` read-only at `/vol`. `HANDOVER.md` records a smoke of that URL. This note did not list Modal apps | Secrets `baansafe-hf` (`HF_TOKEN`) and `baansafe-mubit` (`MUBIT_API_KEY`, `MUBIT_BASE_URL`, and optional `MUBIT_PROJECT_ID` and `S2_SERVE_API_KEY`). The versions volume holds `registry.json` and per-version `metrics.json` |
 | Local disk | `traces.jsonl` (`TRACE_PATH`), `training/events/events.jsonl` (`TRAINING_EVENTS_PATH`), the mock corrections JSONL, `MEMORY_LOCAL_PATH` (`var/memory.jsonl`, or `/data/memory.jsonl` on Modal), committed `data/processed` JSON and GeoJSON, `data/snapshots/`, `eval/out/` | Everything that survives a restart. `data/raw/ingest.sqlite` is the gitignored ingest cache. The hosted memory file persists across demo runs |
 
-The API process is the same code in three hosts: `make serve` on a laptop, `docker/Dockerfile` (`make docker-build`), or `infra/modal/gateway_app.py` on Modal. `make serve` and the image default to `S1_IMPL=stub`, `S2_IMPL=stub`, and `MEMORY_IMPL=mock`. The local `.env` sets `S1_IMPL=real`. The Modal gateway sets `S1_IMPL=real`, auto enrichment, and `S2_IMPL=real` when `baansafe-mubit` injects both Mubit values. `apply_runtime_impl` sets `MEMORY_IMPL=local` and `MEMORY_LOCAL_PATH=/data/memory.jsonl`. That file is BaanSafe's store. Mubit has no memory API. The Modal function mounts `baansafe-versions` read-only at `/vol` and sets `TRAINING_REGISTRY_PATH=/vol/registry.json` and `RL_RUN_PATH=/data/rl_run.json`. `GET /training` and `/ui/training.html` read those files plus the process `TRACE_PATH`. `GET /hosting` lists them under `reads`. `max_containers=1`. Holds live in that one process and empty after `scaledown_window=120` seconds idle.
+The API process is the same code in three hosts: `make serve` on a laptop, `docker/Dockerfile` (`make docker-build`), or `infra/modal/gateway_app.py` on Modal. `make serve` and the image default to `S1_IMPL=stub`, `S2_IMPL=stub`, and `MEMORY_IMPL=mock`. The local `.env` sets `S1_IMPL=real`. The Modal gateway sets `S1_IMPL=real`, auto enrichment, and `S2_IMPL=real` when `baansafe-mubit` injects both Mubit values. A deploy-time `S2_IMPL=cache` is kept. `STUB_ENV` sets `S2_CACHE_KEY=case` and `S2_CACHE_RECORD_PATH=/data/s2_cache.jsonl`. `apply_runtime_impl` sets `MEMORY_IMPL=local` and `MEMORY_LOCAL_PATH=/data/memory.jsonl`. That file is BaanSafe's store. Mubit has no memory API. The Modal function mounts `baansafe-versions` read-only at `/vol` and sets `TRAINING_REGISTRY_PATH=/vol/registry.json` and `RL_RUN_PATH=/data/rl_run.json`. `GET /training` and `/ui/training.html` read those files plus the process `TRACE_PATH`. `GET /hosting` lists them under `reads`. `max_containers=1`. Holds live in that one process and empty after `scaledown_window=120` seconds idle.
 
 ```mermaid
 flowchart LR
@@ -117,6 +119,7 @@ flowchart LR
   subgraph disk["Local disk"]
     events[("training/events/events.jsonl")]
     traces[("traces.jsonl · this server's TRACE_PATH")]
+    s2file[("demo.jsonl + /data/s2_cache.jsonl")]
     memfile[("/data/memory.jsonl when MEMORY_IMPL=local")]
     vol[("/vol/registry.json · baansafe-versions, read-only")]
     snaps[("data/processed JSON, snapshots")]
@@ -142,6 +145,9 @@ flowchart LR
   gw --> s2
   s1 -->|"escalate: cascade"| s2
   s2 -->|"S2_IMPL=real"| compat --> nano
+  s2 -.-> scache["S2_IMPL=cache hit · no socket"]:::unwired
+  scache -.-> s2file
+  s2 -.->|"cache miss"| compat
   s1 --> router
   s2 --> router
   router --> phone
@@ -182,6 +188,7 @@ Each step names its file and where it runs. Everything runs in the API process u
 10. **System 2.**
     - With stubs, the stub file answers.
     - With `S2_IMPL=real`, `system2/decide.py` calls `system2/orchestrator.py` `orchestrate`. That builds the prompt from the transcript, fields, flags, fired triggers, memory, resource counts, handoff, and recommendation. It calls `llm/client.py` `complete` with `case_id`, which posts to **Mubit** with `metadata.session_id` = `case_id[:200]`, and Mubit forwards to **OpenRouter** and Nemotron nano. The call uses `max_tokens` 700, `reasoning` off, temperature 0, seed 7, and a 10 s timeout (`system2.max_latency_ms`). Code must never send `x-middleware-store` or `x-middleware-record`.
+    - With `S2_IMPL=cache`, the same orchestrator uses `system2/cache.py`. A hit replays the reply and traces `mubit_chat` with `host=s2_cache` (`host=s2_cache/case` when `S2_CACHE_KEY=case`) and `status=cache_hit`. It opens no socket. A miss calls Mubit when both credentials exist and appends the reply to `S2_CACHE_RECORD_PATH`. Without credentials the miss becomes `system2_unavailable`. `case` drops `case_id`, `memory`, and `resources` before hashing. The committed file has 158 replies recorded with `MEMORY_IMPL=mock`.
     - The reply is parsed into `reasoned_recommendation`.
     - A timeout, an HTTP error (429 is named "rate limited"), an empty reply, or a parse failure becomes a `system2_unavailable` escalation. That escalation is P1 for medical, oxygen_dependent, need:rescue, or immobile, and P2 otherwise.
     - `_post_rules` forces `requires_human` on safeguarding and aid cases.
@@ -206,7 +213,7 @@ A pattern's path through the loops: a System 1 under-triage is corrected by a hu
 
 | App | Needed for | Blocked by | Status |
 |---|---|---|---|
-| `gateway_app` | A public URL for the town, the API, and `/ui/training.html` | Nothing in git. `make deploy-modal` | Attaches `baansafe-mubit`. `max_containers=1`. `include_source=True`. Sets `S2_IMPL=real` when both Mubit values are present. `apply_runtime_impl` sets `MEMORY_IMPL=local` and `MEMORY_LOCAL_PATH=/data/memory.jsonl`. Mounts `baansafe-versions` read-only at `/vol` |
+| `gateway_app` | A public URL for the town, the API, and `/ui/training.html` | Nothing in git. `make deploy-modal` | Attaches `baansafe-mubit`. `max_containers=1`. `include_source=True`. Sets `S2_IMPL=real` when both Mubit values are present, and keeps a deploy-time `S2_IMPL=cache`. `STUB_ENV` sets `S2_CACHE_KEY=case` and `S2_CACHE_RECORD_PATH=/data/s2_cache.jsonl`. `apply_runtime_impl` sets `MEMORY_IMPL=local` and `MEMORY_LOCAL_PATH=/data/memory.jsonl`. Mounts `baansafe-versions` read-only at `/vol` |
 | `sapling_app` | A live Sapling verifier. The 23B checkpoint needs a 48 GB-class GPU, and no hosted API serves it | `sapling.hosting`, `sapling.gpu`, `sapling.model_id`, `sapling.thai_handling` | Refuses. The router uses the stub |
 | `finetune_app` | The "correction becomes a model update" beat with real weights (L5) | Nothing in git for the two decided leaves. `.env()` is inside the image | `modal.finetune_base_model` is `nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1` and `modal.finetune_gpu` is `T4`. Loss curves land on `baansafe-versions`. The 7-row `s2` LoRA is overfit. System 1 does not load the weights |
 | `stt_app` | Live Thai speech-to-text behind `/stt/transcribe`. `gateway_app` forwards there when `STT_UPSTREAM` is set at deploy time | `modal.stt_model_id`, `modal.stt_gpu` | Refuses. The phone uses typed or scripted lines |
