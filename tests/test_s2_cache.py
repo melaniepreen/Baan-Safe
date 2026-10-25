@@ -53,6 +53,37 @@ def test_key_matches_rl_loop_key():
     assert cache.cache_key("m", messages) != cache.cache_key("m2", messages)
 
 
+def test_case_key_ignores_case_id_memory_resources_only():
+    base = {"case_id": "case-1", "transcript": [{"speaker": "caller", "text": "help"}],
+            "fields": {"needs": ["water"]}, "memory": ["lesson"], "resources": {"boats": 1}}
+    other = {**base, "case_id": "case-2", "memory": [], "resources": {"boats": 0}}
+    changed = {**base, "fields": {"needs": ["rescue"]}}
+    msgs = lambda p: [{"role": "system", "content": "S"}, {"role": "user", "content": json.dumps(p)}]
+    assert cache.cache_key("m", msgs(base)) != cache.cache_key("m", msgs(other))
+    assert cache.cache_key("m", msgs(base), "case") == cache.cache_key("m", msgs(other), "case")
+    assert cache.cache_key("m", msgs(base), "case") != cache.cache_key("m", msgs(changed), "case")
+    with pytest.raises(ValueError):
+        cache.cache_key("m", msgs(base), "fuzzy")
+
+
+def test_case_key_mode_hits_across_case_ids(cache_env, monkeypatch):
+    monkeypatch.setenv("S2_CACHE_KEY", "case")
+    case = load_case("F10")
+    model = orchestrator.require_decision("system2.orchestrator_model")
+    key = cache.cache_key(model, orchestrator._messages(case, None, None), "case")
+    (cache_env / "demo.jsonl").write_text(json.dumps({"key": key, "reply": GOOD}) + "\n")
+
+    def no_socket(*_a, **_k):  # pragma: no cover - must not be reached
+        raise AssertionError("case-key hit must not call Mubit")
+
+    monkeypatch.setattr("llm.client.complete", no_socket)
+    # Same transcript under a fresh id with a different memory context.
+    renamed = case.model_copy(update={"case_id": "case-fresh", "memory_context": []})
+    assert orchestrate(renamed).outcome == "reasoned_recommendation"
+    hop = [e for e in read_traces("case-fresh") if e.stage == "mubit_chat"][0]
+    assert "host=s2_cache/case" in (hop.notes or "")
+
+
 def test_hit_replays_without_socket_and_traces_cache_hit(cache_env, monkeypatch):
     case = load_case("F10")
     model = orchestrator.require_decision("system2.orchestrator_model")
@@ -135,6 +166,7 @@ def test_gateway_app_keeps_cache_mode(monkeypatch, tmp_path):
     assert os.environ["S2_IMPL"] == "cache"
     assert gateway.hosting()["backends"] == "cache"
     assert "S2_CACHE_RECORD_PATH" in gateway.STUB_ENV
+    assert gateway.STUB_ENV["S2_CACHE_KEY"] == "case"
     monkeypatch.setenv("MUBIT_API_KEY", "test-key-not-real")
     monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai")
     gateway.apply_runtime_impl()
