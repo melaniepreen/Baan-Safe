@@ -243,6 +243,7 @@ def test_twenty_calls_link_fixtures_to_buildings():
     assert 'id="log-export"' not in page
     assert "Export JSON" not in page
     assert 'id="pattern-list"' in page
+    assert 'id="mubit-eval-list"' in page
     assert 'id="pattern-reset"' in page
     assert 'id="priority-badge"' in page
     source = (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
@@ -411,6 +412,7 @@ def test_activity_prompts_and_rulebook_are_draft_simulations():
     assert "฿" not in blob
     subprocess.run(["node", "ui/sim/check_hospital.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_patterns.mjs"], cwd=ROOT, check=True)
+    subprocess.run(["node", "ui/sim/check_mubit_eval.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_approval.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_titles.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_pace.mjs"], cwd=ROOT, check=True)

@@ -1,0 +1,33 @@
+{
+  "source": "eval/snapshots/rl/20261025T0600Z-memory-local",
+  "label": "25 Oct Mubit eval, memory on",
+  "outcome": "Reward -0.125 → 0.189 across 3 epochs. No pattern graduated into System 1.",
+  "mubit": {
+    "via": "api.mubit.ai",
+    "model": "nvidia/nemotron-3-nano-30b-a3b",
+    "s2": "live",
+    "live_ok": 187,
+    "cache_hits": 238,
+    "errors": 3
+  },
+  "patterns": [
+    {
+      "id": "RL-UP-2",
+      "label": "upstairs-water",
+      "status": "Recommendation",
+      "detail": "P1 · rescue coordination · requires human · seen 5. P1 or complex pattern; a human keeps authority."
+    },
+    {
+      "id": "RL-COLD-2",
+      "label": "cold-hall",
+      "status": "Recommendation",
+      "detail": "P3 · welfare distribution · requires human · seen 1. P1 or complex pattern; a human keeps authority."
+    },
+    {
+      "id": "RL-WEAK-1",
+      "label": "weak-grandfather-water",
+      "status": "Demoted",
+      "detail": "System 1 under-triaged RL-WEAK-1: predicted P3, truth P2."
+    }
+  ]
+}
