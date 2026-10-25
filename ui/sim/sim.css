@@ -727,7 +727,13 @@ body[data-notes="1"] .bubble.note { display: block; }
 #dispatch-pending-text { display: block; margin-top: 4px; font-size: 13px; line-height: 1.4; }
 #side-stack #op-accept { background: #ED7401; border-color: #ED7401; color: #012246; }
 #side-stack #op-reject { background: #d1241a; border-color: #d1241a; color: #fff; }
-#op-accept:disabled, #op-reject:disabled { opacity: 0.4; }
+#side-stack #op-accept:disabled, #side-stack #op-reject:disabled {
+  opacity: 0.4;
+  background: transparent;
+  border-color: #3a4658;
+  color: #9aa8bb;
+  cursor: not-allowed;
+}
 
 #backend h2 { margin: 14px 0 4px; font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--ink); }
 #rulebook { width: 100%; border-collapse: collapse; font-size: 11px; }

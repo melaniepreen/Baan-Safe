@@ -24,14 +24,14 @@ const healthLocal = {
 
 const cache = hostingLabel(hostedCache, healthLocal);
 assert(cache.tone === "cache", "cache deploy wears the cache tone: " + cache.tone);
-assert(cache.text === "System 2: cache (replays, Mubit on miss) · Memory: local · Mubit credentials: yes", cache.text);
-assert(cache.parts.length === 3 && cache.warning === null && cache.source === "/hosting", JSON.stringify(cache));
+assert(cache.text === "System 2 (Nemotron): replaying saved answers, live via Mubit on new calls · Case memory: on (BaanSafe store) · Inference API: ready · Read API: ready", cache.text);
+assert(cache.parts.length === 4 && cache.warning === null && cache.source === "/hosting", JSON.stringify(cache));
 
 const live = hostingLabel({ ...hostedCache, backends: "live", impl: { ...hostedCache.impl, S2_IMPL: "real" } }, healthLocal);
-assert(live.tone === "live" && live.parts[0] === "System 2: " + S2_LABEL.real, JSON.stringify(live));
+assert(live.tone === "live" && live.parts[0] === "System 2 (Nemotron): " + S2_LABEL.real, JSON.stringify(live));
 
 const stub = hostingLabel({ ...hostedCache, backends: "stub", secrets: false, impl: { ...hostedCache.impl, S1_IMPL: "stub", S2_IMPL: "stub" } }, null);
-assert(stub.tone === "muted" && stub.parts[0] === "System 2: stub" && stub.parts[2] === "Mubit credentials: no", JSON.stringify(stub));
+assert(stub.tone === "muted" && stub.parts[0] === "System 2 (Nemotron): sample answers, no model call" && stub.parts[2] === "Inference API: sample answers" && stub.parts[3] === "Read API: ready", JSON.stringify(stub));
 
 // S2_IMPL missing from impl: fall back to the backends word.
 assert(system2Mode({ backends: "live" }, null) === "real", "backends live → real");
@@ -44,7 +44,7 @@ const warning = "MEMORY_IMPL=mubit is dormant: current Mubit is an LLM gateway w
 const dormantHealth = { ...healthLocal, impl: { ...healthLocal.impl, MEMORY_IMPL: "mubit" }, memory: { mode: "mubit", dormant: true, warning } };
 const dormant = hostingLabel({ ...hostedCache, memory: "mubit", impl: { ...hostedCache.impl, MEMORY_IMPL: "mubit" } }, dormantHealth);
 assert(dormant.tone === "error", "dormant memory is red");
-assert(dormant.parts[1] === "Memory: mubit (dormant!)", dormant.parts[1]);
+assert(dormant.parts[1] === "Case memory: off (Mubit memory API unavailable)", dormant.parts[1]);
 assert(dormant.warning === warning && dormant.text.endsWith(" — " + warning), dormant.text);
 assert(memoryDormant({ impl: { MEMORY_IMPL: "mubit" } }, null) === true, "hosting alone can flag dormant");
 assert(memoryDormant(null, { memory: { mode: "mubit", dormant: true } }) === true, "health alone can flag dormant");
@@ -55,9 +55,9 @@ assert(dormantNoText.tone === "error" && dormantNoText.warning.includes("MEMORY_
 // Local `make serve`: /hosting 404s, /health answers. Credentials are unknown there.
 const healthOnly = hostingLabel(null, healthLocal);
 assert(healthOnly.source === "/health" && healthOnly.tone === "cache", JSON.stringify(healthOnly));
-assert(healthOnly.parts[2] === "Mubit credentials: unknown", healthOnly.parts[2]);
+assert(healthOnly.parts[2] === "Inference API: ready (saved answers)", healthOnly.parts[2]);
 assert(memoryMode(null, { memory: { mode: "mock" } }) === "mock", "health memory.mode is the last resort");
-assert(hostingLabel(null, { ...healthLocal, impl: { S2_IMPL: "real", MEMORY_IMPL: "mock" } }).text === "System 2: live via Mubit · Memory: mock · Mubit credentials: unknown", "health-only live");
+assert(hostingLabel(null, { ...healthLocal, impl: { S2_IMPL: "real", MEMORY_IMPL: "mock" } }).text === "System 2 (Nemotron): live via Mubit · Case memory: sample files · Inference API: checking… · Read API: ready", "health-only live");
 
 // Neither endpoint answered (python -m http.server): quiet, not red.
 const offline = hostingLabel(null, null);
@@ -66,7 +66,7 @@ assert(offline.text.includes("API not connected"), offline.text);
 
 // No secret names, ever.
 for (const label of [cache, live, stub, dormant, healthOnly, offline]) {
-  for (const banned of ["MUBIT_API", "OPENROUTER", "Bearer", "sk-"]) {
+  for (const banned of ["MUBIT_API", "OPENROUTER", "Bearer", "sk-", "unknown", "dormant!", "credentials"]) {
     assert(!label.text.includes(banned), "banner must not name " + banned);
   }
 }
