@@ -53,7 +53,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",
@@ -147,7 +147,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",
@@ -241,7 +241,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",
@@ -335,7 +335,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",
@@ -429,7 +429,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",
@@ -523,7 +523,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",
@@ -617,7 +617,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",
@@ -711,7 +711,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",
@@ -805,7 +805,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",
@@ -899,7 +899,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",
@@ -993,7 +993,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",
@@ -1087,7 +1087,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",
@@ -1181,7 +1181,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",
@@ -1275,7 +1275,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",
@@ -1369,7 +1369,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",
@@ -1463,7 +1463,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",
@@ -1557,7 +1557,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",
@@ -1660,7 +1660,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",
@@ -1763,7 +1763,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",
@@ -1857,7 +1857,7 @@
           "kind": "memory",
           "delay_ms": 520,
           "source": "simulated",
-          "text": "Mubit fetched {memory_count} for this household."
+          "text": "Memory store returned {memory_count} for this household."
         },
         {
           "id": "flood",

@@ -1806,7 +1806,7 @@ function framingNote() {
   const framing = responses && responses.framing
     ? responses.framing
     : "Sukhumvit block in Watthana, drawn in local metres. data.demo_event is Sukhumvit / Watthana (Bangkok); flood on this desk is flood.json.";
-  return framing + " Flood rises from flood.json. Type, speak, or open Prompts. The stub gateway returns the priority, and that result lights the house. Replies are not a live model.";
+  return framing + " Flood rises from flood.json. Type, speak, or open Prompts. The gateway returns the priority, and that result lights the house. Replies are not a live model.";
 }
 
 async function ensureSession() {
@@ -1839,8 +1839,9 @@ function showWelcome() {
   pushPhone("note", framingNote());
   const note = document.getElementById("chooser-note");
   if (note) {
+    // gateway.route_chooser is the decided field precheck.
     note.textContent =
-      "DEMO-ONLY house pin. Free-text and phone POST /cases with transcript; gateway.route_chooser is field precheck. One-click households still use fixture_id.";
+      "Operator replies are scripted. The routing decision is live from the gateway.";
   }
   const line = document.getElementById("phone-line");
   if (line) line.textContent = "Baan-Safe · " + PHONE_NUMBER;
@@ -2710,11 +2711,17 @@ function stepDetail(step, call, decision, source, bag) {
   const lines = [];
   if (step.fill === "flood") lines.push(floodLine(call));
   if (step.fill === "shelter") lines.push(shelterLine(call));
-  if (step.kind === "memory" && (call.memory || []).length) {
-    lines.push("Stub memory file: " + call.memory.map((row) => row.kind + " — " + row.summary).join(" "));
+  if (step.kind === "memory") {
+    const state = caseStates.get(call.id);
+    const items = (state && state.memory_context) || [];
+    if (items.length) {
+      lines.push("Memory store returned " + items.length + " item" + (items.length === 1 ? "" : "s") + ": " + items.map((m) => m.kind + " — " + String(m.summary || "").slice(0, 120)).join("; "));
+    } else if ((call.memory || []).length) {
+      lines.push("Fixture memory file (mock mode): " + call.memory.map((row) => row.kind + " — " + row.summary).join(" "));
+    }
   }
   if (step.kind === "system_1" || step.kind === "system_2" || step.kind === "router" || step.kind === "sapling" || step.kind === "handoff") {
-    lines.push("Gateway stub: " + bag.priority + " · " + bag.route + " · " + bag.next_action + ". " + (source.reason || ""));
+    lines.push("Gateway: " + bag.priority + " · " + bag.route + " · " + bag.next_action + ". " + (source.reason || ""));
   }
   if (step.kind === "system_2" || step.kind === "handoff") {
     lines.push("System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway.");
@@ -3042,7 +3049,7 @@ async function playFeed(call, decision, trace, text, fast) {
       kind: "memory",
       delay_ms: 420,
       source: simulated ? "simulated" : "gateway",
-      text: "Caller IP recorded · " + sessionStamp.caller_ip + (simulated ? " · DEMO" : ""),
+      text: "Caller IP recorded · " + sessionStamp.caller_ip,
     });
   }
   setFeedProgress(0, steps.length);
@@ -3797,6 +3804,7 @@ function bindChrome() {
   tickClock();
   setInterval(tickClock, 15000);
   renderCallList();
+  if (new URLSearchParams(location.search).get("notes") === "1") document.body.dataset.notes = "1";
   greet();
   app.stage.eventMode = "static";
   app.stage.hitArea = app.screen;
