@@ -82,6 +82,8 @@ Carry-forward bug: `s1_app`, `s2_app`, `sapling_app`, `stt_app` chain `.env()` a
 
 ### Track 3 — S2 cache + overlay "learns to be faster" demo
 
+**Backend half done (PRs #31, #32), hosted in cache mode.** `S2_IMPL=cache` (`system2/cache.py`): cache-first completer, Mubit only on a miss, miss recorded to `S2_CACHE_RECORD_PATH`. Committed `fixtures/s2_cache/demo.jsonl` holds 158 replies (fixtures + synthetic, `MEMORY_IMPL=mock`, exact key); `make record-s2-cache` refills misses. Hosted: `/hosting` → `backends: cache`, `S2_CACHE_KEY=case` (ignores random case id, memory summaries, ledger), record file `/data/s2_cache.jsonl`. Proof 25 Oct 05:40: frozen script pass 1 → F10 and caller B `api.mubit.ai status=ok`; pass 2 → both `s2_cache/case status=cache_hit`, `/metrics.mubit_chat.cache_hit_count=2`. **Before the demo, run the exact script once more after any transcript edit** — a changed word is a miss (goes live, then recorded). To flip back to live-only: `S2_IMPL=real modal deploy infra/modal/gateway_app.py`. `TraceEvent.json` synced (Track 4 #5 done). UI half still Melanie's.
+
 Design reviewed against code. Compatible with four corrections:
 
 1. `make rl-loop-replay` does **not** write the cache; only live `make rl-loop` does, and `eval/out/` is gitignored. Ship a committed `fixtures/s2_cache/demo.jsonl` read via `S2_CACHE_PATH`.
@@ -91,7 +93,7 @@ Design reviewed against code. Compatible with four corrections:
 
 | Half | What | Owner / effort |
 |---|---|---|
-| Backend | `S2_IMPL=cache` installs the replay completer via `system2.orchestrator.use_completer()` at `api/main.py` startup (no change to `orchestrate()`); miss → existing `system2_unavailable`; cache hit emits `mubit_chat status=cache_hit` via `eval/rl/run._emit_rl_cache_hit`; `make hackathon-demo` = `RL_OVERLAY=… S1_IMPL=real S2_IMPL=cache make serve` | Moly, ~2 h, after Track 1 |
+| Backend | **done**: `orchestrator._active_completer()` picks `system2.cache.completer` when `S2_IMPL=cache` and no `use_completer` override; miss with creds → one Mubit call (recorded), miss without → `system2_unavailable`; hit emits `mubit_chat host=s2_cache[/case] status=cache_hit`. Local demo: `S1_IMPL=real S2_IMPL=cache make serve` (fixtures hit the committed file) | Moly, PRs #31 #32 |
 | UI | Model Path panel (stage list with latency + cache hit + graduated rule), purple house = S1 via graduated rule, "Learned" badge in `patterns.js`; `rl_panel.js` already renders overlay tables | Melanie, ~5 h, after she pulls `main` |
 
 ### Track 4 — Judge items still open
@@ -102,7 +104,7 @@ Design reviewed against code. Compatible with four corrections:
 | 2 | Moly | Dry-run the frozen script on the hosted URL with the UI open, after 1d. |
 | 3 | Melanie | Pull `main` (PRs #16–#19 plus Track 1) before touching `ui/sim`. |
 | 4 | Both | Aid 501 UI / RL panel hidden or not. |
-| 5 | Moly | `python -m contracts.export_schemas` so `TraceEvent.json` catches `enrich`, `memory`, `mubit_chat`, `memory_write`; bump the contract tag note. |
+| 5 | Moly | ~~`python -m contracts.export_schemas`~~ done in PR #31 (`enrich`, `memory`, `mubit_chat` added to `TraceEvent.json`). |
 
 ### Decisions needed from humans
 
@@ -135,7 +137,7 @@ Design reviewed against code. Compatible with four corrections:
 
 | # | Action |
 |---|---|
-| A | Sync `contracts/schemas/TraceEvent.json` to Pydantic stages (`enrich`, `memory`, `mubit_chat`); note/bump contract tag |
+| A | ~~Sync `TraceEvent.json`~~ done (PR #31) |
 | B | Completers accept `**kwargs` (`case_id`) — Melanie check |
 | C | Northern fixtures vs Sukhumvit units — use F17/F18 or accept first usable unit |
 | D | Post-hackathon: `gateway.auth`; shared ledger/DB if multi-container |
