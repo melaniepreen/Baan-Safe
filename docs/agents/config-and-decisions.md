@@ -5,6 +5,8 @@ files:
   - config/decisions.yaml
   - config/settings.py
   - scripts/validate.py
+  - config/envfile.py
+  - .env.example
 ---
 
 ## Purpose
@@ -18,7 +20,8 @@ Product choices live in `config/decisions.yaml`. Readers fail loudly while a val
 - `scripts/validate.py` — `DECIDED` allowlist. Any other leaf must be the string `TODO_HUMAN`.
 - `config/routing.yaml` — harness `mode: cascade`. The live chooser is `gateway.route_chooser` (`field precheck`, implemented in `gateway/chooser.py`).
 - `config/priorities.yaml`, `config/routes.yaml`, `config/escalation.yaml`, `config/ingest.yaml`.
-- `config/envfile.py` — loads `.env`. Do not print it.
+- `config/envfile.py` — loads `.env`. Do not print it. An existing shell variable wins.
+- `.env.example` — every environment name the code reads, one comment each, with the recommended developer values (`S1_IMPL=real`, `S2_IMPL=cache`, `S2_CACHE_KEY=exact`, `MEMORY_IMPL=local`, `MUBIT_BASE_URL` compat prefix, `MUBIT_API_KEY` blank). Names whose code needs a non-empty value are listed as `# NAME=`. `tests/test_env_example.py` fails when a new `os.environ.get("NAME")` under the runtime packages is not listed. Never `MEMORY_IMPL=mubit` (dormant).
 
 ## Interfaces/contracts
 

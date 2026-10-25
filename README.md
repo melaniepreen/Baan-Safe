@@ -163,7 +163,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Optional `.env` values are listed in `.env.example`. None are required for the stub service. Do not commit keys.
+Optional `.env` values are listed in `.env.example`. None are required for the stub service. Do not commit keys. Copy `.env.example` to `.env` for the recommended developer setup (`S1_IMPL=real`, `S2_IMPL=cache`, `MEMORY_IMPL=local`, Mubit key blank); every name the code reads is listed there with a one-line comment, and `tests/test_env_example.py` keeps it complete. `make demo-reset RESET_ARGS=--yes` puts the local demo state (traces, case memory, recorded replies) back to the start of the frozen script; `--hosted` does the same on the Modal volume.
 
 ## Commands
 

@@ -1,7 +1,7 @@
 PYTHON ?= $(shell test -x .venv/bin/python && echo .venv/bin/python || echo python3)
 export PYTHONPATH := .
 
-.PHONY: mubit-traffic mubit-requests record-s2-cache rl-snapshot rl-restore rl-compare eval-gate validate test replay-stubs demo-stub demo-correction-loop demo-graduation rl-loop rl-loop-replay eval-learning sim-eval extract-eval latte-bench serve seed-memory ingest ingest-refresh data-report sources-refresh sources-status \
+.PHONY: mubit-traffic mubit-requests record-s2-cache rl-snapshot rl-restore rl-compare eval-gate validate test replay-stubs demo-stub demo-correction-loop demo-graduation demo-reset check-owners rl-loop rl-loop-replay eval-learning sim-eval extract-eval latte-bench serve seed-memory ingest ingest-refresh data-report sources-refresh sources-status \
 	export-training export-laya laya-train sync push modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune deploy-modal docker-build docker-run
 
 IMAGE ?= baansafe-api:local
@@ -25,6 +25,16 @@ demo-correction-loop:
 
 demo-graduation:
 	$(PYTHON) -m eval.graduation_demo
+
+# Reset demo state for the frozen 3-minute script. Dry run by default; RESET_ARGS='--yes'
+# applies. '--hosted' works on the Modal volume baansafe-demo; '--events' also clears events.
+demo-reset:
+	$(PYTHON) scripts/demo_reset.py $(RESET_ARGS)
+
+# Single-writer reminder (ui/sim/sim.js, llm/client.py) for this branch vs origin/main.
+# OWNERS_ARGS='--strict' exits 1 on a warning.
+check-owners:
+	$(PYTHON) scripts/check_owners.py $(OWNERS_ARGS)
 
 rl-loop:
 	$(PYTHON) -m eval.rl --s2 live

@@ -4,6 +4,9 @@ tags: [pytest, validate, replay, ci]
 files:
   - scripts/validate.py
   - scripts/check_agents.py
+  - scripts/check_owners.py
+  - scripts/demo_reset.py
+  - .github/CODEOWNERS
   - tests/conftest.py
   - Makefile
 ---
@@ -17,6 +20,8 @@ files:
 - `Makefile` — `test`, `validate`, `replay-stubs`, `eval-learning`, `sim-eval`, `latte-bench`, `serve`, `modal-deploy-*`.
 - `scripts/validate.py` — decisions, Sapling stubs, `NotImplementedError` in `system2/decide.py` (System 1 and `router/merge.py` are real now), schemas, personal-data scan.
 - `scripts/check_agents.py` — `AGENTS.md` line budget, topic template, index paths. Called from `validate`.
+- `scripts/check_owners.py` — `make check-owners`. Changed files on this branch (`git diff --name-only origin/main...HEAD` plus the working tree) against the single-writer map in the script header: `ui/sim/sim.js` (Melanie, branches `melanie/`, `mel/`) and `llm/client.py` (Moly, `moly/`). Prints a warning per file touched from a non-owner branch; exit 0 unless `OWNERS_ARGS=--strict`. A reminder, not security. `.github/CODEOWNERS` is the GitHub side (`@melaniepreen`, `@molyleelatham`); `tests/test_check_owners.py` pins the two together.
+- `scripts/demo_reset.py` — `make demo-reset` (dry run; `RESET_ARGS=--yes` applies). Local mode truncates `TRACE_PATH` and `MOCK_CORRECTIONS_PATH`, removes `S2_CACHE_RECORD_PATH`, and rewrites `MEMORY_LOCAL_PATH` keeping only `baansafe-policy` rows (re-seeding the 10 lessons when none remain); `--events` also clears `TRAINING_EVENTS_PATH`. `--hosted` does the same on the Modal volume `baansafe-demo` through `modal volume get/put/rm`. Prints before/after counts per lane. `tests/test_demo_reset.py` covers both modes (hosted with a fake CLI).
 - `tests/conftest.py` — deletes `MUBIT_API_KEY` and `MEMORY_LOCAL_PATH` for the session; `MEMORY_IMPL=mock`. A local-mode test sets its own tmp `MEMORY_LOCAL_PATH`.
 - `pyproject.toml` — `pythonpath = ["."]`, `testpaths = ["tests"]`. Requires Python `>=3.11`.
 - `tests/test_architecture.py`, `test_gateway_and_replay.py`, `test_chooser.py`, `test_system1.py`, `test_router.py`, `test_extract.py`, `test_api.py`, `test_mubit_memory.py`, `test_memory_write.py`, `test_memory_local.py`, `test_sapling.py`, `test_modal_infra.py`, `test_contracts.py`, `test_learning_eval.py`, `test_sim.py`, `test_latte.py`, `test_agents_docs.py`, `test_training_schema.py`.
@@ -42,6 +47,8 @@ files:
 - `make replay-stubs` when stub labels change.
 - `EXTRACT_EVAL_SET=synthetic make extract-eval` and `EVAL_LEARNING_SET=synthetic make eval-learning` for `fixtures/synthetic`. The defaults still use the original 24 fixtures and the eight stub groups.
 - `python3 scripts/check_agents.py` after editing `AGENTS.md` or `docs/agents/`.
+- `make check-owners` before opening a PR. Work in a worktree per branch (`git worktree add -b <branch> ../Baan-Safe-wt/<name> origin/main`); never `git add -A` in the shared checkout.
+- `make demo-reset` (then `RESET_ARGS=--yes`) before a demo run so traces and case memory start from the same point. `tests/test_demo_reset.py`, `tests/test_env_example.py`, `tests/test_check_owners.py` cover the hygiene scripts.
 
 ## Common pitfalls
 

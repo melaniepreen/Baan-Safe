@@ -1,0 +1,11 @@
+# Review routing for GitHub. The source of truth is OWNERSHIP.md; keep the two in step.
+# Handles come from the repo collaborators: Melanie = @melaniepreen, Moly = @molyleelatham.
+# Single-writer files (one person edits at a time): ui/sim/sim.js (Melanie), llm/client.py (Moly).
+# That is the split in HANDOVER.md (H1, Branch policy). OWNERSHIP.md's folder table still
+# lists `ui/` under Moly and `llm/` as "Melanie wires the call"; update it when settled.
+# `make check-owners` warns locally before a PR; see scripts/check_owners.py.
+
+ui/sim/            @melaniepreen
+llm/client.py      @molyleelatham
+gateway/           @molyleelatham
+infra/             @molyleelatham
