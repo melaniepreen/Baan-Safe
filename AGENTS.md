@@ -40,6 +40,7 @@ make replay-stubs
 make demo-graduation
 make rl-loop
 make rl-loop-replay
+make mubit-traffic
 make eval-learning
 make sim-eval
 make extract-eval
