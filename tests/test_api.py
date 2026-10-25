@@ -211,3 +211,11 @@ def test_docs(client):
     schema = client.get("/openapi.json")
     assert schema.status_code == 200
     assert "/triage" in schema.json()["paths"]
+    assert "/" not in schema.json()["paths"]
+
+
+def test_root_redirects_to_town_sim(client):
+    response = client.get("/", follow_redirects=False)
+    assert response.status_code == 307
+    assert response.headers["location"] == "/ui/sim/index.html"
+    assert client.get("/").status_code == 200
