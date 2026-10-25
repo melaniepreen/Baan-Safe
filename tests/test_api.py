@@ -19,6 +19,17 @@ def test_health(client):
     body = response.json()
     assert body["status"] == "ok"
     assert body["impl"]["S1_IMPL"] == "stub"
+    assert body["memory"] == {"mode": "mock", "dormant": False, "warning": None}
+
+
+def test_health_names_dormant_mubit_memory(monkeypatch):
+    monkeypatch.setenv("MEMORY_IMPL", "mubit")
+    with TestClient(app) as test_client:
+        body = test_client.get("/health").json()
+    assert body["status"] == "ok"
+    assert body["memory"]["mode"] == "mubit"
+    assert body["memory"]["dormant"] is True
+    assert "MEMORY_IMPL=local" in body["memory"]["warning"]
 
 
 def test_fixtures_list_and_one(client):

@@ -12,7 +12,7 @@ One call: `gateway/route.py` `handle` ← `POST /triage` / `POST /cases/{id}/tur
 |---|---|---|
 | Extraction | `system1/extract.py` | English keywords; bare `unaccompanied` → child unless `adult` named. Thai = district names only. Demo English / code-switched. |
 | Enrichment | `enrich/context.py`, `ingest.store` | Live when `districts.json` present. Flags never change priority. |
-| Memory | `memory/adapter.py`, `memory/local.py` | Hosted **local** (`MEMORY_LOCAL_PATH=/data/memory.jsonl` on `baansafe-demo`). Case record written after every routed turn (`memory_write` stage); policy lessons seeded; repeat caller at same place + need → S1 `duplicate_merge`. `GET /metrics.memory`. `memory/mubit.py` is dormant: current Mubit has no memory API (`/v2/control/*` = 404). |
+| Memory | `memory/adapter.py`, `memory/local.py` | Hosted **local** (`MEMORY_LOCAL_PATH=/data/memory.jsonl` on `baansafe-demo`). Case record written after every routed turn (`memory_write` stage); policy lessons seeded; repeat caller at same place + need → S1 `duplicate_merge`. `GET /metrics.memory`. `memory/mubit.py` is dormant: current Mubit has no memory API (`/v2/control/*` = 404). **Your local `.env` must say `MEMORY_IMPL=local`** — with `mubit` every turn 404s twice, memory is always empty, and F09 silently loses `duplicate_merge`. `GET /health.memory.dormant=true` and a startup warning now name it. |
 | Graduation | `gateway/graduation.py` | Threshold 2 → `complex_situation` (not into S1 rules). |
 | Chooser | `gateway/chooser.py` | `field precheck`; `routing.yaml` `mode: cascade`. |
 | System 1 | `system1/decide.py` | Rules-only. |
@@ -88,7 +88,7 @@ Design reviewed against code. Compatible with four corrections:
 
 1. `make rl-loop-replay` does **not** write the cache; only live `make rl-loop` does, and `eval/out/` is gitignored. Ship a committed `fixtures/s2_cache/demo.jsonl` read via `S2_CACHE_PATH`.
 2. No signature-based key. Exact key only; the sim plays fixtures that are in the cache. A reply recorded for a different prompt is not a cache hit.
-3. Record the cache **after** Track 1 lands (memory items are in `_messages`, so the key changes once the workspace has content).
+3. Record the cache **after** Track 1 lands (memory items are in `_messages`, so the key changes once the workspace has content). **The committed `eval/out/rl/s2_cache.jsonl` and `run.json` (25 Oct, also uploaded to Modal as `rl_run.json`) were produced with `.env` `MEMORY_IMPL=mubit`, i.e. `memory: []` in every prompt. They are stale for this track; re-run `make rl-loop` with `MEMORY_IMPL=local`.**
 4. Local `make hackathon-demo` vs hosted URL tell different stories (no LLM calls vs real Mubit traffic). Pick one for the 3-minute script; hosted stays the judges' URL unless both agree.
 
 | Half | What | Owner / effort |
@@ -144,6 +144,25 @@ Design reviewed against code. Compatible with four corrections:
 | E | Live Sapling / STT; Laya/classifier product decision; RL `run.json` on Modal |
 | F | Thai keywords only if product reopens |
 | G | Housekeeping: `.vscode` gitignore, markdown moves, `routes.yaml` vs needs table |
+
+### Audit, 25 Oct (code read + local probes, not docs)
+
+Measured on `main` `daeaad9` with `S1_IMPL=real`. Things a judge can hit.
+
+| # | Finding | Evidence | Fix / status |
+|---|---|---|---|
+| A1 | Local `.env` had `MEMORY_IMPL=mubit` (dormant) | `/cases/F09/trace`: `retrieve_error=... HTTP 404 unknown_route`, `memory_write status=error`; F09 → `create_provisional_dispatch` instead of `duplicate_merge` | `.env` set to `local`; `/health.memory` + startup warning added; `OWNERSHIP.md` corrected |
+| A2 | The 25 Oct live RL run (`eval/out/rl/run.json`, hosted `rl_run.json`) ran under A1 | `mubit: live_ok=54, cache_hits=154`; **20/48 correct, 9 critical under-triage, 9 missed_human, flat across 3 epochs**; `episodes.F09.correct=false` | Re-run with `MEMORY_IMPL=local` before showing `/ui/training.html` or `/rl/run`. The numbers are real and honest but the memory half was broken |
+| A3 | Live Nemotron under-triages the "water at the door + elderly" theme every time | `C01-a`, `C01-b`, `RL-DOOR-1/2`, `RL-UP-1/2` → P2 (truth P1), deterministic at `temperature=0, seed=7`; `C01-a` even with the memory lesson in the prompt | Do not play C01 live in the script. Good material for *why* corrections exist, bad as a "the model gets it" beat |
+| A4 | Nothing forces `requires_human` on a P1 rescue | `G01/G03/G04`: live S2 said P1 `rescue_coordination` with `requires_human=false`; `_post_rules` only forces aid/safeguarding; `HUMAN_ROUTES` excludes rescue | Fixed: `_post_rules` now forces `requires_human=True` on any P1 and appends "P1 requires human sign-off" to `reasoning` (+2 tests). The UI gate (`approval.js`) was already holding every S2 decision; the API contract now matches |
+| A5 | Extraction emitted `needs=['rescue','rescue']` | "Water is at the door and my grandmother cannot walk. We are trapped." — explicit `trapped` plus the inferred rescue | Fixed in `system1/extract.py` + test |
+| A6 | `duplicate_merge` merges *different* households on the same soi | `local` memory: household B (5 people, same soi, water) → `finalize_case`, no dispatch, after household A | Known (Track 1 note). Say it out loud or key the merge on `caller_id_hash` too |
+| A7 | Every decision carries two stale policy notes | `auth scheme is TODO_HUMAN; request was not rejected` and `safeguarding and escalation rules were not evaluated` on every `RouterDecision` — the second is false, the chooser does evaluate them | `gateway/policy.py` is a 12-line placeholder; reword or drop before judges read `policy_notes` |
+| A8 | Sapling stub can never say `supported`/`violation` on a live case | `_verify_stub` needs an exact (policy, evidence, claim) triple; evidence includes the transcript, so every live aid case → `unsure` → `sapling_unsure` → human | Demonstrable only via `eval/sapling_replay.py` on the 5 stub cases. Do not promise a live Sapling verdict |
+| A9 | Overlay "graduated rule" surface is tiny | `overlay.json`: 1 graduated (`RL-ROAD-3`, no needs → P4 info), 1 demoted. `narrow_signature` hashes caller tokens, so a rule fires only on near-identical wording; the `[0.7, 0.8)` confidence band in `system1/decide.py` is unreachable from extraction (it emits 0.85 / 0.6 / None) | "Learns to be faster" must replay the exact fixture that graduated. Not generalisation |
+| A10 | `/docs` summary said "System 1 and System 2 logic are not implemented" | `api/main.py` | Reworded |
+| A11 | `contracts/schemas/TraceEvent.json` lacks `enrich`, `memory`, `mubit_chat` | schema enum has 5 stages, Pydantic has 8 | Track 4 #5, still open |
+| A12 | `read_traces()` parses the whole `traces.jsonl` on every `/metrics` and `/cases/{id}/trace` | 831 lines locally; the hosted volume grows unbounded and the town calls `/trace` after every turn | Fine for one demo; rotate or index before a long session |
 
 ### Branch policy
 

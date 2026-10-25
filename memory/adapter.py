@@ -32,6 +32,21 @@ def memory_mode() -> str:
     return os.environ.get("MEMORY_IMPL", "mock").strip().lower() or "mock"
 
 
+DORMANT_WARNING = (
+    "MEMORY_IMPL=mubit is dormant: current Mubit is an LLM gateway with no "
+    "memory API (/v2/control/* returns 404), so every turn retrieves nothing "
+    "and every case-record write fails. Set MEMORY_IMPL=local."
+)
+
+
+def status() -> dict[str, Any]:
+    """Mode plus whether it can hold memory. `GET /health` reports this so a
+    stale `.env` is visible in one call instead of per-turn trace errors."""
+    mode = memory_mode()
+    dormant = mode == "mubit"
+    return {"mode": mode, "dormant": dormant, "warning": DORMANT_WARNING if dormant else None}
+
+
 def _backend() -> ModuleType | None:
     mode = memory_mode()
     if mode == "mubit":

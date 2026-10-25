@@ -194,6 +194,16 @@ def _post_rules(case: CaseState, outcome: Outcome) -> Outcome:
     if "safeguarding" in flags or aid or flags & _AID_FLAGS:
         if not outcome.requires_human:
             return outcome.model_copy(update={"requires_human": True})
+    # A P1 dispatch is irreversible. The model may leave requires_human
+    # false (nano did on G01/G03/G04); a person still signs it off.
+    if outcome.priority is Priority.P1 and not outcome.requires_human:
+        note = "P1 requires human sign-off (irreversible dispatch)."
+        return outcome.model_copy(
+            update={
+                "requires_human": True,
+                "reasoning": ((outcome.reasoning or "") + " " + note).strip(),
+            }
+        )
     return outcome
 
 
