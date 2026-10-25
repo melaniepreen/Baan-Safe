@@ -4,7 +4,7 @@ Flood and disaster call-triage scaffold. Mubit governs memory, policy, and trace
 
 Sapling is [MubitLabs/banyan-sapling](https://huggingface.co/MubitLabs/banyan-sapling), the Apache-2.0 23B verifier (research preview). It takes a policy, evidence, and a claim, and returns `supported`, `violation`, `missing`, `contradicted`, or `unsure`, with probabilities. `supported` lets the proposed action stand. `violation` blocks it. `unsure`, `missing`, and `contradicted` hand the case to a human. The input limit is 16,384 tokens. It does not run on System 1. `system2.use_banyan_sapling` is true for those two checks. Hosting, the GPU, and Thai handling stay `TODO_HUMAN`. Tests use the stub client and do not load a GPU.
 
-The diagram follows one caller turn from top to bottom. Solid boxes and edges are implemented. Dashed ones are a stub, opt-in, or not wired. Green is System 1, blue is System 2, and yellow is where a person decides. A local `make serve` defaults to stub files (`S1_IMPL=stub`, `S2_IMPL=stub`). `S1_IMPL=real` runs the needs table, and `S2_IMPL=real` calls Nemotron through Mubit. The Modal gateway runs System 1 rules and auto enrichment, and promotes System 2 when `baansafe-mubit` is present. `router/ledger.py` holds stock in this process only. Accept confirms those holds and Reject cancels them. `GET /resources` subtracts the holds. Country packs are not loaded. The file-by-file request map is in `BaanSafe_Revised_Architecture.md`.
+The diagram follows one caller turn from top to bottom. Solid boxes and edges are implemented. Dashed ones are a stub, opt-in, or not wired. Green is System 1, blue is System 2, and yellow is where a person decides. A local `make serve` defaults to stub files (`S1_IMPL=stub`, `S2_IMPL=stub`, `MEMORY_IMPL=mock`). `S1_IMPL=real` runs the needs table, and `S2_IMPL=real` calls Nemotron through Mubit. `MEMORY_IMPL=mubit` retrieves and writes through `memory/mubit.py` on the Mubit control plane. The Modal gateway runs System 1 rules and auto enrichment, and sets System 2 and memory live when `baansafe-mubit` is present. It keeps one container (`max_containers=1`). `router/ledger.py` holds stock in that process only. Accept confirms those holds and Reject cancels them. A confirm after idle scaledown returns 422. `GET /resources` subtracts the holds. Country packs are not loaded. The file-by-file request map is in `BaanSafe_Revised_Architecture.md`.
 
 <!-- Diagram guide for the agent that refreshes this README. This diagram is the model: keep its layout. Keep the numbered subgraphs (1 caller, 2 Mubit gateway with its data inputs, 3a System 1, 3b System 2, 4 decision router with the dispatch list, 5 operator review, 6 learning loops), the colour classes (s1 green, s2 blue, human yellow, store grey, unwired dashed with a transparent fill so it reads in dark mode), hexagons for decisions, data stores beside the step that reads them, and the legend above (solid = implemented, dashed = stub, opt-in, or not wired). Each box names its step, its file, and the rule or numbers it applies. When the code changes, update labels, edges, and status in place, and keep the legend paragraph true. Do not shrink it back to a file-by-file request map. That map lives in BaanSafe_Revised_Architecture.md. -->
 
@@ -23,11 +23,11 @@ flowchart TD
 
   subgraph L2["2 · Mubit gateway — gateway/route.py · routes, traces every stage to traces.jsonl, never reasons"]
     places_db[("districts.json · admin_districts.json<br/>gazetteer snapshot")]:::store
-    extract["Extract — system1/extract.py<br/>runs when a case arrives without fields<br/>English needs · people · danger<br/>district names in Thai and English"]
+    extract["Extract — system1/extract.py<br/>runs when a case arrives without fields<br/>English needs · people · danger<br/>bare unaccompanied → child unless adult is named<br/>district names in Thai and English"]
     geo_db[("weather_observation.json · flood.geojson<br/>facilities.geojson: 4,218 facilities<br/>Open-Meteo and RID snapshots")]:::store
     enrich["Enrich — enrich/context.py<br/>districts.json first, 50 rows, province null<br/>then admin_districts: Hat Yai · Mueang Songkhla<br/>rain null on admin-only · flags never change priority"]
-    memory["Memory — memory/adapter.py<br/>similar cases · past corrections<br/>mock files"]
-    mmem["Mubit memory<br/>memory/mubit.py raises"]:::unwired
+    memory["Memory — memory/adapter.py<br/>every turn<br/>mock files, or the control plane when MEMORY_IMPL=mubit<br/>a query error returns no items"]
+    mmem["Mubit control plane — memory/mubit.py<br/>POST /v2/control/query and /ingest<br/>baansafe-demo · top 5 · 400 tokens<br/>MUBIT_PROJECT_ID overrides · proj- or ws-"]
     grad["Correction escalation — gateway/graduation.py<br/>2 cases with a high-risk human correction on one pattern<br/>tag complex_situation · sets no priority"]
     pick{{"Field precheck — gateway/chooser.py<br/>medical · oxygen or immobile<br/>location below 0.7 · rescue, medical or aid need<br/>safeguarding · conflict · aid exception · complex?"}}
   end
@@ -53,7 +53,7 @@ flowchart TD
   end
 
   subgraph L5["5 · Operator review — browser, ui/sim"]
-    hold["Operator Accept / Reject<br/>confirm or cancel this process's holds<br/>422 when another container has them"]:::human
+    hold["Operator Accept / Reject<br/>confirm or cancel this process's holds<br/>422 when this process has no holds"]:::human
     form["Correction form<br/>ui/correct.js"]:::human
   end
 
@@ -70,7 +70,7 @@ flowchart TD
   extract --> enrich
   geo_db --> enrich
   enrich --> memory
-  memory -.-> mmem
+  memory -.->|"MEMORY_IMPL=mubit"| mmem
   memory --> grad --> pick
   pick -->|"no trigger"| s1
   pick -->|"any trigger"| nemo
@@ -161,10 +161,10 @@ The town simulation is static files in `ui/sim/`. `make serve` mounts them at [h
 |---|---|---|
 | `S1_IMPL` | `stub` | `real` runs the rules in `system1/decide.py` |
 | `S2_IMPL` | `stub` | `real` runs the Nemotron orchestrator (`system2.orchestrator_model`) |
-| `MEMORY_IMPL` | `mock` | `mubit` when `memory/mubit.py` exists |
+| `MEMORY_IMPL` | `mock` | `mubit` calls `memory/mubit.py`. Modal sets this when the secret is present |
 | `ENRICH_IMPL` | `data` if `data/processed` exists, else `off` | `off` to skip lookups |
 
-`real` on System 2 calls Nemotron through Mubit and returns HTTP 503 when `MUBIT_BASE_URL`/`MUBIT_API_KEY` is unset; `mubit` memory still returns HTTP 501. `S1_IMPL=real` is implemented.
+`real` on System 2 calls Nemotron through Mubit and returns HTTP 503 when `MUBIT_BASE_URL`/`MUBIT_API_KEY` is unset. `MEMORY_IMPL=mubit` uses those same two values. A failed query returns no items and does not return HTTP 501. `S1_IMPL=real` is implemented.
 
 Stub gateway flow for `/triage` and `/cases/{id}/turns`: keyword-extract fields when the case has none (`system1/extract.py`) → enrich → memory through `memory/adapter.py` → route to System 1 or System 2 through the field precheck in `gateway/chooser.py` (`gateway.route_chooser` = `field precheck`; `mode: cascade` lets an S1 escalate hand off to S2 in the same turn — the no-stub fallback never cascades) → `router/merge.py` turns that one outcome into a `RouterDecision` with `next_action` and provisional dispatches → trace enrich, memory, the gateway, and the system that ran, with the outcome on the system event. A Mubit hop also emits `mubit_chat`. With `use_stubs=True` the selected system's stub outcome stands in for `decide()`; a non-fixture id falls back to a generic escalation outcome.
 
@@ -197,7 +197,7 @@ make push                # send: Modal secrets + git push main (syncs first if b
 make push MSG='summary'  # commit local work (not .env), then push
 ```
 
-`make sync` / `make push` are the shared teammate path. Sync does not overwrite existing `.env` values. Sync pushes `HF_TOKEN`, `MUBIT_API_KEY`, and `MUBIT_BASE_URL` from `.env` into Modal secrets `baansafe-hf` / `baansafe-mubit`; Modal apps read them there. A Modal secret cannot be downloaded, so a teammate who runs System 2 locally still needs the Mubit values in their own `.env`. They are not written into the image or the repo. Optional: add `S2_SERVE_API_KEY` to `.env` and re-run `make sync` or `make push`. Paste the same value into the Mubit console as the provider key for the self-hosted OpenAI base URL. The Modal URL is `https://<workspace>--baansafe-s2-serve.modal.run/v1`.
+`make sync` / `make push` are the shared teammate path. Sync does not overwrite existing `.env` values. Sync pushes `HF_TOKEN`, `MUBIT_API_KEY`, and `MUBIT_BASE_URL` from `.env` into Modal secrets `baansafe-hf` / `baansafe-mubit`. Optional `MUBIT_PROJECT_ID` and `S2_SERVE_API_KEY` go into `baansafe-mubit` when they are set. Modal apps read them there. A Modal secret cannot be downloaded, so a teammate who runs System 2 locally still needs the Mubit values in their own `.env`. They are not written into the image or the repo. Optional: add `S2_SERVE_API_KEY` to `.env` and re-run `make sync` or `make push`. Paste the same value into the Mubit console as the provider key for the self-hosted OpenAI base URL. The Modal URL is `https://<workspace>--baansafe-s2-serve.modal.run/v1`.
 
 ```bash
 export S1_GPU=cpu
