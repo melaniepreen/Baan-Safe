@@ -1,0 +1,78 @@
+/* Hosting banner: a 24px strip pinned to the top edge of the town page.
+   sim.css is untouched; the three fixed panels are nudged down by the strip
+   height here so nothing sits under it. Tones follow .path-badge in sim.css:
+   live green, cache blue, error red, muted slate. */
+
+:root { --hosting-banner-h: 24px; }
+
+#hosting-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 6;
+  height: var(--hosting-banner-h);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  font-size: 11px;
+  line-height: var(--hosting-banner-h);
+  letter-spacing: 0.02em;
+  color: #e6edf5;
+  background: #101a2b;
+  border-bottom: 1px solid #243044;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#hosting-banner:empty::before { content: "Hosting: reading /hosting…"; color: #9aa8bb; }
+
+.hosting-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #243044;
+}
+.hosting-part { flex: none; }
+.hosting-part:first-of-type { font-weight: 700; }
+.hosting-sep { flex: none; color: #9aa8bb; }
+.hosting-warning {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+.hosting-warning::before { content: "— "; }
+.hosting-source {
+  flex: none;
+  margin-left: auto;
+  color: #9aa8bb;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+#hosting-banner.tone-live { border-bottom-color: #2e7d32; }
+#hosting-banner.tone-live .hosting-dot { background: #2e7d32; }
+#hosting-banner.tone-cache { border-bottom-color: #0076D8; }
+#hosting-banner.tone-cache .hosting-dot { background: #0076D8; }
+#hosting-banner.tone-muted .hosting-dot { background: #9aa8bb; }
+#hosting-banner.tone-error {
+  background: #d1241a;
+  border-bottom-color: #d1241a;
+  color: #fff;
+}
+#hosting-banner.tone-error .hosting-dot { background: #fff; }
+#hosting-banner.tone-error .hosting-sep,
+#hosting-banner.tone-error .hosting-source { color: rgba(255, 255, 255, 0.85); }
+
+/* Make room under the strip. These mirror the top offsets in sim.css. */
+.wordmark { top: calc(16px + var(--hosting-banner-h)); }
+#side-stack { top: calc(16px + var(--hosting-banner-h)); }
+#phone { top: calc(96px + var(--hosting-banner-h)); }
+
+@media (max-width: 860px) {
+  #side-stack { top: auto; }
+  #phone { top: calc(64px + var(--hosting-banner-h)); }
+}

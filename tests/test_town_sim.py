@@ -412,6 +412,7 @@ def test_activity_prompts_and_rulebook_are_draft_simulations():
     subprocess.run(["node", "ui/sim/check_pace.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_landmarks.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_modelpath.mjs"], cwd=ROOT, check=True)
+    subprocess.run(["node", "ui/sim/check_hosting_banner.mjs"], cwd=ROOT, check=True)
     assert 'id="rl-open"' not in (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
     assert "initRlPanel" not in (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
     assert "No patterns yet — repeated calls will show up here" in (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
