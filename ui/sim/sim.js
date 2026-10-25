@@ -2630,7 +2630,7 @@ function renderModelPath(decision, trace) {
   panel.hidden = false;
   const rows = modelPathRows(trace, decision);
   if (!rows.length) {
-    line.textContent = "GET /cases/{id}/trace returned no rows for this turn. The cards below are scripted from sim_events.json.";
+    line.textContent = "GET /cases/{id}/trace returned no rows for this turn, so no gateway cards are shown.";
     return;
   }
   line.textContent = pathHeadline(decision, rows);
@@ -3160,6 +3160,13 @@ async function playFeed(call, decision, trace, text, fast) {
     }
     if (dispatchStep && LIVE_KINDS.has(dispatchStep.kind)) dispatchStep.source = "gateway";
   }
+  // Only cards backed by the gateway are shown. The scripted tool, landmark,
+  // caller-ip, pattern and rulebook cards are dropped: the Model Path panel
+  // and the technical detail on each LIVE card carry the real data.
+  const liveSteps = steps.filter((step) => step.source === "gateway");
+  steps.length = 0;
+  steps.push(...liveSteps);
+  if (dispatchStep && dispatchStep.source !== "gateway") dispatchStep = null;
   setFeedProgress(0, steps.length);
   for (const step of steps) {
     let headline = applyTemplate(step.text, bag).replace(/\s*Gateway reason:.*$/i, "").trim();
@@ -3169,7 +3176,7 @@ async function playFeed(call, decision, trace, text, fast) {
     if (step.id !== "caller-ip" && step.kind === "memory" && path.timesBefore > 0 && planned.stored && planned.consistent) {
       const seen = path.timesBefore;
       headline =
-        "Mubit: seen this pattern " +
+        "Memory: seen this pattern " +
         seen +
         " time" +
         (seen === 1 ? "" : "s") +
