@@ -481,7 +481,7 @@ input[type="range"] { width: 100%; accent-color: var(--yellow); }
   letter-spacing: 0.01em;
 }
 .phone-line strong { color: #e6edf5; font-weight: 650; }
-.demo-note { margin: 6px 8px; color: var(--muted); font-size: 10px; line-height: 1.35; }
+.demo-note { margin: 6px 8px; color: var(--muted); font-size: 11px; line-height: 1.4; }
 
 .phone-screen {
   position: relative;

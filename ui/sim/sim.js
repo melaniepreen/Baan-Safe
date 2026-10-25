@@ -25,6 +25,7 @@ import { phaseDurationMs } from "./pace.js";
 import { evalHeadline, evalRows } from "./mubit_eval.js";
 import { decidePath, PATTERN_KEY, withTop } from "./patterns.js";
 import { legsFromPath, nearestNode, walk } from "./route_walk.js";
+import { chooserSubtitle, FALLBACK } from "./subtitle.js";
 import { Application, Container, Graphics, Text } from "./vendor/pixi.min.mjs";
 
 const STATUSES = ["clear", "at_risk", "flooded", "needs_help", "evacuated"];
@@ -1841,8 +1842,12 @@ function showWelcome() {
   const note = document.getElementById("chooser-note");
   if (note) {
     // gateway.route_chooser is the decided field precheck.
-    note.textContent =
-      "Operator replies are scripted. The routing decision is live from the gateway.";
+    note.textContent = FALLBACK;
+    getJson("/health")
+      .then((health) => {
+        note.textContent = chooserSubtitle(health);
+      })
+      .catch(() => {});
   }
   const line = document.getElementById("phone-line");
   if (line) line.textContent = "Baan-Safe · " + PHONE_NUMBER;

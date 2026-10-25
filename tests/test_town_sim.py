@@ -247,7 +247,10 @@ def test_twenty_calls_link_fixtures_to_buildings():
     assert 'id="pattern-reset"' in page
     assert 'id="priority-badge"' in page
     source = (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
-    assert "Operator replies are scripted. The routing decision is live from the gateway." in source
+    assert "Operator replies are scripted. The routing decision is live from the gateway." in page
+    assert "Operator replies are scripted." in (
+        ROOT / "ui" / "sim" / "subtitle.js"
+    ).read_text(encoding="utf-8")
     assert "gateway.route_chooser" in source
     assert "Gateway stub:" not in source
     assert " · DEMO" not in source
@@ -418,6 +421,7 @@ def test_activity_prompts_and_rulebook_are_draft_simulations():
     subprocess.run(["node", "ui/sim/check_pace.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_landmarks.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_modelpath.mjs"], cwd=ROOT, check=True)
+    subprocess.run(["node", "ui/sim/check_subtitle.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_hosting_banner.mjs"], cwd=ROOT, check=True)
     assert 'id="rl-open"' not in (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
     assert "initRlPanel" not in (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
