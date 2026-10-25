@@ -1,6 +1,6 @@
 # BaanSafe
 
-## For the judges
+## Purpose
 
 **Why.** In a flood, the same hotline hears a family that needs a boat and a household that only needs drinking water, and no desk can sort every call before the water rises. BaanSafe listens, names the need, and puts a life in front of an operator while a routine delivery can leave on its own.
 
