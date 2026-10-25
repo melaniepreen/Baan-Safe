@@ -269,6 +269,15 @@ def test_rescue_inferred_from_door_water_and_elderly():
     assert Need.rescue in fields.needs
 
 
+def test_explicit_trapped_plus_inferred_rescue_is_one_need():
+    fields, _ = extract(
+        _turns(("caller", "Water is at the door and my grandmother cannot walk. We are trapped.")),
+        districts=DISTRICTS,
+    )
+    assert fields.needs.count(Need.rescue) == 1
+    assert len(fields.needs) == len(set(fields.needs))
+
+
 def test_evacuation_suppresses_rescue_without_vulnerable():
     fields, _ = extract(
         _turns(("caller", "The water is up to the steps. We should leave for the shelter.")),

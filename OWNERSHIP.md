@@ -21,7 +21,7 @@ Mubit governs memory, policy, and traceability. System 1 acts fast. System 2 rea
 | `system1/` | Moly for `decide()` and `extract.py`, Melanie for `aid_eligibility.py` | `decide()` is real rules; `aid_eligibility.py` raises |
 | `system2/` | Melanie | `orchestrate()` calls Nemotron through `llm/client.py` (model and latency decided). After reasoning, Sapling runs for aid eligibility and denials. The committed client is the stub |
 | `llm/` | Shared rule, Melanie wires the call | Refuses unless `MUBIT_BASE_URL` is a Mubit host. Does not print the key |
-| `memory/` | Melanie | Adapter switches `MEMORY_IMPL=mock` and `MEMORY_IMPL=mubit`. The mubit client raises |
+| `memory/` | Melanie (Moly wrote `local.py`) | Adapter switches `MEMORY_IMPL=mock` (fixture files), `local` (own JSONL store, the hosted default), and `mubit` (dormant: Mubit has no memory API, `/v2/control/*` is 404; `GET /health.memory.dormant` says so) |
 | `eval/` | Melanie | Scores stubs. `make demo-correction-loop` runs the stub model-update loop |
 | `contracts/` | Shared | v0.3 (CR-003 adds `Dispatch` and `RouterDecision.dispatches`). Tag `v0.3-contracts`. Further changes go through `contracts/CHANGE_REQUESTS.md` |
 | `config/` | Shared | Humans sign off. Big decisions stay `TODO_HUMAN`. `config/routing.yaml` is `cascade` and is a harness setting |
@@ -29,4 +29,4 @@ Mubit governs memory, policy, and traceability. System 1 acts fast. System 2 rea
 | `ingest/`, `enrich/`, `data/` | Shared | Public data. Production database is `TODO_HUMAN` |
 | `api/` | Shared | Stubs until each owner flips their env switch |
 
-Integration point: Saturday 19:00 Europe/London, with `S1_IMPL=real`, `S2_IMPL=real`, and `MEMORY_IMPL=mubit` together. Contracts stay frozen at `v0.3-contracts` until then.
+Integration point: Saturday 19:00 Europe/London, with `S1_IMPL=real`, `S2_IMPL=real`, and `MEMORY_IMPL=local` together (not `mubit`; that backend is dormant). Contracts stay frozen at `v0.3-contracts` until then.

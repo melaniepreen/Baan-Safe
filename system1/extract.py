@@ -501,7 +501,7 @@ def extract(
     vulnerable_hit = any(
         tag in vulnerable for tag in ("elderly", "immobile", "oxygen_dependent", "child")
     )
-    if rising_water and (vulnerable_hit or water_at_door_or_house):
+    if rising_water and (vulnerable_hit or water_at_door_or_house) and Need.rescue not in needs:
         if not (Need.evacuation in needs and not vulnerable_hit):
             needs.append(Need.rescue)
 

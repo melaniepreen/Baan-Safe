@@ -10,6 +10,16 @@ import { mountCorrectForm } from "../correct.js";
 import { needsOperatorApproval } from "./approval.js";
 import { callSummary } from "./call_title.js";
 import { locationLine, matchLandmark, PHONE_NUMBER } from "./landmarks.js";
+import {
+  handlingPath,
+  isLearnedRule,
+  memoryRows,
+  metricsParts,
+  modelPathRows,
+  PATH_HEX,
+  PATH_LABEL,
+  systemPath,
+} from "./modelpath.js";
 import { phaseDurationMs } from "./pace.js";
 import { decidePath, PATTERN_KEY, withTop } from "./patterns.js";
 import { legsFromPath, nearestNode, walk } from "./route_walk.js";
@@ -91,6 +101,7 @@ let callChain = Promise.resolve();
 let callGeneration = 0;
 let activeCallId = null;
 let callLightG = null;
+let colourMode = "priority";
 
 const PRIORITY_COLOR = { P1: "#ff4b3a", P2: "#ff9f1a", P3: "#d6ff3c", P4: "#8aa0ff" };
 const PRIORITY_HEX = { P1: 0xff4b3a, P2: 0xff9f1a, P3: 0xd6ff3c, P4: 0x8aa0ff };
@@ -1192,6 +1203,14 @@ const CALLER_OUTLINE = 0xff3b30;
 const DEST_OUTLINE = 0x2f6bff;
 const PENDING_OUTLINE = 0xed7401;
 
+function decisionColor(decision) {
+  if (colourMode === "path") {
+    const path = handlingPath(decision);
+    return (path && PATH_HEX[path]) || CALLER_OUTLINE;
+  }
+  return OUTLINE_HEX[decision.final_priority] || CALLER_OUTLINE;
+}
+
 function activeDestinationId() {
   if (!review || !review.rule || review.approval === "pending" || review.approval === "rejected") return null;
   const rule = review.rule;
@@ -1213,7 +1232,7 @@ function outlineColorFor(id) {
       if (item.building_id !== id) continue;
       const decision = callResults.get(item.id);
       if (!decision) continue;
-      return OUTLINE_HEX[decision.final_priority] || CALLER_OUTLINE;
+      return decisionColor(decision);
     }
   }
   return CALLER_OUTLINE;
@@ -2418,6 +2437,7 @@ function renderPatterns(rows) {
     tr.append(el("td", "num", String(row.count)));
     const pathCell = document.createElement("td");
     pathCell.append(el("span", "pat-badge " + (row.owner === "system_1" ? "s1" : "s2"), path));
+    if (row.learned) pathCell.append(document.createTextNode(" "), el("span", "pat-badge learned", "Learned"));
     tr.append(pathCell);
     const statusCell = document.createElement("td");
     statusCell.append(el("span", "pat-status " + statusClass, status));
@@ -2434,6 +2454,7 @@ function writePatterns(rows) {
 
 function rememberPattern(theme, decision, path, stored, consistent) {
   const rows = readPatterns().filter((row) => row.id !== theme.id);
+  const deciding = ((decision && decision.source_outcomes) || [])[0] || null;
   rows.unshift({
     id: theme.id,
     label: theme.label,
@@ -2445,6 +2466,7 @@ function rememberPattern(theme, decision, path, stored, consistent) {
     confirmed: !!(stored && stored.confirmed && consistent),
     lifeSafety: !!theme.life_safety,
     learns: theme.learns !== false,
+    learned: !!deciding && String(deciding.system) === "system_1" && isLearnedRule(deciding),
     lastSeen: new Date().toISOString(),
   });
   writePatterns(rows.slice(0, 24));
@@ -2509,34 +2531,92 @@ function mubitHopSummary(decision, trace) {
   };
 }
 
-function renderGatewayHop(decision, trace) {
+function pathBadge(badge) {
+  return el("span", "path-badge " + (badge.tone || "muted"), badge.text);
+}
+
+function pathHeadline(decision, rows) {
+  const path = systemPath(decision);
+  const bits = [];
+  if (path) bits.push(PATH_LABEL[path] + (decision.requires_human === true ? " · requires human" : ""));
+  if ((decision.source_outcomes || []).length > 1) bits.push("cascade");
+  const chat = rows.find((row) => row.stage === "mubit_chat");
+  const hop = mubitHopSummary(decision, null);
+  if (chat) bits.push("Mubit → Nemotron " + (chat.latency_ms == null ? "" : chat.latency_ms + " ms"));
+  else if (hop) bits.push("System 2 without a mubit_chat hop (stub or cache)");
+  const total = rows.reduce((sum, row) => sum + (row.latency_ms || 0), 0);
+  bits.push(rows.length + " stage" + (rows.length === 1 ? "" : "s") + " · " + total + " ms traced");
+  return bits.join(" · ");
+}
+
+function renderModelPath(decision, trace) {
   const panel = document.getElementById("gateway-hop");
   const line = document.getElementById("gateway-hop-line");
   const list = document.getElementById("gateway-hop-list");
   if (!panel || !line || !list) return;
-  const hop = mubitHopSummary(decision, trace);
-  if (!hop) {
+  list.replaceChildren();
+  if (!decision) {
     panel.hidden = true;
     line.textContent = "";
-    list.replaceChildren();
     return;
   }
   panel.hidden = false;
-  line.textContent = hop.headline;
-  list.replaceChildren();
-  for (const system of hop.source_systems) {
-    const item = el("li", system === "system_2" ? "mubit" : null, "source_outcomes · " + system);
+  const rows = modelPathRows(trace, decision);
+  if (!rows.length) {
+    line.textContent = "GET /cases/{id}/trace returned no rows for this turn. The cards below are scripted from sim_events.json.";
+    return;
+  }
+  line.textContent = pathHeadline(decision, rows);
+  for (const row of rows) {
+    if (row.divider) {
+      list.append(el("li", "path-row divider", row.label));
+      continue;
+    }
+    const item = el("li", "path-row stage-" + row.stage + (row.tone ? " tone-" + row.tone : ""));
+    const head = el("div", "path-head");
+    head.append(el("span", "path-stage", row.label));
+    head.append(el("span", "path-ms", row.latency_ms == null ? "—" : row.latency_ms + " ms"));
+    item.append(head);
+    const detail = el("p", "path-detail", row.detail || "");
+    for (const badge of row.badges || []) detail.append(document.createTextNode(" "), pathBadge(badge));
+    item.append(detail);
     list.append(item);
   }
-  if (hop.notes) list.append(el("li", null, hop.notes));
-  list.append(el("li", null, "Token cost not shown — llm.token_price_usd is TODO_HUMAN."));
+}
+
+function renderMemoryPanel(caseState, decision) {
+  const panel = document.getElementById("memory-panel");
+  const list = document.getElementById("memory-list");
+  if (!panel || !list) return;
+  list.replaceChildren();
+  if (!caseState) {
+    panel.hidden = true;
+    return;
+  }
+  panel.hidden = false;
+  const rows = memoryRows(caseState.memory_context || [], decision);
+  if (!rows.length) {
+    list.append(el("li", "mem-empty", "No memory items for this call"));
+    return;
+  }
+  for (const row of rows) {
+    const item = el("li", "mem-row" + (row.merged ? " merged" : ""));
+    const head = el("div", "mem-head");
+    head.append(el("span", "mem-kind kind-" + row.kind, row.kind.replaceAll("_", " ")));
+    head.append(el("span", "mem-pct", row.pct == null ? "—" : row.pct + "%"));
+    if (row.source_case_id) head.append(el("span", "mem-src", row.source_case_id));
+    item.append(head);
+    item.append(el("p", "mem-summary", row.summary));
+    if (row.merged) item.append(el("p", "mem-merged", "repeat caller → merged, no second truck"));
+    list.append(item);
+  }
 }
 
 async function renderMetricsStrip(decision) {
   const panel = document.getElementById("metrics-strip");
   const body = document.getElementById("metrics-body");
   if (!panel || !body) return;
-  if (!system2Decided(decision)) {
+  if (!decision) {
     panel.hidden = true;
     body.textContent = "";
     return;
@@ -2545,31 +2625,11 @@ async function renderMetricsStrip(decision) {
   body.textContent = "Loading GET /metrics…";
   try {
     const metrics = await getJson("/metrics");
-    const mubit = metrics.mubit_chat || {};
-    const avg = (metrics.avg_latency_ms || {}).mubit_chat;
-    const s2share = metrics.pct_handled_by_system_2;
-    const parts = [
-      "Cases traced " + (metrics.cases_traced || 0),
-      "S2 share " + (s2share == null ? "—" : Math.round(Number(s2share) * 100) + "%"),
-    ];
-    if (mubit.call_count != null) {
-      parts.push(
-        "Mubit chat " +
-          mubit.call_count +
-          " call(s) · ok " +
-          (mubit.ok_count || 0) +
-          " · err " +
-          (mubit.error_count || 0)
-      );
-    }
-    if (avg != null) parts.push("avg Mubit hop " + Math.round(avg) + " ms");
-    else if ((metrics.avg_latency_ms || {}).system_2 != null) {
-      parts.push("avg System 2 " + Math.round(metrics.avg_latency_ms.system_2) + " ms");
-    }
+    const parts = metricsParts(metrics);
     parts.push("no token $ (llm.token_price_usd unset)");
     body.textContent = parts.join(" · ");
   } catch (error) {
-    body.textContent = "GET /metrics unavailable. source_outcomes still show System 2 on the hop card.";
+    body.textContent = "GET /metrics unavailable. The Model path above still comes from this call's trace.";
   }
 }
 
@@ -2810,7 +2870,11 @@ async function playFeed(call, decision, trace, text, fast) {
   const source = (decision.source_outcomes && decision.source_outcomes[0]) || {};
   const aid = decision.final_route === "aid_caseworker" || (source.needs || []).map(String).includes("aid_payment");
   const rule = ruleFromDispatches(call, decision, text);
-  renderLocationContext(caseStates.get(call.id) || (live.triage && live.triage.caseState) || null);
+  const caseState = caseStates.get(call.id) || (live.triage && live.triage.caseState) || null;
+  renderLocationContext(caseState);
+  renderModelPath(decision, trace);
+  renderMemoryPanel(caseState, decision);
+  renderMetricsStrip(decision);
   renderScores(scores, needs, accepted);
   setPriorityBadge(decision.final_priority);
   clearApprovalChrome();
@@ -3446,7 +3510,7 @@ function drawCallLights() {
   for (const call of town.calls) {
     const decision = callResults.get(call.id);
     if (!decision) continue;
-    colors.set(call.building_id, OUTLINE_HEX[decision.final_priority] || CALLER_OUTLINE);
+    colors.set(call.building_id, decisionColor(decision));
   }
   const caller = activeCallId ? town.calls.find((item) => item.id === activeCallId) : null;
   if (caller) {
@@ -3467,9 +3531,26 @@ function updateCallLink() {
   // The map chip and dotted connector are gone. Mubit stays on the feed cards.
 }
 
+function hexCss(color) {
+  return "#" + color.toString(16).padStart(6, "0");
+}
+
 function renderCallLegend() {
   const box = document.getElementById("priority-legend");
   box.replaceChildren();
+  if (colourMode === "path") {
+    box.append(el("span", "legend-title", "House colour: handling path"));
+    for (const path of ["system_1", "learned", "system_2", "human"]) {
+      const answered = [...callResults.values()].filter((decision) => handlingPath(decision) === path).length;
+      const span = el("span");
+      const swatch = el("i", "swatch");
+      swatch.style.background = hexCss(PATH_HEX[path]);
+      span.append(swatch, document.createTextNode(" " + PATH_LABEL[path] + " " + answered));
+      box.append(span);
+    }
+    return;
+  }
+  box.append(el("span", "legend-title", "House colour: priority"));
   for (const priority of ["P1", "P2", "P3", "P4"]) {
     const answered = [...callResults.values()].filter((decision) => decision.final_priority === priority).length;
     const labelled = town.calls.filter((call) => call.expected_priority === priority).length;
@@ -3478,6 +3559,15 @@ function renderCallLegend() {
     span.append(swatch, document.createTextNode(" " + priority + " " + answered + "/" + labelled));
     box.append(span);
   }
+}
+
+function setColourMode(mode) {
+  colourMode = mode === "path" ? "path" : "priority";
+  const pick = document.getElementById("colour-mode");
+  if (pick && pick.value !== colourMode) pick.value = colourMode;
+  drawCallLights();
+  drawSelection();
+  renderCallLegend();
 }
 
 function renderCallList() {
@@ -3570,6 +3660,9 @@ function resetCalls() {
   document.getElementById("flow").replaceChildren();
   document.getElementById("backend-log").replaceChildren();
   renderLocationContext(null);
+  renderModelPath(null, []);
+  renderMemoryPanel(null, null);
+  renderMetricsStrip(null);
   setPriorityBadge(null);
   setFeedProgress(0, 0);
   renderPatterns();
@@ -3636,6 +3729,8 @@ function bindChrome() {
   document.getElementById("op-reject").addEventListener("click", rejectReview);
   document.getElementById("log-clear").addEventListener("click", () => writeLog([]));
   document.getElementById("pattern-reset").addEventListener("click", () => writePatterns([]));
+  const colourPick = document.getElementById("colour-mode");
+  if (colourPick) colourPick.addEventListener("change", () => setColourMode(colourPick.value));
   const patternRule = document.getElementById("pattern-rule");
   if (patternRule && eventsFile && eventsFile.learning && eventsFile.learning.life_safety_rule) {
     patternRule.textContent = eventsFile.learning.life_safety_rule;

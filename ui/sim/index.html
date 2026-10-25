@@ -104,6 +104,12 @@
           <h1 id="call-heading">No call yet</h1>
         </div>
         <div class="feed-head-actions">
+          <label class="colour-mode">Colour
+            <select id="colour-mode" aria-label="House colour">
+              <option value="priority">priority</option>
+              <option value="path">path</option>
+            </select>
+          </label>
           <button type="button" id="dispatch-reset">Reset</button>
           <span id="priority-badge" class="priority-badge" hidden>Gateway</span>
         </div>
@@ -111,9 +117,13 @@
       <div class="feed-meter" aria-hidden="true"><div id="feed-progress"></div></div>
       <p id="feed-count" class="muted"></p>
       <section id="gateway-hop" class="mubit-readout" hidden>
-        <p class="kicker">Model path</p>
+        <p class="kicker">Model path <span class="gw-badge">trace</span></p>
         <p id="gateway-hop-line" class="msg"></p>
-        <ul id="gateway-hop-list" class="hops"></ul>
+        <ol id="gateway-hop-list" class="path-rows"></ol>
+      </section>
+      <section id="memory-panel" class="mubit-readout" hidden>
+        <p class="kicker">Memory <span class="gw-badge">case.memory_context</span></p>
+        <ul id="memory-list" class="mem-list"></ul>
       </section>
       <section id="metrics-strip" class="metrics-strip" hidden>
         <p class="kicker">Gateway metrics</p>

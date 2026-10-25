@@ -41,6 +41,7 @@ from config.settings import DecisionRequired
 from gateway.route import handle
 from ingest import store
 from memory.adapter import memory_mode, retrieve, store_correction
+from memory.adapter import status as memory_status
 from training.log import append_event
 from mocks.loader import (
     ResourceUnit,
@@ -138,6 +139,7 @@ class Health(BaseModel):
     status: str
     impl: dict[str, str]
     data_freshness: dict[str, Any]
+    memory: dict[str, Any]
 
 
 class HoldView(BaseModel):
@@ -204,7 +206,12 @@ def health() -> Health:
                 "row_count": row["row_count"],
                 "status": row["status"],
             }
-    return Health(status="ok", impl=impl_snapshot(), data_freshness=freshness)
+    return Health(
+        status="ok",
+        impl=impl_snapshot(),
+        data_freshness=freshness,
+        memory=memory_status(),
+    )
 
 
 @router.get("/fixtures")

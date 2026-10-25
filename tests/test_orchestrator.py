@@ -202,3 +202,29 @@ def test_aid_flags_force_requires_human():
     with use_completer(lambda *a, **k: reply):
         outcome = orchestrate(case)
     assert outcome.requires_human is True
+
+
+def test_p1_forces_requires_human():
+    # Live nano on 25 Oct returned P1 rescue with requires_human=false on
+    # G01/G03/G04. A boat dispatch is irreversible, so a person signs it off.
+    reply = _reply(
+        '{"priority": "P1", "route": "rescue_coordination", "needs": ["rescue"],'
+        ' "requires_human": false, "missing_evidence": [], "next_question": null,'
+        ' "confidence": 0.9, "rationale": "Trapped, water rising.", "plan": []}'
+    )
+    with use_completer(lambda *a, **k: reply):
+        outcome = orchestrate(load_case("G01"))
+    assert outcome.priority is Priority.P1
+    assert outcome.requires_human is True
+    assert "P1" in (outcome.reasoning or "")
+
+
+def test_p2_does_not_force_requires_human():
+    reply = _reply(
+        '{"priority": "P2", "route": "shelter_placement", "needs": ["evacuation"],'
+        ' "requires_human": false, "missing_evidence": [], "next_question": null,'
+        ' "confidence": 0.8, "rationale": "Evacuate today.", "plan": []}'
+    )
+    with use_completer(lambda *a, **k: reply):
+        outcome = orchestrate(load_case("F10"))
+    assert outcome.requires_human is False
