@@ -144,6 +144,26 @@
       ]
     },
     {
+      "path": "docs/agents/training-surface.md",
+      "title": "Training surface",
+      "summary": "GET /training and ui/training.html: Mubit traffic, fine-tune registry with loss curves, RL epochs, event counts.",
+      "keywords": [
+        "training",
+        "metrics",
+        "loss-curve",
+        "finetune",
+        "mubit",
+        "ui"
+      ],
+      "files": [
+        "api/routes/training.py",
+        "ui/training.html",
+        "ui/training.js",
+        "infra/modal/finetune_job.py",
+        "infra/modal/gateway_app.py"
+      ]
+    },
+    {
       "path": "docs/agents/caller-simulation.md",
       "title": "Caller simulation",
       "summary": "Scripted callers routed by the real gateway; coach and sim append TrainingEvents.",

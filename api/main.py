@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 from api.routes.endpoints import router
 from api.routes.policies import router as policies_router
+from api.routes.training import router as training_router
 from config.envfile import load_env_file
 from paths import ROOT
 
@@ -27,4 +28,6 @@ app.add_middleware(
 )
 app.include_router(router)
 app.include_router(policies_router)
+app.include_router(training_router)
+# /ui/training.html reads GET /training. Same static mount as the player and the town.
 app.mount("/ui", StaticFiles(directory=ROOT / "ui", html=True), name="ui")

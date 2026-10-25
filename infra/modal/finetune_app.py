@@ -17,11 +17,13 @@ from infra.modal.common import parse_gpu, redact, resolve
 from infra.modal.finetune_job import (
     DatasetError,
     dry_run_payload,
+    heldout_path_for,
     load_task_datasets,
     merge_registry,
     messages_for,
     parent_from_registry,
     parse_dataset,
+    parse_heldout,
     plan_version,
     role_for,
     setfit_base_model,
@@ -101,7 +103,13 @@ def train(
     max_length: int = 512,
     role: str = "system_2",
     task: str = "sft",
+    heldout_text: str = "",
 ) -> str:
+    """Train one version. `heldout_text` is the s1 held-out JSONL, or empty.
+
+    `metrics.json` next to the adapter carries the loss curve (and the
+    held-out check for SetFit). `GET /training` reads it from the volume.
+    """
     volume.reload()
     root = Path(VERSIONS_PATH)
     registry_path = root / "registry.json"
@@ -122,11 +130,15 @@ def train(
     try:
         parsed = parse_dataset(dataset_text, task)
         if task == "s1_triage":
+            heldout = parse_heldout(heldout_text) if heldout_text.strip() else None
+            if heldout:
+                (version_dir / "heldout.jsonl").write_text(heldout_text, encoding="utf-8")
             metrics = train_setfit(
                 parsed,
                 setfit_base_model(BASE_MODEL),
                 version_dir / "adapter",
                 max_steps=max_steps,
+                heldout=heldout,
             )
         else:
             metrics = train_lora(
@@ -179,7 +191,7 @@ def main(
     steps = int(os.environ.get("FINETUNE_MAX_STEPS", str(max_steps)))
     length = int(os.environ.get("FINETUNE_MAX_LENGTH", str(max_length)))
     runs: list[tuple[str, str, dict]] = []
-    for item_task, _path, text in jobs:
+    for item_task, item_path, text in jobs:
         item_role = role_for(item_task, chosen_role)
         if dry_run:
             version_id, addition = plan_version(
@@ -192,7 +204,13 @@ def main(
             runs.append((version_id, item_task, addition))
             print(version_id)
             continue
-        print(train.remote(text, steps, length, item_role, item_task))
+        heldout_text = ""
+        if item_task == "s1_triage":
+            heldout_file = heldout_path_for(item_path)
+            if heldout_file is not None:
+                heldout_text = heldout_file.read_text(encoding="utf-8")
+                print(f"heldout: {heldout_file}")
+        print(train.remote(text, steps, length, item_role, item_task, heldout_text))
     if dry_run:
         out = Path(os.environ.get("FINETUNE_DRY_RUN_DIR", "eval/out"))
         out.mkdir(parents=True, exist_ok=True)

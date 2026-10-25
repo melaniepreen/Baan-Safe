@@ -21,6 +21,14 @@ Runtime writes (including TRACE_PATH for gateway/S1/S2/router stages) go
 to the `baansafe-demo` volume at `/data`. The ASGI function sets
 `max_containers=1` so confirm/cancel and resource stock share one
 in-process ledger for the demo.
+
+`GET /training` and `/ui/training.html` read two more paths. The
+`baansafe-versions` volume (the fine-tune registry, written by
+`infra/modal/finetune_app.py`) is mounted read-only at `/vol`, so
+`TRAINING_REGISTRY_PATH=/vol/registry.json`. The RL report is gitignored and
+does not ship in the image; `RL_RUN_PATH=/data/rl_run.json` reads a copy on
+the demo volume, uploaded with
+`modal volume put baansafe-demo eval/out/rl/run.json rl_run.json`.
 """
 
 from __future__ import annotations
@@ -59,14 +67,21 @@ def _repo_on_path() -> None:
 
 _repo_on_path()
 
-from infra.modal.common import repo_root  # noqa: E402
-from infra.modal.runtime import mubit_secret  # noqa: E402
+from infra.modal.common import VERSIONS_VOLUME, repo_root  # noqa: E402
+from infra.modal.runtime import VERSIONS_PATH, mubit_secret, versions  # noqa: E402
 
 APP_NAME = "baansafe-gateway"
 DATA_MOUNT = "/data"
 DEMO_VOLUME = "baansafe-demo"
 REMOTE_ROOT = "/opt/baansafe"
 UPSTREAM_ENV_NAMES = ("S1_UPSTREAM", "S2_UPSTREAM", "SAPLING_UPSTREAM", "STT_UPSTREAM")
+# Read-only paths behind GET /training. The registry is on the versions volume;
+# the RL report is a copy on the demo volume (eval/out is not in the image).
+READ_ENV = {
+    "TRAINING_REGISTRY_PATH": f"{VERSIONS_PATH}/registry.json",
+    "RL_RUN_PATH": f"{DATA_MOUNT}/rl_run.json",
+}
+RL_RUN_UPLOAD = f"modal volume put {DEMO_VOLUME} eval/out/rl/run.json rl_run.json"
 
 # Demo switches and writable paths. Nothing here is a secret.
 # S1 + enrich need no key. S2 image default is stub; runtime promotes with Mubit.
@@ -84,6 +99,7 @@ STUB_ENV = {
     "MOCK_CORRECTIONS_PATH": f"{DATA_MOUNT}/corrections.jsonl",
     "TRAINING_EVENTS_PATH": f"{DATA_MOUNT}/events.jsonl",
     "POLICY_PIN_DIR": f"{DATA_MOUNT}/policy-pins",
+    **READ_ENV,
 }
 
 
@@ -175,6 +191,9 @@ image = (
 
 app = modal.App(APP_NAME, image=image)
 demo_data = modal.Volume.from_name(DEMO_VOLUME, create_if_missing=True)
+# The fine-tune job owns this volume; the gateway only reads registry.json
+# and versions/<id>/metrics.json from it.
+versions_data = versions().read_only()
 
 
 def prepare_runtime_files() -> None:
@@ -266,7 +285,9 @@ def _hosting_note(impl: dict[str, str]) -> str:
         f"{memory_line} "
         "Sapling stays stub. "
         "S1_UPSTREAM, S2_UPSTREAM, and SAPLING_UPSTREAM do not replace gateway outcomes. "
-        "STT_UPSTREAM forwards POST /stt/transcribe and invents no words."
+        "STT_UPSTREAM forwards POST /stt/transcribe and invents no words. "
+        "GET /training and /ui/training.html read the fine-tune registry on the "
+        "versions volume (read-only) and the RL report copy on the demo volume."
     )
 
 
@@ -297,6 +318,17 @@ def hosting() -> dict:
             "MEMORY_LOCAL_PATH": os.environ.get(
                 "MEMORY_LOCAL_PATH", STUB_ENV["MEMORY_LOCAL_PATH"]
             ),
+        },
+        "reads": {
+            "TRAINING_REGISTRY_PATH": os.environ.get(
+                "TRAINING_REGISTRY_PATH", READ_ENV["TRAINING_REGISTRY_PATH"]
+            ),
+            "RL_RUN_PATH": os.environ.get("RL_RUN_PATH", READ_ENV["RL_RUN_PATH"]),
+            "versions_volume": VERSIONS_VOLUME,
+            "versions_mount": VERSIONS_PATH,
+            "rl_run_upload": RL_RUN_UPLOAD,
+            "page": "/ui/training.html",
+            "endpoint": "/training",
         },
         "note": _hosting_note(impl),
     }
@@ -346,7 +378,7 @@ async def transcribe(request: Request) -> dict:
     image=image,
     cpu=1.0,
     secrets=[mubit_secret()],
-    volumes={DATA_MOUNT: demo_data},
+    volumes={DATA_MOUNT: demo_data, VERSIONS_PATH: versions_data},
     # One container so confirm/cancel and GET /resources share the in-process ledger.
     max_containers=1,
     scaledown_window=120,

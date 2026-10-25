@@ -25,7 +25,7 @@ Modal apps for System 1, System 2, Sapling, speech-to-text, and a finetune job. 
 - `infra/modal/vram.py` — footprint tables. Not a chosen model.
 - `infra/HARDWARE.md` — prices and the sizing note.
 - `infra/modal/runtime.py` — Modal secret `baansafe-mubit`, key names `MUBIT_API_KEY` and `MUBIT_BASE_URL` (`llm/client.py` refuses without both). The value is not in git.
-- `infra/modal/gateway_app.py` — public demo ASGI. Attaches `mubit_secret()`. `STUB_ENV` keeps `S1_IMPL=real` and enrichment auto; `S2_IMPL` stays stub in the image and `apply_runtime_impl()` promotes to `real` only when both Mubit values are injected. `max_containers=1` so the in-process dispatch ledger is shared. `GET /hosting` reports backends, upstreams, `secrets` as a bool (never the key), and note `LLM via Mubit only`. `TRACE_PATH` is on the `baansafe-demo` volume.
+- `infra/modal/gateway_app.py` — public demo ASGI. Attaches `mubit_secret()`. `STUB_ENV` keeps `S1_IMPL=real` and enrichment auto; `S2_IMPL` stays stub in the image and `apply_runtime_impl()` promotes to `real` only when both Mubit values are injected. `max_containers=1` so the in-process dispatch ledger is shared. `GET /hosting` reports backends, upstreams, `secrets` as a bool (never the key), `reads` (the training-surface paths), and note `LLM via Mubit only`. `TRACE_PATH` is on the `baansafe-demo` volume. The `baansafe-versions` volume is mounted read-only at `/vol` so `GET /training` can read the fine-tune registry (`TRAINING_REGISTRY_PATH=/vol/registry.json`); `RL_RUN_PATH=/data/rl_run.json` is a copy uploaded with `modal volume put baansafe-demo eval/out/rl/run.json rl_run.json`. See `docs/agents/training-surface.md`.
 - `scripts/sync_modal_secrets.py` — `make modal-secrets` from gitignored `.env`.
 - `scripts/sync_workspace.py` — `make sync` (download) for both teammates: pull, `.env`, pip, Modal, secrets, push readiness.
 - `scripts/push_workspace.py` — `make push` (send): Modal secrets + `git push` main. `MSG='...'` commits first (never `.env`).
@@ -36,7 +36,7 @@ Modal apps for System 1, System 2, Sapling, speech-to-text, and a finetune job. 
 - `make push` runs `scripts/push_workspace.py`: syncs Modal secrets from `.env`, optionally commits with `MSG=...` (skips `.env` / `.venv` / `.vscode`), then pushes `main`. If behind origin, runs sync first (same conflict rules).
 - `make modal-secrets` runs `scripts/sync_modal_secrets.py`: pushes `HF_TOKEN` / `MUBIT_API_KEY` / `MUBIT_BASE_URL` (and optional `S2_SERVE_API_KEY`) from gitignored `.env` into `baansafe-hf` / `baansafe-mubit`. Does not print values. Does not sync `OPENROUTER_API_KEY`.
 - `make modal-deploy-s1`, `modal-deploy-s2`, `modal-deploy-sapling`, `modal-deploy-stt` run `modal deploy`.
-- `make modal-finetune` runs `modal run -m infra.modal.finetune_app` with `DATASET` (default `eval/out/sft.jsonl`).
+- `make modal-finetune` runs `modal run -m infra.modal.finetune_app` with `DATASET` (default `eval/out/sft.jsonl`). Each version writes `metrics.json` (loss curve, summaries; SetFit adds a held-out check when `s1_synthetic_heldout.jsonl` sits next to the dataset or `FINETUNE_HELDOUT` names it).
 - Sapling app reads `sapling.model_id` / `SAPLING_MODEL_ID` and `sapling.gpu` / `SAPLING_GPU`. It does not fall back to `MubitLabs/banyan-sapling`.
 - System 2 on Modal is the self-hosted vLLM app. That is separate from `system2.hosting` (`openrouter via mubit gateway`). Do not point the LLM client at the Modal URL directly.
 

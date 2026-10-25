@@ -17,6 +17,7 @@ The operator UI is the transcript player and the town desk. `Correct this` sends
 - `ui/player.html` — plays `GET /fixtures/{id}/stream`, then shows Correct this.
 - `ui/correct.js` — fills `task` and `input_ref`. The operator picks `output_correct` and types `reason`.
 - `ui/sim/index.html` — same form after gateway triage on a household.
+- `ui/training.html`, `ui/training.js` — training page: reads `GET /training`, draws Mubit traffic cards, the fine-tune versions table with an inline SVG loss chart, RL epochs, and event counts. Plain JS. Topic: `docs/agents/training-surface.md`.
 - `ui/transcript_player.py` — `python -m ui.transcript_player F01 --pace 0`. Fixture text only. Owner: Moly.
 - `frontend-prototype/README.md` — gallery `index.html`, variants `v0-dark/` through `v5/`.
 - `contracts/training.py` — closed labels. The form does not define a second enum.

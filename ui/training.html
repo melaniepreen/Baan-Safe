@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BaanSafe training</title>
+  <style>
+    :root {
+      --ink: #1b1b1b;
+      --muted: #666;
+      --line: #d9d9d9;
+      --blue: #0b3d91;
+      --red: #b3261e;
+      --paper: #fff;
+    }
+    body {
+      font-family: sans-serif;
+      margin: 2rem;
+      max-width: 72rem;
+      color: var(--ink);
+      background: var(--paper);
+    }
+    h1 { font-size: 2rem; margin: 0 0 0.25rem; }
+    h2 { font-size: 1.4rem; margin: 2.5rem 0 0.75rem; border-bottom: 2px solid var(--ink); padding-bottom: 0.25rem; }
+    p.lede { color: var(--muted); margin: 0 0 1rem; font-size: 1.05rem; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.75rem; }
+    .card { border: 1px solid var(--line); border-radius: 6px; padding: 0.9rem 1rem; }
+    .card .label { font-size: 0.85rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .card .value { font-size: 2.4rem; font-weight: 700; line-height: 1.1; margin-top: 0.2rem; font-variant-numeric: tabular-nums; }
+    .card .value.small { font-size: 1.4rem; }
+    .card .sub { font-size: 0.9rem; color: var(--muted); margin-top: 0.3rem; }
+    .card.alert .value { color: var(--red); }
+    table { border-collapse: collapse; width: 100%; font-size: 1rem; font-variant-numeric: tabular-nums; }
+    th, td { text-align: left; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    th { font-size: 0.85rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    td.num, th.num { text-align: right; }
+    tbody tr.pick { cursor: pointer; }
+    tbody tr.pick:hover { background: #f3f6fb; }
+    tbody tr.selected { background: #e8eef9; }
+    .chart { margin-top: 1rem; border: 1px solid var(--line); border-radius: 6px; padding: 0.75rem 1rem; }
+    .chart h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+    .chart svg { width: 100%; height: auto; display: block; }
+    .empty { color: var(--muted); font-style: italic; padding: 0.5rem 0; }
+    .mono { font-family: ui-monospace, Menlo, monospace; font-size: 0.9rem; }
+    .meta { color: var(--muted); font-size: 0.9rem; margin-top: 0.5rem; }
+    .scroll { overflow-x: auto; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 50rem) { .pair { grid-template-columns: 1fr; } }
+    ul.missing { color: var(--muted); font-size: 0.9rem; }
+    #status { color: var(--red); }
+  </style>
+</head>
+<body>
+  <h1>Training</h1>
+  <p class="lede">
+    What BaanSafe can measure about learning: Mubit traffic from System 2 calls,
+    our own fine-tune runs with loss curves, the RL reward loop, and the training event log.
+    Reads <code>GET /training</code>.
+  </p>
+  <p id="status" role="status"></p>
+
+  <h2>Mubit traffic <span class="meta" id="mubit-window"></span></h2>
+  <p class="lede">
+    Mubit trains per-task adapters from these recorded System 2 calls on its side.
+    There is no API to read that state; kept examples and adapter status live in the Mubit console (Tasks / Adapters).
+  </p>
+  <div class="cards" id="mubit-cards"></div>
+  <p class="meta" id="mubit-note"></p>
+
+  <h2>Fine-tune versions <span class="meta" id="finetune-decided"></span></h2>
+  <div class="scroll" id="finetune-table"></div>
+  <div class="chart" id="loss-chart"></div>
+
+  <h2>RL loop <span class="meta" id="rl-meta"></span></h2>
+  <div class="scroll" id="rl-table"></div>
+  <div class="cards" id="overlay-cards" style="margin-top:0.75rem"></div>
+  <div class="chart" id="reward-chart"></div>
+
+  <h2>Training events</h2>
+  <div class="pair">
+    <div class="cards" id="event-cards"></div>
+    <div id="manifests"></div>
+  </div>
+
+  <h2>Not found</h2>
+  <ul class="missing" id="missing"></ul>
+
+  <script src="training.js"></script>
+</body>
+</html>

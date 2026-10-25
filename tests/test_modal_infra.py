@@ -176,7 +176,19 @@ def test_gateway_app_builds_demo_asgi_with_mubit_secret_slot(monkeypatch, tmp_pa
     assert spec.secrets[0].name == MUBIT_SECRET_NAME
     assert spec.gpus is None
     assert spec.cpu == 1.0
-    assert set(spec.volumes) == {"/data"}
+    # Demo writes on /data; the fine-tune registry is read-only on /vol.
+    from infra.modal.runtime import VERSIONS_PATH
+
+    assert VERSIONS_PATH == "/vol"
+    assert set(spec.volumes) == {"/data", VERSIONS_PATH}
+    assert spec.volumes[VERSIONS_PATH]._read_only is True
+    assert spec.volumes["/data"]._read_only is False
+    assert gateway.STUB_ENV["TRAINING_REGISTRY_PATH"] == "/vol/registry.json"
+    assert gateway.STUB_ENV["RL_RUN_PATH"] == "/data/rl_run.json"
+    assert gateway.image_env()["TRAINING_REGISTRY_PATH"] == "/vol/registry.json"
+    from api.routes.training import VOLUME_REGISTRY_PATH
+
+    assert VOLUME_REGISTRY_PATH == gateway.STUB_ENV["TRAINING_REGISTRY_PATH"]
     source = Path(gateway.__file__).read_text(encoding="utf-8")
     # Demo ledger is in-process; pin replicas in source (Modal may not mirror on _spec_).
     assert "max_containers=1" in source
@@ -227,6 +239,19 @@ def test_gateway_app_builds_demo_asgi_with_mubit_secret_slot(monkeypatch, tmp_pa
         assert "stub gateway" not in body["note"].lower()
         assert "System 1" in body["note"]
         assert body["writes"]["TRACE_PATH"]
+        assert body["reads"]["TRAINING_REGISTRY_PATH"] == "/vol/registry.json"
+        assert body["reads"]["RL_RUN_PATH"] == "/data/rl_run.json"
+        assert body["reads"]["versions_volume"] == "baansafe-versions"
+        assert body["reads"]["rl_run_upload"].startswith("modal volume put baansafe-demo ")
+        assert body["reads"]["page"] == "/ui/training.html"
+        assert "/training" in body["note"]
+        training_page = client.get("/ui/training.html")
+        assert training_page.status_code == 200
+        assert "training.js" in training_page.text
+        training = client.get("/training")
+        assert training.status_code == 200
+        assert set(training.json()) >= {"finetune", "rl", "mubit_traffic", "events", "missing"}
+        assert "test-key" not in training.text
         assert body["upstreams"] == {
             "S1_UPSTREAM": False,
             "S2_UPSTREAM": False,
