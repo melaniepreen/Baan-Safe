@@ -458,6 +458,25 @@ def test_activity_prompts_and_rulebook_are_draft_simulations():
     assert "คุณเชื่อมต่อกับ Baan-Safe แล้ว มีอะไรให้ช่วยไหมคะ" in source
 
 
+def test_about_dialog_tells_the_whole_story():
+    page = (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
+    for needle in (
+        "The desk learns",
+        "How we use Mubit",
+        "Fine-tuning",
+        "0.875",
+        'id="about-start"',
+        "huggingface.co/baansafe/baansafe-s1-triage-setfit",
+    ):
+        assert needle in page, needle
+    assert "Rules, or Nemotron" not in page
+    about = (ROOT / "ui" / "sim" / "about.js").read_text(encoding="utf-8")
+    for needle in ("aboutDiagramSvg", "Mubit gateway", "RL graduation", "prompts-toggle"):
+        assert needle in about, needle
+    assert "pixi" not in about.lower()
+    subprocess.run(["node", "ui/sim/check_about.mjs"], cwd=ROOT, check=True)
+
+
 def test_scripted_replies_stay_in_human_language():
     replies = _load("replies.json")
     assert replies["simulated"] is True

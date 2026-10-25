@@ -117,7 +117,7 @@ body {
 
 #about {
   width: min(720px, calc(100vw - 48px));
-  max-height: min(86vh, 760px);
+  max-height: 92vh;
   margin: auto;
   padding: 28px 32px 24px;
   overflow: auto;
@@ -195,7 +195,7 @@ body {
   background: #0c1220;
 }
 
-#about-stage canvas { display: block; width: 100%; height: auto; }
+#about-stage svg { display: block; width: 100%; height: auto; }
 
 .about-source {
   margin: 10px 0 0;
@@ -238,8 +238,72 @@ body {
   line-height: 1.45;
 }
 
+.about-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.about-facts h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #9aa8bb;
+}
+
+.about-facts ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #e6edf5;
+}
+
+.about-facts li + li { margin-top: 8px; }
+
+.about-facts code {
+  font-size: 12px;
+  color: #cfd8e6;
+}
+
+.about-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid #243044;
+}
+
+.about-footer p {
+  margin: 0;
+  color: #9aa8bb;
+  font-size: 13px;
+}
+
+.about-footer nav a {
+  color: #8aa0ff;
+  margin-right: 14px;
+  font-size: 13px;
+}
+
+.about-start {
+  background: #ED7401;
+  border-color: #ED7401;
+  color: #012246;
+  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: 10px;
+}
+
 @media (max-width: 640px) {
   .about-stats { grid-template-columns: 1fr; }
+  .about-facts { grid-template-columns: 1fr; }
   #about-title { font-size: 28px; }
 }
 
