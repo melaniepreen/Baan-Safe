@@ -415,7 +415,16 @@ def test_training_endpoint_joins_registry_run_traces_and_events(client, surface_
     response = client.get("/training")
     assert response.status_code == 200
     body = response.json()
-    assert set(body) == {"generated_at", "finetune", "rl", "mubit_traffic", "events", "missing", "note"}
+    assert set(body) == {
+        "generated_at",
+        "finetune",
+        "rl",
+        "mubit_traffic",
+        "events",
+        "compare",
+        "missing",
+        "note",
+    }
 
     finetune = body["finetune"]
     assert finetune["version_count"] == 2

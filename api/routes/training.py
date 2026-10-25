@@ -7,8 +7,12 @@ report. `mubit_traffic` counts the `mubit_chat` trace rows: Mubit trains
 per-task adapters from those calls on their side and exposes no training
 API, so requests, distinct sessions, ok/error, latency, and tokens are the
 measurable part. `events` counts the TrainingEvent log and lists export
-manifests. Every file is optional; a missing one is named in `missing`.
-No secret and no path outside the repo or a Modal volume is returned.
+manifests. `compare` is the memory-off vs memory-on RL snapshot comparison
+(`eval/rl/compare.py`; `RL_COMPARE_A` / `RL_COMPARE_B` override the two
+committed snapshots). `GET /training/episodes` drills into the RL run's
+episode rows by flag and epoch. Every file is optional; a missing one is
+named in `missing`. No secret and no path outside the repo or a Modal volume
+is returned.
 """
 
 from __future__ import annotations
@@ -18,14 +22,18 @@ import os
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, Query
 
 from config.settings import DecisionRequired, require_decision
+from eval.rl import compare as rl_compare
 from paths import ROOT
 from trace import read_traces
 from training.log import events_path
 
 router = APIRouter()
+
+EPISODE_FILTERS = ("critical_under", "under_triage", "missed_human", "incorrect", "all")
+EPISODE_LIMIT_DEFAULT = 200
 
 # Same string as infra.modal.runtime.VERSIONS_PATH; that module imports modal,
 # which the API image does not ship, so the path is repeated here on purpose.
@@ -271,6 +279,117 @@ def _count(value) -> int:
     return 0
 
 
+def compare_refs() -> tuple[str, str]:
+    """`RL_COMPARE_A` / `RL_COMPARE_B`, else the two committed 25 Oct snapshots."""
+
+    a = os.environ.get("RL_COMPARE_A", "").strip() or rl_compare.DEFAULT_A
+    b = os.environ.get("RL_COMPARE_B", "").strip() or rl_compare.DEFAULT_B
+    return a, b
+
+
+def compare_section() -> dict:
+    """A vs B RL run comparison (`eval/rl/compare.py`), empty when either run is absent."""
+
+    missing: list[str] = []
+    ref_a, ref_b = compare_refs()
+    path_a, path_b = rl_compare.resolve(ref_a), rl_compare.resolve(ref_b)
+    run_a = _read_json(path_a, missing)
+    run_b = _read_json(path_b, missing)
+    if not isinstance(run_a, dict) or not isinstance(run_b, dict):
+        return {
+            "available": False,
+            "a": {"label": rl_compare.label_for(path_a), "run_path": display_path(path_a)},
+            "b": {"label": rl_compare.label_for(path_b), "run_path": display_path(path_b)},
+            "missing": missing,
+        }
+    report = rl_compare.compare(
+        run_a,
+        run_b,
+        label_a=rl_compare.label_for(path_a),
+        label_b=rl_compare.label_for(path_b),
+    )
+    report["a"]["run_path"] = display_path(path_a)
+    report["b"]["run_path"] = display_path(path_b)
+    return {"available": True, **report, "missing": missing}
+
+
+def fixture_title(case_id: str) -> str | None:
+    """The fixture or synthetic call title for an episode id; None when unknown."""
+
+    from fixtures.load import entry, load_synthetic
+
+    try:
+        return str(entry(case_id).get("title") or "") or None
+    except (KeyError, OSError, ValueError):
+        pass
+    try:
+        return str(load_synthetic(case_id).get("title") or "") or None
+    except (KeyError, OSError, ValueError):
+        pass
+    try:
+        from eval.rl.themes import THEMES
+
+        for theme in THEMES:
+            if any(variant.case_id == case_id for variant in theme.variants):
+                return f"{theme.theme_id} ({theme.intent})"
+    except Exception:  # noqa: BLE001 - a title is decoration, never a failure
+        pass
+    try:
+        from sim.callers.catalog import CATALOG
+
+        for spec in CATALOG:
+            if spec.combo_id == case_id:
+                return "sim caller: " + ", ".join(spec.traits)
+    except Exception:  # noqa: BLE001
+        pass
+    return None
+
+
+def _episode_matches(row: dict, flag: str) -> bool:
+    if flag == "all":
+        return True
+    if flag == "incorrect":
+        return row.get("correct") is not True
+    return row.get(flag) is True
+
+
+def episodes_section(flag: str = "critical_under", epoch: int | None = None, limit: int = EPISODE_LIMIT_DEFAULT) -> dict:
+    """Episode rows from the RL run filtered by flag and epoch, each with `fixture_title`."""
+
+    if flag not in EPISODE_FILTERS:
+        raise ValueError(f"filter must be one of {', '.join(EPISODE_FILTERS)}")
+    missing: list[str] = []
+    path = rl_run_path()
+    run = _read_json(path, missing)
+    rows = [row for row in (run or {}).get("episodes", []) if isinstance(row, dict)] if isinstance(run, dict) else []
+    matched = [
+        row
+        for row in rows
+        if (epoch is None or row.get("epoch") == epoch) and _episode_matches(row, flag)
+    ]
+    matched.sort(key=lambda row: (_count(row.get("epoch")), _count(row.get("seq"))))
+    limited = matched[: max(0, limit)] if limit is not None else matched
+    titles: dict[str, str | None] = {}
+    episodes = []
+    for row in limited:
+        case_id = str(row.get("id") or "")
+        if case_id not in titles:
+            titles[case_id] = fixture_title(case_id) if case_id else None
+        episodes.append({**row, "fixture_title": titles[case_id]})
+    return {
+        "run_path": display_path(path),
+        "filter": flag,
+        "epoch": epoch,
+        "limit": limit,
+        "count": len(episodes),
+        "matched": len(matched),
+        "total": len(rows),
+        "filters": list(EPISODE_FILTERS),
+        "episodes": episodes,
+        "missing": missing,
+    }
+
+
 def mubit_traffic_section() -> dict:
     from trace import trace_path
 
@@ -404,13 +523,21 @@ def training_report() -> dict:
     rl = rl_section()
     mubit = mubit_traffic_section()
     events = events_section()
-    missing = [*finetune["missing"], *rl["missing"], *mubit["missing"], *events["missing"]]
+    compare = compare_section()
+    missing = [
+        *finetune["missing"],
+        *rl["missing"],
+        *mubit["missing"],
+        *events["missing"],
+        *compare["missing"],
+    ]
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "finetune": finetune,
         "rl": rl,
         "mubit_traffic": mubit,
         "events": events,
+        "compare": compare,
         "missing": missing,
         "note": (
             "Mubit trains per-task adapters from the recorded System 2 calls on their side; "
@@ -422,3 +549,17 @@ def training_report() -> dict:
 @router.get("/training")
 def training() -> dict:
     return training_report()
+
+
+@router.get("/training/episodes")
+def training_episodes(
+    flag: str = Query("critical_under", alias="filter"),
+    epoch: int | None = Query(None, ge=0),
+    limit: int = Query(EPISODE_LIMIT_DEFAULT, ge=0, le=10000),
+) -> dict:
+    """Per-episode drill-down of the RL run at `RL_RUN_PATH`."""
+
+    try:
+        return episodes_section(flag, epoch, limit)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc

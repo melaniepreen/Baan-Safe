@@ -1,6 +1,8 @@
 // Training page. Plain JS, no dependencies. Reads GET /training and draws
-// cards, tables, and two inline SVG charts (loss per version, reward per epoch).
-// Nothing here calls Mubit; the numbers come from the API's trace and file reads.
+// cards, tables, and two inline SVG charts (loss per version, reward per epoch),
+// plus the memory off vs on comparison card and the per-episode drill-down
+// (GET /training/episodes). Nothing here calls Mubit; the numbers come from
+// the API's trace and file reads.
 
 (function () {
   "use strict";
@@ -252,6 +254,91 @@
     );
   }
 
+  function fmtDelta(value, digits) {
+    if (value === null || value === undefined) return "—";
+    const n = Number(value);
+    const text = Number.isInteger(n) && digits === undefined ? String(Math.abs(n)) : Math.abs(n).toFixed(digits === undefined ? 3 : digits);
+    return (n > 0 ? "+" : n < 0 ? "−" : "±") + text;
+  }
+
+  function renderCompare(c) {
+    const host = $("compare-card");
+    const title = el("h3", { text: "Memory off vs on" });
+    if (!c || !c.available) {
+      const want = c && c.a && c.b ? `${c.a.label} vs ${c.b.label}` : "two RL snapshots";
+      host.replaceChildren(title, el("p", { class: "empty", text: `no comparison — ${want} not both on disk (make rl-compare)` }));
+      return;
+    }
+    const last = c.last_epoch || {};
+    const meta = `A ${c.a.label} (epoch ${last.epoch_a}) · B ${c.b.label} (epoch ${last.epoch_b}) · delta = B − A`;
+    const rows = (c.summary || []).map((row) => ({
+      ...row,
+      label: row.group === "last_epoch" ? row.metric : `${row.group} ${row.metric}`,
+      float: row.metric === "mean_reward",
+    }));
+    const columns = [
+      { label: "Metric", key: "label" },
+      { label: "A", num: true, get: (r) => (r.float ? fmtNum(r.a) : fmtInt(r.a)) },
+      { label: "B", num: true, get: (r) => (r.float ? fmtNum(r.b) : fmtInt(r.b)) },
+      { label: "Delta", num: true, get: (r) => fmtDelta(r.delta, r.float ? 3 : undefined) },
+    ];
+    const flips = (c.flips && c.flips.critical_under) || { fixed_in_b: [], new_in_b: [] };
+    host.replaceChildren(
+      title,
+      el("p", { class: "meta", text: meta }),
+      table(columns, rows),
+      el("p", { class: "meta", text:
+        `critical under-triage fixed in B: ${flips.fixed_in_b.length ? flips.fixed_in_b.join(", ") : "none"} · new in B: ${flips.new_in_b.length ? flips.new_in_b.join(", ") : "none"}` }),
+    );
+  }
+
+  function episodeFlags(e) {
+    const flags = [];
+    if (e.critical_under) flags.push("critical");
+    else if (e.under_triage) flags.push("under");
+    if (e.missed_human) flags.push("missed human");
+    if (e.cascaded) flags.push("cascade");
+    if (e.s2_fell_back) flags.push("s2 fallback");
+    if (e.correct) flags.push("correct");
+    return flags.join(", ") || "—";
+  }
+
+  async function renderEpisodes() {
+    const flag = $("episode-filter").value;
+    const epoch = $("episode-epoch").value;
+    const params = new URLSearchParams({ filter: flag, limit: "200" });
+    if (epoch) params.set("epoch", epoch);
+    try {
+      const response = await fetch("/training/episodes?" + params.toString());
+      if (!response.ok) throw new Error("/training/episodes returned " + response.status);
+      const body = await response.json();
+      $("episodes-meta").textContent = body.total
+        ? `${fmtInt(body.matched)} of ${fmtInt(body.total)} episodes${body.matched > body.count ? ` (first ${fmtInt(body.count)})` : ""} · ${body.run_path}`
+        : "";
+      const columns = [
+        { label: "Epoch", key: "epoch", num: true },
+        { label: "Id", get: (e) => (e.fixture_title ? `${e.id} — ${e.fixture_title}` : e.id) },
+        { label: "Systems", get: (e) => (e.systems || []).join(" → ") },
+        { label: "Priority vs truth", get: (e) => `${e.priority || "?"} vs ${e.truth_priority || "?"}` },
+        { label: "Route", key: "route" },
+        { label: "Reward", num: true, get: (e) => fmtNum(e.reward, 2) },
+        { label: "Flags", get: episodeFlags },
+      ];
+      $("episodes-table").replaceChildren(table(columns, body.episodes || []));
+    } catch (error) {
+      $("episodes-table").replaceChildren(el("p", { class: "empty", text: error.message }));
+    }
+  }
+
+  function setupEpisodes(rl) {
+    const epochSelect = $("episode-epoch");
+    epochSelect.replaceChildren(el("option", { value: "", text: "all" }));
+    for (const e of rl.epochs || []) epochSelect.appendChild(el("option", { value: String(e.epoch), text: String(e.epoch) }));
+    $("episode-filter").addEventListener("change", renderEpisodes);
+    epochSelect.addEventListener("change", renderEpisodes);
+    renderEpisodes();
+  }
+
   function renderEvents(ev) {
     const cards = [card("Events", fmtInt(ev.total), ev.events_path)];
     for (const [task, n] of Object.entries(ev.by_task || {})) cards.push(card(task, fmtInt(n), "by task"));
@@ -285,6 +372,8 @@
       renderMubit(body.mubit_traffic || {});
       renderFinetune(body.finetune || { versions: [], decided: {} });
       renderRl(body.rl || { epochs: [] });
+      renderCompare(body.compare || null);
+      setupEpisodes(body.rl || { epochs: [] });
       renderEvents(body.events || {});
       renderMissing(body.missing || []);
       $("status").textContent = "";

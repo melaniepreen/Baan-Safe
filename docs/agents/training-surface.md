@@ -24,7 +24,7 @@ Make training visible. `GET /training` is one JSON document and `/ui/training.ht
 
 ## Interfaces/contracts
 
-`GET /training` top level: `generated_at`, `finetune`, `rl`, `mubit_traffic`, `events`, `missing`, `note`.
+`GET /training` top level: `generated_at`, `finetune`, `rl`, `mubit_traffic`, `events`, `compare`, `missing`, `note`.
 
 | Block | Source | Fields |
 |---|---|---|
@@ -32,6 +32,9 @@ Make training visible. `GET /training` is one JSON document and `/ui/training.ht
 | `rl` | `RL_RUN_PATH` (default `eval/out/rl/run.json`) | `epochs[]` (`mean_reward`, `correct`, `under_triage`, `critical_under`, `share_s1_only/cascade/s2_only`, `s2_fallbacks`), `mubit`, `overlay` counts, `training.counts`, `finetune` note |
 | `mubit_traffic` | `TRACE_PATH` rows with stage `mubit_chat` | `call_count`, `ok_count`, `error_count`, `cache_hit_count`, `distinct_sessions` (distinct `case_id` = `metadata.session_id`), `avg/p50/p95_latency_ms` (cache hits excluded), `tokens_in_total`, `tokens_out_total`, `models`, `first/last_call_at`, `kept_example_threshold: 25`, `note` |
 | `events` | `TRAINING_EVENTS_PATH` (file or dir) and `training/out/*.manifest.json`, `eval/out/rl/training/*.manifest.json` | `total`, `by_task`, `by_source`, `manifests[]` |
+| `compare` | `RL_COMPARE_A` / `RL_COMPARE_B` (snapshot name, dir, or `run.json`; default the memory-empty and memory-local snapshots), computed in-process by `eval/rl/compare.py` | `available`, `a`/`b` (`label`, `run_path`), `epochs[]`, `last_epoch.metrics{metric:{a,b,delta}}`, `mubit`, `overlay`, `flips{flag:{fixed_in_b,new_in_b,both}}`, `summary[]` rows the page draws as the "Memory off vs on" card |
+
+`GET /training/episodes?filter=critical_under|under_triage|missed_human|incorrect|all&epoch=<n>&limit=<n>` (defaults `critical_under`, all epochs, 200) reads the same `RL_RUN_PATH` and returns `{run_path, filter, epoch, count, matched, total, episodes[]}`; each episode row carries `fixture_title` from `fixtures.load` (fixture index, synthetic call, RL theme, or sim caller; `null` when unknown). The page's Episodes table under the RL section re-fetches it on the filter / epoch `<select>` change. Unknown `filter` is 400.
 
 `metrics.json` (LoRA): `trainer: lora`, `steps`, `rows`, `max_length`, `lr`, `lora_r`, `trainable_parameters`, `base_model`, `gpu`, `wall_seconds`, `loss_curve: [{step, loss}]`, `first/last/min/mean_loss`. (SetFit): `trainer: setfit`, `steps`, `rows`, `label_count`, `labels`, `base_model`, `wall_seconds`, `loss_source` (`log_history` | `callback` | `logger` | `none`), `loss_curve`, the four summaries, and `heldout: {rows, accuracy, per_label{support, precision, recall}}` when held-out rows were passed.
 
@@ -52,6 +55,7 @@ Hosted env: `TRAINING_REGISTRY_PATH=/vol/registry.json`, `RL_RUN_PATH=/data/rl_r
 ## How to test
 
 - `tests/test_training_surface.py` — tmp registry + metrics + run.json + traces + events; the helper extraction with a fake trainer; page served and free of secret names.
+- `tests/test_eval_tools.py` — `compare` section with env overrides and defaults, `/training/episodes` filters, `fixture_title`, `rl-compare`, `eval-gate`, `mubit-requests`.
 - `tests/test_modal_infra.py` — `/vol` read-only on the gateway spec, `/hosting.reads`, `/ui/training.html` and `/training` on the demo ASGI.
 - `make serve` then open `/ui/training.html`. `RL_RUN_PATH=eval/out/rl/run.json TRACE_PATH=eval/out/rl/traces.jsonl make serve` shows a real RL run.
 - `make test`, `make validate`.
