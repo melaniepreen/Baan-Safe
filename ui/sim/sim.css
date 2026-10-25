@@ -752,12 +752,14 @@ input[type="range"] { width: 100%; accent-color: var(--yellow); }
   border-radius: 12px;
   background: #0b1220;
 }
-#pattern-list {
+#pattern-list,
+#mubit-eval-list {
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
 }
-#pattern-list th {
+#pattern-list th,
+#mubit-eval-list th {
   position: sticky;
   top: 0;
   z-index: 1;
@@ -770,13 +772,15 @@ input[type="range"] { width: 100%; accent-color: var(--yellow); }
 }
 #pattern-list th.num,
 #pattern-list td.num { text-align: right; font-variant-numeric: tabular-nums; }
-#pattern-list td {
+#pattern-list td,
+#mubit-eval-list td {
   padding: 7px 8px;
   color: #e6edf5;
   border-top: 1px solid #243044;
   vertical-align: middle;
 }
-#pattern-list tbody tr:nth-child(even) { background: #162033; }
+#pattern-list tbody tr:nth-child(even),
+#mubit-eval-list tbody tr:nth-child(even) { background: #162033; }
 .pat-badge {
   display: inline-block;
   padding: 2px 8px;
