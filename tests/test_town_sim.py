@@ -528,7 +528,11 @@ def test_town_copy_uses_sukhumvit_names_and_logo_colours():
     readme = (ROOT / "ui" / "sim" / "README.md").read_text(encoding="utf-8")
     page = (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
     page = page.replace('placeholder="Message"', "")
+    # The grey flow-card badge is the one allowed use of the word; the copy guard still
+    # catches it anywhere else in the page or the script.
+    page = page.replace('class="sim-badge">SAMPLE<', 'class="sim-badge"><')
     source = (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
+    source = source.replace('"LIVE" : "SAMPLE"', '"LIVE" : ""')
     for text in visible + [readme, page, source]:
         assert BANNED_COPY.search(text) is None, text
     css = (ROOT / "ui" / "sim" / "sim.css").read_text(encoding="utf-8")
@@ -611,3 +615,30 @@ def test_town_copy_drops_demo_tags_and_hides_note_bubbles():
     assert 'body[data-notes="1"] .bubble.note' in css
     labels = [group["label"] for group in prompts["groups"]]
     assert not any(label.startswith("System ") for label in labels)
+
+
+def test_flow_cards_use_live_and_sample_badges():
+    source = (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
+    page = (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
+    css = (ROOT / "ui" / "sim" / "sim.css").read_text(encoding="utf-8")
+    # Two quiet badges only: LIVE for real gateway data, SAMPLE for scripted cards.
+    assert '"LIVE" : "SAMPLE"' in source
+    assert '"gateway" : "simulated"' not in source
+    assert "LIVE_KINDS" in source
+    # Technical detail reads the real trace rows for the playing call.
+    assert "feedTrace" in source
+    assert "Trace: mubit_chat" in source
+    assert 'lastTraceRow("system_1")' in source
+    assert 'lastTraceRow("router")' in source
+    # Static badges in the page carry the same two words.
+    assert page.count('class="sim-badge">simulated') == 0
+    assert 'class="sim-badge">overlay' not in page
+    assert 'class="gw-badge">trace' not in page
+    assert 'class="sim-badge">25 Oct' not in page
+    assert "20 example calls" in page
+    # Header is the decision, not the backend; the floating pill is hidden.
+    assert '<p class="kicker">Decision</p>' in page
+    assert 'id="call-heading">Waiting for a call<' in page
+    assert '"Waiting for a call"' in source
+    assert ".dispatch-pending { display: none !important; }" in css
+    assert 'id="approval-banner"' in page

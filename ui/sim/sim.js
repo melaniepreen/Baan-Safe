@@ -2755,6 +2755,25 @@ function writePayload(call, decision, trace, text) {
   log.append(details);
 }
 
+// Trace rows (GET /cases/{id}/trace) for the call that is playing. Set by playFeed,
+// read by stepDetail so each card's technical detail shows the real stage data.
+let feedTrace = [];
+
+function lastTraceRow(stage) {
+  for (let i = feedTrace.length - 1; i >= 0; i -= 1) {
+    const row = feedTrace[i];
+    if (row && row.stage === stage) return row;
+  }
+  return null;
+}
+
+function traceLine(stage, row, withLatency) {
+  const notes = row.notes == null ? "" : String(row.notes);
+  if (withLatency === false) return "Trace: " + stage + " · " + notes;
+  const latency = row.latency_ms == null ? "?" : row.latency_ms;
+  return "Trace: " + stage + " " + latency + " ms · " + notes;
+}
+
 function stepDetail(step, call, decision, source, bag) {
   const lines = [];
   if (step.fill === "flood") lines.push(floodLine(call));
@@ -2767,12 +2786,35 @@ function stepDetail(step, call, decision, source, bag) {
     } else if ((call.memory || []).length) {
       lines.push("Fixture memory file (mock mode): " + call.memory.map((row) => row.kind + " — " + row.summary).join(" "));
     }
+    const memoryRow = lastTraceRow("memory");
+    if (memoryRow) lines.push(traceLine("memory", memoryRow));
   }
   if (step.kind === "system_1" || step.kind === "system_2" || step.kind === "router" || step.kind === "sapling" || step.kind === "handoff") {
     lines.push("Gateway: " + bag.priority + " · " + bag.route + " · " + bag.next_action + ". " + (source.reason || ""));
   }
+  if (step.kind === "system_1") {
+    const s1 = lastTraceRow("system_1");
+    if (s1) lines.push(traceLine("system_1", s1));
+  }
   if (step.kind === "system_2" || step.kind === "handoff") {
     lines.push("System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway.");
+    const s2 = lastTraceRow("system_2");
+    if (s2) lines.push(traceLine("system_2", s2));
+    const hop = lastTraceRow("mubit_chat");
+    if (hop) lines.push("Trace: mubit_chat " + (hop.latency_ms == null ? "?" : hop.latency_ms) + " ms · " + (hop.notes == null ? "" : String(hop.notes)));
+  }
+  if (step.kind === "router") {
+    const routerRow = lastTraceRow("router");
+    if (routerRow) lines.push(traceLine("router", routerRow, false));
+    lines.push(
+      "Decision: " +
+        decision.next_action +
+        " · " +
+        decision.final_priority +
+        " · " +
+        decision.final_route +
+        (decision.requires_human ? " · needs a person" : "")
+    );
   }
   if (step.kind === "rule") {
     const pack = responses && responses.priorities ? responses.priorities[decision.final_priority] : null;
@@ -2791,7 +2833,7 @@ function renderFlowCard(step, headline, details) {
   const body = el("div", "step-body");
   const kicker = el("p", "step-kicker");
   kicker.append(document.createTextNode(meta.kicker));
-  kicker.append(el("span", step.source === "gateway" ? "gw-badge" : "sim-badge", step.source === "gateway" ? "gateway" : "simulated"));
+  kicker.append(el("span", step.source === "gateway" ? "gw-badge" : "sim-badge", step.source === "gateway" ? "LIVE" : "SAMPLE"));
   body.append(kicker, el("p", "step-headline", headline));
   if (details.length) {
     const fold = document.createElement("details");
@@ -2933,13 +2975,14 @@ let activeSummary = "";
 function showCallTitle(title) {
   activeSummary = title || "";
   const heading = document.getElementById("call-heading");
-  if (heading) heading.textContent = title || "No call yet";
+  if (heading) heading.textContent = title || "Waiting for a call";
   const frame = document.getElementById("dispatch-pending-title");
   if (frame) frame.textContent = title || "";
 }
 
 async function playFeed(call, decision, trace, text, fast) {
   const token = ++flowToken;
+  feedTrace = Array.isArray(trace) ? trace : [];
   const scenario = eventsFile && eventsFile.scenarios ? eventsFile.scenarios[call.id] : null;
   const needs = (scenario && scenario.needs) || {};
   const planned = pathFor(call, decision, scenario);
@@ -2987,13 +3030,15 @@ async function playFeed(call, decision, trace, text, fast) {
     rule_id: rule.id,
     action: rule.action,
   };
-  const steps = (scenario ? scenario.steps : []).filter((step) => {
-    if (step.kind === "operator_approval" || step.kind === "dispatch") return false;
-    if (step.when === "rejected" && accepted) return false;
-    if (step.when === "accepted" && !accepted) return false;
-    if (step.when === "aid" && !aid) return false;
-    return true;
-  });
+  const steps = (scenario ? scenario.steps : [])
+    .filter((step) => {
+      if (step.kind === "operator_approval" || step.kind === "dispatch") return false;
+      if (step.when === "rejected" && accepted) return false;
+      if (step.when === "accepted" && !accepted) return false;
+      if (step.when === "aid" && !aid) return false;
+      return true;
+    })
+    .map((step) => ({ ...step }));
   if (path.explain) {
     const at = steps.findIndex((step) => step.kind === "system_1");
     const kind = path.hold === "aid" ? "sapling" : path.accepted ? "system_1" : "system_2";
@@ -3030,22 +3075,24 @@ async function playFeed(call, decision, trace, text, fast) {
   }
   let dispatchStep = null;
   if (gated) {
-    dispatchStep = scenarioKind(scenario, "dispatch") || {
-      id: "dispatch",
-      kind: "dispatch",
-      delay_ms: 480,
-      source: "simulated",
-      text: "Dispatched after operator approval. {action}",
+    dispatchStep = {
+      ...(scenarioKind(scenario, "dispatch") || {
+        id: "dispatch",
+        kind: "dispatch",
+        delay_ms: 480,
+        source: "simulated",
+        text: "Dispatched after operator approval. {action}",
+      }),
     };
-    steps.push(
-      scenarioKind(scenario, "operator_approval") || {
+    steps.push({
+      ...(scenarioKind(scenario, "operator_approval") || {
         id: "approval",
         kind: "operator_approval",
         delay_ms: 420,
         source: "simulated",
         text: "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}.",
-      }
-    );
+      }),
+    });
   } else if (quiet) {
     steps.push({
       id: "closed",
@@ -3100,6 +3147,18 @@ async function playFeed(call, decision, trace, text, fast) {
       source: simulated ? "simulated" : "gateway",
       text: "Caller IP recorded · " + sessionStamp.caller_ip,
     });
+  }
+  // Cards templated from the real RouterDecision and memory_context are LIVE when the
+  // gateway returned a trace. Tool, location, landmark, and caller-ip cards keep the grey
+  // badge (no tool endpoint); so do the simulated pattern memory and the rulebook overlay.
+  const liveTurn = Array.isArray(trace) && trace.length > 0;
+  const LIVE_KINDS = new Set(["memory", "system_1", "system_2", "router", "handoff", "mubit", "operator_approval", "dispatch"]);
+  if (liveTurn) {
+    for (const step of steps) {
+      if (step.id === "pattern" || step.id === "rule" || step.id === "caller-ip") continue;
+      if (LIVE_KINDS.has(step.kind)) step.source = "gateway";
+    }
+    if (dispatchStep && LIVE_KINDS.has(dispatchStep.kind)) dispatchStep.source = "gateway";
   }
   setFeedProgress(0, steps.length);
   for (const step of steps) {
