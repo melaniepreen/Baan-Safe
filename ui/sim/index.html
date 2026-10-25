@@ -35,13 +35,41 @@
       <p><strong>$46.5 billion</strong><span>the scale of that year's damage</span></p>
       <p><strong>335 mm</strong><span>Hat Yai, one day in November 2025. The heaviest in 300 years.</span></p>
     </div>
-    <div id="about-stage" aria-hidden="true"></div>
+    <div id="about-stage"></div>
     <p class="about-source">2011 is the scale cited for that basin flood. The 335 mm figure is Reuters' report of the Hat Yai measurement, not a number this desk computed.</p>
     <ol class="about-path">
-      <li><span>01</span><div><h3>A call arrives</h3><p>A household asks for a boat, or only for the time of the flood news.</p></div></li>
-      <li><span>02</span><div><h3>Rules, or Nemotron</h3><p>A clear request stays on System 1. Oxygen, someone who cannot walk, or rising water goes to Nemotron through Mubit.</p></div></li>
-      <li><span>03</span><div><h3>A person, then a boat</h3><p>Accept sends help. Reject holds it. The same place and the same need does not send a second boat.</p></div></li>
+      <li><span>01</span><div><h3>A call arrives</h3><p>A household asks for a boat, or only for the time of the flood news. Keywords are extracted, the place is checked against live flood layers, and the desk recalls earlier cases at that address.</p></div></li>
+      <li><span>02</span><div><h3>Rules first, Nemotron when it's hard</h3><p>A clear request stays on System 1: deterministic rules, milliseconds, no model cost, the same answer every time. Oxygen, someone who cannot walk, an unclear location or a safeguarding flag goes to System 2: Nemotron, an open-weight model, called through the Mubit gateway.</p></div></li>
+      <li><span>03</span><div><h3>A person, then a boat</h3><p>Nemotron proposes; an operator approves before anything moves. Every P1 needs a human signature. Accept holds a boat from stock. The same place with the same need merges into the earlier case instead of sending a second boat.</p></div></li>
+      <li><span>04</span><div><h3>The desk learns</h3><p>Every correction is logged. Two matching corrections mark a pattern as complex, so it goes to Nemotron first; when Nemotron settles on the same answer repeatedly, the RL loop graduates it into System 1 rules. Turning case memory on cut critical under-triage from 9 to 2 of 48 calls and lifted mean reward from −0.34 to +0.19 in the 25 Oct run.</p></div></li>
     </ol>
+    <div class="about-facts">
+      <section>
+        <h3>How we use Mubit</h3>
+        <ul>
+          <li>Mubit is the only door to the model. Every System 2 call reaches Nemotron (<code>nvidia/nemotron-3-nano-30b-a3b</code>) through <code>api.mubit.ai</code>; the client refuses any other host.</li>
+          <li>One stable system prompt, so every call lands in one Mubit task. Each case is a session, which gives Mubit held-out sessions to test an adapter against. About 650 traced requests on 25 October.</li>
+          <li>Every hop carries Mubit's request id: the Model Path panel shows it, and the same call is in the Mubit console. Replayed answers are labelled, never passed off as live.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Fine-tuning</h3>
+        <ul>
+          <li>SetFit triage classifier: 168 synthetic flood calls (English, Thai, code-switched); held-out accuracy <strong>0.875</strong> on 72 calls. Weights are public on the Hub. It runs as a shadow label — System 1 stays rules-only in production.</li>
+          <li>LoRA on Nemotron Nano 4B from operator corrections: an experiment with loss curves on the training page. Not served.</li>
+          <li>Laya multilingual export: the same 240 calls in Laya's JSONL format, ready for a full-encoder fine-tune.</li>
+        </ul>
+      </section>
+    </div>
+    <footer class="about-footer">
+      <nav>
+        <a href="https://github.com/melaniepreen/Baan-Safe" target="_blank" rel="noopener noreferrer">Repo</a>
+        <a href="/ui/training.html" target="_blank" rel="noopener noreferrer">Training page</a>
+        <a href="https://huggingface.co/baansafe/baansafe-s1-triage-setfit" target="_blank" rel="noopener noreferrer">SetFit weights</a>
+      </nav>
+      <p>Callers are synthetic. Decisions stay with people.</p>
+      <button type="button" id="about-start" class="about-start">Start the demo</button>
+    </footer>
   </dialog>
 
   <p id="dispatch-pending" class="dispatch-pending" hidden>
@@ -58,7 +86,7 @@
       <span class="status-glyphs" aria-hidden="true">●● LTE</span>
     </div>
     <p id="phone-line" class="phone-line"><strong>Baan-Safe</strong> +66 81 555 0149</p>
-    <p id="chooser-note" class="demo-note">DEMO-ONLY house pin. Free-text and phone create a case with transcript; the gateway field precheck routes it. One-click households still use fixture_id.</p>
+    <p id="chooser-note" class="demo-note">Operator replies are scripted. The routing decision is live from the gateway.</p>
     <div class="phone-screen">
       <div id="prompt-drawer" hidden>
         <p class="kicker">Saved prompts</p>
@@ -87,7 +115,7 @@
       </button>
     </form>
     <details id="scripted">
-      <summary>20 scripted calls</summary>
+      <summary>20 example calls</summary>
       <div class="wordmark-actions">
         <button type="button" id="calls-play">Play 20 calls</button>
         <button type="button" id="calls-step">Step</button>
@@ -120,8 +148,8 @@
     <aside id="backend" aria-label="Backend path">
       <div class="feed-head">
         <div>
-          <p class="kicker">Backend</p>
-          <h1 id="call-heading">No call yet</h1>
+          <p class="kicker">Decision</p>
+          <h1 id="call-heading">Waiting for a call</h1>
         </div>
         <div class="feed-head-actions">
           <label class="colour-mode">Colour
@@ -137,12 +165,12 @@
       <div class="feed-meter" aria-hidden="true"><div id="feed-progress"></div></div>
       <p id="feed-count" class="muted"></p>
       <section id="gateway-hop" class="mubit-readout" hidden>
-        <p class="kicker">Model path <span class="gw-badge">trace</span></p>
+        <p class="kicker">Model path <span class="gw-badge">LIVE</span></p>
         <p id="gateway-hop-line" class="msg"></p>
         <ol id="gateway-hop-list" class="path-rows"></ol>
       </section>
       <section id="memory-panel" class="mubit-readout" hidden>
-        <p class="kicker">Memory <span class="gw-badge">case.memory_context</span></p>
+        <p class="kicker">Memory <span class="gw-badge">LIVE</span></p>
         <ul id="memory-list" class="mem-list"></ul>
       </section>
       <section id="metrics-strip" class="metrics-strip" hidden>
@@ -171,8 +199,22 @@
         <p id="location-context-note" class="demo-note">From case.resources.location_context. Distances are gateway values only.</p>
         <div id="location-context-body"></div>
       </section>
-      <h2>Patterns <span class="sim-badge">simulated</span></h2>
-      <p id="pattern-rule" class="demo-note">Simulated desk memory mirrors correction escalation to System 2 (not RL_OVERLAY promotion into System 1). Life-safety stays with System 2 until Accept.</p>
+      <h2>Mubit eval</h2>
+      <p id="mubit-eval-note" class="demo-note">Loading the 25 Oct live Mubit run…</p>
+      <div class="pattern-wrap">
+        <table id="mubit-eval-list">
+          <thead>
+            <tr>
+              <th>Pattern</th>
+              <th>Status</th>
+              <th>What the loop recorded</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <h2>Patterns <span class="sim-badge">SAMPLE</span></h2>
+      <p id="pattern-rule" class="demo-note">Two matching corrections mark a pattern as complex: it goes to Nemotron first and a person approves. Patterns Nemotron settles repeatedly then graduate into System 1 rules through the RL loop (RL_OVERLAY) — fast and deterministic. Life-safety stays with a person until Accept.</p>
       <div class="pattern-wrap">
         <table id="pattern-list" hidden>
           <thead>
@@ -189,7 +231,7 @@
         <p id="pattern-empty" class="pattern-empty">No patterns yet — repeated calls will show up here</p>
       </div>
       <button type="button" id="pattern-reset">Reset patterns</button>
-      <h2>Rulebook <span class="sim-badge">overlay</span></h2>
+      <h2>Rulebook <span class="sim-badge">SAMPLE</span></h2>
       <p id="rulebook-label" class="demo-note"></p>
       <table id="rulebook"><tbody></tbody></table>
       <h2>Decision log</h2>

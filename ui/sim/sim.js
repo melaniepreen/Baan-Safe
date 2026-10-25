@@ -22,8 +22,10 @@ import {
   systemPath,
 } from "./modelpath.js";
 import { phaseDurationMs } from "./pace.js";
+import { evalHeadline, evalRows } from "./mubit_eval.js";
 import { decidePath, PATTERN_KEY, withTop } from "./patterns.js";
 import { legsFromPath, nearestNode, walk } from "./route_walk.js";
+import { chooserSubtitle, FALLBACK } from "./subtitle.js";
 import { Application, Container, Graphics, Text } from "./vendor/pixi.min.mjs";
 
 const STATUSES = ["clear", "at_risk", "flooded", "needs_help", "evacuated"];
@@ -104,6 +106,9 @@ let activeCallId = null;
 let callLightG = null;
 let colourMode = "priority";
 
+const GROUND_LIGHT = 0x202c4a;
+const GROUND_DARK = 0x1d2844;
+const GROUND_GRID = 0x34466e;
 const PRIORITY_COLOR = { P1: "#ff4b3a", P2: "#ff9f1a", P3: "#d6ff3c", P4: "#8aa0ff" };
 const PRIORITY_HEX = { P1: 0xff4b3a, P2: 0xff9f1a, P3: 0xd6ff3c, P4: 0x8aa0ff };
 const PLAIN_PRIORITY = {
@@ -733,15 +738,17 @@ function buildGround(g) {
   const w = town.meta.world.width_m;
   const d = town.meta.world.depth_m;
   const depth = 7;
-  fillPoly(g, quad(0, d, -depth, w, d, -depth, w, d, 0, 0, d, 0), 0x080c16);
-  fillPoly(g, quad(w, 0, -depth, w, d, -depth, w, d, 0, w, 0, 0), 0x0a101c);
+  fillPoly(g, quad(0, d, -depth, w, d, -depth, w, d, 0, 0, d, 0), 0x0f1626);
+  fillPoly(g, quad(w, 0, -depth, w, d, -depth, w, d, 0, w, 0, 0), 0x121a2c);
+  // Ground: two close shades, lighter than the roads, so the roads and the
+  // priority lights read against it instead of merging into the checker.
   const step = 16;
   for (let x = 0; x < w; x += step) {
     for (let y = 0; y < d; y += step) {
       const alt = ((x / step + y / step) | 0) % 2 === 0;
       const tile = [project(x, y, 0), project(x + step, y, 0), project(x + step, y + step, 0), project(x, y + step, 0)];
-      fillPoly(g, tile, alt ? 0x10182e : 0x0d1428);
-      strokePoly(g, tile, 0x24345c, 0.35);
+      fillPoly(g, tile, alt ? GROUND_LIGHT : GROUND_DARK);
+      strokePoly(g, tile, GROUND_GRID, 0.18);
     }
   }
   g.poly(flat([project(0, 0, 0), project(w, 0, 0), project(w, d, 0), project(0, d, 0)]), true).stroke({
@@ -1806,7 +1813,7 @@ function framingNote() {
   const framing = responses && responses.framing
     ? responses.framing
     : "Sukhumvit block in Watthana, drawn in local metres. data.demo_event is Sukhumvit / Watthana (Bangkok); flood on this desk is flood.json.";
-  return framing + " Flood rises from flood.json. Type, speak, or open Prompts. The stub gateway returns the priority, and that result lights the house. Replies are not a live model.";
+  return framing + " Flood rises from flood.json. Type, speak, or open Prompts. The gateway returns the priority, and that result lights the house. Replies are not a live model.";
 }
 
 async function ensureSession() {
@@ -1839,8 +1846,13 @@ function showWelcome() {
   pushPhone("note", framingNote());
   const note = document.getElementById("chooser-note");
   if (note) {
-    note.textContent =
-      "DEMO-ONLY house pin. Free-text and phone POST /cases with transcript; gateway.route_chooser is field precheck. One-click households still use fixture_id.";
+    // gateway.route_chooser is the decided field precheck.
+    note.textContent = FALLBACK;
+    getJson("/health")
+      .then((health) => {
+        note.textContent = chooserSubtitle(health);
+      })
+      .catch(() => {});
   }
   const line = document.getElementById("phone-line");
   if (line) line.textContent = "Baan-Safe · " + PHONE_NUMBER;
@@ -2091,12 +2103,17 @@ function topScore(scores) {
   return { key, value: Math.max(0, value) };
 }
 
-function renderScores(scores, needs, accepted) {
+function renderScores(scores, needs, accepted, moved) {
   const box = document.getElementById("scores");
   if (!box) return;
   box.replaceChildren();
   const top = topScore(scores);
-  box.append(el("p", null, accepted ? "System 1 ACCEPTED — stays on the fast path." : "System 1 REJECTED — handed to System 2."));
+  const line = moved
+    ? "System 2 → System 1. The fast path takes it now."
+    : accepted
+      ? "System 1 ACCEPTED — stays on the fast path."
+      : "System 1 REJECTED — handed to System 2.";
+  box.append(el("p", null, line));
   for (const [key, score] of Object.entries(scores || {})) {
     const row = el("div", "score" + (key === top.key ? (accepted ? " accepted" : " rejected") : ""));
     row.append(el("span", null, key));
@@ -2435,6 +2452,38 @@ function formatSeen(iso) {
   });
 }
 
+function renderMubitEval(report) {
+  const note = document.getElementById("mubit-eval-note");
+  const table = document.getElementById("mubit-eval-list");
+  if (note) note.textContent = evalHeadline(report);
+  if (!table) return;
+  const body = table.querySelector("tbody");
+  if (!body) return;
+  body.replaceChildren();
+  for (const row of evalRows(report)) {
+    const tr = document.createElement("tr");
+    tr.append(el("td", null, row.label));
+    const status = document.createElement("td");
+    const tone = row.status === "Demoted" ? "s2" : "learned";
+    status.append(el("span", "pat-badge " + tone, row.status));
+    tr.append(status);
+    tr.append(el("td", null, row.detail));
+    body.append(tr);
+  }
+}
+
+function loadMubitEval() {
+  fetch("./data/mubit_eval.json")
+    .then((response) => (response.ok ? response.json() : null))
+    .then((report) => {
+      if (report) renderMubitEval(report);
+    })
+    .catch(() => {
+      const note = document.getElementById("mubit-eval-note");
+      if (note) note.textContent = "The 25 Oct Mubit eval could not be loaded.";
+    });
+}
+
 function renderPatterns(rows) {
   const table = document.getElementById("pattern-list");
   const empty = document.getElementById("pattern-empty");
@@ -2706,18 +2755,66 @@ function writePayload(call, decision, trace, text) {
   log.append(details);
 }
 
+// Trace rows (GET /cases/{id}/trace) for the call that is playing. Set by playFeed,
+// read by stepDetail so each card's technical detail shows the real stage data.
+let feedTrace = [];
+
+function lastTraceRow(stage) {
+  for (let i = feedTrace.length - 1; i >= 0; i -= 1) {
+    const row = feedTrace[i];
+    if (row && row.stage === stage) return row;
+  }
+  return null;
+}
+
+function traceLine(stage, row, withLatency) {
+  const notes = row.notes == null ? "" : String(row.notes);
+  if (withLatency === false) return "Trace: " + stage + " · " + notes;
+  const latency = row.latency_ms == null ? "?" : row.latency_ms;
+  return "Trace: " + stage + " " + latency + " ms · " + notes;
+}
+
 function stepDetail(step, call, decision, source, bag) {
   const lines = [];
   if (step.fill === "flood") lines.push(floodLine(call));
   if (step.fill === "shelter") lines.push(shelterLine(call));
-  if (step.kind === "memory" && (call.memory || []).length) {
-    lines.push("Stub memory file: " + call.memory.map((row) => row.kind + " — " + row.summary).join(" "));
+  if (step.kind === "memory") {
+    const state = caseStates.get(call.id);
+    const items = (state && state.memory_context) || [];
+    if (items.length) {
+      lines.push("Memory store returned " + items.length + " item" + (items.length === 1 ? "" : "s") + ": " + items.map((m) => m.kind + " — " + String(m.summary || "").slice(0, 120)).join("; "));
+    } else if ((call.memory || []).length) {
+      lines.push("Fixture memory file (mock mode): " + call.memory.map((row) => row.kind + " — " + row.summary).join(" "));
+    }
+    const memoryRow = lastTraceRow("memory");
+    if (memoryRow) lines.push(traceLine("memory", memoryRow));
   }
   if (step.kind === "system_1" || step.kind === "system_2" || step.kind === "router" || step.kind === "sapling" || step.kind === "handoff") {
-    lines.push("Gateway stub: " + bag.priority + " · " + bag.route + " · " + bag.next_action + ". " + (source.reason || ""));
+    lines.push("Gateway: " + bag.priority + " · " + bag.route + " · " + bag.next_action + ". " + (source.reason || ""));
+  }
+  if (step.kind === "system_1") {
+    const s1 = lastTraceRow("system_1");
+    if (s1) lines.push(traceLine("system_1", s1));
   }
   if (step.kind === "system_2" || step.kind === "handoff") {
     lines.push("System 2 orchestrator is Nemotron (nvidia/nemotron-3-nano-30b-a3b) via the Mubit gateway.");
+    const s2 = lastTraceRow("system_2");
+    if (s2) lines.push(traceLine("system_2", s2));
+    const hop = lastTraceRow("mubit_chat");
+    if (hop) lines.push("Trace: mubit_chat " + (hop.latency_ms == null ? "?" : hop.latency_ms) + " ms · " + (hop.notes == null ? "" : String(hop.notes)));
+  }
+  if (step.kind === "router") {
+    const routerRow = lastTraceRow("router");
+    if (routerRow) lines.push(traceLine("router", routerRow, false));
+    lines.push(
+      "Decision: " +
+        decision.next_action +
+        " · " +
+        decision.final_priority +
+        " · " +
+        decision.final_route +
+        (decision.requires_human ? " · needs a person" : "")
+    );
   }
   if (step.kind === "rule") {
     const pack = responses && responses.priorities ? responses.priorities[decision.final_priority] : null;
@@ -2736,7 +2833,7 @@ function renderFlowCard(step, headline, details) {
   const body = el("div", "step-body");
   const kicker = el("p", "step-kicker");
   kicker.append(document.createTextNode(meta.kicker));
-  kicker.append(el("span", step.source === "gateway" ? "gw-badge" : "sim-badge", step.source === "gateway" ? "gateway" : "simulated"));
+  kicker.append(el("span", step.source === "gateway" ? "gw-badge" : "sim-badge", step.source === "gateway" ? "LIVE" : "SAMPLE"));
   body.append(kicker, el("p", "step-headline", headline));
   if (details.length) {
     const fold = document.createElement("details");
@@ -2878,13 +2975,14 @@ let activeSummary = "";
 function showCallTitle(title) {
   activeSummary = title || "";
   const heading = document.getElementById("call-heading");
-  if (heading) heading.textContent = title || "No call yet";
+  if (heading) heading.textContent = title || "Waiting for a call";
   const frame = document.getElementById("dispatch-pending-title");
   if (frame) frame.textContent = title || "";
 }
 
 async function playFeed(call, decision, trace, text, fast) {
   const token = ++flowToken;
+  feedTrace = Array.isArray(trace) ? trace : [];
   const scenario = eventsFile && eventsFile.scenarios ? eventsFile.scenarios[call.id] : null;
   const needs = (scenario && scenario.needs) || {};
   const planned = pathFor(call, decision, scenario);
@@ -2906,7 +3004,8 @@ async function playFeed(call, decision, trace, text, fast) {
   renderModelPath(decision, trace);
   renderMemoryPanel(caseState, decision);
   renderMetricsStrip(decision);
-  renderScores(scores, needs, accepted);
+  const moved = accepted && (scenario && scenario.steps || []).some((step) => step.id === "to-s1");
+  renderScores(scores, needs, accepted, moved);
   setPriorityBadge(decision.final_priority);
   clearApprovalChrome();
   const list = document.getElementById("flow");
@@ -2931,13 +3030,15 @@ async function playFeed(call, decision, trace, text, fast) {
     rule_id: rule.id,
     action: rule.action,
   };
-  const steps = (scenario ? scenario.steps : []).filter((step) => {
-    if (step.kind === "operator_approval" || step.kind === "dispatch") return false;
-    if (step.when === "rejected" && accepted) return false;
-    if (step.when === "accepted" && !accepted) return false;
-    if (step.when === "aid" && !aid) return false;
-    return true;
-  });
+  const steps = (scenario ? scenario.steps : [])
+    .filter((step) => {
+      if (step.kind === "operator_approval" || step.kind === "dispatch") return false;
+      if (step.when === "rejected" && accepted) return false;
+      if (step.when === "accepted" && !accepted) return false;
+      if (step.when === "aid" && !aid) return false;
+      return true;
+    })
+    .map((step) => ({ ...step }));
   if (path.explain) {
     const at = steps.findIndex((step) => step.kind === "system_1");
     const kind = path.hold === "aid" ? "sapling" : path.accepted ? "system_1" : "system_2";
@@ -2974,22 +3075,24 @@ async function playFeed(call, decision, trace, text, fast) {
   }
   let dispatchStep = null;
   if (gated) {
-    dispatchStep = scenarioKind(scenario, "dispatch") || {
-      id: "dispatch",
-      kind: "dispatch",
-      delay_ms: 480,
-      source: "simulated",
-      text: "Dispatched after operator approval. {action}",
+    dispatchStep = {
+      ...(scenarioKind(scenario, "dispatch") || {
+        id: "dispatch",
+        kind: "dispatch",
+        delay_ms: 480,
+        source: "simulated",
+        text: "Dispatched after operator approval. {action}",
+      }),
     };
-    steps.push(
-      scenarioKind(scenario, "operator_approval") || {
+    steps.push({
+      ...(scenarioKind(scenario, "operator_approval") || {
         id: "approval",
         kind: "operator_approval",
         delay_ms: 420,
         source: "simulated",
         text: "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}.",
-      }
-    );
+      }),
+    });
   } else if (quiet) {
     steps.push({
       id: "closed",
@@ -3042,8 +3145,20 @@ async function playFeed(call, decision, trace, text, fast) {
       kind: "memory",
       delay_ms: 420,
       source: simulated ? "simulated" : "gateway",
-      text: "Caller IP recorded · " + sessionStamp.caller_ip + (simulated ? " · DEMO" : ""),
+      text: "Caller IP recorded · " + sessionStamp.caller_ip,
     });
+  }
+  // Cards templated from the real RouterDecision and memory_context are LIVE when the
+  // gateway returned a trace. Tool, location, landmark, and caller-ip cards keep the grey
+  // badge (no tool endpoint); so do the simulated pattern memory and the rulebook overlay.
+  const liveTurn = Array.isArray(trace) && trace.length > 0;
+  const LIVE_KINDS = new Set(["memory", "system_1", "system_2", "router", "handoff", "mubit", "operator_approval", "dispatch"]);
+  if (liveTurn) {
+    for (const step of steps) {
+      if (step.id === "pattern" || step.id === "rule" || step.id === "caller-ip") continue;
+      if (LIVE_KINDS.has(step.kind)) step.source = "gateway";
+    }
+    if (dispatchStep && LIVE_KINDS.has(dispatchStep.kind)) dispatchStep.source = "gateway";
   }
   setFeedProgress(0, steps.length);
   for (const step of steps) {
@@ -3788,6 +3903,7 @@ function bindChrome() {
     patternRule.textContent = eventsFile.learning.life_safety_rule;
   }
   renderPatterns();
+  loadMubitEval();
   const threshold = document.getElementById("threshold");
   if (eventsFile && eventsFile.confidence_threshold != null) threshold.value = String(eventsFile.confidence_threshold);
   renderPrompts();
@@ -3797,6 +3913,7 @@ function bindChrome() {
   tickClock();
   setInterval(tickClock, 15000);
   renderCallList();
+  if (new URLSearchParams(location.search).get("notes") === "1") document.body.dataset.notes = "1";
   greet();
   app.stage.eventMode = "static";
   app.stage.hitArea = app.screen;

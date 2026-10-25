@@ -243,11 +243,19 @@ def test_twenty_calls_link_fixtures_to_buildings():
     assert 'id="log-export"' not in page
     assert "Export JSON" not in page
     assert 'id="pattern-list"' in page
+    assert 'id="mubit-eval-list"' in page
     assert 'id="pattern-reset"' in page
     assert 'id="priority-badge"' in page
     source = (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
-    assert "DEMO-ONLY" in source
+    assert "Operator replies are scripted. The routing decision is live from the gateway." in page
+    assert "Operator replies are scripted." in (
+        ROOT / "ui" / "sim" / "subtitle.js"
+    ).read_text(encoding="utf-8")
     assert "gateway.route_chooser" in source
+    assert "Gateway stub:" not in source
+    assert " · DEMO" not in source
+    assert "Memory store returned" in source
+    assert "dataset.notes" in source
     assert "Web Speech API" in source
     assert "/stt/transcribe" in source
     assert "attachLiveFeed" in source
@@ -407,11 +415,13 @@ def test_activity_prompts_and_rulebook_are_draft_simulations():
     assert "฿" not in blob
     subprocess.run(["node", "ui/sim/check_hospital.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_patterns.mjs"], cwd=ROOT, check=True)
+    subprocess.run(["node", "ui/sim/check_mubit_eval.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_approval.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_titles.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_pace.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_landmarks.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_modelpath.mjs"], cwd=ROOT, check=True)
+    subprocess.run(["node", "ui/sim/check_subtitle.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_hosting_banner.mjs"], cwd=ROOT, check=True)
     assert 'id="rl-open"' not in (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
     assert "initRlPanel" not in (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
@@ -446,6 +456,25 @@ def test_activity_prompts_and_rulebook_are_draft_simulations():
     assert "335 mm" in phone_page
     assert "mountAbout" in source
     assert "คุณเชื่อมต่อกับ Baan-Safe แล้ว มีอะไรให้ช่วยไหมคะ" in source
+
+
+def test_about_dialog_tells_the_whole_story():
+    page = (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
+    for needle in (
+        "The desk learns",
+        "How we use Mubit",
+        "Fine-tuning",
+        "0.875",
+        'id="about-start"',
+        "huggingface.co/baansafe/baansafe-s1-triage-setfit",
+    ):
+        assert needle in page, needle
+    assert "Rules, or Nemotron" not in page
+    about = (ROOT / "ui" / "sim" / "about.js").read_text(encoding="utf-8")
+    for needle in ("aboutDiagramSvg", "Mubit gateway", "RL graduation", "prompts-toggle"):
+        assert needle in about, needle
+    assert "pixi" not in about.lower()
+    subprocess.run(["node", "ui/sim/check_about.mjs"], cwd=ROOT, check=True)
 
 
 def test_scripted_replies_stay_in_human_language():
@@ -518,7 +547,11 @@ def test_town_copy_uses_sukhumvit_names_and_logo_colours():
     readme = (ROOT / "ui" / "sim" / "README.md").read_text(encoding="utf-8")
     page = (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
     page = page.replace('placeholder="Message"', "")
+    # The grey flow-card badge is the one allowed use of the word; the copy guard still
+    # catches it anywhere else in the page or the script.
+    page = page.replace('class="sim-badge">SAMPLE<', 'class="sim-badge"><')
     source = (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
+    source = source.replace('"LIVE" : "SAMPLE"', '"LIVE" : ""')
     for text in visible + [readme, page, source]:
         assert BANNED_COPY.search(text) is None, text
     css = (ROOT / "ui" / "sim" / "sim.css").read_text(encoding="utf-8")
@@ -586,3 +619,45 @@ def test_sim_threshold_matches_system1_min_confidence():
     events = _load("sim_events.json")
     escalation = yaml.safe_load((ROOT / "config" / "escalation.yaml").read_text())
     assert events["confidence_threshold"] == escalation["system_1_min_confidence"]
+
+
+def test_town_copy_drops_demo_tags_and_hides_note_bubbles():
+    source = (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
+    css = (ROOT / "ui" / "sim" / "sim.css").read_text(encoding="utf-8")
+    events = (ROOT / "ui" / "sim" / "data" / "sim_events.json").read_text(encoding="utf-8")
+    prompts = _load("prompts.json")
+    assert "Gateway stub:" not in source
+    assert " · DEMO" not in source
+    assert "Memory store returned" in source
+    assert "dataset.notes" in source
+    assert "Mubit fetched" not in events
+    assert 'body[data-notes="1"] .bubble.note' in css
+    labels = [group["label"] for group in prompts["groups"]]
+    assert not any(label.startswith("System ") for label in labels)
+
+
+def test_flow_cards_use_live_and_sample_badges():
+    source = (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
+    page = (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
+    css = (ROOT / "ui" / "sim" / "sim.css").read_text(encoding="utf-8")
+    # Two quiet badges only: LIVE for real gateway data, SAMPLE for scripted cards.
+    assert '"LIVE" : "SAMPLE"' in source
+    assert '"gateway" : "simulated"' not in source
+    assert "LIVE_KINDS" in source
+    # Technical detail reads the real trace rows for the playing call.
+    assert "feedTrace" in source
+    assert "Trace: mubit_chat" in source
+    assert 'lastTraceRow("system_1")' in source
+    assert 'lastTraceRow("router")' in source
+    # Static badges in the page carry the same two words.
+    assert page.count('class="sim-badge">simulated') == 0
+    assert 'class="sim-badge">overlay' not in page
+    assert 'class="gw-badge">trace' not in page
+    assert 'class="sim-badge">25 Oct' not in page
+    assert "20 example calls" in page
+    # Header is the decision, not the backend; the floating pill is hidden.
+    assert '<p class="kicker">Decision</p>' in page
+    assert 'id="call-heading">Waiting for a call<' in page
+    assert '"Waiting for a call"' in source
+    assert ".dispatch-pending { display: none !important; }" in css
+    assert 'id="approval-banner"' in page

@@ -1,9 +1,9 @@
 {
-  "note": "Saved caller lines for the phone drawer. fixture_id is the DEMO-ONLY chooser target. The stub gateway answers that fixture, not a live reading of the sentence. Thai lines are optional display text. The sent text is the English line.",
+  "note": "Saved caller lines for the phone drawer. fixture_id is the DEMO-ONLY chooser target. The gateway answers that fixture, not a live reading of the sentence. Thai lines are optional display text. The sent text is the English line.",
   "groups": [
     {
       "id": "system_1",
-      "label": "System 1",
+      "label": "Supplies and information",
       "prompts": [
         {
           "id": "s1-rice",
@@ -39,7 +39,7 @@
     },
     {
       "id": "system_2",
-      "label": "System 2",
+      "label": "Medical, rescue and safeguarding",
       "prompts": [
         {
           "id": "s2-oxygen",

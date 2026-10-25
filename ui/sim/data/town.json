@@ -4573,7 +4573,12 @@
       "expected_priority": "P3",
       "expected_system": "system_1",
       "expected_route": "welfare_distribution",
-      "memory": []
+      "memory": [
+        {
+          "kind": "similar_case",
+          "summary": "An earlier drinking-water call for this household was handled by System 2."
+        }
+      ]
     },
     {
       "id": "F02",

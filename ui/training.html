@@ -20,6 +20,8 @@
       color: var(--ink);
       background: var(--paper);
     }
+    p.back { color: var(--muted); font-size: 12px; margin: 0 0 0.5rem; }
+    p.back a { color: inherit; }
     h1 { font-size: 2rem; margin: 0 0 0.25rem; }
     h2 { font-size: 1.4rem; margin: 2.5rem 0 0.75rem; border-bottom: 2px solid var(--ink); padding-bottom: 0.25rem; }
     p.lede { color: var(--muted); margin: 0 0 1rem; font-size: 1.05rem; }
@@ -52,11 +54,12 @@
   <link rel="stylesheet" href="training_polish.css" />
 </head>
 <body>
-  <h1>Training</h1>
+  <p class="back"><a href="/ui/sim/index.html">← Town desk</a> · Training</p>
+  <h1>Training — what the desk learned</h1>
   <p class="lede">
-    What BaanSafe can measure about learning: Mubit traffic from System 2 calls,
-    our own fine-tune runs with loss curves, the RL reward loop, and the training event log.
-    Reads <code>GET /training</code>.
+    Fine-tune versions with loss curves and held-out accuracy, the RL loop's memory-off vs memory-on comparison,
+    per-episode drill-down, and every System 2 hop through Mubit. Numbers come from files and traces on this server;
+    nothing here calls a model.
   </p>
   <p id="status" role="status"></p>
 
