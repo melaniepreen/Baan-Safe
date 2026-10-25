@@ -15,6 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from api.caller_ip import resolve_caller_ip, stamp_caller_ip
 from api.deps import enrich_impl, impl_snapshot, not_ready, s1_impl, s2_impl
+from api.routes.training import rl_run_path
 from api.store import StoredCase, get, put
 from contracts.models import (
     CaseState,
@@ -568,7 +569,7 @@ def aid_exceptions(case: CaseState) -> dict:
 
 @router.get("/rl/run")
 def rl_run() -> dict:
-    path = ROOT / "eval" / "out" / "rl" / "run.json"
+    path = rl_run_path()
     if not path.exists():
         raise HTTPException(
             status_code=404,

@@ -26,7 +26,7 @@ One turn: enrich, retrieve memory, record a policy pre-check, route by the field
 - `gateway/chooser.py` — `choose`, `system_2_triggers`. The decided `gateway.route_chooser` (`field precheck`).
 - `gateway/graduation.py` — `apply(case)` tags graduated patterns (`complex_situation`) and adds a recommendation MemoryItem after memory retrieval. Sets no priority; nothing moves to System 1.
 - `gateway/auth.py` — records the auth scheme. Does not reject the request.
-- `gateway/policy.py` — `precheck_notes`. Does not read medical fields or change priority.
+- `gateway/policy.py` — `precheck_notes(triggers)`: records which `config/escalation.yaml` System 2 triggers fired. Does not read medical fields or change priority.
 - `memory/adapter.py` — `MEMORY_IMPL=mock` (default), `local` (hosted default), or `mubit`. `memory_mode`, `retrieve`, `store_correction`, `store_record` (no-op in mock mode, returns `False`), `last_retrieve_error`.
 - `memory/local.py` — BaanSafe's own store when `MEMORY_IMPL=local`: append-only JSONL at `MEMORY_LOCAL_PATH` (default `var/memory.jsonl`), written under an exclusive file lock, scored on read. Lanes: `baansafe-case` → `similar_case`, `baansafe-correction` → `correction`, `baansafe-policy` → `policy`.
 - `memory/mubit.py` — control-plane client (`/v2/control/query`, `/v2/control/ingest`) when `MEMORY_IMPL=mubit`. `MUBIT_CONTROL_URL` (a `mubit.ai` host) overrides the origin. Dormant: current Mubit is an LLM gateway and returns 404 `unknown_route` for `/v2/control/*`, so this backend returns no items until Mubit exposes a memory API. Same lanes as local.

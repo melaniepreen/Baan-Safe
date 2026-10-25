@@ -102,7 +102,7 @@ def handle(
     graduations = apply_graduations(case)
     mode = _mode()
     system, triggers = choose(case, overlay)
-    notes = [auth_status(), *precheck_notes()]
+    notes = [auth_status(), *precheck_notes(triggers)]
     emit(
         TraceEvent(
             case_id=case.case_id,

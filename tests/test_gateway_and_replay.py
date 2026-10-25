@@ -58,3 +58,17 @@ def test_replay_stubs_are_accurate():
     assert s2["priority_accuracy"] == 1
     assert s2["route_accuracy"] == 1
     assert s2["system_accuracy"] == 1
+
+
+def test_policy_precheck_note_records_evaluated_triggers():
+    decision = handle(load_case("F02"), use_stubs=True)
+    notes = decision.policy_notes
+    assert not any("not evaluated" in note for note in notes)
+    precheck = [note for note in notes if note.startswith("policy precheck:")]
+    assert precheck and "fired: none" in precheck[0]
+
+    triggered = handle(load_case("F10"), use_stubs=True)
+    notes = triggered.policy_notes
+    assert not any("not evaluated" in note for note in notes)
+    precheck = [note for note in notes if note.startswith("policy precheck:")]
+    assert precheck and "fired: " in precheck[0] and "fired: none" not in precheck[0]

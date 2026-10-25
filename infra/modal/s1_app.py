@@ -29,14 +29,14 @@ image = with_repo(
         "protobuf",
         "huggingface_hub",
         "laya>=0.4.14",
+    ).env(
+        {
+            "S1_MODEL_ID": MODEL_ID,
+            "S1_GPU": GPU_LABEL,
+            "HF_HOME": HF_CACHE_PATH,
+            "USE_TF": "0",
+        }
     )
-).env(
-    {
-        "S1_MODEL_ID": MODEL_ID,
-        "S1_GPU": GPU_LABEL,
-        "HF_HOME": HF_CACHE_PATH,
-        "USE_TF": "0",
-    }
 )
 
 app = modal.App("baansafe-s1", image=image)
