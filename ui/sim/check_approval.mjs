@@ -13,7 +13,9 @@ function assert(cond, message) {
 }
 
 assert(needsOperatorApproval(s1, fast) === false, "System 1 above the threshold dispatches on its own");
-assert(needsOperatorApproval(s2, fast) === false, "a confirmed fast path still dispatches when the stub label is system_2");
+assert(needsOperatorApproval(s2, fast) === true, "System 2 waits even when the simulated score would accept");
+assert(needsOperatorApproval({ source_outcomes: [{ system: "system_1" }], final_route: "information_only", next_action: "finalize_case", dispatches: [] }, handedOff) === false, "P4 information does not wait");
+assert(needsOperatorApproval({ source_outcomes: [{ system: "system_1" }], final_route: "duplicate_merge", next_action: "finalize_case", dispatches: [] }, fast) === false, "a merged duplicate does not wait");
 assert(needsOperatorApproval(s1, handedOff) === true, "System 1 under the threshold waits");
 assert(needsOperatorApproval(s2, handedOff) === true, "System 2 waits");
 assert(needsOperatorApproval(cascade, fast) === true, "a cascade waits even if the score would accept");

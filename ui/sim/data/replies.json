@@ -9,6 +9,12 @@
       "th": "เรื่องเงินช่วยเหลือน้ำท่วม เจ้าหน้าที่จะตรวจให้ค่ะ โทรนี้ยังยืนยันไม่ได้"
     },
     {
+      "id": "duplicate-merge",
+      "when": { "route": "duplicate_merge" },
+      "en": "I already have this household's request. I will not send a second boat.",
+      "th": "รับเรื่องของบ้านนี้ไว้แล้ว จะไม่ส่งเรือลำที่สองค่ะ"
+    },
+    {
       "id": "boat-medical",
       "when": { "vehicle": "boat", "needs_any": ["medical"] },
       "en": "Help is on the way. A rescue boat is leaving the jetty now and should reach you in about {eta} minutes. Please stay on the upper floor and keep your phone with you.",

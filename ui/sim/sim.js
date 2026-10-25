@@ -7,7 +7,7 @@
    Houses, streets, flood polygons, and routes come from ./data.
 */
 import { mountCorrectForm } from "../correct.js";
-import { needsOperatorApproval } from "./approval.js";
+import { closedWithoutVehicle, needsOperatorApproval } from "./approval.js";
 import { callSummary } from "./call_title.js";
 import { locationLine, matchLandmark, PHONE_NUMBER } from "./landmarks.js";
 import {
@@ -1954,8 +1954,25 @@ function replyMatches(template, ctx) {
   return true;
 }
 
-function operatorReply(decision, call, text) {
+function shownRule(call, decision, text) {
   const rule = ruleFromDispatches(call, decision, text);
+  if (!closedWithoutVehicle(decision)) return rule;
+  const merge = decision.final_route === "duplicate_merge";
+  return {
+    ...rule,
+    id: merge ? "duplicate-merge" : "information-only",
+    vehicle: "none",
+    action: merge
+      ? "Same place and the same need as an earlier case. System 1 merged this call. No second vehicle."
+      : "System 1 answered. Information only. No vehicle.",
+    fromDispatches: false,
+    overlay: false,
+    disagree: false,
+  };
+}
+
+function operatorReply(decision, call, text) {
+  const rule = shownRule(call, decision, text);
   const source = (decision.source_outcomes && decision.source_outcomes[0]) || {};
   const needs = new Set((source.needs || []).map(String));
   const ctx = {
@@ -2875,11 +2892,14 @@ async function playFeed(call, decision, trace, text, fast) {
   const scores = planned.scores;
   const top = topScore(scores);
   const path = planned.path;
-  const accepted = path.accepted;
+  const outcomes = (decision && decision.source_outcomes) || [];
+  const system2 = outcomes.some((row) => row && row.system === "system_2") || outcomes.length > 1;
+  const quiet = closedWithoutVehicle(decision);
+  const accepted = system2 ? false : quiet ? true : path.accepted;
   const gated = needsOperatorApproval(decision, path);
   const source = (decision.source_outcomes && decision.source_outcomes[0]) || {};
   const aid = decision.final_route === "aid_caseworker" || (source.needs || []).map(String).includes("aid_payment");
-  const rule = ruleFromDispatches(call, decision, text);
+  const rule = shownRule(call, decision, text);
   const caseState = caseStates.get(call.id) || (live.triage && live.triage.caseState) || null;
   renderLocationContext(caseState);
   renderModelPath(decision, trace);
@@ -2969,6 +2989,14 @@ async function playFeed(call, decision, trace, text, fast) {
         text: "Awaiting operator approval. Proposed {vehicle} to {destination}, about {eta} minutes. Rule {rule_id}.",
       }
     );
+  } else if (quiet) {
+    steps.push({
+      id: "closed",
+      kind: "router",
+      delay_ms: 480,
+      source: "gateway",
+      text: rule.action,
+    });
   } else if (rule.fromDispatches) {
     steps.push({
       id: "dispatch-live",
@@ -3066,7 +3094,7 @@ async function playFeed(call, decision, trace, text, fast) {
   };
   for (const id of ["op-accept", "op-reject"]) {
     const button = document.getElementById(id);
-    if (button) button.disabled = false;
+    if (button) button.disabled = quiet;
   }
   if (gated) {
     trips = [];

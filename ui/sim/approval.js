@@ -8,10 +8,22 @@
    under the threshold.
 */
 
+export function closedWithoutVehicle(decision) {
+  const route = decision && decision.final_route;
+  if (route === "information_only" || route === "duplicate_merge") return true;
+  const dispatches = (decision && decision.dispatches) || [];
+  return decision && decision.next_action === "finalize_case" && dispatches.length === 0;
+}
+
 export function needsOperatorApproval(decision, path) {
+  if (closedWithoutVehicle(decision)) return false;
   const outcomes = (decision && decision.source_outcomes) || [];
   if (outcomes.length > 1) return true;
+  if (outcomes.some((row) => row && row.system === "system_2")) return true;
+  const route = decision && decision.final_route;
+  if (route === "aid_caseworker" || route === "supervisor_escalation") return true;
   if (path && path.accepted === true && path.owner === "system_1") return false;
+  if (decision && decision.next_action === "create_provisional_dispatch") return false;
   return true;
 }
 
