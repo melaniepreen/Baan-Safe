@@ -6,6 +6,7 @@ files:
   - scripts/check_agents.py
   - scripts/check_owners.py
   - scripts/demo_reset.py
+  - scripts/demo.py
   - .github/CODEOWNERS
   - tests/conftest.py
   - Makefile
@@ -22,6 +23,7 @@ files:
 - `scripts/check_agents.py` — `AGENTS.md` line budget, topic template, index paths. Called from `validate`.
 - `scripts/check_owners.py` — `make check-owners`. Changed files on this branch (`git diff --name-only origin/main...HEAD` plus the working tree) against the single-writer map in the script header: `ui/sim/sim.js` (Melanie, branches `melanie/`, `mel/`) and `llm/client.py` (Moly, `moly/`). Prints a warning per file touched from a non-owner branch; exit 0 unless `OWNERS_ARGS=--strict`. A reminder, not security. `.github/CODEOWNERS` is the GitHub side (`@melaniepreen`, `@molyleelatham`); `tests/test_check_owners.py` pins the two together.
 - `scripts/demo_reset.py` — `make demo-reset` (dry run; `RESET_ARGS=--yes` applies). Local mode truncates `TRACE_PATH` and `MOCK_CORRECTIONS_PATH`, removes `S2_CACHE_RECORD_PATH`, and rewrites `MEMORY_LOCAL_PATH` keeping only `baansafe-policy` rows (re-seeding the 10 lessons when none remain); `--events` also clears `TRAINING_EVENTS_PATH`. `--hosted` does the same on the Modal volume `baansafe-demo` through `modal volume get/put/rm`. Prints before/after counts per lane. `tests/test_demo_reset.py` covers both modes (hosted with a fake CLI).
+- `scripts/demo.py` — `make demo` / `make backend` / `make frontend` / `make demo-stop`: one-command quick start for the API in the hosted demo config (state under `var/demo/`; `DEMO_PORT`/`RESET`/`OPEN` knobs; `DEMO_<name>` overrides one config value, an ambient shell export does not). `tests/test_demo_quickstart.py` covers the env defaults and the shell-override note, seeding, the pid-file guard, and the port check.
 - `tests/conftest.py` — deletes `MUBIT_API_KEY` and `MEMORY_LOCAL_PATH` for the session; `MEMORY_IMPL=mock`. A local-mode test sets its own tmp `MEMORY_LOCAL_PATH`.
 - `pyproject.toml` — `pythonpath = ["."]`, `testpaths = ["tests"]`. Requires Python `>=3.11`.
 - `tests/test_architecture.py`, `test_gateway_and_replay.py`, `test_chooser.py`, `test_system1.py`, `test_router.py`, `test_extract.py`, `test_api.py`, `test_mubit_memory.py`, `test_memory_write.py`, `test_memory_local.py`, `test_sapling.py`, `test_modal_infra.py`, `test_contracts.py`, `test_learning_eval.py`, `test_sim.py`, `test_latte.py`, `test_agents_docs.py`, `test_training_schema.py`.

@@ -153,6 +153,24 @@ This tree is Phase 0 plus a Phase 1 API. **System 2 calls live Nemotron through 
 
 The architecture note is `BaanSafe_Revised_Architecture.md`. What to do in the morning is `MORNING_REPORT.md`. Who owns each folder is `OWNERSHIP.md`. Background reading for Phase 1 is `research/INDEX.md`. The training event schema is `docs/agents/training-schema.md` (listed in `docs/agents/index.json`).
 
+## Quick start
+
+Once per machine, do the Setup steps below and `make sync` (or copy `.env.example` to `.env`) so System 2 has the Mubit values.
+
+```bash
+make demo            # backend on http://127.0.0.1:8000, then opens the town and the training page; Ctrl+C stops it
+```
+
+Or in two terminals:
+
+```bash
+make backend         # API and UI on :8000 in the hosted demo config
+make frontend        # waits for /health, then opens /ui/sim/ and /ui/training.html
+make demo-stop       # stops a backend that make backend or make demo left running
+```
+
+The demo config runs System 1 rules (`S1_IMPL=real`), System 2 replaying recorded Nemotron replies (`S2_IMPL=cache`, `S2_CACHE_KEY=case`), and BaanSafe's own memory store (`MEMORY_IMPL=local`). Memory, traces, corrections, and recorded replies live under `var/demo/` (gitignored). The 10 policy lessons are seeded on first start. A System 2 turn that is not in the cache is one paid Nemotron call through Mubit, recorded so the same turn replays next time. Without Mubit values in `.env`, a miss returns `system2_unavailable` and opens no socket. `RESET=1` clears case memory, traces, and corrections first, and keeps the policy lessons and recorded replies. `DEMO_PORT=8001` moves the port. `OPEN=0` prints the URLs instead of opening a browser. `make frontend DEMO_URL=<url>` opens another deployment's town. `DEMO_S2_IMPL=stub make backend` overrides one setting. A value your shell already exports (for example `S2_IMPL=stub`) does not change the demo config, and the banner says so.
+
 ## Setup
 
 Python 3.11 or newer (this environment runs 3.12). From the repo root:

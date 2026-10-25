@@ -1,7 +1,7 @@
 PYTHON ?= $(shell test -x .venv/bin/python && echo .venv/bin/python || echo python3)
 export PYTHONPATH := .
 
-.PHONY: mubit-traffic mubit-requests record-s2-cache rl-snapshot rl-restore rl-compare eval-gate validate test replay-stubs demo-stub demo-correction-loop demo-graduation demo-reset check-owners rl-loop rl-loop-replay eval-learning sim-eval extract-eval latte-bench serve seed-memory ingest ingest-refresh data-report sources-refresh sources-status \
+.PHONY: mubit-traffic mubit-requests record-s2-cache rl-snapshot rl-restore rl-compare eval-gate validate test replay-stubs demo-stub demo-correction-loop demo-graduation demo-reset check-owners rl-loop rl-loop-replay eval-learning sim-eval extract-eval latte-bench serve demo backend frontend demo-stop seed-memory ingest ingest-refresh data-report sources-refresh sources-status \
 	export-training export-laya laya-train sync push modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune deploy-modal docker-build docker-run
 
 IMAGE ?= baansafe-api:local
@@ -86,6 +86,17 @@ latte-bench:
 
 serve:
 	$(PYTHON) -m uvicorn api.main:app --host 0.0.0.0 --port 8000
+
+# Quick start (README): API + town UI in the hosted demo config, state under var/demo/.
+# DEMO_PORT=8000, RESET=1 clears case memory/traces first (keeps policy lessons and recorded S2 replies), OPEN=0 prints URLs.
+demo:
+	$(PYTHON) scripts/demo.py up
+backend:
+	$(PYTHON) scripts/demo.py backend
+frontend:
+	$(PYTHON) scripts/demo.py frontend
+demo-stop:
+	$(PYTHON) scripts/demo.py stop
 
 # Ingest the 10 policy lessons into the memory store (MEMORY_IMPL=local, path from
 # MEMORY_LOCAL_PATH; mubit is dormant). SEED_ARGS='--dry-run' prints without writing;
