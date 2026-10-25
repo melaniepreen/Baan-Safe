@@ -29,7 +29,7 @@ if (seen[0].accepted) throw new Error("says-fine accepted on first look");
 if (seen[1].hold !== "escalated" || seen[1].accepted || seen[1].owner !== "system_2") {
   throw new Error("second look should graduate to System 2");
 }
-if (!seen[1].explain.includes("graduates to System 2")) throw new Error(seen[1].explain);
+if (!seen[1].explain.includes("goes to Nemotron first") || !seen[1].explain.includes("graduates the pattern into System 1 rules")) throw new Error(seen[1].explain);
 if (seen[2].hold !== "escalated" || seen[2].accepted) throw new Error("later looks stay graduated to S2");
 
 let life = 0;
