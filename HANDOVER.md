@@ -87,7 +87,7 @@ Carry-forward bug: `s1_app`, `s2_app`, `sapling_app`, `stt_app` chain `.env()` a
 Design reviewed against code. Compatible with four corrections:
 
 1. `make rl-loop-replay` does **not** write the cache; only live `make rl-loop` does, and `eval/out/` is gitignored. Ship a committed `fixtures/s2_cache/demo.jsonl` read via `S2_CACHE_PATH`.
-2. No signature-based key. Exact key only; the sim plays fixtures that are in the cache. A reply recorded for a different prompt is not a cache hit.
+2. No fuzzy key. `S2_CACHE_KEY=exact` (default; RL loop, committed fixture) hashes the messages as sent. Hosted needs `S2_CACHE_KEY=case`, which drops only `case_id`, `memory`, `resources` from the payload (random ids, store grows per case, ledger moves) — transcript, fields, triggers, handoff, system prompt still must match byte for byte. A reply recorded for a different transcript is not a hit.
 3. Record the cache **after** Track 1 lands (memory items are in `_messages`, so the key changes once the workspace has content). **The committed `eval/out/rl/s2_cache.jsonl` and `run.json` (25 Oct, also uploaded to Modal as `rl_run.json`) were produced with `.env` `MEMORY_IMPL=mubit`, i.e. `memory: []` in every prompt. They are stale for this track; re-run `make rl-loop` with `MEMORY_IMPL=local`.**
 4. Local `make hackathon-demo` vs hosted URL tell different stories (no LLM calls vs real Mubit traffic). Pick one for the 3-minute script; hosted stays the judges' URL unless both agree.
 
@@ -161,8 +161,18 @@ Measured on `main` `daeaad9` with `S1_IMPL=real`. Things a judge can hit.
 | A8 | Sapling stub can never say `supported`/`violation` on a live case | `_verify_stub` needs an exact (policy, evidence, claim) triple; evidence includes the transcript, so every live aid case → `unsure` → `sapling_unsure` → human | Demonstrable only via `eval/sapling_replay.py` on the 5 stub cases. Do not promise a live Sapling verdict |
 | A9 | Overlay "graduated rule" surface is tiny | `overlay.json`: 1 graduated (`RL-ROAD-3`, no needs → P4 info), 1 demoted. `narrow_signature` hashes caller tokens, so a rule fires only on near-identical wording; the `[0.7, 0.8)` confidence band in `system1/decide.py` is unreachable from extraction (it emits 0.85 / 0.6 / None) | "Learns to be faster" must replay the exact fixture that graduated. Not generalisation |
 | A10 | `/docs` summary said "System 1 and System 2 logic are not implemented" | `api/main.py` | Reworded |
-| A11 | `contracts/schemas/TraceEvent.json` lacks `enrich`, `memory`, `mubit_chat` | schema enum has 5 stages, Pydantic has 8 | Track 4 #5, still open |
+| A11 | `contracts/schemas/TraceEvent.json` lacks `enrich`, `memory`, `mubit_chat` | schema enum has 5 stages, Pydantic has 8 | Done in PR #31 (`python -m contracts.export_schemas`) |
 | A12 | `read_traces()` parses the whole `traces.jsonl` on every `/metrics` and `/cases/{id}/trace` | 831 lines locally; the hosted volume grows unbounded and the town calls `/trace` after every turn | Fine for one demo; rotate or index before a long session |
+
+### Mubit training status (25 Oct, 05:45 UTC)
+
+What the API shows: a live S2 call is a plain passthrough (`model: nvidia/nemotron-3-nano-30b-a3b`, `provider: Novita`, `x-middleware-request-id`), with no adapter, task, or version marker in headers or body. `api.mubit.ai` has no readable task/adapter endpoint (`/v1/tasks`, `/v1/adapters`, `/v1/requests` → `404 unknown_route`); the console is the only view. If Mubit promotes an adapter it is served under the same model id, so our traces will not show it.
+
+What ran: an adapter cycle for the System 2 Task at roughly 04:00 UTC, reported "with issues" from the console (exact label not captured here). Context that makes `Below target` / `Prompt only` the expected result for that cycle: strict-JSON output at `temperature=0, seed=7` that the base model already produces, and every prompt before ~04:50 carried `memory: []` (audit A1/A2), so the kept examples were near-duplicates.
+
+What changed since: ~650 distinct requests across ~650 sessions (RL loop, synthetic set, two `make mubit-traffic` batches, 158 `make record-s2-cache` recordings, hosted script runs), each with `metadata.session_id`, one stable system prompt → one Task with held-out sessions available.
+
+To do (console, human): Adapters → History for the System 2 Task — status label, kept-example count, whether a cycle ran after 05:00 UTC. If "no examples": confirm training is on for `ws-3e4ac86aadff0b72` (Mubit-side). Record the label here and in the demo line: *the gateway recorded every call, grouped the task, ran a cycle, and the test gate held* — the gate is the point. Top up any time with `make mubit-traffic COUNT=300 SEED=<n>`.
 
 ### Branch policy
 
