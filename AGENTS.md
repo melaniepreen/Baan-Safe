@@ -54,6 +54,10 @@ make sim-eval
 make extract-eval
 make latte-bench
 make serve
+make demo
+make backend
+make frontend
+make demo-stop
 make sync
 make push
 make modal-secrets
