@@ -284,7 +284,10 @@
       "files": [
         "ui/player.html",
         "ui/correct.js",
-        "ui/transcript_player.py"
+        "ui/transcript_player.py",
+        "ui/training_polish.js",
+        "ui/sim/hosting_banner.js",
+        "ui/sim/check_hosting_banner.mjs"
       ]
     },
     {

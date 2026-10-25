@@ -1,0 +1,16 @@
+/* Training page polish: Hub links on the versions table and the held-out
+   per-label table. Follows the inline palette in training.html. */
+
+td.hub, th.hub { white-space: nowrap; }
+a.hub-link {
+  color: var(--blue, #0b3d91);
+  text-decoration: none;
+  border-bottom: 1px dotted currentColor;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+a.hub-link:hover, a.hub-link:focus { border-bottom-style: solid; }
+
+.heldout-labels table { width: auto; min-width: 28rem; }
+.heldout-labels .heldout-caption { margin: 0 0 0.5rem; }
+.heldout-labels td.mono { font-size: 0.95rem; }

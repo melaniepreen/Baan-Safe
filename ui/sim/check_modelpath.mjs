@@ -75,7 +75,7 @@ if (mem.mode !== "local" || mem.items !== 2 || mem.retrieve_error !== "Timeout")
 if (parseMemoryNote("memory via adapter mode=mock; items=0").retrieve_error !== null) throw new Error("no error expected");
 
 if (parseMubitNote("mubit chat host=api.mubit.ai status=ok").tone !== "live") throw new Error("ok is live");
-if (parseMubitNote("mubit chat host=api.mubit.ai status=cache_hit").label !== "CACHE HIT") throw new Error("cache hit label");
+if (parseMubitNote("mubit chat host=api.mubit.ai status=cache_hit").label !== "CACHE HIT · replayed") throw new Error("cache hit label");
 const bad = parseMubitNote("mubit chat host=api.mubit.ai status=http_429");
 if (bad.tone !== "error" || !bad.label.includes("http_429")) throw new Error(JSON.stringify(bad));
 if (parseMubitNote("mubit chat host=api.mubit.ai status=timeout").tone !== "error") throw new Error("timeout is error");
@@ -95,6 +95,16 @@ const replayRow = modelPathRows(
   null
 ).find((row) => row.stage === "mubit_chat");
 if (!replayRow || !replayRow.detail.includes(MREQ + " (recorded)")) throw new Error("replayed id is marked recorded");
+// An S2_IMPL=cache hit (system2/cache.py): host=s2_cache/case, latency 0, blue badge with the word replayed, no tokens.
+const cacheHitRow = modelPathRows(
+  [{ case_id: "c", stage: "mubit_chat", started_at: at, latency_ms: 0, model: "nvidia/nemotron-3-nano-30b-a3b", notes: "mubit chat host=s2_cache/case status=cache_hit request_id=" + MREQ + " (recorded)" }],
+  null
+).find((row) => row.stage === "mubit_chat");
+if (!cacheHitRow || cacheHitRow.latency_ms !== 0) throw new Error("cache hit keeps its 0 ms latency " + JSON.stringify(cacheHitRow));
+if (cacheHitRow.tone !== "cache" || cacheHitRow.badges[0].tone !== "cache" || cacheHitRow.badges[0].text !== "CACHE HIT · replayed") throw new Error("cache hit badge " + JSON.stringify(cacheHitRow.badges));
+if (!cacheHitRow.detail.includes("s2_cache/case")) throw new Error("cache hit names the cache host: " + cacheHitRow.detail);
+if (cacheHitRow.detail.includes("tokens")) throw new Error("a replay has no token count");
+if (cacheHitRow.badges[0].text === parseMubitNote("mubit chat host=api.mubit.ai status=ok").label) throw new Error("cache badge must differ from the live badge");
 
 const write = parseMemoryWriteNote("status=error; error=ConnectionError; kind=case_record; mode=mubit");
 if (write.ok || write.error !== "ConnectionError" || write.mode !== "mubit") throw new Error(JSON.stringify(write));

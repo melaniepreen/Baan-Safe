@@ -107,7 +107,7 @@ export function parseMubitNote(notes) {
     label = "live via Mubit";
   } else if (status === "cache_hit") {
     tone = "cache";
-    label = "CACHE HIT";
+    label = "CACHE HIT · replayed";
   }
   const requestId = /^mreq_[0-9a-f]{32}$/.test(bag.request_id || "") ? bag.request_id : null;
   return {
