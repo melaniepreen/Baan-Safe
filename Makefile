@@ -1,7 +1,7 @@
 PYTHON ?= $(shell test -x .venv/bin/python && echo .venv/bin/python || echo python3)
 export PYTHONPATH := .
 
-.PHONY: validate test replay-stubs demo-stub demo-correction-loop demo-graduation rl-loop rl-loop-replay eval-learning sim-eval extract-eval latte-bench serve seed-memory ingest ingest-refresh data-report sources-refresh sources-status \
+.PHONY: mubit-traffic validate test replay-stubs demo-stub demo-correction-loop demo-graduation rl-loop rl-loop-replay eval-learning sim-eval extract-eval latte-bench serve seed-memory ingest ingest-refresh data-report sources-refresh sources-status \
 	export-training export-laya laya-train sync push modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune deploy-modal docker-build docker-run
 
 IMAGE ?= baansafe-api:local
@@ -55,6 +55,13 @@ serve:
 # SEED_ARGS='--dry-run' prints without POSTing; '--case-fact CASE_ID' adds one synthetic fact.
 seed-memory:
 	$(PYTHON) scripts/seed_memory.py $(SEED_ARGS)
+
+# Distinct synthetic System 2 calls through Mubit so its task gains kept examples.
+# Needs .env loaded. COUNT / SEED override; TRAFFIC_ARGS="--dry-run" prints only.
+COUNT ?= 100
+SEED ?= 1
+mubit-traffic:
+	S1_IMPL=real S2_IMPL=real MEMORY_IMPL=mock $(PYTHON) scripts/mubit_traffic.py --count $(COUNT) --seed $(SEED) $(TRAFFIC_ARGS)
 
 ingest:
 	$(PYTHON) -m ingest
