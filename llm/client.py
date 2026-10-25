@@ -155,6 +155,11 @@ def complete(
         body["seed"] = seed
     if reasoning is not None:
         body["reasoning"] = reasoning
+    if case_id:
+        # Mubit groups a conversation's calls into one session by
+        # metadata.session_id and holds adapter test cases out by session, so a
+        # case's turns stay together and held-out tests are other cases.
+        body["metadata"] = {"session_id": case_id[:200]}
 
     started_at = datetime.now(timezone.utc)
     t0 = perf_counter()

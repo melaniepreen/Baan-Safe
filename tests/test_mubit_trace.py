@@ -36,11 +36,14 @@ def test_complete_emits_mubit_chat_on_success(monkeypatch, tmp_path):
     monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai/compat/openrouter/v1")
     monkeypatch.setenv("MUBIT_API_KEY", "mbt_should_not_appear")
 
+    sent: dict = {}
+
     def fake_post(url, **kwargs):
         assert "openrouter.ai" not in url
         assert "api.mubit.ai" in url
         headers = kwargs.get("headers") or {}
         assert headers.get("Authorization", "").startswith("Bearer ")
+        sent.update(kwargs.get("json") or {})
         return _ok_response(httpx.Request("POST", url))
 
     monkeypatch.setattr("llm.client.httpx.post", fake_post)
@@ -50,6 +53,9 @@ def test_complete_emits_mubit_chat_on_success(monkeypatch, tmp_path):
         case_id="F10",
     )
     assert body["usage"]["prompt_tokens"] == 11
+    # Mubit sessions: one case = one session, test cases held out by session.
+    assert sent["metadata"] == {"session_id": "F10"}
+    assert "x-middleware-store" not in {k.lower() for k in (sent.get("headers") or {})}
     events = read_traces("F10")
     assert len(events) == 1
     event = events[0]
