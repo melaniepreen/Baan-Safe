@@ -1,5 +1,23 @@
 # BaanSafe
 
+## For the judges
+
+**Why.** In a flood, the same hotline hears a family that needs a boat and a household that only needs drinking water, and no desk can sort every call before the water rises. BaanSafe listens, names the need, and puts a life in front of an operator while a routine delivery can leave on its own.
+
+**How.** A field precheck sends ordinary cases down a rules-only fast path and, in the same turn, hands the hard ones to Nemotron through Mubit. Before anyone is told they do not qualify for aid, Banyan Sapling checks the claim against the policy, and the decision router turns the result into a question, a boat or a shelter, or a person who can accept, reject, and correct the call.
+
+**What.** The demo is one screen: a phone, a flooded block of Sukhumvit drawn from public streets and flood data, and the operator's accept or reject. Twenty synthetic households call in, each house takes the priority the gateway returns, and a correction on a rejected call is what the system learns from.
+
+Open it with `make serve`, then [http://127.0.0.1:8000/ui/sim/](http://127.0.0.1:8000/ui/sim/).
+
+![The town desk before a call: phone, flooded Sukhumvit block, operator panel](docs/images/town-desk.png)
+
+The desk at rest. The caller is connected in English and Thai. The block is Watthana, with flood depth drawn darker where the water is deeper. Accept and Reject wait for a case.
+
+![A drinking-water call kept on the System 1 fast path at P3](docs/images/town-call.png)
+
+A household asks for drinking water. System 1 keeps the case on the fast path, scores water at 0.90, and answers with a supply boat from Sun Chuai Lue Nam Thuam in about twenty minutes. The operator can still accept or reject. The reply on the phone is scripted. The priority is the gateway's.
+
 Flood and disaster call-triage scaffold. Mubit is the LLM gateway and trace record: every System 2 call goes through it, is grouped into a task, and can train a per-task adapter. Memory is BaanSafe's own store. System 1 acts fast. System 2 reasons deeply with Nemotron as its orchestrator. On aid-eligibility and denial checks, Banyan Sapling verifies the claim before the decision router. The field precheck picks the entry system; a System 1 escalate cascades to System 2 in the same turn, and the decision router turns the deciding outcome into the next action. Mubit does not reason.
 
 Sapling is [MubitLabs/banyan-sapling](https://huggingface.co/MubitLabs/banyan-sapling), the Apache-2.0 23B verifier (research preview). It takes a policy, evidence, and a claim, and returns `supported`, `violation`, `missing`, `contradicted`, or `unsure`, with probabilities. `supported` lets the proposed action stand. `violation` blocks it. `unsure`, `missing`, and `contradicted` hand the case to a human. The input limit is 16,384 tokens. It does not run on System 1. `system2.use_banyan_sapling` is true for those two checks. Hosting, the GPU, and Thai handling stay `TODO_HUMAN`. Tests use the stub client and do not load a GPU.
