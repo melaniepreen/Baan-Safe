@@ -771,6 +771,13 @@ input[type="range"] { width: 100%; accent-color: var(--yellow); }
 .path-stage { color: #e6edf5; font-weight: 600; }
 .path-ms { color: #9aa8bb; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 .path-detail { margin: 2px 0 0; color: #9aa8bb; line-height: 1.4; overflow-wrap: anywhere; }
+.path-mreq {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  color: #d6ff3c;
+  user-select: all;
+  cursor: text;
+}
 .path-badge {
   display: inline-block;
   padding: 0 6px;

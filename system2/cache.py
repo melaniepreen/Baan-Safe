@@ -158,7 +158,7 @@ def record(key: str, reply: dict) -> bool:
 
 def completer(messages: list[dict[str, Any]], model: str | None = None, **kwargs: Any) -> dict:
     """Cache hit, else one Mubit call (recorded when a record path is set)."""
-    from llm.client import complete, emit_mubit_chat_trace
+    from llm.client import REPLY_REQUEST_ID, complete, emit_mubit_chat_trace
 
     mode = key_mode()
     key = cache_key(model, messages, mode)
@@ -167,7 +167,13 @@ def completer(messages: list[dict[str, Any]], model: str | None = None, **kwargs
     if hit is not None:
         host = HOST if mode == "exact" else f"{HOST}/{mode}"
         emit_mubit_chat_trace(
-            case_id=case_id, model=model, latency_ms=0, status="cache_hit", host=host
+            case_id=case_id,
+            model=model,
+            latency_ms=0,
+            status="cache_hit",
+            host=host,
+            request_id=hit.get(REPLY_REQUEST_ID),
+            recorded=True,
         )
         return hit
     if not live_available():

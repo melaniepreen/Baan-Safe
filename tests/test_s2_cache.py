@@ -104,6 +104,20 @@ def test_hit_replays_without_socket_and_traces_cache_hit(cache_env, monkeypatch)
     assert not (cache_env / "record.jsonl").exists()
 
 
+def test_hit_replays_recorded_mubit_request_id(cache_env, monkeypatch):
+    case = load_case("F10")
+    model = orchestrator.require_decision("system2.orchestrator_model")
+    messages = orchestrator._messages(case, None, None)
+    recorded = {**GOOD, "mubit_request_id": "mreq_feedfacefeedfacefeedfacefeedface"}
+    _seed(cache_env / "demo.jsonl", model, messages, reply=recorded)
+    monkeypatch.setattr("llm.client.complete", lambda *_a, **_k: pytest.fail("no socket"))
+    orchestrate(case)
+    hop = [e for e in read_traces("F10") if e.stage == "mubit_chat"][0]
+    assert "status=cache_hit" in (hop.notes or "")
+    # The id of the call that was recorded, flagged so nobody reads it as new.
+    assert "request_id=mreq_feedfacefeedfacefeedfacefeedface (recorded)" in (hop.notes or "")
+
+
 def test_miss_without_credentials_falls_back_safely(cache_env):
     outcome = orchestrate(load_case("F10"))
     assert outcome.missing_evidence == ["system2_unavailable"]
