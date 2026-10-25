@@ -8,7 +8,7 @@
 
 **What.** The demo is one screen: a phone, a flooded block of Sukhumvit drawn from public streets and flood data, and the operator's accept or reject. Twenty synthetic households call in, each house takes the priority the gateway returns, and a correction on a rejected call is what the system learns from.
 
-Open it with `make serve`, then [http://127.0.0.1:8000/ui/sim/](http://127.0.0.1:8000/ui/sim/).
+Open the town: [https://baansafe--baansafe-gateway-web.us-east.modal.run/ui/sim/](https://baansafe--baansafe-gateway-web.us-east.modal.run/ui/sim/).
 
 ![The town desk before a call: phone, flooded Sukhumvit block, operator panel](docs/images/town-desk.png)
 
