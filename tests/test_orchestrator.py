@@ -228,3 +228,31 @@ def test_p2_does_not_force_requires_human():
     with use_completer(lambda *a, **k: reply):
         outcome = orchestrate(load_case("F10"))
     assert outcome.requires_human is False
+
+
+def test_aid_exception_route_maps_to_aid_caseworker_not_an_outage():
+    # nano answered F17 (aid denied: tenant) with the policy-flag name as the route
+    reply = _reply(
+        '{"priority": "P3", "route": "aid_exception", "needs": ["aid_payment"],'
+        ' "requires_human": false, "missing_evidence": ["house_number"], "next_question": null,'
+        ' "confidence": 0.6, "rationale": "Tenant denied aid.", "plan": []}'
+    )
+    with use_completer(lambda *a, **k: reply):
+        outcome = orchestrate(load_case("F17"))
+    assert outcome.route is Route.aid_caseworker
+    assert outcome.requires_human is True
+    assert "system2_unavailable" not in outcome.missing_evidence
+    assert "aid_exception" in (outcome.reasoning or "")
+
+
+def test_unknown_route_goes_to_a_supervisor_with_a_human():
+    reply = _reply(
+        '{"priority": "p2", "route": "banana", "needs": [], "requires_human": false,'
+        ' "missing_evidence": [], "next_question": null, "confidence": 0.5, "rationale": "x", "plan": []}'
+    )
+    with use_completer(lambda *a, **k: reply):
+        outcome = orchestrate(load_case("F10"))
+    assert outcome.priority is Priority.P2
+    assert outcome.route is Route.supervisor_escalation
+    assert outcome.requires_human is True
+    assert outcome.missing_evidence == []

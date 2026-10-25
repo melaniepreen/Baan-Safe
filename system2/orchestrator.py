@@ -228,8 +228,8 @@ def _outcome_from_reply(reply: dict[str, Any], latency_ms) -> Outcome:
     if not match:
         raise ValueError("System 2 reply carried no JSON object")
     data = json.loads(match.group(0))
-    priority = Priority(data["priority"])
-    route = Route(data["route"])
+    priority = Priority(str(data["priority"]).strip().upper())
+    route, route_note = _route_from(data.get("route"))
     known = {need.value for need in Need}
     raw_needs = _strings(data.get("needs"))
     dropped = [need for need in raw_needs if need not in known]
@@ -241,6 +241,8 @@ def _outcome_from_reply(reply: dict[str, Any], latency_ms) -> Outcome:
         reasoning = (reasoning + " Plan: " + steps).strip()
     if dropped:
         reasoning = (reasoning + f" dropped unknown needs: {', '.join(dropped)}").strip()
+    if route_note:
+        reasoning = (reasoning + " " + route_note).strip()
     return Outcome(
         system=System.system_2,
         outcome="reasoned_recommendation",
@@ -253,9 +255,45 @@ def _outcome_from_reply(reply: dict[str, Any], latency_ms) -> Outcome:
         reasoning=reasoning or None,
         missing_evidence=_strings(data.get("missing_evidence")),
         next_question=data.get("next_question") or None,
-        requires_human=bool(data.get("requires_human")) or bool(dropped),
+        requires_human=bool(data.get("requires_human")) or bool(dropped) or bool(route_note),
         escalate=False,
         latency_ms=latency_ms(),
+    )
+
+
+# Names the model uses for a route that are not Route values. `aid_exception`
+# is a policy flag the prompt carries, and nano echoes it as the route on aid
+# cases (F17, 25 Oct). A mapped or unknown route always keeps a human in the
+# loop; it is not a System 2 outage, the call succeeded.
+_ROUTE_ALIASES = {
+    "aid_exception": Route.aid_caseworker,
+    "aid_eligibility": Route.aid_caseworker,
+    "aid_payment": Route.aid_caseworker,
+    "aid_casework": Route.aid_caseworker,
+    "aid": Route.aid_caseworker,
+    "medical": Route.medical_response,
+    "rescue": Route.rescue_coordination,
+    "shelter": Route.shelter_placement,
+    "welfare": Route.welfare_distribution,
+    "information": Route.information_only,
+    "supervisor": Route.supervisor_escalation,
+    "escalate": Route.supervisor_escalation,
+}
+
+
+def _route_from(raw: Any) -> tuple[Route, str | None]:
+    """(Route, note). The note is set when the model's word had to be mapped."""
+    text = str(raw or "").strip().lower()
+    try:
+        return Route(text), None
+    except ValueError:
+        pass
+    alias = _ROUTE_ALIASES.get(text)
+    if alias is not None:
+        return alias, f"Route {text!r} read as {alias.value}; a person confirms."
+    return (
+        Route.supervisor_escalation,
+        f"Route {text!r} is not a Route value; sent to a supervisor.",
     )
 
 
