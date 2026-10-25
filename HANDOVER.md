@@ -45,6 +45,7 @@ Owners: `OWNERSHIP.md`. Contracts: `v0.3-contracts` (TraceEvent stages grew; sch
 | Hosted smoke | `/hosting` `backends=live`, S2 real; free-text oxygen → S2; `mubit_chat` ok |
 | Memory: local store, write path, metrics | PRs #20 #22 (+ #23 session ids, #24 RL note). Mubit memory API does not exist in the current product; `MEMORY_IMPL=local` is the hosted default. Seed with `MEMORY_IMPL=local make seed-memory`, upload via `modal volume put baansafe-demo <file> memory.jsonl` |
 | Fine-tune decisions + SetFit run | PR #19, version `ft-20261025T031241Z-e4ce5eb6` |
+| Training surface: loss curves, `GET /training`, `ui/training.html` | PR #28 (+ #26 `make mubit-traffic`, #27). Hosted: `/training` and `/ui/training.html` read `baansafe-versions` (ro at `/vol`) and `/data/rl_run.json` |
 
 ---
 
@@ -71,6 +72,7 @@ Known behaviour to say out loud: duplicate detection is district/street + need g
 | Tier | What | Status |
 |---|---|---|
 | 1 | `modal.finetune_base_model = nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1`, `modal.finetune_gpu = T4`, both in `DECIDED`. Real SetFit run on T4: version **`ft-20261025T031241Z-e4ce5eb6`** on `baansafe-versions` (168 rows, 20 steps, `train_loss 0.3013`). `FINETUNE_S1_MODEL` stays env-only | **done, PR #19** |
+| 1b | Loss curves + held-out eval in `finetune_job.py` (PR #28). Versions on `baansafe-versions`, all visible at `/training` and `/ui/training.html`: `ft-20261025T045101Z-e4ce5eb6` SetFit s1_triage, 168 rows, 20 loss points (`loss_source=log_history`), **held-out accuracy 0.875 on 72 rows**; `ft-20261025T045212Z-8d9937b9` LoRA on the 7-row event s2 set, loss 14.27 → 0.0017 (overfit, 7 rows); `ft-20261025T045425Z-114efba3` LoRA on the 36-row RL s2 set, loss 13.20 → 6.56. Re-run: `SYNTHETIC=1 make export-training` then `make modal-finetune DATASET=training/out/s1_synthetic.jsonl` (held-out picked up automatically) or `DATASET=eval/out/rl/training/s2.jsonl`; refresh RL block with `modal volume put --force baansafe-demo eval/out/rl/run.json rl_run.json` | **done** |
 | 2 | SetFit **shadow** label: `S1_SHADOW_VERSION=<id>` loads the adapter off the volume, emits `shadow_label` + `shadow_confidence` in the `system_1` trace. Never changes `next_action`. Gives Melanie a disagreement rate | post-demo, ~½ day, Moly plumbing / Melanie reads |
 | 3 | S1 stays rules-only (DECIDED). Laya full-encoder recipe parked until human events exist (log has 25, mostly from `demo-correction-loop`) | decision, no work |
 | 3 | Sapling: stays stub by decision. When reopened: `sapling.hosting=self-hosted`, `sapling.gpu=L40S`, `sapling.model_id=MubitLabs/banyan-sapling`, `sapling.thai_handling=translate`; needs CUDA 13 base image and confirmation Mubit can route to a self-hosted endpoint. 0 `sapling_verdict` rows, so nothing to fine-tune | post-demo, Melanie |
