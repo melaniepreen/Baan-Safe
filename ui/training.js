@@ -1,5 +1,7 @@
 // Training page. Plain JS, no dependencies. Reads GET /training and draws
 // cards, tables, and two inline SVG charts (loss per version, reward per epoch).
+// A second fetch, GET /training/compare, draws the "Memory off vs on" card from
+// two committed RL snapshots; if it fails the rest of the page still renders.
 // Nothing here calls Mubit; the numbers come from the API's trace and file reads.
 
 (function () {
@@ -32,6 +34,12 @@
     const date = new Date(iso);
     if (Number.isNaN(date.getTime())) return String(iso);
     return date.toISOString().replace("T", " ").slice(0, 16) + "Z";
+  }
+
+  function fmtDelta(value, digits) {
+    if (value === null || value === undefined || Number.isNaN(Number(value))) return "—";
+    const text = digits === undefined ? fmtInt(value) : fmtNum(value, digits);
+    return Number(value) > 0 ? "+" + text : text;
   }
 
   function el(tag, attrs, children) {
@@ -252,6 +260,56 @@
     );
   }
 
+  // Memory off vs on: two RL snapshots, last epoch of each. `lowerIsBetter`
+  // decides which direction of the delta turns the card red.
+  const COMPARE_METRICS = [
+    { key: "critical_under", label: "Critical under-triage", lowerIsBetter: true },
+    { key: "mean_reward", label: "Mean reward", digits: 3 },
+    { key: "correct", label: "Correct" },
+  ];
+
+  function renderCompare(result) {
+    const a = result.a || {};
+    const b = result.b || {};
+    const headline = result.headline || {};
+    $("compare-meta").textContent = `A ${a.name || "?"} · B ${b.name || "?"}`;
+    const cards = COMPARE_METRICS.map((metric) => {
+      const cell = headline[metric.key] || {};
+      const fmt = (v) => (metric.digits === undefined ? fmtInt(v) : fmtNum(v, metric.digits));
+      const delta = cell.delta;
+      const worse = delta !== null && delta !== undefined && (metric.lowerIsBetter ? Number(delta) > 0 : Number(delta) < 0);
+      return card(
+        metric.label,
+        `${fmt(cell.a)} → ${fmt(cell.b)}`,
+        `Δ ${fmtDelta(delta, metric.digits)} · ${metric.lowerIsBetter ? "lower" : "higher"} is better`,
+        worse,
+      );
+    });
+    $("compare-cards").replaceChildren(...cards);
+    const side = (row, key, digits) => {
+      if (!row) return "—";
+      return digits === undefined ? fmtInt(row[key]) : fmtNum(row[key], digits);
+    };
+    const columns = [
+      { label: "Epoch", key: "epoch", num: true },
+      { label: "Critical under A", num: true, get: (r) => side(r.a, "critical_under") },
+      { label: "Critical under B", num: true, get: (r) => side(r.b, "critical_under") },
+      { label: "Reward A", num: true, get: (r) => side(r.a, "mean_reward", 3) },
+      { label: "Reward B", num: true, get: (r) => side(r.b, "mean_reward", 3) },
+      { label: "Correct A", num: true, get: (r) => side(r.a, "correct") },
+      { label: "Correct B", num: true, get: (r) => side(r.b, "correct") },
+      { label: "Under A", num: true, get: (r) => side(r.a, "under_triage") },
+      { label: "Under B", num: true, get: (r) => side(r.b, "under_triage") },
+    ];
+    $("compare-table").replaceChildren(table(columns, result.per_epoch || []));
+  }
+
+  function renderCompareEmpty(message) {
+    $("compare-meta").textContent = "";
+    $("compare-cards").replaceChildren(el("p", { class: "empty", text: message }));
+    $("compare-table").replaceChildren();
+  }
+
   function renderEvents(ev) {
     const cards = [card("Events", fmtInt(ev.total), ev.events_path)];
     for (const [task, n] of Object.entries(ev.by_task || {})) cards.push(card(task, fmtInt(n), "by task"));
@@ -293,5 +351,17 @@
     }
   }
 
+  // Separate from load(): a missing snapshot folder must not blank the page.
+  async function loadCompare() {
+    try {
+      const response = await fetch("/training/compare");
+      if (!response.ok) throw new Error("/training/compare returned " + response.status);
+      renderCompare(await response.json());
+    } catch (error) {
+      renderCompareEmpty("no snapshots — make rl-snapshot after make rl-loop (" + error.message + ")");
+    }
+  }
+
   load();
+  loadCompare();
 })();

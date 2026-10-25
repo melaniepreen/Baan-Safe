@@ -15,7 +15,10 @@ Files per snapshot: `run.json` (what `GET /rl/run` and `GET /training` read), `o
 make rl-snapshot                       # copy eval/out/rl → eval/snapshots/rl/<stamp>-<MEMORY_IMPL>
 make rl-restore SNAPSHOT=20261025T0600Z-memory-local   # copy back so rl-loop-replay / /rl/run work on a fresh clone
 make rl-loop-replay                    # cache only, no network
+make rl-compare A=20261025T0407Z-memory-empty B=20261025T0600Z-memory-local   # side by side → eval/out/rl_compare.md (+ .json); no args = first vs last
 ```
+
+`GET /training/compare?a=<folder>&b=<folder>` returns the same comparison; `/ui/training.html` draws it as the "Memory off vs on" card.
 
 Hosted: `modal volume put --force baansafe-demo eval/snapshots/rl/<stamp>/run.json rl_run.json` puts a snapshot on `/training`.
 

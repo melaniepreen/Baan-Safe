@@ -524,6 +524,56 @@ def test_training_endpoint_with_nothing_on_disk(client, tmp_path, monkeypatch):
     assert str(tmp_path) not in response.text
 
 
+def test_training_compare_endpoint_pairs_the_committed_snapshots(client):
+    response = client.get("/training/compare")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["snapshots"] == ["20261025T0407Z-memory-empty", "20261025T0600Z-memory-local"]
+    assert body["a"]["name"] == "20261025T0407Z-memory-empty"
+    assert body["b"]["name"] == "20261025T0600Z-memory-local"
+    assert body["headline"]["critical_under"]["a"] == 9
+    assert body["headline"]["critical_under"]["b"] == 2
+    assert body["headline"]["critical_under"]["delta"] == -7
+    assert body["headline"]["mean_reward"]["a"] == -0.341
+    assert body["headline"]["mean_reward"]["b"] == 0.189
+    assert body["headline"]["correct"] == {"a": 20, "b": 21, "delta": 1}
+    assert [row["epoch"] for row in body["per_epoch"]] == [1, 2, 3]
+    assert body["a"]["overlay"] == {"graduated": 1, "recommendations": 0, "demoted": 1}
+    assert body["b"]["overlay"] == {"graduated": 0, "recommendations": 2, "demoted": 1}
+    assert body["a"]["mubit"]["live_ok"] == 54
+    assert "MUBIT_API_KEY" not in response.text
+    assert str(ROOT) not in response.text
+
+    swapped = client.get(
+        "/training/compare",
+        params={"a": "20261025T0600Z-memory-local", "b": "20261025T0407Z-memory-empty"},
+    )
+    assert swapped.status_code == 200
+    assert swapped.json()["headline"]["critical_under"] == {"a": 2, "b": 9, "delta": 7}
+
+
+def test_training_compare_rejects_paths_and_unknown_names_without_echo(client):
+    for bad in ("..%2F..", "../../etc/passwd", "does-not-exist", "20261025T0407Z-memory-empty%2Frun.json"):
+        response = client.get(f"/training/compare?a={bad}")
+        assert response.status_code == 400, bad
+        detail = response.json()["detail"]
+        assert "snapshot" in detail
+        assert "/" not in detail.replace("GET /training/compare", "")
+        assert "etc" not in detail and "does-not-exist" not in detail
+    response = client.get("/training/compare?b=nope")
+    assert response.status_code == 400
+
+
+def test_training_compare_without_snapshots_is_404(client, tmp_path, monkeypatch):
+    from eval.rl import compare as module
+
+    monkeypatch.setattr(module, "SNAPSHOT_ROOT", tmp_path / "none")
+    response = client.get("/training/compare")
+    assert response.status_code == 404
+    assert "rl-snapshot" in response.json()["detail"]
+    assert str(tmp_path) not in response.text
+
+
 def test_registry_path_defaults(monkeypatch, tmp_path):
     monkeypatch.delenv("TRAINING_REGISTRY_PATH", raising=False)
     monkeypatch.setattr(surface, "VOLUME_REGISTRY_PATH", str(tmp_path / "vol" / "registry.json"))
@@ -566,3 +616,9 @@ def test_training_page_is_served_and_reads_the_endpoint(client):
     html = (ROOT / "ui" / "training.html").read_text(encoding="utf-8")
     assert "import " not in html.split("<script")[0]
     assert "<script src=\"training.js\">" in html
+    # Memory off vs on card: its own fetch, so a missing snapshot folder cannot blank the page.
+    assert 'fetch("/training/compare")' in source
+    assert "compare" in source
+    for key in ("critical_under", "compare-cards", "compare-meta", "no snapshots"):
+        assert key in source
+    assert 'id="compare"' in html and "Memory off vs on" in html

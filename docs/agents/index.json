@@ -120,6 +120,7 @@
       ],
       "files": [
         "eval/rl/run.py",
+        "eval/rl/compare.py",
         "eval/rl/learner.py",
         "gateway/overlay.py"
       ]

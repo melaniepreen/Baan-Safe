@@ -9,6 +9,11 @@ API, so requests, distinct sessions, ok/error, latency, and tokens are the
 measurable part. `events` counts the TrainingEvent log and lists export
 manifests. Every file is optional; a missing one is named in `missing`.
 No secret and no path outside the repo or a Modal volume is returned.
+
+`GET /training/compare` puts two committed RL snapshots side by side
+(`eval/snapshots/rl/`), by default the first and last folder: memory off vs
+memory on. Snapshot names are checked against the folder listing, never
+joined onto a path from the query string.
 """
 
 from __future__ import annotations
@@ -18,9 +23,10 @@ import os
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from config.settings import DecisionRequired, require_decision
+from eval.rl.compare import compare, list_snapshots, load_snapshot
 from paths import ROOT
 from trace import read_traces
 from training.log import events_path
@@ -405,3 +411,30 @@ def training_report() -> dict:
 @router.get("/training")
 def training() -> dict:
     return training_report()
+
+
+def compare_report(a: str | None = None, b: str | None = None) -> dict:
+    """`compare()` of two listed snapshots plus the listing. Pure apart from the file reads."""
+
+    snapshots = list_snapshots()
+    if not snapshots:
+        raise HTTPException(
+            status_code=404,
+            detail="no RL snapshot under eval/snapshots/rl; run make rl-snapshot after make rl-loop",
+        )
+    a_name = a or snapshots[0]
+    b_name = b or snapshots[-1]
+    try:
+        result = compare(load_snapshot(a_name), load_snapshot(b_name), a_name, b_name)
+    except ValueError:
+        # Do not echo the query value: it may be a path fragment.
+        raise HTTPException(
+            status_code=400,
+            detail="unknown snapshot name; a and b must be names from `snapshots` in GET /training/compare",
+        ) from None
+    return {**result, "snapshots": snapshots}
+
+
+@router.get("/training/compare")
+def training_compare(a: str | None = None, b: str | None = None) -> dict:
+    return compare_report(a, b)

@@ -1,7 +1,7 @@
 PYTHON ?= $(shell test -x .venv/bin/python && echo .venv/bin/python || echo python3)
 export PYTHONPATH := .
 
-.PHONY: mubit-traffic record-s2-cache rl-snapshot rl-restore validate test replay-stubs demo-stub demo-correction-loop demo-graduation rl-loop rl-loop-replay eval-learning sim-eval extract-eval latte-bench serve seed-memory ingest ingest-refresh data-report sources-refresh sources-status \
+.PHONY: mubit-traffic record-s2-cache rl-snapshot rl-restore rl-compare validate test replay-stubs demo-stub demo-correction-loop demo-graduation rl-loop rl-loop-replay eval-learning sim-eval extract-eval latte-bench serve seed-memory ingest ingest-refresh data-report sources-refresh sources-status \
 	export-training export-laya laya-train sync push modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune deploy-modal docker-build docker-run
 
 IMAGE ?= baansafe-api:local
@@ -46,6 +46,11 @@ rl-restore:
 	@mkdir -p $(RL_OUT)/training && cp $(RL_SNAPSHOTS)/$(SNAPSHOT)/run.json $(RL_SNAPSHOTS)/$(SNAPSHOT)/overlay.json $(RL_SNAPSHOTS)/$(SNAPSHOT)/s2_cache.jsonl $(RL_OUT)/ && \
 	cp $(RL_SNAPSHOTS)/$(SNAPSHOT)/rl.md $(RL_OUT)/ 2>/dev/null; \
 	cp $(RL_SNAPSHOTS)/$(SNAPSHOT)/training/* $(RL_OUT)/training/ 2>/dev/null; echo "restored $(SNAPSHOT) → $(RL_OUT)"
+
+# Two snapshots side by side (memory off vs on by default: first vs last folder).
+# Writes eval/out/rl_compare.md + .json. A=<folder> B=<folder> pick the sides.
+rl-compare:
+	$(PYTHON) -m eval.rl.compare $(if $(A),--a $(A)) $(if $(B),--b $(B))
 
 eval-learning:
 	$(PYTHON) -m eval.learning

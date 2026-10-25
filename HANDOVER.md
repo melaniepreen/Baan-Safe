@@ -184,7 +184,7 @@ Ranked by demo value. Owners per `OWNERSHIP.md`: Moly = API / calls / infra / ev
 
 | # | Item | Why | Effort | Owner |
 |---|---|---|---|---|
-| E1 | Before/after comparison: `make rl-compare A=<snapshot> B=<snapshot>` → `eval/out/rl_compare.md` + a "memory off vs on" card on `ui/training.html` | The two snapshots in `eval/snapshots/rl/` are the strongest number we have (critical under-triage 9 → 2, reward flat → +0.19); nothing renders them side by side | ~1 h | Moly |
+| E1 | Before/after comparison: `make rl-compare A=<snapshot> B=<snapshot>` → `eval/out/rl_compare.md` + a "memory off vs on" card on `ui/training.html` | The two snapshots in `eval/snapshots/rl/` are the strongest number we have (critical under-triage 9 → 2, reward flat → +0.19); nothing renders them side by side | **done**: `make rl-compare`, `GET /training/compare`, card on `/ui/training.html` | Moly |
 | E2 | Hosted `GET /training` reports `missing: training/out, eval/out/rl/training` and `events: 1` | Fine-tune exports and the 25 training events exist locally, not on the volume. Either `modal volume put` them or point `/training` at `eval/snapshots/rl/<snap>/training/` | 15 min | Moly |
 | E3 | Per-episode drill-down: `GET /rl/run/episodes?filter=critical_under` + table on the training page | `run.json` holds 48 episodes with truth vs decision; only aggregates show. Lets Melanie click into *which* cases under-triage (A3 theme) | ~1 h | Moly builds, Melanie reads |
 | E4 | `make eval-gate`: fail if SetFit held-out accuracy < 0.85 or RL `critical_under` > last snapshot | Turns "we have evals" into a gate. No CI runner on the repo yet, so local/pre-merge | ~45 min | Moly |

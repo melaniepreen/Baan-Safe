@@ -3,6 +3,7 @@ title: RL loop
 tags: [rl, overlay, cascade, graduation, demotion, bandit]
 files:
   - eval/rl/run.py
+  - eval/rl/compare.py
   - eval/rl/learner.py
   - eval/rl/reward.py
   - eval/rl/themes.py
@@ -17,6 +18,7 @@ Score System 1 / System 2 outcomes in a reward loop. A System 1 escalate cascade
 ## Key files
 
 - `eval/rl/run.py` — `python -m eval.rl --s2 live|replay|fake`. Writes `eval/out/rl/run.json`, `rl.md`, `overlay.json`, `s2_cache.jsonl`.
+- `eval/rl/compare.py` — `make rl-compare [A=<snapshot> B=<snapshot>]` (`python -m eval.rl.compare`). Pairs two `eval/snapshots/rl/<name>/run.json` files, headline = last epoch of each, writes `eval/out/rl_compare.md` + `.json`. Default A/B = first/last folder, i.e. memory off vs on. `GET /training/compare` serves the same dict; snapshot names are checked against the folder listing (no path traversal).
 - `eval/rl/themes.py` — eight authored themes with variants and settled truth.
 - `eval/rl/reward.py` — priority distance, route, human, cost, and correctness scoring.
 - `eval/rl/learner.py` — graduation streaks, demotion, Beta(1,1) shadow bandit.
@@ -46,7 +48,8 @@ Score System 1 / System 2 outcomes in a reward loop. A System 1 escalate cascade
 - `python -m eval.rl --s2 fake --epochs 3` — road-info and cold-hall graduate, quiet-grandmother and upstairs-water recommend, weak-grandfather-water demotes, aid never graduates.
 - `make rl-loop-replay` (cache only, no network). `make rl-loop` only with Mubit env.
 - `eval/out/` is gitignored. `make rl-snapshot` copies a run into `eval/snapshots/rl/<stamp>-<MEMORY_IMPL>/` (committed); `make rl-restore SNAPSHOT=<folder>` copies one back so replay and `/rl/run` work on a fresh clone. Two 25 Oct runs are kept there (memory empty vs memory local); see its README.
-- `tests/test_rl_loop.py` (fake + mocked live/replay traces), `tests/test_cascade.py`, `tests/test_overlay.py`, `tests/test_orchestrator.py`.
+- `make rl-compare` renders those two side by side (critical under-triage 9 → 2, mean reward −0.341 → 0.189) and the "Memory off vs on" card on `/ui/training.html` reads `GET /training/compare`.
+- `tests/test_rl_loop.py` (fake + mocked live/replay traces), `tests/test_rl_compare.py`, `tests/test_cascade.py`, `tests/test_overlay.py`, `tests/test_orchestrator.py`.
 - `GET /rl/run` and `GET /metrics` on `make serve`.
 
 ## Common pitfalls

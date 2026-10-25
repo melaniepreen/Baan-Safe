@@ -76,6 +76,18 @@
   <div class="cards" id="overlay-cards" style="margin-top:0.75rem"></div>
   <div class="chart" id="reward-chart"></div>
 
+  <section id="compare">
+    <h2>Memory off vs on <span class="meta" id="compare-meta"></span></h2>
+    <p class="lede">
+      Two committed RL snapshots side by side, last epoch of each: A is the first folder under
+      <code>eval/snapshots/rl</code> (the run that sent <code>memory: []</code> on every prompt), B the last
+      (the run on the local memory store). Reads <code>GET /training/compare</code>;
+      <code>make rl-compare</code> writes the same as markdown.
+    </p>
+    <div class="cards" id="compare-cards"></div>
+    <div class="scroll" id="compare-table" style="margin-top:0.75rem"></div>
+  </section>
+
   <h2>Training events</h2>
   <div class="pair">
     <div class="cards" id="event-cards"></div>
