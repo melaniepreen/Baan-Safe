@@ -107,7 +107,7 @@ Open http://127.0.0.1:8000/ui/sim/ with `make serve` already running. `data.demo
 6. Raise the confidence threshold above 0.82 and send the rice line again. System 1 is **REJECTED**, the handoff plays, and the supply boat waits for **Accept**. The gateway priority badge is still the stub outcome.
 7. Send the oxygen line again and press **Reject** while it is awaiting approval. No boat appears. The decision log records the rejection. The phone says an operator is reassigning. **Correct this** opens. Task and the case link are filled from the case and the gateway decision. On a System 1 call that already dispatched, Reject still stops the boat and opens the same form.
 8. Type `Our rice is finished. Can someone bring food today?` and press the send arrow. The chooser matches F02 by the food keyword and says it is demo-only.
-9. Press the blue Call button, speak, then the red end-call button. The in-call screen shows a timer. The phone names Web Speech API, `POST /stt/transcribe`, or the stub transcript. Only a real transcript is sent on.
+9. Type a line and press Send. The phone has no call button. A spoken clip is only used when a transcript already exists.
 10. Open "20 scripted calls" and press Step to send the next fixture in index order. The decision log lists the row. Clear log removes it.
 11. Press **Reset patterns**. Open **Prompts** and send "We're fine. Really. No need to send anyone." three times, waiting for each feed to finish. The first stays **REJECTED**. The second and third graduate to System 2 as a complex situation. Pattern memory shows Graduated to S2. The block map stays above the feed.
 

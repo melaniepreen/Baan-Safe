@@ -3460,7 +3460,7 @@ async function toggleRecord() {
   heard = "";
   recording = true;
   const button = document.getElementById("phone-record");
-  button.classList.add("on");
+  if (button) button.classList.add("on");
   setPhoneStatus("Recording");
   showInCall("Caller");
   const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -3494,7 +3494,7 @@ async function stopRecord() {
   recording = false;
   hideInCall();
   const button = document.getElementById("phone-record");
-  button.classList.remove("on");
+  if (button) button.classList.remove("on");
   const liveSpeech = recognition;
   recognition = null;
   if (liveSpeech) {
@@ -3759,7 +3759,8 @@ function bindChrome() {
     syncPlayButton();
     placeCall(text, null, { via: "typed message" });
   });
-  document.getElementById("phone-record").addEventListener("click", () => toggleRecord());
+  const record = document.getElementById("phone-record");
+  if (record) record.addEventListener("click", () => toggleRecord());
   document.getElementById("call-end").addEventListener("click", () => {
     if (recording) stopRecord();
   });

@@ -229,7 +229,7 @@ def test_twenty_calls_link_fixtures_to_buildings():
     assert 'alt="Baan-Safe"' in page
     assert "baansafe-logo.png" in page
     assert 'id="phone"' in page
-    assert 'id="phone-record"' in page
+    assert 'id="phone-record"' not in page
     assert 'id="backend"' in page
     assert 'id="flow"' in page
     assert 'id="inspector"' not in page

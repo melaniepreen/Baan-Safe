@@ -584,16 +584,6 @@ input[type="range"] { width: 100%; accent-color: var(--yellow); }
   border-color: #ED7401;
   color: #012246;
 }
-#phone #phone-record {
-  width: 42px;
-  height: 42px;
-  padding: 0;
-  border-radius: 50%;
-  background: #0076D8;
-  border-color: #0076D8;
-  color: #fff;
-}
-#phone #phone-record.on { background: #ED7401; border-color: #ED7401; color: #012246; }
 #scripted { margin: 0 8px 4px; min-height: 0; }
 #scripted summary { cursor: pointer; color: var(--muted); font-size: 12px; }
 #scripted .wordmark-actions { margin-top: 6px; }
