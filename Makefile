@@ -1,7 +1,7 @@
 PYTHON ?= $(shell test -x .venv/bin/python && echo .venv/bin/python || echo python3)
 export PYTHONPATH := .
 
-.PHONY: mubit-traffic record-s2-cache validate test replay-stubs demo-stub demo-correction-loop demo-graduation rl-loop rl-loop-replay eval-learning sim-eval extract-eval latte-bench serve seed-memory ingest ingest-refresh data-report sources-refresh sources-status \
+.PHONY: mubit-traffic record-s2-cache rl-snapshot rl-restore validate test replay-stubs demo-stub demo-correction-loop demo-graduation rl-loop rl-loop-replay eval-learning sim-eval extract-eval latte-bench serve seed-memory ingest ingest-refresh data-report sources-refresh sources-status \
 	export-training export-laya laya-train sync push modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune deploy-modal docker-build docker-run
 
 IMAGE ?= baansafe-api:local
@@ -31,6 +31,21 @@ rl-loop:
 
 rl-loop-replay:
 	$(PYTHON) -m eval.rl --s2 replay
+
+# Committed copies of eval/out/rl (gitignored). See eval/snapshots/rl/README.md.
+RL_OUT = eval/out/rl
+RL_SNAPSHOTS = eval/snapshots/rl
+rl-snapshot:
+	@stamp=$$(date -u +%Y%m%dT%H%MZ)-$${MEMORY_IMPL:-mock}; dest=$(RL_SNAPSHOTS)/$$stamp; mkdir -p $$dest/training; \
+	cp $(RL_OUT)/run.json $(RL_OUT)/overlay.json $(RL_OUT)/rl.md $(RL_OUT)/s2_cache.jsonl $$dest/ && \
+	cp $(RL_OUT)/training/*.jsonl $(RL_OUT)/training/*.manifest.json $$dest/training/ 2>/dev/null; \
+	echo "saved $$dest"; du -sh $$dest
+
+rl-restore:
+	@test -n "$(SNAPSHOT)" || { echo "usage: make rl-restore SNAPSHOT=<folder under $(RL_SNAPSHOTS)>"; exit 2; }
+	@mkdir -p $(RL_OUT)/training && cp $(RL_SNAPSHOTS)/$(SNAPSHOT)/run.json $(RL_SNAPSHOTS)/$(SNAPSHOT)/overlay.json $(RL_SNAPSHOTS)/$(SNAPSHOT)/s2_cache.jsonl $(RL_OUT)/ && \
+	cp $(RL_SNAPSHOTS)/$(SNAPSHOT)/rl.md $(RL_OUT)/ 2>/dev/null; \
+	cp $(RL_SNAPSHOTS)/$(SNAPSHOT)/training/* $(RL_OUT)/training/ 2>/dev/null; echo "restored $(SNAPSHOT) → $(RL_OUT)"
 
 eval-learning:
 	$(PYTHON) -m eval.learning

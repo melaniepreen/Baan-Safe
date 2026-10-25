@@ -40,6 +40,8 @@ make replay-stubs
 make demo-graduation
 make rl-loop
 make rl-loop-replay
+make rl-snapshot
+make rl-restore
 make mubit-traffic
 make record-s2-cache
 make eval-learning

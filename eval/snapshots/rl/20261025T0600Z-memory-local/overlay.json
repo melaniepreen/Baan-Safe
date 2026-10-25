@@ -1,0 +1,31 @@
+{
+  "demoted": {
+    "needs=water|vuln=elderly|danger=none|medical=0|loc=ok|people=known|flags=none": {
+      "reason": "System 1 under-triaged RL-WEAK-1: predicted P3, truth P2.",
+      "since": "2026-10-25T05:58:24+00:00"
+    }
+  },
+  "graduated": {},
+  "graduation_threshold": 2,
+  "recommendations": {
+    "needs=none|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=none|text=d64d98f33d89": {
+      "count": 5,
+      "needs": [
+        "rescue"
+      ],
+      "priority": "P1",
+      "requires_human": true,
+      "route": "rescue_coordination",
+      "why": "P1 or complex pattern; a human keeps authority."
+    },
+    "needs=none|vuln=none|danger=none|medical=0|loc=ok|people=known|flags=none|text=f3d9a902b2a9": {
+      "count": 1,
+      "needs": [],
+      "priority": "P3",
+      "requires_human": true,
+      "route": "welfare_distribution",
+      "why": "P1 or complex pattern; a human keeps authority."
+    }
+  },
+  "schema": "baansafe.rl_overlay.v1"
+}
