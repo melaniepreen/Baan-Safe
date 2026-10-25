@@ -16,6 +16,8 @@ Nemotron reasons. Sapling then checks System 2 aid-eligibility and denial claims
 
 - `system2/decide.py` — `orchestrate(case, handoff, recommendation)`, then `verify_before_router`. Owner: Melanie.
 - `system2/orchestrator.py` — prompts Nemotron, parses one JSON object into `reasoned_recommendation`, falls back to a safe `system2_unavailable` outcome on timeout, HTTP error, empty content, or parse/enum failure. The fallback reason names the HTTP status (429 is marked rate limited). The fallback is P1 when the case has a life-safety trigger — `medical` or `oxygen_dependent` cite `NIEMS-ANNOUNCEMENT-2554` (Red: life threat to breathing, circulation, or the nervous system); `need:rescue` or `immobile` cite the P1 definition in `config/priorities.yaml`, because the announcement assigns no colour to being trapped — and P2 otherwise. `use_completer(fn)` swaps the model call for tests and the RL loop. The call sends `reasoning={"enabled": false}` and `max_tokens=700`: the model otherwise spends its whole budget on `<think>`.
+- `system2/cache.py` — `S2_IMPL=cache`: exact-key replay for the demo. Key = sha256 over model id + full message list (same as the RL loop's `_cache_key`), so memory context and prompt must match byte for byte; nothing fuzzy. Reads `S2_CACHE_PATH` (default `fixtures/s2_cache/demo.jsonl`, committed, 158 replies for the fixture + synthetic set with `MEMORY_IMPL=mock`) then `S2_CACHE_RECORD_PATH` (optional; misses answered by Mubit are appended). A hit emits `mubit_chat host=s2_cache status=cache_hit` and opens no socket. A miss with credentials is one normal Mubit call; without credentials it raises `ValueError`, so the orchestrator falls back to `system2_unavailable`. `use_completer` still wins over cache mode. `gateway/route.py` treats `cache` like `real` (`_S2_LIVE`). The Modal gateway honours a deploy-time `S2_IMPL=cache` and sets `S2_CACHE_RECORD_PATH=/data/s2_cache.jsonl`; `/hosting` reports `backends: cache`. Record after memory is seeded: `make record-s2-cache` (fixtures) or run the demo script once on the hosted URL so every scripted turn is a hit.
+- `scripts/record_s2_cache.py` — `make record-s2-cache` runs every fixture (and `--synthetic`) through the gateway in cache mode with the committed file as record path. Needs `.env`; re-runs only fill misses.
 - `system2/sapling.py` — scope, verdict application.
 - `system2/sapling_client.py` — stub client. `SAPLING_IMPL=live` refuses before any socket.
 - `mocks/sapling_stub/` — `S01`–`S05`.
@@ -40,7 +42,7 @@ Nemotron reasons. Sapling then checks System 2 aid-eligibility and denial claims
 
 ## How to test
 
-- `make test` — `tests/test_sapling.py`, `tests/test_gateway_and_replay.py` (System 2 raise names Melanie).
+- `make test` — `tests/test_sapling.py`, `tests/test_gateway_and_replay.py` (System 2 raise names Melanie), `tests/test_s2_cache.py` (hit without socket, miss fallback, record path, Modal env).
 - `make replay-stubs` — includes `S01`–`S05`.
 - `make validate` — five stub files, every verdict, both checks.
 

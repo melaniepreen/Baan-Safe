@@ -165,8 +165,11 @@
     "stage": {
       "enum": [
         "gateway",
+        "enrich",
+        "memory",
         "system_1",
         "system_2",
+        "mubit_chat",
         "router",
         "memory_write"
       ],

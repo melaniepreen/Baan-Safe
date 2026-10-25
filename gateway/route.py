@@ -12,7 +12,7 @@ a later turn once `keyword_extraction` is in policy_flags. Fixture cases carry
 hand-filled fields, so they are never extracted.
 
 use_stubs=True loads the stub for the chosen system. use_stubs=False, or
-S1_IMPL=real / S2_IMPL=real on the chosen system, calls that system's decide().
+S1_IMPL=real / S2_IMPL=real|cache on the chosen system, calls that system's decide().
 """
 
 from __future__ import annotations
@@ -265,7 +265,7 @@ def _run(
     recommendation: dict | None = None,
 ) -> Outcome:
     real = (system is System.system_1 and _impl("S1_IMPL") == "real") or (
-        system is System.system_2 and _impl("S2_IMPL") == "real"
+        system is System.system_2 and _impl("S2_IMPL") in _S2_LIVE
     )
     if real or not use_stubs:
         if system is System.system_1:
@@ -280,13 +280,18 @@ def _run(
     return _fallback_outcome(case.case_id, System.system_2)
 
 
+# S2_IMPL values that call system2.decide(): `real` is Mubit on every turn,
+# `cache` replays an exact-key reply and goes to Mubit only on a miss.
+_S2_LIVE = {"real", "cache"}
+
+
 def _impl(name: str) -> str:
     return os.environ.get(name, "stub").strip().lower() or "stub"
 
 
 def _trace_system(case_id: str, outcome: Outcome, use_stubs: bool) -> None:
     real = (outcome.system is System.system_1 and _impl("S1_IMPL") == "real") or (
-        outcome.system is System.system_2 and _impl("S2_IMPL") == "real"
+        outcome.system is System.system_2 and _impl("S2_IMPL") in _S2_LIVE
     )
     if real or not use_stubs:
         path = "real"
@@ -295,6 +300,8 @@ def _trace_system(case_id: str, outcome: Outcome, use_stubs: bool) -> None:
     note = f"{path} interface"
     if outcome.system is System.system_2 and path == "real":
         note = "real interface; mubit_chat hop traced in llm.complete"
+        if _impl("S2_IMPL") == "cache":
+            note = "cache interface; mubit_chat cache_hit or live hop (system2/cache.py)"
     emit(
         TraceEvent(
             case_id=case_id,

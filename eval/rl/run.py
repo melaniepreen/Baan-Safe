@@ -455,8 +455,10 @@ def _finetune_note() -> str:
 
 
 def _cache_key(model: str | None, messages) -> str:
-    raw = json.dumps({"model": model, "messages": messages}, sort_keys=True)
-    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+    # Same exact key as system2.cache so S2_IMPL=cache can replay RL replies.
+    from system2.cache import cache_key
+
+    return cache_key(model, messages)
 
 
 def _read_cache(path: Path) -> dict:

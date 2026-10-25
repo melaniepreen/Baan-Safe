@@ -16,7 +16,8 @@ Outcome. Config errors from `llm.complete` (missing URL, key, or host)
 propagate unchanged; the key never appears in text.
 
 `use_completer(fn)` swaps the model call for tests and the RL loop. The
-default is `llm.client.complete`.
+default is `llm.client.complete`; with `S2_IMPL=cache` and no override it is
+`system2.cache.completer` (exact-key replay, Mubit on a miss).
 
 use_banyan_sapling is already true. The verifier does not run here. decide()
 runs it on the outcome this function returns, and the gateway then builds the
@@ -26,6 +27,7 @@ Decision Router result.
 from __future__ import annotations
 
 import json
+import os
 import re
 from collections.abc import Callable
 from contextlib import contextmanager
@@ -64,6 +66,17 @@ def use_completer(fn: Completer) -> Iterator[None]:
         yield
     finally:
         _completer = previous
+
+
+def _active_completer() -> Completer:
+    """An installed override wins; else the cache when S2_IMPL=cache; else Mubit."""
+    if _completer is not _llm_complete:
+        return _completer
+    if os.environ.get("S2_IMPL", "").strip().lower() == "cache":
+        from system2.cache import completer as cache_completer
+
+        return cache_completer
+    return _llm_complete
 
 
 _AID_FLAGS = {"safeguarding", "aid_exception", "aid_eligibility", "aid_denial"}
@@ -110,7 +123,7 @@ def orchestrate(
     latency_ms = lambda: int((perf_counter() - started) * 1000)  # noqa: E731
     try:
         # llm.complete emits mubit_chat before/after the Mubit hop (case_id set).
-        reply = _completer(
+        reply = _active_completer()(
             _messages(case, handoff, recommendation),
             model=model,
             max_tokens=_MAX_TOKENS,
