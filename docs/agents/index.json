@@ -287,7 +287,9 @@
         "ui/transcript_player.py",
         "ui/training_polish.js",
         "ui/sim/hosting_banner.js",
-        "ui/sim/check_hosting_banner.mjs"
+        "ui/sim/check_hosting_banner.mjs",
+        "ui/sim/subtitle.js",
+        "ui/sim/check_subtitle.mjs"
       ]
     },
     {
