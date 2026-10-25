@@ -103,6 +103,7 @@
         "eval/correction_loop.py",
         "eval/learning/harness.py",
         "eval/learning/synthetic_cases.py",
+        "eval/gate.py",
         "eval/LATTE.md",
         "scripts/gen_synthetic_calls.py"
       ]

@@ -7,6 +7,7 @@ files:
   - gateway/graduation.py
   - eval/learning/harness.py
   - eval/learning/synthetic_cases.py
+  - eval/gate.py
   - eval/latte/run.py
   - eval/replay.py
   - scripts/gen_synthetic_calls.py
@@ -25,6 +26,7 @@ Score stub labels, run a synthetic correction through a stub model version, and 
 - `eval/graduation_demo.py` — `make demo-graduation`. Temp event log, two corrections, F02 graduates.
 - `eval/compare.py` — route accuracy, latency, tokens. `cost_usd` stays null.
 - `eval/learning/` — `make eval-learning`. Seeds 17, 29, 41. Report `eval/out/learning.md`.
+- `eval/gate.py` — `make eval-gate`. Fails when the newest `s1_triage` fine-tune's held-out accuracy (registry via `api/routes/training.py`) is under 0.85 (`EVAL_GATE_MIN_ACCURACY`, `--min-accuracy`) or the current RL run's last-epoch `critical_under` exceeds the last `eval/snapshots/rl/` snapshot. A missing registry or run is a skip, not a failure; `EVAL_GATE_ARGS=--strict` forbids skips. No Mubit call.
 - `eval/latte/` — `make latte-bench`. Pin in `eval/latte/pin.py`. Notes in `eval/LATTE.md`.
 - `eval/sapling_replay.py` — `S01`–`S05`.
 

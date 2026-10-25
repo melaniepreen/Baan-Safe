@@ -1,7 +1,7 @@
 PYTHON ?= $(shell test -x .venv/bin/python && echo .venv/bin/python || echo python3)
 export PYTHONPATH := .
 
-.PHONY: mubit-traffic record-s2-cache rl-snapshot rl-restore validate test replay-stubs demo-stub demo-correction-loop demo-graduation rl-loop rl-loop-replay eval-learning sim-eval extract-eval latte-bench serve seed-memory ingest ingest-refresh data-report sources-refresh sources-status \
+.PHONY: mubit-traffic record-s2-cache rl-snapshot rl-restore validate test replay-stubs demo-stub demo-correction-loop demo-graduation rl-loop rl-loop-replay eval-gate eval-learning sim-eval extract-eval latte-bench serve seed-memory ingest ingest-refresh data-report sources-refresh sources-status \
 	export-training export-laya laya-train sync push modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune deploy-modal docker-build docker-run
 
 IMAGE ?= baansafe-api:local
@@ -46,6 +46,12 @@ rl-restore:
 	@mkdir -p $(RL_OUT)/training && cp $(RL_SNAPSHOTS)/$(SNAPSHOT)/run.json $(RL_SNAPSHOTS)/$(SNAPSHOT)/overlay.json $(RL_SNAPSHOTS)/$(SNAPSHOT)/s2_cache.jsonl $(RL_OUT)/ && \
 	cp $(RL_SNAPSHOTS)/$(SNAPSHOT)/rl.md $(RL_OUT)/ 2>/dev/null; \
 	cp $(RL_SNAPSHOTS)/$(SNAPSHOT)/training/* $(RL_OUT)/training/ 2>/dev/null; echo "restored $(SNAPSHOT) → $(RL_OUT)"
+
+# Thresholds over existing eval output: newest s1_triage SetFit held-out accuracy >= 0.85
+# (EVAL_GATE_MIN_ACCURACY) and the current RL run's last-epoch critical_under <= the last
+# eval/snapshots/rl run. A missing registry or run skips; EVAL_GATE_ARGS=--strict forbids skips.
+eval-gate:
+	$(PYTHON) -m eval.gate $(EVAL_GATE_ARGS)
 
 eval-learning:
 	$(PYTHON) -m eval.learning

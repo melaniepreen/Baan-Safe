@@ -44,6 +44,7 @@ make rl-snapshot
 make rl-restore
 make mubit-traffic
 make record-s2-cache
+make eval-gate
 make eval-learning
 make sim-eval
 make extract-eval
@@ -89,7 +90,7 @@ Index: `docs/agents/index.json`. Read one topic file, not the whole set.
 
 ## Done
 
-- `make test` and `make validate` pass.
+- `make test` and `make validate` pass. Optional: `make eval-gate` passes or skips.
 - No decision value outside `DECIDED`. No secrets in the diff.
 - `frontend-prototype/` unchanged unless the task asked for it.
 - The change is on a PR into `main` (or merged), not a lone push of feature work to `main`.
