@@ -20,6 +20,17 @@ export function MEMORY_LABEL(mode, dormant) {
   return "checking…";
 }
 
+/* Can a System 2 call be answered right now? `secrets` is /hosting's Mubit
+   credential flag (null when only /health answered). Saved answers count as
+   ready: a cache deploy replays them without a key. */
+export function INFERENCE_LABEL(s2, secrets) {
+  if (s2 === "stub") return "sample answers";
+  if (secrets === true) return "ready";
+  if (s2 === "cache") return secrets === false ? "ready (saved answers only)" : "ready (saved answers)";
+  if (secrets === false) return "not connected";
+  return "checking…";
+}
+
 function text(value) {
   return value == null ? "" : String(value);
 }
@@ -78,12 +89,12 @@ export function hostingLabel(hosting, health) {
     ? text(health && health.memory && health.memory.warning) ||
       "MEMORY_IMPL=mubit is dormant: Mubit has no memory API today. Set MEMORY_IMPL=local."
     : null;
-  let credentials = "checking…";
-  if (hosting && typeof hosting.secrets === "boolean") credentials = hosting.secrets ? "connected" : "not connected";
+  const secrets = hosting && typeof hosting.secrets === "boolean" ? hosting.secrets : null;
   const parts = [
     "System 2 (Nemotron): " + s2Label,
     "Case memory: " + MEMORY_LABEL(memory, dormant),
-    "Mubit: " + credentials,
+    "Inference API: " + INFERENCE_LABEL(s2, secrets),
+    "Read API: ready",
   ];
   let tone = "muted";
   if (dormant) tone = "error";
