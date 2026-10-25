@@ -25,13 +25,13 @@ image = with_repo(
         "uvicorn>=0.30",
         "python-multipart",
         "faster-whisper>=1.1",
+    ).env(
+        {
+            "STT_MODEL_ID": MODEL_ID,
+            "STT_GPU": GPU_LABEL,
+            "HF_HOME": HF_CACHE_PATH,
+        }
     )
-).env(
-    {
-        "STT_MODEL_ID": MODEL_ID,
-        "STT_GPU": GPU_LABEL,
-        "HF_HOME": HF_CACHE_PATH,
-    }
 )
 
 app = modal.App("baansafe-stt", image=image)

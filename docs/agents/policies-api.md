@@ -10,7 +10,7 @@ files:
 
 ## Purpose
 
-The policy corpus is served from `policies/service.py`. Aid eligibility and exception endpoints stay stubs and do not approve a payment or an exception. Escalation rules are listed for humans and are not evaluated by the gateway.
+The policy corpus is served from `policies/service.py`. Aid eligibility and exception endpoints stay stubs and do not approve a payment or an exception. `route_to_system_2_if_any` is evaluated by `gateway/chooser.py`; the `always_requires_human` strings are enforced by `router/merge.py` and `system2/orchestrator.py::_post_rules`.
 
 ## Key files
 
@@ -22,7 +22,7 @@ The policy corpus is served from `policies/service.py`. Aid eligibility and exce
 - `system2/aid_exceptions.py` — `propose`. Owner: Melanie.
 - `system1/labels.py`, `system2/sapling_policy.py` — read the service.
 - `config/escalation.yaml` — `route_to_system_2_if_any`, `system_1_min_confidence`, `always_requires_human`, enrichment flag numbers.
-- `gateway/policy.py` — one note: safeguarding and escalation rules were not evaluated.
+- `gateway/policy.py` — `precheck_notes(triggers)`: one note naming the System 2 triggers that fired (`fired: none` when the fast path was chosen).
 
 ## Interfaces/contracts
 

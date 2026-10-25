@@ -30,15 +30,15 @@ image = with_repo(
         add_python="3.12",
     )
     .entrypoint([])
-    .uv_pip_install("vllm==0.21.0", "huggingface_hub")
-).env(
-    {
-        "S2_MODEL_ID": MODEL_ID,
-        "NEMOTRON_SIZE": SIZE,
-        "S2_QUANT": QUANT,
-        "S2_GPU": GPU,
-        "HF_HOME": HF_CACHE_PATH,
-    }
+    .uv_pip_install("vllm==0.21.0", "huggingface_hub").env(
+        {
+            "S2_MODEL_ID": MODEL_ID,
+            "NEMOTRON_SIZE": SIZE,
+            "S2_QUANT": QUANT,
+            "S2_GPU": GPU,
+            "HF_HOME": HF_CACHE_PATH,
+        }
+    )
 )
 
 app = modal.App("baansafe-s2", image=image)

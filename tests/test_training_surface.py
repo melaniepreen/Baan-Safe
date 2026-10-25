@@ -566,3 +566,37 @@ def test_training_page_is_served_and_reads_the_endpoint(client):
     html = (ROOT / "ui" / "training.html").read_text(encoding="utf-8")
     assert "import " not in html.split("<script")[0]
     assert "<script src=\"training.js\">" in html
+
+
+def test_rl_run_endpoint_honours_rl_run_path(client, tmp_path, monkeypatch):
+    run = tmp_path / "rl_run.json"
+    run.write_text(
+        json.dumps({"schema": "baansafe.rl_run.v1", "epochs": []}), encoding="utf-8"
+    )
+    monkeypatch.setenv("RL_RUN_PATH", str(run))
+    response = client.get("/rl/run")
+    assert response.status_code == 200
+    assert response.json()["schema"] == "baansafe.rl_run.v1"
+
+    monkeypatch.setenv("RL_RUN_PATH", str(tmp_path / "absent.json"))
+    response = client.get("/rl/run")
+    assert response.status_code == 404
+    assert "no RL run yet" in response.json()["detail"]
+
+
+def test_manifest_dirs_fall_back_to_newest_snapshot(tmp_path, monkeypatch):
+    rl_out = tmp_path / "out"
+    snaps = tmp_path / "snaps"
+    older = snaps / "20260101T0000Z-a" / "training"
+    newer = snaps / "20260102T0000Z-b" / "training"
+    older.mkdir(parents=True)
+    newer.mkdir(parents=True)
+    (older / "s1.manifest.json").write_text(json.dumps({"task": "s1"}), encoding="utf-8")
+    (newer / "s2.manifest.json").write_text(json.dumps({"task": "s2"}), encoding="utf-8")
+    monkeypatch.setattr(surface, "RL_TRAINING_OUT", rl_out)
+    monkeypatch.setattr(surface, "MANIFEST_DIRS", (tmp_path / "none", rl_out))
+    monkeypatch.setattr(surface, "SNAPSHOT_ROOT", snaps)
+    assert surface.manifest_dirs()[1] == newer
+
+    rl_out.mkdir()
+    assert surface.manifest_dirs()[1] == rl_out

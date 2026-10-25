@@ -42,13 +42,13 @@ image = with_repo(
         "huggingface_hub==1.33.0",
         "fastapi>=0.115",
         "uvicorn>=0.30",
+    ).env(
+        {
+            "SAPLING_MODEL_ID": MODEL_ID,
+            "SAPLING_GPU": GPU,
+            "HF_HOME": HF_CACHE_PATH,
+        }
     )
-).env(
-    {
-        "SAPLING_MODEL_ID": MODEL_ID,
-        "SAPLING_GPU": GPU,
-        "HF_HOME": HF_CACHE_PATH,
-    }
 )
 
 app = modal.App("baansafe-sapling", image=image)

@@ -32,7 +32,9 @@ router = APIRouter()
 VOLUME_REGISTRY_PATH = "/vol/registry.json"
 LOCAL_REGISTRY_PATH = ROOT / "var" / "versions" / "registry.json"
 DEFAULT_RL_RUN_PATH = ROOT / "eval" / "out" / "rl" / "run.json"
-MANIFEST_DIRS = (ROOT / "training" / "out", ROOT / "eval" / "out" / "rl" / "training")
+RL_TRAINING_OUT = ROOT / "eval" / "out" / "rl" / "training"
+SNAPSHOT_ROOT = ROOT / "eval" / "snapshots" / "rl"
+MANIFEST_DIRS = (ROOT / "training" / "out", RL_TRAINING_OUT)
 KEPT_EXAMPLE_THRESHOLD = 25
 MUBIT_NOTE = (
     "Mubit groups these into one task; kept-example count and adapter status "
@@ -51,6 +53,21 @@ def registry_path() -> Path:
     if volume.parent.is_dir():
         return volume
     return LOCAL_REGISTRY_PATH
+
+
+def manifest_dirs() -> list[Path]:
+    """`MANIFEST_DIRS`; a missing `eval/out/rl/training` falls back to the newest
+    committed snapshot's `training/` (hosted images do not ship `eval/out`)."""
+    dirs: list[Path] = []
+    for directory in MANIFEST_DIRS:
+        if directory == RL_TRAINING_OUT and not directory.is_dir() and SNAPSHOT_ROOT.is_dir():
+            snapshots = sorted(
+                path / "training" for path in SNAPSHOT_ROOT.iterdir() if (path / "training").is_dir()
+            )
+            if snapshots:
+                directory = snapshots[-1]
+        dirs.append(directory)
+    return dirs
 
 
 def rl_run_path() -> Path:
@@ -355,7 +372,7 @@ def events_section() -> dict:
             by_task[task] = by_task.get(task, 0) + 1
             by_source[origin] = by_source.get(origin, 0) + 1
     manifests: list[dict] = []
-    for directory in MANIFEST_DIRS:
+    for directory in manifest_dirs():
         if not directory.is_dir():
             missing.append(display_path(directory))
             continue

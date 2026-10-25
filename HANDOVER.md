@@ -46,6 +46,7 @@ Owners: `OWNERSHIP.md`. Contracts: `v0.3-contracts` (TraceEvent stages grew; sch
 | Memory: local store, write path, metrics | PRs #20 #22 (+ #23 session ids, #24 RL note). Mubit memory API does not exist in the current product; `MEMORY_IMPL=local` is the hosted default. Seed with `MEMORY_IMPL=local make seed-memory`, upload via `modal volume put baansafe-demo <file> memory.jsonl` |
 | Fine-tune decisions + SetFit run | PR #19, version `ft-20261025T031241Z-e4ce5eb6` |
 | Training surface: loss curves, `GET /training`, `ui/training.html` | PR #28 (+ #26 `make mubit-traffic`, #27). Hosted: `/training` and `/ui/training.html` read `baansafe-versions` (ro at `/vol`) and `/data/rl_run.json` |
+| `GET /rl/run` honours `RL_RUN_PATH` | Hosted returned 404 while `/training` read `/data/rl_run.json`; `rl_panel.js` fetches `/rl/run` |
 
 ---
 
@@ -78,7 +79,7 @@ Known behaviour to say out loud: duplicate detection is district/street + need g
 | 3 | Sapling: stays stub by decision. When reopened: `sapling.hosting=self-hosted`, `sapling.gpu=L40S`, `sapling.model_id=MubitLabs/banyan-sapling`, `sapling.thai_handling=translate`; needs CUDA 13 base image and confirmation Mubit can route to a self-hosted endpoint. 0 `sapling_verdict` rows, so nothing to fine-tune | post-demo, Melanie |
 | 3 | STT: stays scripted. When reopened: `modal.stt_model_id=biodatlab/whisper-th-large-v3-combined`, `modal.stt_gpu=T4` | post-demo, unowned |
 
-Carry-forward bug: `s1_app`, `s2_app`, `sapling_app`, `stt_app` chain `.env()` after `with_repo()`; Modal 1.6 rejects that on deploy. Two-line reorder each (see `finetune_app.py` on `main`). Fix when any of them is next deployed.
+Fixed on `main`: `s1_app`, `s2_app`, `sapling_app`, `stt_app` now call `.env()` before `with_repo()` like `finetune_app.py`. Untested against a real deploy — the next `make modal-deploy-*` is the proof.
 
 ### Track 3 — S2 cache + overlay "learns to be faster" demo
 
@@ -157,12 +158,12 @@ Measured on `main` `daeaad9` with `S1_IMPL=real`. Things a judge can hit.
 | A4 | Nothing forces `requires_human` on a P1 rescue | `G01/G03/G04`: live S2 said P1 `rescue_coordination` with `requires_human=false`; `_post_rules` only forces aid/safeguarding; `HUMAN_ROUTES` excludes rescue | Fixed: `_post_rules` now forces `requires_human=True` on any P1 and appends "P1 requires human sign-off" to `reasoning` (+2 tests). The UI gate (`approval.js`) was already holding every S2 decision; the API contract now matches |
 | A5 | Extraction emitted `needs=['rescue','rescue']` | "Water is at the door and my grandmother cannot walk. We are trapped." — explicit `trapped` plus the inferred rescue | Fixed in `system1/extract.py` + test |
 | A6 | `duplicate_merge` merges *different* households on the same soi | `local` memory: household B (5 people, same soi, water) → `finalize_case`, no dispatch, after household A | Known (Track 1 note). Say it out loud or key the merge on `caller_id_hash` too |
-| A7 | Every decision carries two stale policy notes | `auth scheme is TODO_HUMAN; request was not rejected` and `safeguarding and escalation rules were not evaluated` on every `RouterDecision` — the second is false, the chooser does evaluate them | `gateway/policy.py` is a 12-line placeholder; reword or drop before judges read `policy_notes` |
+| A7 | Every decision carries two stale policy notes | `auth scheme is TODO_HUMAN; request was not rejected` and `safeguarding and escalation rules were not evaluated` on every `RouterDecision` — the second is false, the chooser does evaluate them | Fixed: `gateway/policy.py` now records the triggers the precheck evaluated (`policy precheck: System 2 triggers from config/escalation.yaml evaluated; fired: …`). The auth note stays — `gateway.auth` is still `TODO_HUMAN` and that is true |
 | A8 | Sapling stub can never say `supported`/`violation` on a live case | `_verify_stub` needs an exact (policy, evidence, claim) triple; evidence includes the transcript, so every live aid case → `unsure` → `sapling_unsure` → human | Demonstrable only via `eval/sapling_replay.py` on the 5 stub cases. Do not promise a live Sapling verdict |
 | A9 | Overlay "graduated rule" surface is tiny | `overlay.json`: 1 graduated (`RL-ROAD-3`, no needs → P4 info), 1 demoted. `narrow_signature` hashes caller tokens, so a rule fires only on near-identical wording; the `[0.7, 0.8)` confidence band in `system1/decide.py` is unreachable from extraction (it emits 0.85 / 0.6 / None) | "Learns to be faster" must replay the exact fixture that graduated. Not generalisation |
 | A10 | `/docs` summary said "System 1 and System 2 logic are not implemented" | `api/main.py` | Reworded |
 | A11 | `contracts/schemas/TraceEvent.json` lacks `enrich`, `memory`, `mubit_chat` | schema enum has 5 stages, Pydantic has 8 | Done in PR #31 (`python -m contracts.export_schemas`) |
-| A12 | `read_traces()` parses the whole `traces.jsonl` on every `/metrics` and `/cases/{id}/trace` | 831 lines locally; the hosted volume grows unbounded and the town calls `/trace` after every turn | Fine for one demo; rotate or index before a long session |
+| A12 | `read_traces()` parses the whole `traces.jsonl` on every `/metrics` and `/cases/{id}/trace` | 831 lines locally; the hosted volume grows unbounded and the town calls `/trace` after every turn | Fixed: `read_traces()` streams the file and skips rows without the case id before parsing. `/metrics` still reads every row; rotate before a long session |
 
 ### Mubit training status (25 Oct, 05:45 UTC)
 
@@ -185,7 +186,7 @@ Ranked by demo value. Owners per `OWNERSHIP.md`: Moly = API / calls / infra / ev
 | # | Item | Why | Effort | Owner |
 |---|---|---|---|---|
 | E1 | Before/after comparison: `make rl-compare A=<snapshot> B=<snapshot>` → `eval/out/rl_compare.md` + a "memory off vs on" card on `ui/training.html` | The two snapshots in `eval/snapshots/rl/` are the strongest number we have (critical under-triage 9 → 2, reward flat → +0.19); nothing renders them side by side | ~1 h | Moly |
-| E2 | Hosted `GET /training` reports `missing: training/out, eval/out/rl/training` and `events: 1` | Fine-tune exports and the 25 training events exist locally, not on the volume. Either `modal volume put` them or point `/training` at `eval/snapshots/rl/<snap>/training/` | 15 min | Moly |
+| E2 | Hosted `GET /training` reports `missing: training/out, eval/out/rl/training` and `events: 1` | Fine-tune exports and the 25 training events exist locally, not on the volume. Either `modal volume put` them or point `/training` at `eval/snapshots/rl/<snap>/training/`. `eval/out/rl/training` now falls back to the newest committed `eval/snapshots/rl/<stamp>/training/` manifests; `training/out` still needs the upload | 15 min | Moly |
 | E3 | Per-episode drill-down: `GET /rl/run/episodes?filter=critical_under` + table on the training page | `run.json` holds 48 episodes with truth vs decision; only aggregates show. Lets Melanie click into *which* cases under-triage (A3 theme) | ~1 h | Moly builds, Melanie reads |
 | E4 | `make eval-gate`: fail if SetFit held-out accuracy < 0.85 or RL `critical_under` > last snapshot | Turns "we have evals" into a gate. No CI runner on the repo yet, so local/pre-merge | ~45 min | Moly |
 | E5 | `scripts/mubit_requests.py`: last N `request_id=mreq_…` from traces with case id + outcome | Ready list for the "paste into Mubit console → Requests" beat | 30 min | Moly |
