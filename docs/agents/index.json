@@ -234,7 +234,8 @@
         "infra/HARDWARE.md",
         "scripts/sync_modal_secrets.py",
         "scripts/sync_workspace.py",
-        "scripts/push_workspace.py"
+        "scripts/push_workspace.py",
+        "scripts/demo_reset.py"
       ]
     },
     {

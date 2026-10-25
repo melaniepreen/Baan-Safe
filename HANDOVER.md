@@ -198,14 +198,14 @@ Ranked by demo value. Owners per `OWNERSHIP.md`: Moly = API / calls / infra / ev
 | F2 | `/hosting` banner at page load: `backends`, `memory`, `secrets` | Nobody curls during the demo | small | Melanie |
 | F3 | Training page: link version rows to the Hub repos (flip them public first), render `heldout.per_label` as a table (already in the JSON) | Shows per-class precision/recall, not one number | small | either |
 | F4 | Correction → memory round-trip: show "memory items used: n" on each new call's card | `ui/correct.js` writes a lesson; the town never shows it landing on the next call | medium | Melanie |
-| F5 | `make demo-reset`: truncate volume `traces.jsonl`, `/data/s2_cache.jsonl`, case rows in `memory.jsonl` (keep the 10 policy lessons) | Every rehearsal grows the hosted store; the script should start from one state | 30 min | Moly |
+| F5 | `make demo-reset`: truncate volume `traces.jsonl`, `/data/s2_cache.jsonl`, case rows in `memory.jsonl` (keep the 10 policy lessons) | Every rehearsal grows the hosted store; the script should start from one state | **done**: `make demo-reset` (dry run) / `make demo-reset DEMO_RESET_ARGS=--yes` | Moly |
 
 **Repo hygiene (bit us twice tonight)**
 
 | # | Item | Why |
 |---|---|---|
 | H1 | `CODEOWNERS` (`ui/sim/sim.js`, `llm/client.py`) and a `make check` that refuses a commit touching another owner's file from a non-owner branch | PRs #34 and #35 each carried someone else's in-progress work swept in by `git add -A` in the shared checkout. Work in a worktree per branch (`git worktree add ../Baan-Safe-wt/<name>`) |
-| H2 | `.env.example` with `MEMORY_IMPL=local`, `S1_IMPL=real`, `S2_IMPL=cache`, `S2_CACHE_KEY=exact`, Mubit vars blank | A fresh clone otherwise repeats audit A1 (dormant `mubit` memory) |
+| H2 | `.env.example` with `MEMORY_IMPL=local`, `S1_IMPL=real`, `S2_IMPL=cache`, `S2_CACHE_KEY=exact`, Mubit vars blank | A fresh clone otherwise repeats audit A1 (dormant `mubit` memory) — **done** |
 
 Suggested order if one person has ~2.5 h: E2, E1, F5, H2 (all outside `ui/sim`); F1–F4 go with Melanie's next `ui/sim` pull.
 

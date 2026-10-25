@@ -11,6 +11,7 @@ files:
   - scripts/sync_modal_secrets.py
   - scripts/sync_workspace.py
   - scripts/push_workspace.py
+  - scripts/demo_reset.py
 ---
 
 ## Purpose
@@ -29,6 +30,7 @@ Modal apps for System 1, System 2, Sapling, speech-to-text, and a finetune job. 
 - `scripts/sync_modal_secrets.py` — `make modal-secrets` from gitignored `.env`.
 - `scripts/sync_workspace.py` — `make sync` (download) for both teammates: pull, `.env`, pip, Modal, secrets, push readiness.
 - `scripts/push_workspace.py` — `make push` (send): Modal secrets + `git push` main. `MSG='...'` commits first (never `.env`).
+- `scripts/demo_reset.py` — `make demo-reset`: resets the `baansafe-demo` volume to one state via `modal volume get`/`put --force`: drops `baansafe-case` rows from `memory.jsonl` (policy lessons and corrections kept byte for byte), empties `traces.jsonl` and `s2_cache.jsonl`. Dry run by default; `DEMO_RESET_ARGS=--yes` applies; `--keep-traces` / `--keep-cache` skip those. Deletes nothing and never touches `rl_run.json`, `events.jsonl`, `corrections.jsonl`, or `policy-pins/`. Tests inject a fake `run`.
 
 ## Interfaces/contracts
 

@@ -2,7 +2,7 @@ PYTHON ?= $(shell test -x .venv/bin/python && echo .venv/bin/python || echo pyth
 export PYTHONPATH := .
 
 .PHONY: mubit-traffic record-s2-cache rl-snapshot rl-restore validate test replay-stubs demo-stub demo-correction-loop demo-graduation rl-loop rl-loop-replay eval-learning sim-eval extract-eval latte-bench serve seed-memory ingest ingest-refresh data-report sources-refresh sources-status \
-	export-training export-laya laya-train sync push modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune deploy-modal docker-build docker-run
+	export-training export-laya laya-train sync push modal-secrets modal-deploy-s1 modal-deploy-s2 modal-deploy-sapling modal-deploy-stt modal-finetune deploy-modal demo-reset docker-build docker-run
 
 IMAGE ?= baansafe-api:local
 DATASET ?= eval/out/sft.jsonl
@@ -147,6 +147,13 @@ modal-deploy-stt:
 # Public stub demo: one *.modal.run URL for /ui/sim/, /triage, /cases, and /stt/transcribe.
 deploy-modal:
 	modal deploy infra/modal/gateway_app.py
+
+# Reset the hosted demo volume (baansafe-demo): drop baansafe-case rows from
+# memory.jsonl (policy lessons and corrections stay), empty traces.jsonl and
+# s2_cache.jsonl. DRY RUN unless DEMO_RESET_ARGS=--yes. Also --keep-traces,
+# --keep-cache, --volume NAME. Deletes nothing; never touches rl_run.json.
+demo-reset:
+	$(PYTHON) scripts/demo_reset.py $(DEMO_RESET_ARGS)
 
 # Event-log SetFit (s1_triage) / LoRA — not Laya. Laya uses make laya-train.
 modal-finetune:

@@ -56,6 +56,7 @@ make modal-deploy-s1
 make modal-deploy-s2
 make modal-deploy-sapling
 make modal-deploy-stt
+make demo-reset
 make export-training
 make export-laya
 make modal-finetune
