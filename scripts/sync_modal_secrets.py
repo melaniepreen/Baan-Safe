@@ -2,7 +2,8 @@
 
 Reads .env (or BAANSAFE_ENV), creates/updates:
   baansafe-hf    <- HF_TOKEN
-  baansafe-mubit <- MUBIT_API_KEY, MUBIT_BASE_URL, and optional S2_SERVE_API_KEY
+  baansafe-mubit <- MUBIT_API_KEY, MUBIT_BASE_URL, and optional
+                    S2_SERVE_API_KEY, MUBIT_PROJECT_ID
 
 llm/client.py refuses without both Mubit values, so both are required.
 
@@ -22,7 +23,12 @@ SECRET_SPECS = (
     (
         "baansafe-mubit",
         ("MUBIT_API_KEY", "MUBIT_BASE_URL"),
-        ("MUBIT_API_KEY", "MUBIT_BASE_URL", "S2_SERVE_API_KEY"),
+        (
+            "MUBIT_API_KEY",
+            "MUBIT_BASE_URL",
+            "S2_SERVE_API_KEY",
+            "MUBIT_PROJECT_ID",
+        ),
     ),
 )
 

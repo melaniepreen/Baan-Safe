@@ -143,7 +143,30 @@ def test_project_env_override(monkeypatch):
     monkeypatch.setenv("MUBIT_PROJECT_ID", "proj-live-123")
 
     def handler(request: httpx.Request) -> httpx.Response:
-        assert b"proj-live-123" in request.read()
+        raw = request.read()
+        assert b"proj-live-123" in raw
+        assert b'"project_id"' in raw
+        return httpx.Response(200, json={"evidence": []})
+
+    transport = httpx.MockTransport(handler)
+    real_client = httpx.Client
+    monkeypatch.setattr(
+        mubit.httpx,
+        "Client",
+        lambda **kwargs: real_client(transport=transport, **kwargs),
+    )
+    assert mubit.retrieve(_case()) == []
+
+
+def test_workspace_env_sets_workspace_id(monkeypatch):
+    monkeypatch.setenv("MUBIT_API_KEY", "mbt_test")
+    monkeypatch.setenv("MUBIT_BASE_URL", "https://api.mubit.ai")
+    monkeypatch.setenv("MUBIT_PROJECT_ID", "ws-3e4ac86aadff0b72")
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        raw = request.read()
+        assert b"ws-3e4ac86aadff0b72" in raw
+        assert b'"workspace_id"' in raw
         return httpx.Response(200, json={"evidence": []})
 
     transport = httpx.MockTransport(handler)

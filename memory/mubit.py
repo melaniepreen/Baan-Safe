@@ -65,6 +65,18 @@ def _project_scope() -> str:
     return str(require_decision("memory.mubit_project"))
 
 
+def _scope_fields() -> dict[str, str]:
+    """Attach console workspace/project ids when present; always set run_id."""
+    scope = _project_scope()
+    body = {"run_id": scope, "agent_id": _AGENT_ID}
+    if scope.startswith("proj-"):
+        body["project_id"] = scope
+    elif scope.startswith("ws-"):
+        body["workspace_id"] = scope
+        body["project_id"] = scope
+    return body
+
+
 def _top_k() -> int:
     value = int(require_decision("memory.retrieval_top_k"))
     return max(1, min(value, 50))
@@ -174,16 +186,14 @@ def _evidence_to_items(payload: dict[str, Any], *, limit: int) -> list[MemoryIte
 def retrieve(case: CaseState) -> list[MemoryItem]:
     """Query Mubit control plane for case-scoped memory items."""
     origin = _gateway_origin()
-    scope = _project_scope()
     limit = _top_k()
     body = {
-        "run_id": scope,
+        **_scope_fields(),
         "query": _case_query(case),
         "limit": limit,
         "entry_types": ["fact", "lesson", "rule"],
         "mode": "agent_routed",
         "max_token_budget": _token_budget(),
-        "agent_id": _AGENT_ID,
     }
     url = f"{origin}/v2/control/query"
     with httpx.Client(timeout=20.0) as client:
@@ -204,8 +214,7 @@ def _ingest(items: list[dict[str, Any]]) -> None:
         return
     origin = _gateway_origin()
     body = {
-        "run_id": _project_scope(),
-        "agent_id": _AGENT_ID,
+        **_scope_fields(),
         "items": items,
     }
     url = f"{origin}/v2/control/ingest"
