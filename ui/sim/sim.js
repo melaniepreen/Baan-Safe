@@ -105,6 +105,9 @@ let activeCallId = null;
 let callLightG = null;
 let colourMode = "priority";
 
+const GROUND_LIGHT = 0x202c4a;
+const GROUND_DARK = 0x1d2844;
+const GROUND_GRID = 0x34466e;
 const PRIORITY_COLOR = { P1: "#ff4b3a", P2: "#ff9f1a", P3: "#d6ff3c", P4: "#8aa0ff" };
 const PRIORITY_HEX = { P1: 0xff4b3a, P2: 0xff9f1a, P3: 0xd6ff3c, P4: 0x8aa0ff };
 const PLAIN_PRIORITY = {
@@ -734,15 +737,17 @@ function buildGround(g) {
   const w = town.meta.world.width_m;
   const d = town.meta.world.depth_m;
   const depth = 7;
-  fillPoly(g, quad(0, d, -depth, w, d, -depth, w, d, 0, 0, d, 0), 0x080c16);
-  fillPoly(g, quad(w, 0, -depth, w, d, -depth, w, d, 0, w, 0, 0), 0x0a101c);
+  fillPoly(g, quad(0, d, -depth, w, d, -depth, w, d, 0, 0, d, 0), 0x0f1626);
+  fillPoly(g, quad(w, 0, -depth, w, d, -depth, w, d, 0, w, 0, 0), 0x121a2c);
+  // Ground: two close shades, lighter than the roads, so the roads and the
+  // priority lights read against it instead of merging into the checker.
   const step = 16;
   for (let x = 0; x < w; x += step) {
     for (let y = 0; y < d; y += step) {
       const alt = ((x / step + y / step) | 0) % 2 === 0;
       const tile = [project(x, y, 0), project(x + step, y, 0), project(x + step, y + step, 0), project(x, y + step, 0)];
-      fillPoly(g, tile, alt ? 0x10182e : 0x0d1428);
-      strokePoly(g, tile, 0x24345c, 0.35);
+      fillPoly(g, tile, alt ? GROUND_LIGHT : GROUND_DARK);
+      strokePoly(g, tile, GROUND_GRID, 0.18);
     }
   }
   g.poly(flat([project(0, 0, 0), project(w, 0, 0), project(w, d, 0), project(0, d, 0)]), true).stroke({
