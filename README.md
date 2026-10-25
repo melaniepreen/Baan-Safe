@@ -227,6 +227,18 @@ make modal-deploy-sapling
 
 The exports above are examples of the variable names. `SAPLING_MODEL_ID` is the published checkpoint. `SAPLING_GPU=L40S` is Modal's 48 GB board; an A6000 is the self-hosted board of the same class and is not a Modal GPU string. `sapling.hosting` is still unset, so the in-process client keeps using the stub until a human confirms that Mubit can route to this endpoint. `infra/HARDWARE.md` is the sizing note. A dry run of the version id, with no GPU and no Modal token, is `python -m infra.modal.finetune_job --dataset eval/out/sft.jsonl` after `FINETUNE_BASE_MODEL` is set.
 
+### Trained weights
+
+Fine-tune versions live on the `baansafe-versions` Modal volume (`registry.json`, `versions/<id>/{adapter,metrics.json}`) and are listed with loss curves at `GET /training` / `/ui/training.html`. Trained on synthetic callers only. Copies of the 25 Oct runs are on the Hugging Face Hub under the `baansafe` org (private):
+
+| Hub repo | Version | What | Result |
+|---|---|---|---|
+| [baansafe/baansafe-s1-triage-setfit](https://huggingface.co/baansafe/baansafe-s1-triage-setfit) | `ft-20261025T045101Z-e4ce5eb6` | SetFit on `paraphrase-multilingual-MiniLM-L12-v2`, 168 rows, 16 labels, 20 steps | held-out accuracy 0.875 on 72 rows |
+| [baansafe/baansafe-s2-nemotron-nano-4b-lora](https://huggingface.co/baansafe/baansafe-s2-nemotron-nano-4b-lora) | `ft-20261025T045425Z-114efba3` (root) | LoRA r=8 on Nemotron Nano 4B, 36-row RL System 2 set | loss 13.20 → 6.56 |
+| same repo, `versions/ft-20261025T045212Z-8d9937b9/` | `ft-20261025T045212Z-8d9937b9` | LoRA r=8, 7-row event-log set | loss 14.27 → 0.0017 (overfit, pipeline demo) |
+
+Each repo carries `training/metrics.json` with the per-step loss. None of these weights is loaded on the live path: System 1 stays rules-only and System 2 is Nemotron through Mubit. Reproduce with `SYNTHETIC=1 make export-training` then `make modal-finetune DATASET=training/out/s1_synthetic.jsonl` (the held-out file next to it is picked up automatically) or `DATASET=eval/out/rl/training/s2.jsonl`; push a new version with `hf upload baansafe/<repo> <adapter dir> .`.
+
 Local API container (CPU). This is the same process as `make serve`:
 
 ```bash
