@@ -1785,7 +1785,7 @@ function setComposerReady(ready) {
 function framingNote() {
   const framing = responses && responses.framing
     ? responses.framing
-    : "Sukhumvit block in Watthana, drawn in local metres. data.demo_event is Hat Yai / Songkhla for flood enrichment.";
+    : "Sukhumvit block in Watthana, drawn in local metres. data.demo_event is Sukhumvit / Watthana (Bangkok); flood on this desk is flood.json.";
   return framing + " Flood rises from flood.json. Type, speak, or open Prompts. The stub gateway returns the priority, and that result lights the house. Replies are not a live model.";
 }
 

@@ -1669,13 +1669,13 @@ def main() -> None:
             "id": "synthetic-operator-block",
             "title": "Sukhumvit block, Watthana",
             "district_anchor": (
-                "data.demo_event is Hat Yai / Songkhla (GISTDA/enrichment). "
+                "data.demo_event is Sukhumvit / Watthana (Bangkok). "
                 "Fixture households stay labelled northern (Lampang, Phrae, Nan, Phayao). "
                 "Drawn streets use Sukhumvit names in local metres."
             ),
             "disclaimer": (
                 "Local-metre picture of streets around Soi Sukhumvit 49 in Watthana, Bangkok. Not a cadastral survey. "
-                "data.demo_event is Hat Yai / Songkhla for flood visibility; this block is still Sukhumvit until the basemap moves. "
+                "data.demo_event matches this Sukhumvit / Watthana block; desk flood is flood.json. "
                 "Household location_label stays the fixture district. Plots are local metres, not home addresses."
             ),
             "projection": "fixed isometric 2:1. x east, y south toward the camera. z up.",

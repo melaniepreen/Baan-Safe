@@ -53,7 +53,7 @@ Optional upstreams, all unset by default. Export one before `modal deploy` to ba
 
 ## What is drawn, and what stays a fixture
 
-`data.demo_event` is still unset. The picture is a local-metre block of real Sukhumvit streets in Watthana, not a cadastral survey. The HDX set `eos-rs-thailand-flood-bangkok-sep-2026` is listed in `data/SOURCES.md` and was not fetched. Household `location_label` stays the fixture district (Lampang, Phrae, Nan, Phayao). `flood.json` is local metres, not that Bangkok map. Flooded ground is a murky brown-teal, darker where the depth is greater, with a soft edge. Wat That Thong's compound is the dry hole.
+`data.demo_event` is `Sukhumvit / Watthana (Bangkok)` so the decision matches this basemap. The picture is a local-metre block of real Sukhumvit streets in Watthana, not a cadastral survey. The HDX set `eos-rs-thailand-flood-bangkok-sep-2026` is listed in `data/SOURCES.md` and was not fetched. Household `location_label` stays the fixture district (Lampang, Phrae, Nan, Phayao) except F17/F18. `flood.json` is local metres for this desk. Flooded ground is a murky brown-teal, darker where the depth is greater, with a soft edge. Wat That Thong's compound is the dry hole.
 
 | Piece | Where it lives | Contract |
 |---|---|---|
@@ -97,7 +97,7 @@ The priority text still quotes `config/priorities.yaml` and, separately, a sugge
 
 ## Demo script
 
-Open http://127.0.0.1:8000/ui/sim/ with `make serve` already running. `data.demo_event` stays unset.
+Open http://127.0.0.1:8000/ui/sim/ with `make serve` already running. `data.demo_event` is Sukhumvit / Watthana (Bangkok).
 
 1. Watch the flood rise to `flood.json`. Flooded ground is a murky brown-teal, darker in deeper water. The phone shows Baan-Safe and `+66 81 555 0149`. After `POST /session` records a caller IP, the status reads Connected with a green dot, and the first operator bubble is "You are connected to Baan-Safe. How can we help?" with the Thai line under it. The next note names the Sukhumvit block and says the EOS-RS Bangkok map was not fetched. On this machine the address is the fixed Thai stub `171.6.84.23`, marked DEMO on the feed card. A public `X-Forwarded-For` hop is stored as given.
 2. Open **Prompts** and tap the System 1 rice line (F02). The chooser note says it is a saved prompt. The cards badge each step simulated. The first card is the caller IP. The next names the house and its soi. System 1 shows P3 above the threshold and **ACCEPTED**. The house is outlined in green for P3. Sun Chuai Lue Nam Thuam is not a second stop, so only the house is outlined. A supply boat leaves Sun Chuai Lue Nam Thuam along the drawn roads, with a wake and crates. The dashed path and the boat share one pace: at most 54 projected pixels a second, and at least three seconds even on a short hop. Reset clears the trip mid-route. The phone says a supply boat is bringing food and that the reply is scripted. The rulebook row `p3-welfare` highlights, and the decision log gains a row. Press **Accept**.

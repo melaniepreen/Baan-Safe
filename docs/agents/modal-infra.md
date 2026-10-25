@@ -25,7 +25,7 @@ Modal apps for System 1, System 2, Sapling, speech-to-text, and a finetune job. 
 - `infra/modal/vram.py` — footprint tables. Not a chosen model.
 - `infra/HARDWARE.md` — prices and the sizing note.
 - `infra/modal/runtime.py` — Modal secret `baansafe-mubit`, key names `MUBIT_API_KEY` and `MUBIT_BASE_URL` (`llm/client.py` refuses without both). The value is not in git.
-- `infra/modal/gateway_app.py` — public demo ASGI. Attaches `mubit_secret()`. `STUB_ENV` keeps `S1_IMPL=real` and enrichment auto; `S2_IMPL` stays stub in the image and `apply_runtime_impl()` promotes to `real` only when both Mubit values are injected. `GET /hosting` reports backends, upstreams, `secrets` as a bool (never the key), and note `LLM via Mubit only`. `TRACE_PATH` is on the `baansafe-demo` volume.
+- `infra/modal/gateway_app.py` — public demo ASGI. Attaches `mubit_secret()`. `STUB_ENV` keeps `S1_IMPL=real` and enrichment auto; `S2_IMPL` stays stub in the image and `apply_runtime_impl()` promotes to `real` only when both Mubit values are injected. `max_containers=1` so the in-process dispatch ledger is shared. `GET /hosting` reports backends, upstreams, `secrets` as a bool (never the key), and note `LLM via Mubit only`. `TRACE_PATH` is on the `baansafe-demo` volume.
 - `scripts/sync_modal_secrets.py` — `make modal-secrets` from gitignored `.env`.
 - `scripts/sync_workspace.py` — `make sync` (download) for both teammates: pull, `.env`, pip, Modal, secrets, push readiness.
 - `scripts/push_workspace.py` — `make push` (send): Modal secrets + `git push` main. `MSG='...'` commits first (never `.env`).
