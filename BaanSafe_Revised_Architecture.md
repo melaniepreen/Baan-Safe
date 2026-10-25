@@ -15,7 +15,7 @@ Key corrections:
 
 Target flow: Caller → live speech-to-text → Call Agent → Mubit Gateway (memory retrieval, policy pre-check, route) → System 1 (simple, clear, low-risk) or System 2 (ambiguous or high-risk, Nemotron, then Sapling when the claim is aid eligibility or a denial) → Decision Router → Call Agent (next question, update case, or provisional dispatch).
 
-The diagram is `gateway/route.py` on the default request (`use_stubs=True`). Solid edges run. A dashed edge is not taken on that request. After mock memory, `gateway/graduation.py` may tag `complex_situation` and add a `graduated-*` recommendation. That sets no priority and does not move a pattern into System 1. The field precheck in `gateway/chooser.py` picks the system. `router/merge.py` builds the `RouterDecision` and `router/ledger.py` reserves stock in this process only. `load_dispatch_resources` reads `data/snapshots/places.json` on that request and lists public shelters, hospitals, and boat points ahead of the fictional units. Extract, when it runs, reads `data/processed/admin_districts.json` and `districts.json`, then `data/snapshots/gazetteer.json`. Enrichment reads `data/processed` through `ingest/store.py` when `districts.json` is present. `_match_district` tries `districts.json` first, then `admin_districts.json`. Open-Meteo and RID snapshots are the rain and reservoir fallbacks when the matched row has a weather key or a northern province. Every `districts.json` row stores `province` null, so a northern name stops there and `_regional_reservoirs` stays empty for Lampang, Phrae, Nan, and Phayao. Hat Yai and Mueang Songkhla resolve on `admin_districts` as Songkhla Province, and rain stays null on those admin-only matches. Those flags do not change `final_priority`. SQLite is the gitignored `make ingest` cache at `data/raw/ingest.sqlite`. `BAANSAFE_DB_PATH` overrides that cache and is not set on the Modal gateway. GISTDA, TMD, and geoBoundaries stay in `data/snapshots` and are not read on the turn. `countries/` is not imported. `system1/decide.py` runs only when `S1_IMPL=real` or `use_stubs=False`, and then it replaces the stub file. `system2.decide` runs only when `S2_IMPL=real` or `use_stubs=False`. The model id is `nvidia/nemotron-3-nano-30b-a3b`. A local `make serve` defaults to `S1_IMPL=stub` and `S2_IMPL=stub`. The Modal gateway sets `S1_IMPL=real`, leaves `ENRICH_IMPL` empty so enrichment follows `store.available()`, attaches `baansafe-mubit`, and sets `S2_IMPL=real` when both `MUBIT_API_KEY` and `MUBIT_BASE_URL` are present. `apply_runtime_impl` sets `MEMORY_IMPL=local` and `MEMORY_LOCAL_PATH=/data/memory.jsonl` with or without those credentials. A deploy-time `MEMORY_IMPL=mubit` next to the credentials is kept and stays dormant. System 2 is a paid Nemotron call through the Mubit LLM gateway. `llm.complete` sends `metadata.session_id` = `case_id[:200]`. Mubit records that call and can train a per-task adapter. It exposes no memory API. Without those credentials System 2 stays stub. A local `make serve` stays `MEMORY_IMPL=mock`. The function sets `max_containers=1` and `include_source=True`. `llm.complete` records stage `mubit_chat` and receives `case_id`. `llm/client.py` and `llm/openai_client.py` accept only a Mubit host (`llm.provider_route` is `mubit`, including the compat OpenRouter prefix). `GET /policies` serves the local corpus on its own. Aid routes return 501. Modal model apps refuse to start while their model and GPU values are `TODO_HUMAN`. The gateway app does not. After that response, the page holds a System 2 or cascade vehicle until the operator presses Accept or Reject. Accept posts `POST /cases/{id}/dispatches/confirm`. Reject posts `POST /cases/{id}/dispatches/cancel`. Either returns 422 when this process has no holds. `GET /resources` subtracts in-process holds. The ledger has already reserved stock at decision time.
+The diagram is `gateway/route.py` on the default request (`use_stubs=True`). Solid edges run. A dashed edge is not taken on that request. After mock memory, `gateway/graduation.py` may tag `complex_situation` and add a `graduated-*` recommendation. That sets no priority and does not move a pattern into System 1. The field precheck in `gateway/chooser.py` picks the system. `router/merge.py` builds the `RouterDecision` and `router/ledger.py` reserves stock in this process only. `load_dispatch_resources` reads `data/snapshots/places.json` on that request and lists public shelters, hospitals, and boat points ahead of the fictional units. Extract, when it runs, reads `data/processed/admin_districts.json` and `districts.json`, then `data/snapshots/gazetteer.json`. Enrichment reads `data/processed` through `ingest/store.py` when `districts.json` is present. `_match_district` tries `districts.json` first, then `admin_districts.json`. Open-Meteo and RID snapshots are the rain and reservoir fallbacks when the matched row has a weather key or a northern province. Every `districts.json` row stores `province` null, so a northern name stops there and `_regional_reservoirs` stays empty for Lampang, Phrae, Nan, and Phayao. Hat Yai and Mueang Songkhla resolve on `admin_districts` as Songkhla Province, and rain stays null on those admin-only matches. Those flags do not change `final_priority`. SQLite is the gitignored `make ingest` cache at `data/raw/ingest.sqlite`. `BAANSAFE_DB_PATH` overrides that cache and is not set on the Modal gateway. GISTDA, TMD, and geoBoundaries stay in `data/snapshots` and are not read on the turn. `countries/` is not imported. `system1/decide.py` runs only when `S1_IMPL=real` or `use_stubs=False`, and then it replaces the stub file. `system2.decide` runs only when `S2_IMPL=real` or `use_stubs=False`. The model id is `nvidia/nemotron-3-nano-30b-a3b`. A local `make serve` defaults to `S1_IMPL=stub` and `S2_IMPL=stub`. The Modal gateway sets `S1_IMPL=real`, leaves `ENRICH_IMPL` empty so enrichment follows `store.available()`, attaches `baansafe-mubit`, and sets `S2_IMPL=real` when both `MUBIT_API_KEY` and `MUBIT_BASE_URL` are present. `apply_runtime_impl` sets `MEMORY_IMPL=local` and `MEMORY_LOCAL_PATH=/data/memory.jsonl` with or without those credentials. A deploy-time `MEMORY_IMPL=mubit` next to the credentials is kept and stays dormant. System 2 is a paid Nemotron call through the Mubit LLM gateway. `llm.complete` sends `metadata.session_id` = `case_id[:200]`. The orchestrator passes `case_id` on every System 2 hop. Mubit groups those calls into one Task by the static system prompt. Changing that prompt starts a new Task. Mubit exposes no memory API. Without those credentials System 2 stays stub. A local `make serve` stays `MEMORY_IMPL=mock`. The function sets `max_containers=1` and `include_source=True`. `llm.complete` records stage `mubit_chat` and receives `case_id`. `llm/client.py` and `llm/openai_client.py` accept only a Mubit host (`llm.provider_route` is `mubit`, including the compat OpenRouter prefix). `GET /policies` serves the local corpus on its own. Aid routes return 501. Modal model apps refuse to start while their model and GPU values are `TODO_HUMAN`. The gateway app does not. After that response, the page holds a System 2 or cascade vehicle until the operator presses Accept or Reject. Accept posts `POST /cases/{id}/dispatches/confirm`. Reject posts `POST /cases/{id}/dispatches/cancel`. Either returns 422 when this process has no holds. `GET /resources` subtracts in-process holds. The ledger has already reserved stock at decision time.
 
 ```mermaid
 flowchart TD
@@ -46,12 +46,14 @@ flowchart TD
   rules -.-> merge
   s2 -.-> s2d["system2.decide if S2_IMPL=real"]
   s2d -.-> sap["Sapling gate, client stub"]:::unwired
-  s2d -.-> llm["Mubit LLM gateway: session_id, traces, adapters"]:::unwired
+  s2d -.-> llm["Mubit LLM gateway: session_id, one Task per static prompt, traces, adapters"]:::unwired
+  traffic["make mubit-traffic: mock memory, paid S2, local traces"]:::unwired
+  traffic -.-> llm
   packs["country packs, not loaded"]:::unwired
-  modal["Modal gateway: S1 real, memory local, S2 if secret, one container"]:::unwired
+  modal["Modal gateway: S1 real, memory local, /vol read-only, GET /training, S2 if secret"]:::unwired
 ```
 
-Training is a separate path from that call. Operator corrections, coach notes, and simulator outcomes append one `TrainingEvent` each. `make export-training` reads the log. `fixtures/synthetic` is a seeded flood-call set. `training/synthetic_export.py` writes SetFit rows from it (`SYNTHETIC=1` on that make target). `training/laya_export.py` writes Laya JSONL. `scripts/laya_train.py` skips unless `LAYA_TRAIN=1`, a GPU or a Modal task is present, and `laya-train` is on `PATH`. Laya is export-only. `make modal-finetune` is SetFit and LoRA from the event log (`infra/modal/finetune_job.py`). It does not train Laya or read `training/out/laya/`. `modal.finetune_base_model` is `nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1` and `modal.finetune_gpu` is `T4`. `eval/rl/run.py` reports ready only when both are set. System 1 stays rules-only. Held-out eval splits on `group_id` and filters `source`. It scores stub arms and does not load fine-tune weights. `EVAL_LEARNING_SET=synthetic` scores that call set on its committed group split and still does not promote.
+Training is a separate path from that call. Operator corrections, coach notes, and simulator outcomes append one `TrainingEvent` each. `make export-training` reads the log. `fixtures/synthetic` is a seeded flood-call set. `training/synthetic_export.py` writes SetFit rows from it (`SYNTHETIC=1` on that make target). `training/laya_export.py` writes Laya JSONL. `scripts/laya_train.py` skips unless `LAYA_TRAIN=1`, a GPU or a Modal task is present, and `laya-train` is on `PATH`. Laya is export-only. `make modal-finetune` is SetFit and LoRA from the event log (`infra/modal/finetune_job.py`). It writes loss curves to `baansafe-versions`. It does not train Laya or read `training/out/laya/`. `modal.finetune_base_model` is `nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1` and `modal.finetune_gpu` is `T4`. `eval/rl/run.py` reports ready only when both are set. System 1 stays rules-only. `HANDOVER.md` records LoRA `ft-20261025T045212Z-8d9937b9` on the 7-row event `s2` set as overfit (loss 14.27 to 0.0017). Held-out eval splits on `group_id` and filters `source`. It scores stub arms and does not load fine-tune weights. `EVAL_LEARNING_SET=synthetic` scores that call set on its committed group split and still does not promote. `make mubit-traffic` (`41413c6`) calls `gateway.handle` with `use_stubs=False`, `S1_IMPL=real`, `S2_IMPL=real`, and `MEMORY_IMPL=mock`. Case ids are `traffic-<seed>-`. `HANDOVER.md` (`30dfa0d`, `daeaad9`) records ~650 requests on 25 Oct, including local batches seed 3 (160 hops) and seed 11 (204 hops). Those traces stay on the machine that ran the command. `GET /training` counts `mubit_chat` in the answering server's `TRACE_PATH` and reads `TRAINING_REGISTRY_PATH` (`/vol/registry.json` on the hosted gateway).
 
 ```mermaid
 flowchart LR
@@ -60,7 +62,10 @@ flowchart LR
   coach[Coach] --> log
   sim[Simulator] --> log
   log --> export[export-training]
-  export -.-> ft["Modal fine-tune, Nano 4B · T4"]:::unwired
+  export -.-> ft["Modal fine-tune, Nano 4B · T4<br/>loss curves · 7-row s2 LoRA overfit"]:::unwired
+  ft -.-> page["GET /training reads /vol/registry.json<br/>this server's mubit_chat rows"]
+  traffic["make mubit-traffic<br/>mock memory · paid S2 · local traces"]:::unwired
+  traffic -.->|"not the hosted trace file"| page
   synth["fixtures/synthetic"] --> setfit["SetFit rows"]
   synth --> laya["Laya JSONL"]
   laya -.-> ltrain["laya-train, skips"]:::unwired
@@ -79,7 +84,7 @@ Checked against `main` on 25 October 2026 (`daeaad9`). This section says where e
 
 ### Where things run
 
-"Mubit Gateway" in the diagrams above is the `gateway/` package. It runs inside the BaanSafe API process, not on Mubit. The Mubit service is the LLM gateway and the trace record. `llm.complete` sends `metadata.session_id` = `case_id[:200]`. Mubit groups that case's calls by session and groups System 2 calls into one Task by the static system prompt. Changing that prompt starts a new Task. It exposes no memory API. Memory is BaanSafe's own store behind `memory/adapter.py`. The host diagram draws only that LLM edge. `GET /training` reads this server's trace file and the read-only versions volume.
+"Mubit Gateway" in the diagrams above is the `gateway/` package. It runs inside the BaanSafe API process, not on Mubit. The Mubit service is the LLM gateway and the trace record. `llm.complete` sends `metadata.session_id` = `case_id[:200]`. Mubit groups that case's calls by session and groups System 2 calls into one Task by the static system prompt. Changing that prompt starts a new Task. Mubit exposes no memory API. Memory is BaanSafe's own store behind `memory/adapter.py`. The host diagram draws that LLM edge, and a dashed laptop `make mubit-traffic` hop into the same gateway. Memory stays BaanSafe's store. `GET /training` reads this server's trace file and the read-only versions volume. `finetune_app` writes `registry.json` on that volume.
 
 | Place | What runs there | State it holds |
 |---|---|---|
@@ -118,7 +123,7 @@ flowchart LR
     overlay[("eval/out/rl/overlay.json")]
   end
   subgraph mubit["Mubit"]
-    compat["LLM gateway · session_id<br/>traces and per-task adapters"]
+    compat["LLM gateway · session_id<br/>one Task per static system prompt<br/>traces and per-task adapters"]
   end
   subgraph orouter["OpenRouter"]
     nano["Nemotron nano 30B-A3B"]
@@ -126,11 +131,12 @@ flowchart LR
   subgraph modal["Modal"]
     gapp["gateway_app: S1 real, memory local, /vol read-only, S2 if secret"]:::unwired
     sap["sapling_app"]:::unwired
-    ft["finetune_app"]:::unwired
+    ft["finetune_app · writes loss curves"]:::unwired
     stt["stt_app"]:::unwired
     s1app["s1_app"]:::unwired
     s2app["s2_app vLLM"]:::unwired
   end
+  traffic["make mubit-traffic · laptop<br/>MEMORY_IMPL=mock · paid S2<br/>traces stay on that machine"]:::unwired
   phone --> turns --> gw
   gw --> s1
   gw --> s2
@@ -143,6 +149,8 @@ flowchart LR
   gw --> traces
   train --> traces
   train --> vol
+  ft -.->|"writes registry.json"| vol
+  traffic -.->|"paid hop"| compat
   router -.->|"local write after merge"| memfile
   snaps --> gw
   correct --> corr --> events
@@ -200,7 +208,7 @@ A pattern's path through the loops: a System 1 under-triage is corrected by a hu
 |---|---|---|---|
 | `gateway_app` | A public URL for the town, the API, and `/ui/training.html` | Nothing in git. `make deploy-modal` | Attaches `baansafe-mubit`. `max_containers=1`. `include_source=True`. Sets `S2_IMPL=real` when both Mubit values are present. `apply_runtime_impl` sets `MEMORY_IMPL=local` and `MEMORY_LOCAL_PATH=/data/memory.jsonl`. Mounts `baansafe-versions` read-only at `/vol` |
 | `sapling_app` | A live Sapling verifier. The 23B checkpoint needs a 48 GB-class GPU, and no hosted API serves it | `sapling.hosting`, `sapling.gpu`, `sapling.model_id`, `sapling.thai_handling` | Refuses. The router uses the stub |
-| `finetune_app` | The "correction becomes a model update" beat with real weights (L5) | Nothing in git for the two decided leaves. `.env()` is inside the image | `modal.finetune_base_model` is `nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1` and `modal.finetune_gpu` is `T4`. System 1 does not load the weights |
+| `finetune_app` | The "correction becomes a model update" beat with real weights (L5) | Nothing in git for the two decided leaves. `.env()` is inside the image | `modal.finetune_base_model` is `nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1` and `modal.finetune_gpu` is `T4`. Loss curves land on `baansafe-versions`. The 7-row `s2` LoRA is overfit. System 1 does not load the weights |
 | `stt_app` | Live Thai speech-to-text behind `/stt/transcribe`. `gateway_app` forwards there when `STT_UPSTREAM` is set at deploy time | `modal.stt_model_id`, `modal.stt_gpu` | Refuses. The phone uses typed or scripted lines |
 | `s1_app` | A learned System 1 classifier (mDeBERTa or Laya) | `modal.s1_model_id`, `modal.s1_gpu` | Not needed now: `system1.extraction_method` is `rules-only` |
 | `s2_app` | Self-hosted Nemotron on vLLM, registered in the Mubit console | `modal.s2_model_id`, `modal.nemotron_size`, `modal.s2_quant`, `modal.s2_gpu` | Not needed now: `system2.hosting` is `openrouter via mubit gateway` |
