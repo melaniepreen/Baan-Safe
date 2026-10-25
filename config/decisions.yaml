@@ -36,7 +36,7 @@ speech_to_text:
 ui:
   framework: TODO_HUMAN
 data:
-  demo_event: Hat Yai / Songkhla     # decided: GISTDA/enrichment flood story (HANDOVER #14/#30); town basemap may still draw Sukhumvit until UI moves
+  demo_event: Sukhumvit / Watthana (Bangkok)  # decided: match town basemap + flood.json; GISTDA Hat Yai enrich is off-script unless a call names Songkhla
   production_db: TODO_HUMAN          # committed JSON in data/processed tonight
 correction_loop:
   graduation_threshold: 2            # decided: matching S2 decisions before a pattern graduates to a System 1 rule (RL loop, eval/rl/); P1 and complex patterns become recommendations instead

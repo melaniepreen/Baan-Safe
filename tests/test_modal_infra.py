@@ -174,6 +174,8 @@ def test_gateway_app_builds_demo_asgi_with_mubit_secret_slot(monkeypatch):
     assert spec.gpus is None
     assert spec.cpu == 1.0
     assert set(spec.volumes) == {"/data"}
+    # Demo ledger is in-process; pin replicas in source (Modal may not mirror on _spec_).
+    assert "max_containers=1" in Path(gateway.__file__).read_text(encoding="utf-8")
     assert gateway.web._is_web_endpoint()
     assert gateway._ignore(Path(".env"))
     assert gateway._ignore(Path(".git/config"))

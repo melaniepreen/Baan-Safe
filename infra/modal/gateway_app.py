@@ -14,7 +14,9 @@ uploads to `{STT_UPSTREAM}/transcribe`. `S1_UPSTREAM`, `S2_UPSTREAM`, and
 gateway outcomes: those apps do not return a gateway Outcome.
 
 Runtime writes (including TRACE_PATH for gateway/S1/S2/router stages) go
-to the `baansafe-demo` volume at `/data`.
+to the `baansafe-demo` volume at `/data`. The ASGI function sets
+`max_containers=1` so confirm/cancel and resource stock share one
+in-process ledger for the demo.
 """
 
 from __future__ import annotations
@@ -313,6 +315,8 @@ async def transcribe(request: Request) -> dict:
     cpu=1.0,
     secrets=[mubit_secret()],
     volumes={DATA_MOUNT: demo_data},
+    # One container so confirm/cancel and GET /resources share the in-process ledger.
+    max_containers=1,
     scaledown_window=120,
     timeout=120,
     include_source=False,

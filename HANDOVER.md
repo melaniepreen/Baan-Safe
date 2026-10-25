@@ -41,47 +41,39 @@ Owners: `OWNERSHIP.md`. Contracts: `v0.3-contracts`. Detail plan: `docs/wire-fro
 | Mubit `mubit_chat` traces + enrich/memory stages + `/metrics` | `96bef6e`, `7d1eddc` |
 | RL Mubit/cache traces + RL panel | `c996c35` / related; panel `f243e2b` |
 | Modal S1 real + enrich auto + mubit secret / S2 gate | `b2275c6`, `c996c35` |
-| `data.demo_event` = Hat Yai / Songkhla; G01–G04 → system_2 | `110e370` |
+| `data.demo_event` was Hat Yai; G01–G04 → system_2 | `110e370` (place later realigned to Sukhumvit) |
 | Correct this Mubit→Nemotron line | `61663d0` |
-| Enrich `admin_districts` fallback | Hat Yai resolves |
+| Enrich `admin_districts` fallback | Hat Yai resolves (off desk script) |
 | Unaccompanied adult ≠ child | Bare `unaccompanied` still implies child; `adult` named does not |
+| Judge audit into HANDOVER | PR #11 |
+| `data.demo_event` → Sukhumvit / Watthana (Bangkok) | Match town + `flood.json` |
+| Modal gateway `max_containers=1` | Shared in-process ledger for demo |
 
 ---
 
-## Judge audit (25 Oct) — context for both owners
+## Judge audit (25 Oct) — status
 
-External pass did **not** boot the API or make live Mubit calls; endpoints on the hosted URL are unchecked until A1–A2.
+### Hold the line
+- Every LLM call goes through Mubit; no ReliefWeb / DDPM; synthetic people only.
+- **Pitch Mubit as gateway + traces** (memory still stub; three `memory.*` keys still `TODO_HUMAN`).
+- Learning story frozen: **corrections escalate to System 2** (`sim_events` `promote_after` 2). Feed cards are scripted; one live Mubit hop proves traces.
+- Place frozen: **`data.demo_event` = `Sukhumvit / Watthana (Bangkok)`**. Desk flood = `flood.json`. Do not claim GISTDA Hat Yai on the town script.
+- Freeze `ui/sim` until Melanie rebases/reviews.
 
-### Still true / hold the line
-- Every LLM call goes through Mubit (`llm/client.py`); no ReliefWeb / DDPM; synthetic people only.
-- Architecture still *promises* Mubit memory, Sapling verifier, and model-based System 1 — runtime today: **memory stub**, **Sapling stub**, **S1 rules-only**. Pitch Mubit as **gateway + traces**, not memory, unless Melanie lands the three `memory.*` decisions tonight.
-- `config/decisions.yaml` still has many `TODO_HUMAN` leaves (~33 outside `DECIDED`).
-- High churn on `ui/sim/sim.js` in the last hours — prefer one writer per PR (branch → PR → merge).
+### Frozen 3-minute script
+1. English **System 1** call (e.g. F02 rice / food) — boat may move when UI threshold accepts.
+2. **System 2** beat (e.g. F10 oxygen / under threshold) — PENDING APPROVAL; say Mubit→Nemotron; Prefer one live hop or replay cache, then Accept (confirm dispatch).
+3. Human **Reject → Correct this** once, or repeat a theme twice to show **Graduated to S2**.
+4. Point at `GET /metrics` `mubit_chat` if a live hop ran. Hide aid 501 and RL panel.
 
-### Risks called out
-| Risk | Mitigation |
-|---|---|
-| Hosted URL ≠ git | Redeploy Modal; smoke `/metrics` |
-| Hat Yai event vs Sukhumvit town vs northern calls | No flood in demo until place lines up |
-| Live Nemotron: ~3/6 fixtures, rate limits | Script S2 with rules safety gate; keep `make rl-loop-replay` cache ready |
-| Two learning stories | Freeze **corrections escalate to System 2** |
-| Unaccompanied adult → child | Treat as bug; do not imply child when `adult` is named |
-| Thai extract = districts only | Demo English / code-switched |
-| Stock holds | Pin Modal to **one** container |
-| Aid 501 + RL panel noise | **Hide** from demo UI for the script |
+### Still open
+1. **Redeploy Modal** (this branch pins one container) + smoke `/hosting` + one S2 turn + `/metrics`. Judges-only URL.
+2. Melanie: memory decisions **or** leave gateway+traces pitch.
+3. Agree public paid S2 vs stub after smoke.
 
-### Next 5 (in order) — both owners
-
-1. **Redeploy Modal** and run a Mubit check on the live URL (`GET /hosting`, one System 2 turn, `GET /metrics` → `mubit_chat`). Share the link **only with judges** (no auth).
-2. **Line up place on Hat Yai** — move town pins + one fixture set to Songkhla/Hat Yai, *or* change `data.demo_event` back if the basemap stays Sukhumvit.
-3. **Freeze the ~3-minute script:** English System 1 call → System 2 escalation through Mubit (rules safety gate visible) → human confirm dispatch → graduation (correction path to S2). Keep RL replay cache warm; do not depend on live nano for the scripted beat.
-4. **Settle Mubit memory** (Melanie: `memory.mubit_project`, `retrieval_top_k`, `token_budget` + wire) **or** reword all pitch/docs to “gateway + traces”.
-5. **Keep HANDOVER tip SHA / test counts fresh** after each merge; confirm deploy image installs `requirements.txt` (includes `openai>=1.40`).
-
-### Same-night smaller fixes
-- Hide aid eligibility UI and RL panel for the demo path.
-- Pin Modal concurrency / replicas to 1 for ledger holds.
-- Unaccompanied adult must not get `vulnerable: child` (see extract fix on this PR if merged).
+### Same-night leftovers
+- Hide aid eligibility / RL panel in the page if they reappear.
+- Northern fixtures still won’t match Sukhumvit dispatch units — use F17/F18 or accept first usable unit.
 
 ## Plan of action (full backlog)
 

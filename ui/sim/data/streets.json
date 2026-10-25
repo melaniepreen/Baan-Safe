@@ -1,5 +1,5 @@
 {
-  "note": "Local-metre picture of streets around Soi Sukhumvit 49 in Watthana, Bangkok. Not a cadastral survey. EOS-RS eos-rs-thailand-flood-bangkok-sep-2026 is listed in data/SOURCES.md and was not fetched. Household location_label stays the fixture district. Plots are local metres, not home addresses. Wat That Thong stands on Thanon Sukhumvit beside BTS Ekkamai; this block draws the compound on the south side of the drawn road. Khlong Saen Saep is drawn along the west edge. Access lanes link each call house to the nearest clear street or canal. data.demo_event is still TODO_HUMAN.",
+  "note": "Local-metre picture of streets around Soi Sukhumvit 49 in Watthana, Bangkok. Not a cadastral survey. data.demo_event is Sukhumvit / Watthana (Bangkok). EOS-RS eos-rs-thailand-flood-bangkok-sep-2026 is listed in data/SOURCES.md and was not fetched. Household location_label stays the fixture district. Plots are local metres, not home addresses. Wat That Thong stands on Thanon Sukhumvit beside BTS Ekkamai; this block draws the compound on the south side of the drawn road. Khlong Saen Saep is drawn along the west edge. Access lanes link each call house to the nearest clear street or canal.",
   "streets": [
     {
       "id": "thanon-chamlong-nam-thuam",
