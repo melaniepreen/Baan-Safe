@@ -197,7 +197,7 @@ Ranked by demo value. Owners per `OWNERSHIP.md`: Moly = API / calls / infra / ev
 |---|---|---|---|---|
 | F1 | Badge a cache hit in the Model Path panel (`host=s2_cache/case status=cache_hit`, 0 ms, "replayed") vs a live Mubit hop | Hosted runs `S2_IMPL=cache`; without the badge the resilience story is invisible | small | Melanie |
 | F2 | `/hosting` banner at page load: `backends`, `memory`, `secrets` | Nobody curls during the demo | small | Melanie |
-| F3 | Training page: link version rows to the Hub repos (flip them public first), render `heldout.per_label` as a table (already in the JSON) | Shows per-class precision/recall, not one number | small | either |
+| F3 | Training page: link version rows to the Hub repos (both public since 25 Oct), render `heldout.per_label` as a table (already in the JSON) | Shows per-class precision/recall, not one number | small | either |
 | F4 | Correction → memory round-trip: show "memory items used: n" on each new call's card | `ui/correct.js` writes a lesson; the town never shows it landing on the next call | medium | Melanie |
 | F5 | `make demo-reset`: truncate volume `traces.jsonl`, `/data/s2_cache.jsonl`, case rows in `memory.jsonl` (keep the 10 policy lessons) | Every rehearsal grows the hosted store; the script should start from one state | 30 min | Moly |
 

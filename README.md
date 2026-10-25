@@ -95,8 +95,8 @@ flowchart TD
     log[("Training event log<br/>training/events")]:::store
     rl["RL loop — make rl-loop<br/>live and cache hits trace mubit_chat<br/>replay miss → system2_unavailable<br/>make rl-snapshot / rl-restore<br/>copies under eval/snapshots/rl"]
     overlay["Learned overlay<br/>only with RL_OVERLAY"]:::unwired
-    ft["Fine-tune on Modal<br/>Nemotron Nano 4B · T4 · both decisions set<br/>loss curves on baansafe-versions<br/>7-row s2 LoRA is overfit<br/>Hub copies private, not served<br/>weights not loaded into System 1"]:::unwired
-    page["GET /training · ui/training.html<br/>compare card · GET /training/episodes<br/>Hub (private) links · held-out per-label table<br/>this server's mubit_chat rows<br/>/vol/registry.json · RL_RUN_PATH<br/>GET /rl/run reads that same path"]
+    ft["Fine-tune on Modal<br/>Nemotron Nano 4B · T4 · both decisions set<br/>loss curves on baansafe-versions<br/>7-row s2 LoRA is overfit<br/>Hub copies public, not served<br/>weights not loaded into System 1"]:::unwired
+    page["GET /training · ui/training.html<br/>compare card · GET /training/episodes<br/>Hub links · held-out per-label table<br/>this server's mubit_chat rows<br/>/vol/registry.json · RL_RUN_PATH<br/>GET /rl/run reads that same path"]
     traffic["make mubit-traffic<br/>scripts/mubit_traffic.py<br/>TRAFFIC_MEMORY=mock by default<br/>local puts a seeded store in the prompt<br/>real S1 and S2 · paid Nemotron<br/>case ids traffic-seed- · traces stay local"]:::unwired
   end
 
@@ -275,7 +275,7 @@ The exports above are examples of the variable names. `SAPLING_MODEL_ID` is the 
 
 ### Trained weights
 
-Fine-tune versions live on the `baansafe-versions` Modal volume (`registry.json`, `versions/<id>/{adapter,metrics.json}`) and are listed with loss curves at `GET /training` / `/ui/training.html`. Trained on synthetic callers only. Copies of the 25 Oct runs are on the Hugging Face Hub under the `baansafe` org (private):
+Fine-tune versions live on the `baansafe-versions` Modal volume (`registry.json`, `versions/<id>/{adapter,metrics.json}`) and are listed with loss curves at `GET /training` / `/ui/training.html`. Trained on synthetic callers only. Copies of the 25 Oct runs are on the Hugging Face Hub under the `baansafe` org (public since 25 Oct):
 
 | Hub repo | Version | What | Result |
 |---|---|---|---|

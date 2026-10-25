@@ -13,7 +13,7 @@
     s1_triage: "https://huggingface.co/baansafe/baansafe-s1-triage-setfit",
     s2_lora: "https://huggingface.co/baansafe/baansafe-s2-nemotron-nano-4b-lora",
   };
-  var HUB_TEXT = "Hub (private)";
+  var HUB_TEXT = "Hub";
 
   function el(tag, attrs, children) {
     var node = document.createElement(tag);
