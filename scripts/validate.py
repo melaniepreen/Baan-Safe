@@ -70,6 +70,8 @@ DECIDED = {
     "memory.mubit_project": "baansafe-demo",
     "memory.retrieval_top_k": 5,
     "memory.token_budget": 400,
+    "modal.finetune_base_model": "nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1",
+    "modal.finetune_gpu": "T4",
 }
 
 

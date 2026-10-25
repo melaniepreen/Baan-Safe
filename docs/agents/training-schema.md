@@ -114,8 +114,8 @@ Export shapes from the event log are s1 `{text, label, group_id, weight}`, s2 ch
 - `correction_loop.graduation_threshold` — the loop still does not promote.
 - `learning_eval.promotion` — held-out eval does not promote.
 - `policies.authoritative_set` — the corpus pin is a hash; which rules bind the demo is still human.
-- `modal.finetune_base_model` — exporters and the LoRA job are not this contract.
 - `llm.token_price_usd` — the loop still leaves cost null.
+- `modal.finetune_base_model` is decided (`nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1`). Exporters and the LoRA job are still not this contract.
 
 ## Proposed changes
 

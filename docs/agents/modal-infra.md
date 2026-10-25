@@ -15,7 +15,7 @@ files:
 
 ## Purpose
 
-Modal apps for System 1, System 2, Sapling, speech-to-text, and a finetune job. GPU names and model ids in git stay `TODO_HUMAN`, so the apps refuse until a human exports them.
+Modal apps for System 1, System 2, Sapling, speech-to-text, and a finetune job. GPU names and model ids in git stay `TODO_HUMAN`, so the apps refuse until a human exports them. The two exceptions are `modal.finetune_gpu` (`T4`) and `modal.finetune_base_model` (`nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1`), decided 25 Oct 2026.
 
 ## Key files
 
@@ -44,12 +44,12 @@ Modal apps for System 1, System 2, Sapling, speech-to-text, and a finetune job. 
 
 - Do not commit `HF_TOKEN`, `MUBIT_API_KEY`, or `S2_SERVE_API_KEY`. `infra/modal/common.py` lists those names.
 - Importing an app module resolves config. Tests that import `sapling_app` must set env and pop the module from `sys.modules`.
-- `modal.*` leaves in `config/decisions.yaml` stay `TODO_HUMAN`. They are not the product decisions `system2.*` or `sapling.*`.
+- `modal.*` leaves in `config/decisions.yaml` stay `TODO_HUMAN`, except `modal.finetune_base_model` and `modal.finetune_gpu`, which are in `DECIDED`. They are not the product decisions `system2.*` or `sapling.*`. System 1 SetFit still needs `FINETUNE_S1_MODEL` (a sentence-transformer) in the environment; the base model is the LoRA base.
 
 ## How to test
 
 - `tests/test_modal_infra.py`, `tests/test_sapling.py` (GPU allow-list and unset model id).
-- `make validate` — modal leaves are still `TODO_HUMAN`.
+- `make validate` — modal leaves are still `TODO_HUMAN` except the two finetune keys, which must match `DECIDED`.
 - Do not deploy from a test run.
 
 ## Common pitfalls
@@ -62,6 +62,6 @@ Modal apps for System 1, System 2, Sapling, speech-to-text, and a finetune job. 
 
 - `modal.s1_gpu`, `modal.s1_model_id`
 - `modal.s2_gpu`, `modal.s2_model_id`, `modal.nemotron_size`, `modal.s2_quant`
-- `modal.finetune_gpu`, `modal.finetune_base_model`
 - `modal.stt_gpu`, `modal.stt_model_id`
+- (decided: `modal.finetune_gpu` `T4`, `modal.finetune_base_model` `nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1`)
 - `sapling.gpu`, `sapling.model_id`, `sapling.hosting` (product keys the Sapling app also refuses on)

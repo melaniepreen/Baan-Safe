@@ -65,14 +65,14 @@ image = with_repo(
         "huggingface_hub",
         "setfit>=1.1",
         "datasets>=2.14",
+    ).env(
+        {
+            "FINETUNE_BASE_MODEL": BASE_MODEL,
+            "FINETUNE_GPU": GPU_LABEL,
+            "FINETUNE_S1_MODEL": os.environ.get("FINETUNE_S1_MODEL", ""),
+            "HF_HOME": HF_CACHE_PATH,
+        }
     )
-).env(
-    {
-        "FINETUNE_BASE_MODEL": BASE_MODEL,
-        "FINETUNE_GPU": GPU_LABEL,
-        "FINETUNE_S1_MODEL": os.environ.get("FINETUNE_S1_MODEL", ""),
-        "HF_HOME": HF_CACHE_PATH,
-    }
 )
 
 app = modal.App("baansafe-finetune", image=image)

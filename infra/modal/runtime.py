@@ -38,8 +38,9 @@ def versions() -> modal.Volume:
 
 def with_repo(image: modal.Image) -> modal.Image:
     decisions = repo_root() / "config" / "decisions.yaml"
+    # `.env` is a build step. Modal requires `add_local_*` to come last.
     return (
-        image.add_local_python_source("infra", "contracts")
+        image.env({"BAANSAFE_DECISIONS": "/opt/baansafe/config/decisions.yaml"})
+        .add_local_python_source("infra", "contracts")
         .add_local_file(str(decisions), "/opt/baansafe/config/decisions.yaml")
-        .env({"BAANSAFE_DECISIONS": "/opt/baansafe/config/decisions.yaml"})
     )
