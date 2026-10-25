@@ -247,8 +247,15 @@ def test_twenty_calls_link_fixtures_to_buildings():
     assert 'id="pattern-reset"' in page
     assert 'id="priority-badge"' in page
     source = (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
-    assert "DEMO-ONLY" in source
+    assert "Operator replies are scripted. The routing decision is live from the gateway." in page
+    assert "Operator replies are scripted." in (
+        ROOT / "ui" / "sim" / "subtitle.js"
+    ).read_text(encoding="utf-8")
     assert "gateway.route_chooser" in source
+    assert "Gateway stub:" not in source
+    assert " · DEMO" not in source
+    assert "Memory store returned" in source
+    assert "dataset.notes" in source
     assert "Web Speech API" in source
     assert "/stt/transcribe" in source
     assert "attachLiveFeed" in source
@@ -414,6 +421,7 @@ def test_activity_prompts_and_rulebook_are_draft_simulations():
     subprocess.run(["node", "ui/sim/check_pace.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_landmarks.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_modelpath.mjs"], cwd=ROOT, check=True)
+    subprocess.run(["node", "ui/sim/check_subtitle.mjs"], cwd=ROOT, check=True)
     subprocess.run(["node", "ui/sim/check_hosting_banner.mjs"], cwd=ROOT, check=True)
     assert 'id="rl-open"' not in (ROOT / "ui" / "sim" / "index.html").read_text(encoding="utf-8")
     assert "initRlPanel" not in (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
@@ -588,3 +596,18 @@ def test_sim_threshold_matches_system1_min_confidence():
     events = _load("sim_events.json")
     escalation = yaml.safe_load((ROOT / "config" / "escalation.yaml").read_text())
     assert events["confidence_threshold"] == escalation["system_1_min_confidence"]
+
+
+def test_town_copy_drops_demo_tags_and_hides_note_bubbles():
+    source = (ROOT / "ui" / "sim" / "sim.js").read_text(encoding="utf-8")
+    css = (ROOT / "ui" / "sim" / "sim.css").read_text(encoding="utf-8")
+    events = (ROOT / "ui" / "sim" / "data" / "sim_events.json").read_text(encoding="utf-8")
+    prompts = _load("prompts.json")
+    assert "Gateway stub:" not in source
+    assert " · DEMO" not in source
+    assert "Memory store returned" in source
+    assert "dataset.notes" in source
+    assert "Mubit fetched" not in events
+    assert 'body[data-notes="1"] .bubble.note' in css
+    labels = [group["label"] for group in prompts["groups"]]
+    assert not any(label.startswith("System ") for label in labels)
